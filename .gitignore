@@ -1,3 +1,14 @@
+# idea
 .idea
+
+# terraform
+.terraform
+terraform/variables/*
+terraform.plan
+terraform.tfstate*
+terraform/crash.log
+
+# build and vendor
 vendor
 build
+terraform-provider-logzio
