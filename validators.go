@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/jonboydell/logzio_client"
 	"fmt"
+	"github.com/jonboydell/logzio_client"
 )
 
 func contains(slice []string, s string) bool {
@@ -49,12 +49,34 @@ func validAggregationTypes(v interface{}, k string) (ws []string, errors []error
 
 	value := v.(string)
 
-	validAggregationTypes := []string{logzio_client.AggregationTypeUniqueCount,
-	logzio_client.Avg, logzio_client.AggregationTypeMaz, logzio_client.AggregationTypeNone,
-	logzio_client.AggregationTypeSum, logzio_client.AggregationTypeCount, logzio_client.AggregationTypeMin}
+	validAggregationTypes := []string{
+		logzio_client.AggregationTypeUniqueCount,
+		logzio_client.AggregationTypeAvg,
+		logzio_client.AggregationTypeMax,
+		logzio_client.AggregationTypeNone,
+		logzio_client.AggregationTypeSum,
+		logzio_client.AggregationTypeCount,
+		logzio_client.AggregationTypeMin,
+	}
 
 	if !contains(validAggregationTypes, value) {
 		errors = append(errors, fmt.Errorf("valueAggregationType %q must be one of %s", k, validAggregationTypes))
+	}
+	return
+}
+
+func validateSeverityTypes(v interface{}, k string) (ws []string, errors []error) {
+
+	value := v.(string)
+
+	validSeverityTypes := []string{
+		logzio_client.SeverityHigh,
+		logzio_client.SeverityMedium,
+		logzio_client.SeverityHigh,
+	}
+
+	if !contains(validSeverityTypes, value) {
+		errors = append(errors, fmt.Errorf("validSeverityType %q must be one of %s", k, validSeverityTypes))
 	}
 	return
 }

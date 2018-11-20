@@ -30,8 +30,8 @@
   version = "0.11.10"
 
 [[constraint]]
-  branch = "develop"
   name = "github.com/jonboydell/logzio_client"
+  version = "0.2.1"
 
 [prune]
   go-tests = true
