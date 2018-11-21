@@ -303,12 +303,12 @@
   revision = "0b12d6b5"
 
 [[projects]]
-  digest = "1:6025effc049eca752633f0384012ecdff0268c2c7de2ed84de3ccf5a246842a1"
+  digest = "1:12806f393c726813c0ffe84813785c4acb74614ca3083de0bf2ed18fa3dc3b36"
   name = "github.com/jonboydell/logzio_client"
   packages = ["."]
   pruneopts = "UT"
-  revision = "9d7dfe410a3f0e78b9bda7f4c13cca5a3e1bdcf7"
-  version = "v0.2.1"
+  revision = "ba78d26d4cc0ee38007da752e3ef56e32d4cd47d"
+  version = "v0.3"
 
 [[projects]]
   digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
