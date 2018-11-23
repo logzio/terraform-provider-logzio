@@ -13,6 +13,9 @@ import (
 const BASE_10 int = 10
 const BITSIZE_64 int = 64
 
+const title string = "title"
+const query_string string = "query_string"
+
 func resourceAlert() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAlertCreate,
@@ -21,7 +24,7 @@ func resourceAlert() *schema.Resource {
 		Delete: resourceAlertDelete,
 
 		Schema: map[string]*schema.Schema{
-			"title": &schema.Schema{
+			title: &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -29,7 +32,7 @@ func resourceAlert() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"query_string": &schema.Schema{
+			query_string: &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -86,17 +89,17 @@ func resourceAlert() *schema.Resource {
 				},
 			},
 			"severity_threshold_tiers": &schema.Schema{
-				Type: schema.TypeList,
+				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema {
+					Schema: map[string]*schema.Schema{
 						"severity": {
-							Type:schema.TypeString,
-							Required:true,
+							Type:     schema.TypeString,
+							Required: true,
 						},
 						"threshold": {
-							Type:schema.TypeInt,
-							Required:true,
+							Type:     schema.TypeInt,
+							Required: true,
 						},
 					},
 				},
@@ -113,9 +116,9 @@ func prettyprint(b []byte) ([]byte, error) {
 
 func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 
-	title := d.Get("title").(string)
+	title := d.Get(title).(string)
 	description := d.Get("description").(string)
-	queryString := d.Get("query_string").(string)
+	queryString := d.Get(query_string).(string)
 	filter := d.Get("filter").(string)
 	operation := d.Get("operation").(string)
 	searchTimeFrameMinutes := d.Get("search_timeframe_minutes").(int)
@@ -144,8 +147,8 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 	for x := 0; x < len(tiers); x++ {
 		tier := tiers[x].(map[string]interface{})
 		thresholdTier := logzio_client.SeverityThresholdType{
-			Severity:tier["severity"].(string),
-			Threshold:tier["threshold"].(int),
+			Severity:  tier["severity"].(string),
+			Threshold: tier["threshold"].(int),
 		}
 		severityThresholdTiers = append(severityThresholdTiers, thresholdTier)
 	}
@@ -213,8 +216,8 @@ func resourceAlertRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	d.Set("query_string", alert.QueryString)
-	d.Set("title", alert.Title)
+	d.Set(query_string, alert.QueryString)
+	d.Set(title, alert.Title)
 	d.Set("description", alert.Description)
 	d.Set("filter", alert.Filter)
 	d.Set("operation", alert.Operation)
@@ -237,9 +240,9 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 
 	alertId, _ := strconv.ParseInt(d.Id(), BASE_10, BITSIZE_64)
 
-	title := d.Get("title").(string)
+	title := d.Get(title).(string)
 	description := d.Get("description").(string)
-	queryString := d.Get("query_string").(string)
+	queryString := d.Get(query_string).(string)
 	filter := d.Get("filter").(string)
 	operation := d.Get("operation").(string)
 	searchTimeFrameMinutes := d.Get("search_timeframe_minutes").(int)
@@ -268,8 +271,8 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 	for x := 0; x < len(tiers); x++ {
 		tier := tiers[x].(map[string]interface{})
 		thresholdTier := logzio_client.SeverityThresholdType{
-			Severity:tier["severity"].(string),
-			Threshold:tier["threshold"].(int),
+			Severity:  tier["severity"].(string),
+			Threshold: tier["threshold"].(int),
 		}
 		severityThresholdTiers = append(severityThresholdTiers, thresholdTier)
 	}
