@@ -1,5 +1,6 @@
 # Logz.io terraform provider
 
+### Supports only alerts at the moment!
 
 ##### Using the provider
 
