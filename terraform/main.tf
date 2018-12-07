@@ -10,7 +10,7 @@ resource "logzio_alert" "my_alert" {
   search_timeframe_minutes = 5
   value_aggregation_type = "NONE"
   alert_notification_endpoints = []
-  suppress_notification_minutes = 5
+  suppress_notifications_minutes = 5
   severity_threshold_tiers = [
     {
       "severity" = "HIGH",
