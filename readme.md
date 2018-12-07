@@ -7,6 +7,8 @@
 A simple example, will create an alert, triggered if over 5 minutes more than 10 logs are found with a loglevel of ERROR,
 further notifications are suppressed for 5 minutes.
 
+You can also provide the `api_token` as the `LOGZIO_API_TOKEN` env var.
+
 ```hcl-terraform
 provider "logzio" {
   api_token = "${var.api_token}"
@@ -20,7 +22,7 @@ resource "logzio_alert" "my_alert" {
   search_timeframe_minutes = 5
   value_aggregation_type = "NONE"
   alert_notification_endpoints = []
-  suppress_notification_minutes = 5
+  suppress_notifications_minutes = 5
   severity_threshold_tiers = [
     {
       "severity" = "HIGH",
@@ -36,10 +38,10 @@ resource "logzio_alert" "my_alert" {
 
 |api  |method|support     |implementation|
 |-----|------|------------|--------------|
-|alert|create|experimental|`resource_alert::resourceAlertCreate`|
-|alert|delete|experimental|`resource_alert::resourceAlertDelete`|
-|alert|update|experimental|`resource_alert::resourceAlertUpdate`|
-|alert|read  |experimental|`resource_alert::resourceAlertRead`  |
+|alert|create|implemented |`resource_alert::resourceAlertCreate`|
+|alert|delete|implemented |`resource_alert::resourceAlertDelete`|
+|alert|update|implemented |`resource_alert::resourceAlertUpdate`|
+|alert|read  |implemented |`resource_alert::resourceAlertRead`  |
 
 ##### Building and testing the provider
 
