@@ -100,6 +100,14 @@
   version = "v3.5.1"
 
 [[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "UT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   digest = "1:865079840386857c809b72ce300be7580cb50d3d3129ce11bf9aa6ca2bc1934a"
   name = "github.com/fatih/color"
   packages = ["."]
@@ -257,7 +265,15 @@
   revision = "fa9f258a92500514cc8e9c67020487709df92432"
 
 [[projects]]
-  digest = "1:8ee6b299ec5e027376522696c4a2d236c5d4da19ccc23d8cc31a3530ce9cb26b"
+  digest = "1:16ae35b3a854c667baaf55ff5d455c486f7c2baf040a2727f2ef0e4b096b2a95"
+  name = "github.com/hashicorp/logutils"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a335183dfd075f638afcc820c90591ca3c97eba6"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:d2be5156bd880db58b83021d6720f71393f57846c033d19e19b7b038f21017cd"
   name = "github.com/hashicorp/terraform"
   packages = [
     "config",
@@ -266,8 +282,11 @@
     "config/module",
     "dag",
     "flatmap",
+    "helper/config",
     "helper/hashcode",
     "helper/hilmapstructure",
+    "helper/logging",
+    "helper/resource",
     "helper/schema",
     "httpclient",
     "moduledeps",
@@ -303,12 +322,12 @@
   revision = "0b12d6b5"
 
 [[projects]]
-  digest = "1:12806f393c726813c0ffe84813785c4acb74614ca3083de0bf2ed18fa3dc3b36"
+  digest = "1:232ecd32a8459b8ef6f60c8e795ac3610a8fc668c41b498a027c1c38b3cec55d"
   name = "github.com/jonboydell/logzio_client"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ba78d26d4cc0ee38007da752e3ef56e32d4cd47d"
-  version = "v0.3"
+  revision = "e8a6e79614e4e9b7e9473f20d6016838336d4dd5"
+  version = "v0.4"
 
 [[projects]]
   digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
@@ -556,6 +575,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/hashicorp/terraform/helper/resource",
     "github.com/hashicorp/terraform/helper/schema",
     "github.com/hashicorp/terraform/plugin",
     "github.com/hashicorp/terraform/terraform",
