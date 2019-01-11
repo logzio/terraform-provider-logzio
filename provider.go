@@ -19,6 +19,9 @@ func Provider() terraform.ResourceProvider {
 				Sensitive:   true,
 			},
 		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"logzio_alert": dataSourceAlert(),
+		},
 		ResourcesMap: map[string]*schema.Resource{
 			"logzio_alert": resourceAlert(),
 		},

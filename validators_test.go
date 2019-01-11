@@ -1,18 +1,20 @@
 package main
 
 import (
-	"github.com/jonboydell/logzio_client"
+	"github.com/jonboydell/logzio_client/alerts"
 	"testing"
+	"github.com/stretchr/testify/assert"
+
 )
 
 func TestValidateOperation(t *testing.T) {
 	validOperations := []string{
-		logzio_client.OperatorGreaterThanOrEquals,
-		logzio_client.OperatorLessThanOrEquals,
-		logzio_client.OperatorGreaterThan,
-		logzio_client.OperatorLessThan,
-		logzio_client.OperatorEquals,
-		logzio_client.OperatorNotEquals,
+		alerts.OperatorGreaterThanOrEquals,
+		alerts.OperatorLessThanOrEquals,
+		alerts.OperatorGreaterThan,
+		alerts.OperatorLessThan,
+		alerts.OperatorEquals,
+		alerts.OperatorNotEquals,
 	}
 
 	for _, s := range validOperations {
@@ -33,4 +35,10 @@ func TestValidateOperation(t *testing.T) {
 			t.Fatalf("%q should not be a valid operations: %v", s, errors)
 		}
 	}
+}
+
+func TestValidUrl(t *testing.T) {
+	str := "https://some.url"
+	_, errors :=  validateUrl(str, "url")
+	assert.Len(t, errors, 0)
 }

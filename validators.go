@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/jonboydell/logzio_client"
+	"github.com/jonboydell/logzio_client/alerts"
 )
 
 func contains(slice []string, s string) bool {
@@ -20,12 +20,12 @@ func validateOperation(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
 	validOperations := []string{
-		logzio_client.OperatorGreaterThanOrEquals,
-		logzio_client.OperatorGreaterThan,
-		logzio_client.OperatorEquals,
-		logzio_client.OperatorLessThan,
-		logzio_client.OperatorLessThanOrEquals,
-		logzio_client.OperatorNotEquals,
+		alerts.OperatorGreaterThanOrEquals,
+		alerts.OperatorGreaterThan,
+		alerts.OperatorEquals,
+		alerts.OperatorLessThan,
+		alerts.OperatorLessThanOrEquals,
+		alerts.OperatorNotEquals,
 	}
 
 	if len(value) == 0 {
@@ -50,13 +50,13 @@ func validAggregationTypes(v interface{}, k string) (ws []string, errors []error
 	value := v.(string)
 
 	validAggregationTypes := []string{
-		logzio_client.AggregationTypeUniqueCount,
-		logzio_client.AggregationTypeAvg,
-		logzio_client.AggregationTypeMax,
-		logzio_client.AggregationTypeNone,
-		logzio_client.AggregationTypeSum,
-		logzio_client.AggregationTypeCount,
-		logzio_client.AggregationTypeMin,
+		alerts.AggregationTypeUniqueCount,
+		alerts.AggregationTypeAvg,
+		alerts.AggregationTypeMax,
+		alerts.AggregationTypeNone,
+		alerts.AggregationTypeSum,
+		alerts.AggregationTypeCount,
+		alerts.AggregationTypeMin,
 	}
 
 	if !contains(validAggregationTypes, value) {
@@ -70,9 +70,9 @@ func validateSeverityTypes(v interface{}, k string) (ws []string, errors []error
 	value := v.(string)
 
 	validSeverityTypes := []string{
-		logzio_client.SeverityHigh,
-		logzio_client.SeverityMedium,
-		logzio_client.SeverityHigh,
+		alerts.SeverityHigh,
+		alerts.SeverityMedium,
+		alerts.SeverityHigh,
 	}
 
 	if !contains(validSeverityTypes, value) {

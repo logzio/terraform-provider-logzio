@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jonboydell/logzio_client"
+	"github.com/jonboydell/logzio_client/alerts"
 	"log"
 	"strconv"
 )
@@ -153,10 +153,10 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 	searchTimeFrameMinutes := d.Get(search_timeframe_minutes).(int)
 
 	tiers := d.Get(severity_threshold_tiers).([]interface{})
-	severityThresholdTiers := []logzio_client.SeverityThresholdType{}
+	severityThresholdTiers := []alerts.SeverityThresholdType{}
 	for t := 0; t < len(tiers); t++ {
 		tier := tiers[t].(map[string]interface{})
-		thresholdTier := logzio_client.SeverityThresholdType{
+		thresholdTier := alerts.SeverityThresholdType{
 			Severity:  tier[severity].(string),
 			Threshold: tier[threshold].(int),
 		}
@@ -176,7 +176,7 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 
 	valueAggregationType := d.Get(value_aggregation_type).(string)
 
-	createAlert := logzio_client.CreateAlertType{
+	createAlert := alerts.CreateAlertType{
 		AlertNotificationEndpoints:   alertNotificationEndpoints,
 		Description:                  description,
 		Filter:                       filter,
@@ -205,13 +205,12 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 
 	api_token := m.(Config).api_token
 
-	var client *logzio_client.Client
-	client = logzio_client.New(api_token)
-
+	var client *alerts.Alerts
+	client, err = alerts.New(api_token)
 	a, err := client.CreateAlert(createAlert)
 
 	if err != nil {
-		ferr := err.(logzio_client.FieldError)
+		ferr := err.(alerts.FieldError)
 		if ferr.Field == "valueAggregationTypeComposite" {
 			return fmt.Errorf("if valueAggregationType is set to None, valueAggregationField and groupByAggregationFields must not be set")
 		}
@@ -228,12 +227,12 @@ func resourceAlertRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("%s::%s", "resourceAlertRead", d.Id())
 	api_token := m.(Config).api_token
 
-	var client *logzio_client.Client
-	client = logzio_client.New(api_token)
+	var client *alerts.Alerts
+	client, _ = alerts.New(api_token)
 
 	alertId, _ := strconv.ParseInt(d.Id(), BASE_10, BITSIZE_64)
 
-	var alert *logzio_client.AlertType
+	var alert *alerts.AlertType
 	var err error
 	alert, err = client.GetAlert(alertId)
 	if err != nil {
@@ -281,10 +280,10 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 	searchTimeFrameMinutes := d.Get(search_timeframe_minutes).(int)
 
 	tiers := d.Get(severity_threshold_tiers).([]interface{})
-	severityThresholdTiers := []logzio_client.SeverityThresholdType{}
+	severityThresholdTiers := []alerts.SeverityThresholdType{}
 	for t := 0; t < len(tiers); t++ {
 		tier := tiers[t].(map[string]interface{})
-		thresholdTier := logzio_client.SeverityThresholdType{
+		thresholdTier := alerts.SeverityThresholdType{
 			Severity:  tier[severity].(string),
 			Threshold: tier[threshold].(int),
 		}
@@ -302,7 +301,7 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 
 	valueAggregationType := d.Get(value_aggregation_type).(string)
 
-	updateAlert := logzio_client.CreateAlertType{
+	updateAlert := alerts.CreateAlertType{
 		AlertNotificationEndpoints:   alertNotificationEndpoints,
 		Description:                  description,
 		Filter:                       filter,
@@ -331,13 +330,13 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 
 	api_token := m.(Config).api_token
 
-	var client *logzio_client.Client
-	client = logzio_client.New(api_token)
+	var client *alerts.Alerts
+	client, _ = alerts.New(api_token)
 
 	_, err = client.UpdateAlert(alertId, updateAlert)
 
 	if err != nil {
-		ferr := err.(logzio_client.FieldError)
+		ferr := err.(alerts.FieldError)
 		if ferr.Field == "valueAggregationTypeComposite" {
 			return fmt.Errorf("if valueAggregationType is set to None, valueAggregationField and groupByAggregationFields must not be set")
 		}
@@ -351,8 +350,8 @@ func resourceAlertDelete(d *schema.ResourceData, m interface{}) error {
 	log.Printf("%s::%s", "resourceAlertDelete", d.Id())
 	api_token := m.(Config).api_token
 
-	var client *logzio_client.Client
-	client = logzio_client.New(api_token)
+	var client *alerts.Alerts
+	client, _ = alerts.New(api_token)
 
 	alertId, _ := strconv.ParseInt(d.Id(), BASE_10, BITSIZE_64)
 	err := client.DeleteAlert(alertId)
