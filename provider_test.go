@@ -33,8 +33,8 @@ func TestProviderImpl(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
-	if v := os.Getenv("LOGZIO_API_TOKEN"); v == "" {
+	if v := os.Getenv(envLogzioApiToken); v == "" {
 		t.Log(v)
-		t.Fatal("LOGZIO_API_TOKEN must be set for acceptance tests")
+		t.Fatalf("%s must be set for acceptance tests", envLogzioApiToken)
 	}
 }

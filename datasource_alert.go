@@ -10,51 +10,124 @@ func dataSourceAlert() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlertRead,
 		Schema: map[string]*schema.Schema{
-			"id": {
+			alertId: {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"title": {
-				Type: schema.TypeString,
+			alert_title: {
+				Type:     schema.TypeString,
 				Optional: true,
+			},
+			alertNotificationEndpoints: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeInt,
+				},
+			},
+			alertDescription: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			alertFilter: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			alert_group_by_aggregation_fields: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			alert_is_enabled: {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			alert_query_string: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			alert_notification_emails: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			alert_operation: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			alert_search_timeframe_minutes: {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			alert_severity_threshold_tiers: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						alert_severity: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						alert_threshold: {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+					},
+				},
+			},
+			alert_suppress_notifications_minutes: {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			alert_value_aggregation_field: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			alert_value_aggregation_type: {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
 }
 
 func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
-	api_token := m.(Config).api_token
+	apiToken := m.(Config).apiToken
 
 	var client *alerts.Alerts
-	client, _ = alerts.New(api_token)
+	client, _ = alerts.New(apiToken)
 
-	alertId, ok := d.GetOk("id")
+	alertId, ok := d.GetOk(alertId)
 	if ok {
 		alert, err := client.GetAlert(alertId.(int64))
 		if err != nil {
 			return err
 		}
 		d.SetId(fmt.Sprintf("%d", alertId.(int64)))
-		d.Set(alert_notification_endpoints, alert.AlertNotificationEndpoints)
-		d.Set(created_at, alert.CreatedAt)
-		d.Set(created_by, alert.CreatedBy)
-		d.Set(description, alert.Description)
-		d.Set(filter, alert.Filter)
-		d.Set(group_by_aggregation_fields, alert.GroupByAggregationFields)
-		d.Set(last_triggered_at, alert.LastTriggeredAt)
-		d.Set(last_updated, alert.LastUpdated)
-		d.Set(notification_emails, alert.NotificationEmails)
-		d.Set(operation, alert.Operation)
-		d.Set(query_string, alert.QueryString)
-		d.Set(title, alert.Title)
-		d.Set(search_timeframe_minutes, alert.SearchTimeFrameMinutes)
-		d.Set(suppress_notifications_minutes, alert.SuppressNotificationsMinutes)
-		d.Set(value_aggregation_field, alert.ValueAggregationField)
-		d.Set(value_aggregation_type, alert.ValueAggregationType)
+		d.Set(alertNotificationEndpoints, alert.AlertNotificationEndpoints)
+		d.Set(alertCreatedAt, alert.CreatedAt)
+		d.Set(alertCreatedBy, alert.CreatedBy)
+		d.Set(alertDescription, alert.Description)
+		d.Set(alertFilter, alert.Filter)
+		d.Set(alert_group_by_aggregation_fields, alert.GroupByAggregationFields)
+		d.Set(alert_last_triggered_at, alert.LastTriggeredAt)
+		d.Set(alert_last_updated, alert.LastUpdated)
+		d.Set(alert_notification_emails, alert.NotificationEmails)
+		d.Set(alert_operation, alert.Operation)
+		d.Set(alert_query_string, alert.QueryString)
+		d.Set(alert_title, alert.Title)
+		d.Set(alert_search_timeframe_minutes, alert.SearchTimeFrameMinutes)
+		d.Set(alert_suppress_notifications_minutes, alert.SuppressNotificationsMinutes)
+		d.Set(alert_value_aggregation_field, alert.ValueAggregationField)
+		d.Set(alert_value_aggregation_type, alert.ValueAggregationType)
 		return nil
 	}
 
-	alertTitle, ok := d.GetOk("title")
+	alertTitle, ok := d.GetOk(alert_title)
 	if ok {
 		list, err := client.ListAlerts()
 		if err != nil {
@@ -64,25 +137,25 @@ func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
 			alert := list[i]
 			if alert.Title == alertTitle {
 				d.SetId(fmt.Sprintf("%d", alert.AlertId))
-				d.Set(alert_notification_endpoints, alert.AlertNotificationEndpoints)
-				d.Set(created_at, alert.CreatedAt)
-				d.Set(created_by, alert.CreatedBy)
-				d.Set(description, alert.Description)
-				d.Set(filter, alert.Filter)
-				d.Set(group_by_aggregation_fields, alert.GroupByAggregationFields)
-				d.Set(last_triggered_at, alert.LastTriggeredAt)
-				d.Set(last_updated, alert.LastUpdated)
-				d.Set(notification_emails, alert.NotificationEmails)
-				d.Set(operation, alert.Operation)
-				d.Set(query_string, alert.QueryString)
-				d.Set(title, alert.Title)
-				d.Set(search_timeframe_minutes, alert.SearchTimeFrameMinutes)
-				d.Set(suppress_notifications_minutes, alert.SuppressNotificationsMinutes)
-				d.Set(value_aggregation_field, alert.ValueAggregationField)
-				d.Set(value_aggregation_type, alert.ValueAggregationType)
+				d.Set(alertNotificationEndpoints, alert.AlertNotificationEndpoints)
+				d.Set(alertCreatedAt, alert.CreatedAt)
+				d.Set(alertCreatedBy, alert.CreatedBy)
+				d.Set(alertDescription, alert.Description)
+				d.Set(alertFilter, alert.Filter)
+				d.Set(alert_group_by_aggregation_fields, alert.GroupByAggregationFields)
+				d.Set(alert_last_triggered_at, alert.LastTriggeredAt)
+				d.Set(alert_last_updated, alert.LastUpdated)
+				d.Set(alert_notification_emails, alert.NotificationEmails)
+				d.Set(alert_operation, alert.Operation)
+				d.Set(alert_query_string, alert.QueryString)
+				d.Set(alert_title, alert.Title)
+				d.Set(alert_search_timeframe_minutes, alert.SearchTimeFrameMinutes)
+				d.Set(alert_suppress_notifications_minutes, alert.SuppressNotificationsMinutes)
+				d.Set(alert_value_aggregation_field, alert.ValueAggregationField)
+				d.Set(alert_value_aggregation_type, alert.ValueAggregationType)
 				return nil
 			}
 		}
 	}
-	return fmt.Errorf("Couldn't find alert with specified attributes")
+	return fmt.Errorf("couldn't find alert with specified attributes")
 }

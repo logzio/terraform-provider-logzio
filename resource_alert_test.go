@@ -69,7 +69,7 @@ func testAccCheckLogzioAlertExists(n string) resource.TestCheckFunc {
 		id, err := strconv.ParseInt(rs.Primary.ID, 10, 64)
 
 		var client *alerts.Alerts
-		client, _ = alerts.New(os.Getenv("LOGZIO_API_TOKEN"))
+		client, _ = alerts.New(os.Getenv(envLogzioApiToken))
 
 		_, err = client.GetAlert(int64(id))
 
@@ -90,75 +90,17 @@ func testAccLogzioAlertDestroy(s *terraform.State) error {
 		}
 
 		var client *alerts.Alerts
-		client, _ = alerts.New(os.Getenv("LOGZIO_API_TOKEN"))
+		client, _ = alerts.New(os.Getenv(envLogzioApiToken))
 
 		_, err = client.GetAlert(int64(id))
 
 		if err == nil {
-			return fmt.Errorf("Alert still exists")
+			return fmt.Errorf("alert still exists")
 		}
 	}
 	return nil
 }
 
-func TestAccDataSourceLogzIoAlert(t *testing.T) {
-	rName := "some_name"
-	rTitle := "some_title"
-	resourceName := "logzio_alert.some_name"
-	datasourceName := "data.logzio_alert.by_title"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataSourceLogzioAlertConfig(rName, rTitle),
-				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceLogzIoAlertCheck(datasourceName, resourceName),
-				),
-			},
-		},
-	})
-}
-
-func testAccDataSourceLogzIoAlertCheck(datasourceName, resourceName string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		ds, ok := s.RootModule().Resources[datasourceName]
-		if !ok {
-			return fmt.Errorf("root module has no data source called %s", datasourceName)
-		}
-
-		alertRs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("root module has no resource called %s", resourceName)
-		}
-
-		attrNames := []string{
-			"title",
-			"query_string",
-			"operation",
-			"notification_emails",
-			"search_timeframe_minutes",
-			"value_aggregation_type",
-			"alert_notification_endpoonts",
-			"suppress_notification_minutes",
-			"severity_threshold_tiers",
-		}
-
-		for _, attrName := range attrNames {
-			if ds.Primary.Attributes[attrName] != alertRs.Primary.Attributes[attrName] {
-				return fmt.Errorf(
-					"%s is %s; want %s",
-					attrName,
-					ds.Primary.Attributes[attrName],
-					alertRs.Primary.Attributes[attrName],
-				)
-			}
-		}
-
-		return nil
-	}
-}
 
 func testAccCheckLogzioAlertConfig(rName string) string {
 	return fmt.Sprintf(`
@@ -200,30 +142,4 @@ resource "logzio_alert" "%s" {
   ]
 }
 `, rName)
-}
-
-func testAccDataSourceLogzioAlertConfig(rName string, rTitle string) string {
-	return fmt.Sprintf(`
-resource "logzio_alert" "%s" {
-  title = "%s"
-  query_string = "loglevel:ERROR"
-  operation = "GREATER_THAN"
-  notification_emails = ["testx@test.com"]
-  search_timeframe_minutes = 5
-  value_aggregation_type = "NONE"
-  alert_notification_endpoints = []
-  suppress_notifications_minutes = 5
-  severity_threshold_tiers = [
-    {
-      "severity" = "HIGH",
-      "threshold" = 10
-    }
-  ]
-}
-
-data "logzio_alert" "by_title" {
-  title = "%s"
-  depends_on = ["logzio_alert.%s"]
-}
-`, rName, rTitle, rTitle, rName)
 }

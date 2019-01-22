@@ -6,24 +6,31 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-const API_TOKEN = "api_token"
+const (
+	providerApiToken     = "api_token"
+	resourceAlertType    = "logzio_alert"
+	resourceEndpointType = "logzio_endpoint"
+	envLogzioApiToken    = "LOGZIO_API_TOKEN"
+)
 
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			API_TOKEN: {
+			providerApiToken: {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: descriptions[API_TOKEN],
-				DefaultFunc: schema.EnvDefaultFunc("LOGZIO_API_TOKEN", nil),
+				Description: descriptions[providerApiToken],
+				DefaultFunc: schema.EnvDefaultFunc(envLogzioApiToken, nil),
 				Sensitive:   true,
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"logzio_alert": dataSourceAlert(),
+			resourceAlertType:    dataSourceAlert(),
+			resourceEndpointType: dataSourceEndpoint(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"logzio_alert": resourceAlert(),
+			resourceAlertType:    resourceAlert(),
+			resourceEndpointType: resourceEndpoint(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
@@ -32,16 +39,16 @@ func Provider() terraform.ResourceProvider {
 var descriptions map[string]string
 
 func init() {
-	descriptions = map[string]string{API_TOKEN: "Your API token"}
+	descriptions = map[string]string{providerApiToken: "Your API token"}
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	apiToken, ok := d.GetOk("api_token")
+	apiToken, ok := d.GetOk(providerApiToken)
 	if !ok {
-		return nil, fmt.Errorf("Can't find the api_token, either set it in the provider or set the LOGZIO_API_TOKEN env var")
+		return nil, fmt.Errorf("can't find the %s, either set it in the provider or set the %s env var", providerApiToken, envLogzioApiToken)
 	}
 	config := Config{
-		api_token: apiToken.(string),
+		apiToken: apiToken.(string),
 	}
 	return config, nil
 }

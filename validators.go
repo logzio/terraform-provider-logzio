@@ -29,7 +29,7 @@ func validateOperation(v interface{}, k string) (ws []string, errors []error) {
 	}
 
 	if len(value) == 0 {
-		errors = append(errors, fmt.Errorf("Operation %q must not be blank and be one of %s", k, validOperations))
+		errors = append(errors, fmt.Errorf("operation %q must not be blank and be one of %s", k, validOperations))
 	}
 
 	valid := false
@@ -40,7 +40,7 @@ func validateOperation(v interface{}, k string) (ws []string, errors []error) {
 	}
 
 	if !valid {
-		errors = append(errors, fmt.Errorf("Operation %q must be one of %s", k, validOperations))
+		errors = append(errors, fmt.Errorf("operation %q must be one of %s", k, validOperations))
 	}
 	return
 }

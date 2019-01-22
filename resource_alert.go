@@ -10,31 +10,39 @@ import (
 	"strconv"
 )
 
-const BASE_10 int = 10
-const BITSIZE_64 int = 64
-
 const (
-	alert_notification_endpoints   string = "alert_notification_endpoints"
-	created_at                     string = "created_at"
-	created_by                     string = "created_by"
-	description                    string = "description"
-	filter                         string = "filter"
-	group_by_aggregation_fields    string = "group_by_aggregation_fields"
-	is_enabled                     string = "is_enabled"
-	query_string                   string = "query_string"
-	last_triggered_at              string = "last_triggered_at"
-	last_updated                   string = "last_updated"
-	notification_emails            string = "notification_emails"
-	operation                      string = "operation"
-	search_timeframe_minutes       string = "search_timeframe_minutes"
-	severity                       string = "severity"
-	severity_threshold_tiers       string = "severity_threshold_tiers"
-	suppress_notifications_minutes string = "suppress_notifications_minutes"
-	threshold                      string = "threshold"
-	title                          string = "title"
-	value_aggregation_field        string = "value_aggregation_field"
-	value_aggregation_type         string = "value_aggregation_type"
+	alertId                           string = "id"
+	alertNotificationEndpoints        string = "alert_notification_endpoints"
+	alertCreatedAt                    string = "created_at"
+	alertCreatedBy                    string = "created_by"
+	alertDescription                  string = "description"
+	alertFilter                       string = "filter"
+	alert_group_by_aggregation_fields string = "group_by_aggregation_fields"
+	alert_is_enabled                  string = "is_enabled"
+	alert_query_string                string = "query_string"
+	alert_last_triggered_at           string = "last_triggered_at"
+	alert_last_updated                string = "last_updated"
+	alert_notification_emails         string = "notification_emails"
+	alert_operation                   string = "operation"
+	alert_search_timeframe_minutes    string = "search_timeframe_minutes"
+	alert_severity                       string = "severity"
+	alert_severity_threshold_tiers       string = "severity_threshold_tiers"
+	alert_suppress_notifications_minutes string = "suppress_notifications_minutes"
+	alert_threshold                      string = "threshold"
+	alert_title                          string = "title"
+	alert_value_aggregation_field        string = "value_aggregation_field"
+	alert_value_aggregation_type      string = "value_aggregation_type"
 )
+
+/**
+ * returns the alert client with the api token from the provider
+ */
+func alertClient(m interface{}) *alerts.Alerts {
+	apiToken := m.(Config).apiToken
+	var client *alerts.Alerts
+	client, _ = alerts.New(apiToken)
+	return client
+}
 
 func resourceAlert() *schema.Resource {
 	return &schema.Resource{
@@ -44,23 +52,23 @@ func resourceAlert() *schema.Resource {
 		Delete: resourceAlertDelete,
 
 		Schema: map[string]*schema.Schema{
-			alert_notification_endpoints: &schema.Schema{
+			alertNotificationEndpoints: {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
 			},
-			description: &schema.Schema{
+			alertDescription: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			filter: &schema.Schema{
+			alertFilter: {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "{\"bool\":{\"must\":[], \"must_not\":[]}}",
 			},
-			group_by_aggregation_fields: &schema.Schema{
+			alert_group_by_aggregation_fields: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -68,61 +76,61 @@ func resourceAlert() *schema.Resource {
 				},
 				Default: nil,
 			},
-			is_enabled: &schema.Schema{
+			alert_is_enabled: {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			query_string: &schema.Schema{
+			alert_query_string: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			notification_emails: &schema.Schema{
+			alert_notification_emails: {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			operation: &schema.Schema{
+			alert_operation: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateOperation,
 			},
-			search_timeframe_minutes: &schema.Schema{
+			alert_search_timeframe_minutes: {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			severity_threshold_tiers: &schema.Schema{
+			alert_severity_threshold_tiers: {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						severity: {
+						alert_severity: {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						threshold: {
+						alert_threshold: {
 							Type:     schema.TypeInt,
 							Required: true,
 						},
 					},
 				},
 			},
-			suppress_notifications_minutes: &schema.Schema{
+			alert_suppress_notifications_minutes: {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  5,
 			},
-			title: &schema.Schema{
+			alert_title: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			value_aggregation_field: &schema.Schema{
+			alert_value_aggregation_field: {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  nil,
 			},
-			value_aggregation_type: &schema.Schema{
+			alert_value_aggregation_type: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -136,45 +144,48 @@ func prettyprint(b []byte) ([]byte, error) {
 	return out.Bytes(), err
 }
 
+/**
+ * creates a new alert in logzio
+ */
 func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
-	alertNotificationEndpoints := d.Get(alert_notification_endpoints).([]interface{})
-	description := d.Get(description).(string)
-	filter := d.Get(filter).(string)
+	alertNotificationEndpoints := d.Get(alertNotificationEndpoints).([]interface{})
+	description := d.Get(alertDescription).(string)
+	filter := d.Get(alertFilter).(string)
 
 	var isEnabled bool = true
-	_, e := d.GetOk(is_enabled)
+	_, e := d.GetOk(alert_is_enabled)
 	if e {
-		isEnabled = d.Get(is_enabled).(bool)
+		isEnabled = d.Get(alert_is_enabled).(bool)
 	}
 
-	notificationEmails := d.Get(notification_emails).([]interface{})
-	operation := d.Get(operation).(string)
-	queryString := d.Get(query_string).(string)
-	searchTimeFrameMinutes := d.Get(search_timeframe_minutes).(int)
+	notificationEmails := d.Get(alert_notification_emails).([]interface{})
+	operation := d.Get(alert_operation).(string)
+	queryString := d.Get(alert_query_string).(string)
+	searchTimeFrameMinutes := d.Get(alert_search_timeframe_minutes).(int)
 
-	tiers := d.Get(severity_threshold_tiers).([]interface{})
+	tiers := d.Get(alert_severity_threshold_tiers).([]interface{})
 	severityThresholdTiers := []alerts.SeverityThresholdType{}
 	for t := 0; t < len(tiers); t++ {
 		tier := tiers[t].(map[string]interface{})
 		thresholdTier := alerts.SeverityThresholdType{
-			Severity:  tier[severity].(string),
-			Threshold: tier[threshold].(int),
+			Severity:  tier[alert_severity].(string),
+			Threshold: tier[alert_threshold].(int),
 		}
 		severityThresholdTiers = append(severityThresholdTiers, thresholdTier)
 	}
 
-	suppressNotificationsMinutes := d.Get(suppress_notifications_minutes).(int)
+	suppressNotificationsMinutes := d.Get(alert_suppress_notifications_minutes).(int)
 
-	title := d.Get(title).(string)
+	title := d.Get(alert_title).(string)
 
-	valueAggregationField, f := d.GetOk(value_aggregation_field)
+	valueAggregationField, f := d.GetOk(alert_value_aggregation_field)
 	if f {
-		valueAggregationField = d.Get(value_aggregation_field).(string)
+		valueAggregationField = d.Get(alert_value_aggregation_field).(string)
 	} else {
 		valueAggregationField = nil
 	}
 
-	valueAggregationType := d.Get(value_aggregation_type).(string)
+	valueAggregationType := d.Get(alert_value_aggregation_type).(string)
 
 	createAlert := alerts.CreateAlertType{
 		AlertNotificationEndpoints:   alertNotificationEndpoints,
@@ -192,9 +203,9 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 		ValueAggregationType:         valueAggregationType,
 	}
 
-	_, g := d.GetOk(group_by_aggregation_fields)
+	_, g := d.GetOk(alert_group_by_aggregation_fields)
 	if g {
-		createAlert.GroupByAggregationFields = d.Get(group_by_aggregation_fields).([]interface{})
+		createAlert.GroupByAggregationFields = d.Get(alert_group_by_aggregation_fields).([]interface{})
 	} else {
 		createAlert.GroupByAggregationFields = nil
 	}
@@ -203,10 +214,7 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 	jsonStr, _ := prettyprint(jsonBytes)
 	log.Printf("%s::%s", "resourceAlertCreate", jsonStr)
 
-	api_token := m.(Config).api_token
-
-	var client *alerts.Alerts
-	client, err = alerts.New(api_token)
+	client := alertClient(m)
 	a, err := client.CreateAlert(createAlert)
 
 	if err != nil {
@@ -223,14 +231,12 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 	return resourceAlertRead(d, m)
 }
 
+/**
+ * reads an endpoint from logzio
+ */
 func resourceAlertRead(d *schema.ResourceData, m interface{}) error {
-	log.Printf("%s::%s", "resourceAlertRead", d.Id())
-	api_token := m.(Config).api_token
-
-	var client *alerts.Alerts
-	client, _ = alerts.New(api_token)
-
-	alertId, _ := strconv.ParseInt(d.Id(), BASE_10, BITSIZE_64)
+	alertId, _ := idFromResourceData(d)
+	client := alertClient(m)
 
 	var alert *alerts.AlertType
 	var err error
@@ -238,68 +244,69 @@ func resourceAlertRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	d.Set(alert_notification_endpoints, alert.AlertNotificationEndpoints)
-	d.Set(created_at, alert.CreatedAt)
-	d.Set(created_by, alert.CreatedBy)
-	d.Set(description, alert.Description)
-	d.Set(filter, alert.Filter)
-	d.Set(group_by_aggregation_fields, alert.GroupByAggregationFields)
-	d.Set(last_triggered_at, alert.LastTriggeredAt)
-	d.Set(last_updated, alert.LastUpdated)
-	d.Set(notification_emails, alert.NotificationEmails)
-	d.Set(operation, alert.Operation)
-	d.Set(query_string, alert.QueryString)
-	d.Set(title, alert.Title)
-	d.Set(search_timeframe_minutes, alert.SearchTimeFrameMinutes)
-	d.Set(suppress_notifications_minutes, alert.SuppressNotificationsMinutes)
-	d.Set(value_aggregation_field, alert.ValueAggregationField)
-	d.Set(value_aggregation_type, alert.ValueAggregationType)
+	d.Set(alertNotificationEndpoints, alert.AlertNotificationEndpoints)
+	d.Set(alertCreatedAt, alert.CreatedAt)
+	d.Set(alertCreatedBy, alert.CreatedBy)
+	d.Set(alertDescription, alert.Description)
+	d.Set(alertFilter, alert.Filter)
+	d.Set(alert_group_by_aggregation_fields, alert.GroupByAggregationFields)
+	d.Set(alert_last_triggered_at, alert.LastTriggeredAt)
+	d.Set(alert_last_updated, alert.LastUpdated)
+	d.Set(alert_notification_emails, alert.NotificationEmails)
+	d.Set(alert_operation, alert.Operation)
+	d.Set(alert_query_string, alert.QueryString)
+	d.Set(alert_title, alert.Title)
+	d.Set(alert_search_timeframe_minutes, alert.SearchTimeFrameMinutes)
+	d.Set(alert_suppress_notifications_minutes, alert.SuppressNotificationsMinutes)
+	d.Set(alert_value_aggregation_field, alert.ValueAggregationField)
+	d.Set(alert_value_aggregation_type, alert.ValueAggregationType)
 
 	return nil
 }
 
+/**
+ * updates an existing alert in logzio, returns an error if it doesn't exist
+ */
 func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
-	log.Printf("%s", "resourceAlertUpdate")
+	alertId, _ := idFromResourceData(d)
 
-	alertId, _ := strconv.ParseInt(d.Id(), BASE_10, BITSIZE_64)
+	alertNotificationEndpoints := d.Get(alertNotificationEndpoints).([]interface{})
+	description := d.Get(alertDescription).(string)
+	filter := d.Get(alertFilter).(string)
 
-	alertNotificationEndpoints := d.Get(alert_notification_endpoints).([]interface{})
-	description := d.Get(description).(string)
-	filter := d.Get(filter).(string)
-
-	var isEnabled bool = true
-	_, e := d.GetOk(is_enabled)
+	var isEnabled = true
+	_, e := d.GetOk(alert_is_enabled)
 	if e {
-		isEnabled = d.Get(is_enabled).(bool)
+		isEnabled = d.Get(alert_is_enabled).(bool)
 	}
 
-	notificationEmails := d.Get(notification_emails).([]interface{})
-	operation := d.Get(operation).(string)
-	queryString := d.Get(query_string).(string)
-	title := d.Get(title).(string)
-	searchTimeFrameMinutes := d.Get(search_timeframe_minutes).(int)
+	notificationEmails := d.Get(alert_notification_emails).([]interface{})
+	operation := d.Get(alert_operation).(string)
+	queryString := d.Get(alert_query_string).(string)
+	title := d.Get(alert_title).(string)
+	searchTimeFrameMinutes := d.Get(alert_search_timeframe_minutes).(int)
 
-	tiers := d.Get(severity_threshold_tiers).([]interface{})
+	tiers := d.Get(alert_severity_threshold_tiers).([]interface{})
 	severityThresholdTiers := []alerts.SeverityThresholdType{}
 	for t := 0; t < len(tiers); t++ {
 		tier := tiers[t].(map[string]interface{})
 		thresholdTier := alerts.SeverityThresholdType{
-			Severity:  tier[severity].(string),
-			Threshold: tier[threshold].(int),
+			Severity:  tier[alert_severity].(string),
+			Threshold: tier[alert_threshold].(int),
 		}
 		severityThresholdTiers = append(severityThresholdTiers, thresholdTier)
 	}
 
-	suppressNotificationsMinutes := d.Get(suppress_notifications_minutes).(int)
+	suppressNotificationsMinutes := d.Get(alert_suppress_notifications_minutes).(int)
 
-	valueAggregationField, v := d.GetOk(value_aggregation_field)
+	valueAggregationField, v := d.GetOk(alert_value_aggregation_field)
 	if v {
-		valueAggregationField = d.Get(value_aggregation_field).(string)
+		valueAggregationField = d.Get(alert_value_aggregation_field).(string)
 	} else {
 		valueAggregationField = nil
 	}
 
-	valueAggregationType := d.Get(value_aggregation_type).(string)
+	valueAggregationType := d.Get(alert_value_aggregation_type).(string)
 
 	updateAlert := alerts.CreateAlertType{
 		AlertNotificationEndpoints:   alertNotificationEndpoints,
@@ -317,9 +324,9 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 		ValueAggregationType:         valueAggregationType,
 	}
 
-	_, g := d.GetOk(group_by_aggregation_fields)
+	_, g := d.GetOk(alert_group_by_aggregation_fields)
 	if g {
-		updateAlert.GroupByAggregationFields = d.Get(group_by_aggregation_fields).([]interface{})
+		updateAlert.GroupByAggregationFields = d.Get(alert_group_by_aggregation_fields).([]interface{})
 	} else {
 		updateAlert.GroupByAggregationFields = nil
 	}
@@ -328,11 +335,7 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 	jsonStr, _ := prettyprint(jsonBytes)
 	log.Printf("%s::%s", "resourceAlertCreate", jsonStr)
 
-	api_token := m.(Config).api_token
-
-	var client *alerts.Alerts
-	client, _ = alerts.New(api_token)
-
+	client := alertClient(m)
 	_, err = client.UpdateAlert(alertId, updateAlert)
 
 	if err != nil {
@@ -346,14 +349,12 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 	return resourceAlertRead(d, m)
 }
 
+/**
+ deletes an existing alert in logzio, returns an error if it doesn't exist
+ */
 func resourceAlertDelete(d *schema.ResourceData, m interface{}) error {
-	log.Printf("%s::%s", "resourceAlertDelete", d.Id())
-	api_token := m.(Config).api_token
-
-	var client *alerts.Alerts
-	client, _ = alerts.New(api_token)
-
-	alertId, _ := strconv.ParseInt(d.Id(), BASE_10, BITSIZE_64)
+	client := alertClient(m)
+	alertId, _ := idFromResourceData(d)
 	err := client.DeleteAlert(alertId)
 	return err
 }

@@ -1,6 +1,6 @@
 # Logz.io terraform provider
 
-### Supports only alerts at the moment!
+### Supports alerts and slack endpoints - please refer to the API support below
 
 ##### Using the provider
 
@@ -14,6 +14,13 @@ provider "logzio" {
   api_token = "${var.api_token}"
 }
 
+resource "logzio_endpoint" "my_endpoint" {
+}
+
+output "endpoint_id" {
+  value="${logzio_endpoint.my_endpoint.endpoint_id}"
+}
+
 resource "logzio_alert" "my_alert" {
   title = "my_alert_title"
   query_string = "loglevel:ERROR"
@@ -21,7 +28,7 @@ resource "logzio_alert" "my_alert" {
   notification_emails = ["${var.notification_email}"]
   search_timeframe_minutes = 5
   value_aggregation_type = "NONE"
-  alert_notification_endpoints = []
+  alert_notification_endpoints = ["${logzio_endpoint.my_endpoint.endpoint_id}"]
   suppress_notifications_minutes = 5
   severity_threshold_tiers = [
     {
@@ -30,18 +37,21 @@ resource "logzio_alert" "my_alert" {
     }
    ]
 }
+
 ```
-
-
 
 ##### Logz.io API support
 
 |api  |method|support     |implementation|
 |-----|------|------------|--------------|
-|alert|create|implemented |`resource_alert::resourceAlertCreate`|
-|alert|delete|implemented |`resource_alert::resourceAlertDelete`|
-|alert|update|implemented |`resource_alert::resourceAlertUpdate`|
-|alert|read  |implemented |`resource_alert::resourceAlertRead`  |
+|alert|create|tested |`resource_alert::resourceAlertCreate`|
+|alert|delete|tested |`resource_alert::resourceAlertDelete`|
+|alert|update|tested |`resource_alert::resourceAlertUpdate`|
+|alert|read  |tested |`resource_alert::resourceAlertRead`  |
+|endpoints|create|slack only tested|`resource_endpoint::resourceEndpointCreate`|
+|endpoints|delete|slack only tested|`resource_endpoint::resourceEndpointDelete`|
+|endpoints|update|slack only tested|`resource_endpoint::resourceEndpointDelete`|
+|endpoints|read|not tested|`resource_endpoint::resourceEndpointRead`|
 
 ##### Building and testing the provider
 
