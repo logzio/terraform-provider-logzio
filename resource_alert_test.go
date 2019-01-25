@@ -101,7 +101,6 @@ func testAccLogzioAlertDestroy(s *terraform.State) error {
 	return nil
 }
 
-
 func testAccCheckLogzioAlertConfig(rName string) string {
 	return fmt.Sprintf(`
 resource "logzio_alert" "%s" {

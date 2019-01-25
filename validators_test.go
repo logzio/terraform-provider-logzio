@@ -2,9 +2,8 @@ package main
 
 import (
 	"github.com/jonboydell/logzio_client/alerts"
-	"testing"
 	"github.com/stretchr/testify/assert"
-
+	"testing"
 )
 
 func TestValidateOperation(t *testing.T) {
@@ -39,6 +38,6 @@ func TestValidateOperation(t *testing.T) {
 
 func TestValidUrl(t *testing.T) {
 	str := "https://some.url"
-	_, errors :=  validateUrl(str, "url")
+	_, errors := validateUrl(str, "url")
 	assert.Len(t, errors, 0)
 }

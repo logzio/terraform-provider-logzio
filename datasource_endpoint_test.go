@@ -13,8 +13,8 @@ func TestAccDataSourceEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				ExpectNonEmptyPlan: true,
-				Config: endpointDatasourceConfig(),
+				ExpectNonEmptyPlan:        true,
+				Config:                    endpointDatasourceConfig(),
 				PreventPostDestroyRefresh: true,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.logzio_endpoint.by_title", "title", "ATestStaticEndpoint"),

@@ -207,8 +207,8 @@ func mappingsFromResourceData(d *schema.ResourceData, key string) (map[string]in
 func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
 	endpoint := endpoints.Endpoint{
 		EndpointType: d.Get(endpointType).(string),
-		Title: d.Get(endpointTitle).(string),
-		Description: d.Get(endpointDescription).(string),
+		Title:        d.Get(endpointTitle).(string),
+		Description:  d.Get(endpointDescription).(string),
 	}
 
 	if strings.EqualFold(endpoint.EndpointType, endpointSlack) {

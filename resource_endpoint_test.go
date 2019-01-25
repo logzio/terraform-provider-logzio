@@ -258,7 +258,7 @@ resource "logzio_endpoint" "custom" {
   }
 }
 `,
-"pagerDutyHappyPath": `
+		"pagerDutyHappyPath": `
 	resource "logzio_endpoint" "pagerduty" {
 		title = "my_pagerduty_title"
 		endpoint_type = "pager_duty"
@@ -268,7 +268,7 @@ resource "logzio_endpoint" "custom" {
 		}
 	}
 `,
-"bigPandaHappyPath": `
+		"bigPandaHappyPath": `
 	resource "logzio_endpoint" "bigpanda" {
 		title = "my_bigpanda_title"
 		endpoint_type = "big_panda"
@@ -279,6 +279,6 @@ resource "logzio_endpoint" "custom" {
 		}
 	}
 `,
-}
+	}
 	return templates[key]
 }

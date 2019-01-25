@@ -15,7 +15,7 @@ func dataSourceEndpoint() *schema.Resource {
 				Optional: true,
 			},
 			endpointTitle: {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 		},
@@ -38,7 +38,6 @@ func dataSourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 		d.Set(endpointTitle, endpoint.Title)
 		d.Set(endpointDescription, endpoint.Description)
 		d.Set(endpointType, endpoint.EndpointType)
-		d.Set(endpointUrl, endpoint.Url)
 		return nil
 	}
 
@@ -55,7 +54,6 @@ func dataSourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 				d.Set(endpointTitle, endpoint.Title)
 				d.Set(endpointDescription, endpoint.Description)
 				d.Set(endpointType, endpoint.EndpointType)
-				d.Set(endpointUrl, endpoint.Url)
 				return nil
 			}
 		}

@@ -13,7 +13,7 @@ func TestAccDataSourceLogzIoAlert(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExpectNonEmptyPlan: true,
-				Config: testAccDataSourceLogzioAlertConfig(),
+				Config:             testAccDataSourceLogzioAlertConfig(),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.logzio_alert.by_title", "title", "hello"),
 					resource.TestCheckResourceAttr("data.logzio_alert.by_title", "query_string", "loglevel:ERROR"),

@@ -11,27 +11,27 @@ import (
 )
 
 const (
-	alertId                           string = "id"
-	alertNotificationEndpoints        string = "alert_notification_endpoints"
-	alertCreatedAt                    string = "created_at"
-	alertCreatedBy                    string = "created_by"
-	alertDescription                  string = "description"
-	alertFilter                       string = "filter"
-	alert_group_by_aggregation_fields string = "group_by_aggregation_fields"
-	alert_is_enabled                  string = "is_enabled"
-	alert_query_string                string = "query_string"
-	alert_last_triggered_at           string = "last_triggered_at"
-	alert_last_updated                string = "last_updated"
-	alert_notification_emails         string = "notification_emails"
-	alert_operation                   string = "operation"
-	alert_search_timeframe_minutes    string = "search_timeframe_minutes"
+	alertId                              string = "id"
+	alertNotificationEndpoints           string = "alert_notification_endpoints"
+	alertCreatedAt                       string = "created_at"
+	alertCreatedBy                       string = "created_by"
+	alertDescription                     string = "description"
+	alertFilter                          string = "filter"
+	alert_group_by_aggregation_fields    string = "group_by_aggregation_fields"
+	alert_is_enabled                     string = "is_enabled"
+	alert_query_string                   string = "query_string"
+	alert_last_triggered_at              string = "last_triggered_at"
+	alert_last_updated                   string = "last_updated"
+	alert_notification_emails            string = "notification_emails"
+	alert_operation                      string = "operation"
+	alert_search_timeframe_minutes       string = "search_timeframe_minutes"
 	alert_severity                       string = "severity"
 	alert_severity_threshold_tiers       string = "severity_threshold_tiers"
 	alert_suppress_notifications_minutes string = "suppress_notifications_minutes"
 	alert_threshold                      string = "threshold"
 	alert_title                          string = "title"
 	alert_value_aggregation_field        string = "value_aggregation_field"
-	alert_value_aggregation_type      string = "value_aggregation_type"
+	alert_value_aggregation_type         string = "value_aggregation_type"
 )
 
 /**
@@ -350,8 +350,8 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 /**
- deletes an existing alert in logzio, returns an error if it doesn't exist
- */
+deletes an existing alert in logzio, returns an error if it doesn't exist
+*/
 func resourceAlertDelete(d *schema.ResourceData, m interface{}) error {
 	client := alertClient(m)
 	alertId, _ := idFromResourceData(d)
