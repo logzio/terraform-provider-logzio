@@ -12,3 +12,4 @@ terraform/crash.log
 vendor
 build
 terraform-provider-logzio
+Gopkg.lock

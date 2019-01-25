@@ -8,7 +8,7 @@ import (
 
 func dataSourceEndpoint() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlertRead,
+		Read: dataSourceEndpointRead,
 		Schema: map[string]*schema.Schema{
 			endpointId: {
 				Type:     schema.TypeInt,
@@ -38,6 +38,7 @@ func dataSourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 		d.Set(endpointTitle, endpoint.Title)
 		d.Set(endpointDescription, endpoint.Description)
 		d.Set(endpointType, endpoint.EndpointType)
+		d.Set(endpointUrl, endpoint.Url)
 		return nil
 	}
 
@@ -54,10 +55,11 @@ func dataSourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 				d.Set(endpointTitle, endpoint.Title)
 				d.Set(endpointDescription, endpoint.Description)
 				d.Set(endpointType, endpoint.EndpointType)
+				d.Set(endpointUrl, endpoint.Url)
 				return nil
 			}
 		}
 	}
 
-	return fmt.Errorf("couldn't find alert with specified attributes")
+	return fmt.Errorf("couldn't find endpoint with specified attributes")
 }

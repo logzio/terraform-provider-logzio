@@ -63,8 +63,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "a2484497433aa110263c045df2f1d49336b38cfd"
-  version = "v1.16.22"
+  revision = "3503f7b53173f227ff96dc247983360cc7cb8463"
+  version = "v1.16.25"
 
 [[projects]]
   branch = "master"
@@ -137,8 +137,8 @@
     ".",
     "helper/url"
   ]
-  revision = "3279f7834bfada0785f23677629791ea1abb7475"
-  version = "v1.0.0"
+  revision = "dde89f93975670ed3a449be055954c139e36810f"
+  version = "v1.0.1"
 
 [[projects]]
   branch = "master"
@@ -207,7 +207,7 @@
     "hclparse",
     "hclwrite"
   ]
-  revision = "7b147fbae47a39a84792258ad4017a940a752d46"
+  revision = "a9ca194bcdc3696ae3146fe4fdb04d25eb2e87cd"
 
 [[projects]]
   branch = "master"
@@ -270,7 +270,6 @@
   revision = "c2b33e84"
 
 [[projects]]
-  branch = "develop"
   name = "github.com/jonboydell/logzio_client"
   packages = [
     ".",
@@ -278,7 +277,8 @@
     "client",
     "endpoints"
   ]
-  revision = "7bb9c43276f653c22ce79554862f2d2e2ab64eeb"
+  revision = "ae67ef063c4805a896576d9eda312b5bf7d3e25c"
+  version = "v0.7"
 
 [[projects]]
   name = "github.com/mattn/go-colorable"
@@ -392,7 +392,7 @@
     "cty/json",
     "cty/set"
   ]
-  revision = "67e3da15e4309389854d5b28eaaede43da5ca9ad"
+  revision = "a385d646c1e9f1f711614e577f478b60982e6fd6"
 
 [[projects]]
   branch = "master"
@@ -408,7 +408,7 @@
     "openpgp/packet",
     "openpgp/s2k"
   ]
-  revision = "ff983b9c42bc9fbf91556e191cc8efb585c16908"
+  revision = "057139ce5d2bdbe6fe73c53679e24e9cf007f637"
 
 [[projects]]
   branch = "master"
@@ -424,13 +424,13 @@
     "internal/timeseries",
     "trace"
   ]
-  revision = "ed066c81e75eba56dd9bd2139ade88125b855585"
+  revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "770c60269bf0ef965e9e7ac8bedcb6bca2a1cefd"
+  revision = "b90733256f2e882e81d52f9126de08df5615afd9"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -457,7 +457,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "db91494dd46c1fdcbbde05e5ff5eb56df8f7d79a"
+  revision = "8819c946db4494a2259bf100a377f51aa585d893"
 
 [[projects]]
   name = "google.golang.org/grpc"

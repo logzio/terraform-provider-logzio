@@ -25,6 +25,8 @@ func TestAccLogzioEndpoint_Slack_HappyPath(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.slack", "title", "my_slack_title"),
 					testAccCheckOutputExists("logzio_endpoint.slack"),
+					resource.TestMatchOutput("test", regexp.MustCompile("\\d")),
+					resource.TestMatchOutput("test_id", regexp.MustCompile("\\d")),
 				),
 			},
 		},
@@ -82,7 +84,49 @@ func TestAccLogzioEndpoint_Custom_HappyPath(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLogzioEndpointExists("logzio_endpoint.custom"),
 					resource.TestCheckResourceAttr(
-						"logzio_endpoint.name", "title", "my_custom_title"),
+						"logzio_endpoint.custom", "title", "my_custom_title"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccLogzioEndpoint_PagerDuty_HappyPath(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccLogzioEndpointDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckLogzioEndpointConfig("pagerDutyHappyPath"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLogzioEndpointExists("logzio_endpoint.pagerduty"),
+					resource.TestCheckResourceAttr(
+						"logzio_endpoint.pagerduty", "title", "my_pagerduty_title"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccLogzioEndpoint_BigPanda_HappyPath(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccLogzioEndpointDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckLogzioEndpointConfig("bigPandaHappyPath"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLogzioEndpointExists("logzio_endpoint.bigpanda"),
+					resource.TestCheckResourceAttr(
+						"logzio_endpoint.bigpanda", "title", "my_bigpanda_title"),
+					resource.TestCheckResourceAttr(
+						"logzio_endpoint.bigpanda", "big_panda.#", "1"),
+					resource.TestCheckResourceAttr(
+						"logzio_endpoint.bigpanda", "big_panda.1922960384.api_token", "my_api_token"),
+					resource.TestCheckResourceAttr(
+						"logzio_endpoint.bigpanda", "big_panda.1922960384.app_key", "my_app_key"),
 				),
 			},
 		},
@@ -170,6 +214,10 @@ resource "logzio_endpoint" "slack" {
 output "test" {
 	value = "${logzio_endpoint.slack.endpoint_id}"
 }
+
+output "test_id" {
+	value = "${logzio_endpoint.slack.id}"
+}
 `,
 		"slackBadUrl": `
 resource "logzio_endpoint" "slack" {
@@ -203,10 +251,34 @@ resource "logzio_endpoint" "custom" {
 		"this" = "is"
 		"a" = "header"
 	}
-	body_template = "this_is_my_template"
+	body_template = {
+		"this" = "is"
+		"my" = "template"
+	}
   }
 }
 `,
+"pagerDutyHappyPath": `
+	resource "logzio_endpoint" "pagerduty" {
+		title = "my_pagerduty_title"
+		endpoint_type = "pager_duty"
+		description = "this is my description"
+		pager_duty {
+			service_key = "my_service_key"
+		}
 	}
+`,
+"bigPandaHappyPath": `
+	resource "logzio_endpoint" "bigpanda" {
+		title = "my_bigpanda_title"
+		endpoint_type = "big_panda"
+		description = "this is my description"
+		big_panda {
+			api_token = "my_api_token"
+			app_key = "my_app_key"
+		}
+	}
+`,
+}
 	return templates[key]
 }

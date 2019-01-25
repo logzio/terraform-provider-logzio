@@ -31,7 +31,6 @@ const (
 	endpointRoutingKey    string = "routing_key"
 	endpointMessageType   string = "message_type"
 	endpointServiceApiKey string = "service_api_key"
-	endpointIdComputed    string = "endpoint_id"
 )
 
 /**
@@ -50,6 +49,7 @@ func resourceEndpoint() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validateEndpointType,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					new = strings.Replace(new, "_", "", 1)
 					if strings.EqualFold(old, new) {
 						return true
 					}
@@ -97,7 +97,7 @@ func resourceEndpoint() *schema.Resource {
 							Required: true,
 						},
 						endpointBodyTemplate: {
-							Type:     schema.TypeString,
+							Type:     schema.TypeMap,
 							Required: true,
 						},
 					},
@@ -163,10 +163,6 @@ func resourceEndpoint() *schema.Resource {
 					},
 				},
 			},
-			endpointIdComputed: {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -222,17 +218,24 @@ func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
 		opts, _ := mappingsFromResourceData(d, endpointCustom)
 		endpoint.Url = opts[endpointUrl].(string)
 		endpoint.Method = opts[endpointMethod].(string)
-		endpoint.BodyTemplate = opts[endpointBodyTemplate].(map[string]string)
-		endpoint.Headers = opts[endpointHeaders].(map[string]string)
+		endpoint.BodyTemplate = opts[endpointBodyTemplate]
+		headerMap := make(map[string]string)
+		for k, v := range opts[endpointHeaders].(map[string]interface{}) {
+			headerMap[k] = v.(string)
+		}
+		endpoint.Headers = headerMap
 	} else if endpoint.EndpointType == endpointPagerDuty {
 		opts, _ := mappingsFromResourceData(d, endpointPagerDuty)
+		endpoint.EndpointType = "pager-duty"
 		endpoint.ServiceKey = opts[endpointServiceKey].(string)
 	} else if endpoint.EndpointType == endpointBigPanda {
 		opts, _ := mappingsFromResourceData(d, endpointBigPanda)
+		endpoint.EndpointType = "big-panda"
 		endpoint.ApiToken = opts[endpointApiToken].(string)
 		endpoint.AppKey = opts[endpointAppKey].(string)
 	} else if endpoint.EndpointType == endpointDataDog {
 		opts, _ := mappingsFromResourceData(d, endpointDataDog)
+		endpoint.EndpointType = "data-dog"
 		endpoint.ApiKey = opts[endpointApiKey].(string)
 	} else if endpoint.EndpointType == endpointVictorOps {
 		opts, _ := mappingsFromResourceData(d, endpointVictorOps)
@@ -257,7 +260,6 @@ func resourceEndpointCreate(d *schema.ResourceData, m interface{}) error {
 
 	endpointId := strconv.FormatInt(e.Id, BASE_10)
 	d.SetId(endpointId)
-	d.Set(endpointIdComputed, endpointId)
 
 	return nil
 }
@@ -287,13 +289,17 @@ func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 		d.Set(endpointHeaders, endpoint.Headers)
 		d.Set(endpointBodyTemplate, endpoint.BodyTemplate)
 	} else if endpoint.EndpointType == endpointPagerDuty {
+		d.Set(endpointType, endpointPagerDuty)
 		d.Set(endpointServiceKey, endpoint.ServiceKey)
 	} else if endpoint.EndpointType == endpointBigPanda {
+		d.Set(endpointType, endpointBigPanda)
 		d.Set(endpointApiToken, endpoint.ApiToken)
 		d.Set(endpointAppKey, endpoint.AppKey)
 	} else if endpoint.EndpointType == endpointDataDog {
+		d.Set(endpointType, endpointDataDog)
 		d.Set(endpointApiKey, endpoint.ApiKey)
 	} else if endpoint.EndpointType == endpointVictorOps {
+		d.Set(endpointType, endpointVictorOps)
 		d.Set(endpointRoutingKey, endpoint.RoutingKey)
 		d.Set(endpointMessageType, endpoint.MessageType)
 		d.Set(endpointServiceApiKey, endpoint.ServiceApiKey)
