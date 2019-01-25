@@ -3,13 +3,16 @@
 
 # terraform
 .terraform
-terraform/variables/*
+terraform
 terraform.plan
 terraform.tfstate*
 terraform/crash.log
+jon.boydell.tfvars
 
 # build and vendor
 vendor
 build
 terraform-provider-logzio
+
+# go
 Gopkg.lock
