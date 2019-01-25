@@ -1,13 +1,24 @@
-# Logz.io terraform provider
+# Logz.io Terraform provider
 
-### Supports alerts and slack endpoints - please refer to the API support below
+### Supports CRUD of Logz.io alerts and notification endpoints
+
+This provider is based on the Logz.io client library - https://github.com/jonboydell/logzio_client
+
+
+##### Obtaining the provider
+
+You can [build from souce](#build-from-source) and copy the output into your Terraform templates folder, Terraform will find it here.
+
+You can [get a release from here](https://github.com/jonboydell/logzio_terraform_provider/releases) and put it into your Terraform templates folder.
+
+You'll need to do a `terraform init` for it to pick up the provider.
+
 
 ##### Using the provider
 
-A simple example, will create an alert, triggered if over 5 minutes more than 10 logs are found with a loglevel of ERROR,
-further notifications are suppressed for 5 minutes.
-
-You can also provide the `api_token` as the `LOGZIO_API_TOKEN` env var.
+This simple example will create a Logz.io Slack notification endpoint (you'll need to provide the right URL) and an alert that
+is triggered should Logz.io record 10 loglevel:ERROR messages in 5 minutes.  To make this example work you will also need to provide
+your Logz.io API token.
 
 ```hcl-terraform
 provider "logzio" {
@@ -15,56 +26,34 @@ provider "logzio" {
 }
 
 resource "logzio_endpoint" "my_endpoint" {
-}
-
-output "endpoint_id" {
-  value="${logzio_endpoint.my_endpoint.endpoint_id}"
+  title = "my_endpoint"
+  description = "hello"
+  endpoint_type = "slack"
+  slack {
+    url = "${var.slack_url}"
+  }
 }
 
 resource "logzio_alert" "my_alert" {
-  title = "my_alert_title"
+  title = "my_other_title"
   query_string = "loglevel:ERROR"
   operation = "GREATER_THAN"
-  notification_emails = ["${var.notification_email}"]
+  notification_emails = []
   search_timeframe_minutes = 5
   value_aggregation_type = "NONE"
-  alert_notification_endpoints = ["${logzio_endpoint.my_endpoint.endpoint_id}"]
+  alert_notification_endpoints = ["${logzio_endpoint.my_endpoint.id}"]
   suppress_notifications_minutes = 5
   severity_threshold_tiers = [
     {
       "severity" = "HIGH",
       "threshold" = 10
     }
-   ]
+  ]
 }
-
 ```
 
-##### Logz.io API support
+##### Doens't work?
 
-|api  |method|support     |implementation|
-|-----|------|------------|--------------|
-|alert|create|tested |`resource_alert::resourceAlertCreate`|
-|alert|delete|tested |`resource_alert::resourceAlertDelete`|
-|alert|update|tested |`resource_alert::resourceAlertUpdate`|
-|alert|read  |tested |`resource_alert::resourceAlertRead`  |
-|endpoints|create|slack only tested|`resource_endpoint::resourceEndpointCreate`|
-|endpoints|delete|slack only tested|`resource_endpoint::resourceEndpointDelete`|
-|endpoints|update|slack only tested|`resource_endpoint::resourceEndpointDelete`|
-|endpoints|read|not tested|`resource_endpoint::resourceEndpointRead`|
+Do an [https://github.com/jonboydell/logzio_terraform_provider/issues](issue).
 
-##### Building and testing the provider
-
-Run `scripts/build.sh` to build the provider, copy it to the terraform execution directory (the `terraform` directory) and
-do a complete terraform init/plan/apply lifecycle.
-
-Run `scripts/destroy.sh` to build the provider, copy it and run the destroy part of the terraform lifecycle.
-
-##### Terraform demos
-
-The terraform demos are in the `terraform` directory.
-
-To use the demos you'll need to provide an `api_token` and a `notification_email` as variables.
-
-There's a utility script in the `terraform` directory that will run the terraform init/plan/apply lifecycle the templates in that directory.  The script looks for a file called `variables\${USER}.tfvars` to set the values of `api_token` and `notification_email`.
-
+Fix it yourself and do a [https://github.com/jonboydell/logzio_terraform_provider/pulls](PR), please create any fix branches from `develop`.  They'll be merged back into `develop` and go `master` from there.  Releases are from `master`.
