@@ -4,15 +4,15 @@
 
 This provider is based on the Logz.io client library - https://github.com/jonboydell/logzio_client
 
-
 ##### Obtaining the provider
 
-You can [build from souce](#build-from-source) and copy the output into your Terraform templates folder, Terraform will find it here.
+To build; from the project root (on a *nix style system), this will copy it into your [plugins directory](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins).  You can copy it into your Terraform templates folder too.
+```bash
+./scripts/build.sh
+```
 
-You can [get a release from here](https://github.com/jonboydell/logzio_terraform_provider/releases) and put it into your Terraform templates folder.
-
+You can [get a release from here](https://github.com/jonboydell/logzio_terraform_provider/releases) and follow these [instructions](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins)
 You'll need to do a `terraform init` for it to pick up the provider.
-
 
 ##### Using the provider
 
