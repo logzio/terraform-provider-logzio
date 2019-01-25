@@ -57,3 +57,7 @@ resource "logzio_alert" "my_alert" {
 Do an [https://github.com/jonboydell/logzio_terraform_provider/issues](issue).
 
 Fix it yourself and do a [https://github.com/jonboydell/logzio_terraform_provider/pulls](PR), please create any fix branches from `develop`.  They'll be merged back into `develop` and go `master` from there.  Releases are from `master`.
+
+#### License
+
+[![FOSSA Status](https://app.fossa.io/api/projects/custom%2B8359%2Fgit%40github.com%3Ajonboydell%2Flogzio_terraform_provider.git.svg?type=large)](https://app.fossa.io/projects/custom%2B8359%2Fgit%40github.com%3Ajonboydell%2Flogzio_terraform_provider.git?ref=badge_large)
