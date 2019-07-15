@@ -1,0 +1,21 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.12
+    working_directory: /go/src/github.com/jonboydell/logzio_client
+    steps:
+      - checkout
+      - run: go get golang.org/x/tools/cmd/cover
+      - run: go get github.com/mattn/goveralls
+      - run: go get -v -t ./...
+      - run: TF_ACC=true go test -v ./... -covermode=count -coverprofile=coverage.out
+      - run: goveralls -coverprofile=coverage.out -service=circle-ci -repotoken $COVERALLS_TOKEN
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - build
