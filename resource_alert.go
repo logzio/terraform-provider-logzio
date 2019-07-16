@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jonboydell/logzio_client/alerts"
 	"log"
 	"strconv"
+
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/jonboydell/logzio_client/alerts"
 )
 
 const (
@@ -218,9 +219,13 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 	a, err := client.CreateAlert(createAlert)
 
 	if err != nil {
-		ferr := err.(alerts.FieldError)
-		if ferr.Field == "valueAggregationTypeComposite" {
-			return fmt.Errorf("if valueAggregationType is set to None, valueAggregationField and groupByAggregationFields must not be set")
+		switch typedError := err.(type) {
+		case alerts.FieldError:
+			if typedError.Field == "valueAggregationTypeComposite" {
+				return fmt.Errorf("if valueAggregationType is set to None, valueAggregationField and groupByAggregationFields must not be set")
+			}
+		default:
+			return fmt.Errorf("resourceAlertCreate failed: %v", typedError)
 		}
 		return err
 	}
