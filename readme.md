@@ -51,6 +51,9 @@ resource "logzio_alert" "my_alert" {
   ]
 }
 ```
+## How to run the tests
+1. `dep ensure -v`
+2. `go test -v .`
 
 ##### Doens't work?
 
