@@ -68,7 +68,7 @@ func testAccCheckLogzioAlertExists(n string) resource.TestCheckFunc {
 
 		id, err := strconv.ParseInt(rs.Primary.ID, 10, 64)
 
-		var client *alerts.Alerts
+		var client *alerts.AlertsClient
 		client, _ = alerts.New(os.Getenv(envLogzioApiToken))
 
 		_, err = client.GetAlert(int64(id))
@@ -89,7 +89,7 @@ func testAccLogzioAlertDestroy(s *terraform.State) error {
 			return err
 		}
 
-		var client *alerts.Alerts
+		var client *alerts.AlertsClient
 		client, _ = alerts.New(os.Getenv(envLogzioApiToken))
 
 		_, err = client.GetAlert(int64(id))

@@ -170,9 +170,9 @@ func resourceEndpoint() *schema.Resource {
 /**
  * returns the endpoints client with the api token from the provider
  */
-func endpointClient(m interface{}) *endpoints.Endpoints {
+func endpointClient(m interface{}) *endpoints.EndpointsClient {
 	apiToken := m.(Config).apiToken
-	var client *endpoints.Endpoints
+	var client *endpoints.EndpointsClient
 	client, _ = endpoints.New(apiToken)
 	return client
 }

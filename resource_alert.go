@@ -37,9 +37,9 @@ const (
 /**
  * returns the alert client with the api token from the provider
  */
-func alertClient(m interface{}) *alerts.Alerts {
+func alertClient(m interface{}) *alerts.AlertsClient {
 	apiToken := m.(Config).apiToken
-	var client *alerts.Alerts
+	var client *alerts.AlertsClient
 	client, _ = alerts.New(apiToken)
 	return client
 }

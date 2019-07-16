@@ -168,7 +168,7 @@ func testAccCheckLogzioEndpointExists(n string) resource.TestCheckFunc {
 
 		id, err := strconv.ParseInt(rs.Primary.ID, BASE_10, BITSIZE_64)
 
-		var client *endpoints.Endpoints
+		var client *endpoints.EndpointsClient
 		client, _ = endpoints.New(os.Getenv(envLogzioApiToken))
 
 		_, err = client.GetEndpoint(int64(id))
@@ -188,7 +188,7 @@ func testAccLogzioEndpointDestroy(s *terraform.State) error {
 			return err
 		}
 
-		var client *endpoints.Endpoints
+		var client *endpoints.EndpointsClient
 		client, _ = endpoints.New(os.Getenv(envLogzioApiToken))
 
 		_, err = client.GetEndpoint(int64(id))
