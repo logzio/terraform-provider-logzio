@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	userId string = "id"
-	userUsername string = "username"
-	userFullname string = "fullname"
-	userAccountId string = "accountid"
-	userRoles string = "roles"
-	userActive string = "active"
+	userId        string = "id"
+	userUsername  string = "username"
+	userFullname  string = "fullname"
+	userAccountId string = "account_id"
+	userRoles     string = "roles"
+	userActive    string = "active"
 )
 
 /**
@@ -57,21 +57,25 @@ func usersClient(m interface{}) *users.UsersClient {
 	return client
 }
 
-
 func resourceUserCreate(d *schema.ResourceData, m interface{}) error {
-	accountId, _ := strconv.ParseInt(d.Get(userAccountId).(string), BASE_10, BITSIZE_64)
-
-	user := users.User{
-		AccountId: accountId,
-		Username: d.Get(userUsername).(string),
-		Fullname: d.Get(userFullname).(string),
-		Roles: d.Get(userRoles).([]int32),
+	var roles []int32
+	for _, v := range d.Get(userRoles).([]interface{}) {
+		roles = append(roles, int32(v.(int)))
 	}
 
-	_, err := usersClient(m).CreateUser(user)
+	user := users.User{
+		AccountId: int64(d.Get(userAccountId).(int)),
+		Username:  d.Get(userUsername).(string),
+		Fullname:  d.Get(userFullname).(string),
+		Roles:     roles,
+	}
+
+	u, err := usersClient(m).CreateUser(user)
 	if err != nil {
 		return err
 	}
+	userId := strconv.FormatInt(u.Id, BASE_10)
+	d.SetId(userId)
 
 	return nil
 }
@@ -91,7 +95,13 @@ func resourceUserRead(d *schema.ResourceData, m interface{}) error {
 	d.Set(userAccountId, fmt.Sprintf("%d", user.AccountId))
 	d.Set(userUsername, user.Username)
 	d.Set(userFullname, user.Fullname)
-	d.Set(userRoles, []string{})
+
+	var roles []interface{}
+	for _, v := range user.Roles {
+		roles = append(roles, int(v))
+	}
+
+	d.Set(userRoles, roles)
 	d.Set(userActive, user.Active)
 
 	return nil
@@ -109,12 +119,12 @@ func resourceUserUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	user := users.User{
-		Id : id,
-		AccountId:accountId,
-		Username:d.Get(userUsername).(string),
-		Fullname:d.Get(userFullname).(string),
-		Roles:d.Get(userRoles).([]int32),
-		Active:d.Get(userActive).(bool),
+		Id:        id,
+		AccountId: accountId,
+		Username:  d.Get(userUsername).(string),
+		Fullname:  d.Get(userFullname).(string),
+		Roles:     d.Get(userRoles).([]int32),
+		Active:    d.Get(userActive).(bool),
 	}
 
 	_, err = usersClient(m).UpdateUser(user)

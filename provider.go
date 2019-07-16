@@ -10,7 +10,9 @@ const (
 	providerApiToken     = "api_token"
 	resourceAlertType    = "logzio_alert"
 	resourceEndpointType = "logzio_endpoint"
+	resourceUserType     = "logzio_user"
 	envLogzioApiToken    = "LOGZIO_API_TOKEN"
+	envLogzioAccountId   = "LOGZIO_ACCOUNT_ID"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -31,6 +33,7 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			resourceAlertType:    resourceAlert(),
 			resourceEndpointType: resourceEndpoint(),
+			resourceUserType:     resourceUser(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
