@@ -1,0 +1,57 @@
+module github.com/jonboydell/logzio_terraform_provider
+
+go 1.12
+
+require (
+	github.com/agext/levenshtein v1.2.1
+	github.com/apparentlymart/go-cidr v1.0.0
+	github.com/apparentlymart/go-textseg v1.0.0
+	github.com/armon/go-radix v1.0.0
+	github.com/aws/aws-sdk-go v1.16.25
+	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d
+	github.com/bgentry/speakeasy v0.1.0
+	github.com/blang/semver v3.5.1+incompatible
+	github.com/davecgh/go-spew v1.1.1
+	github.com/fatih/color v1.7.0
+	github.com/golang/protobuf v1.2.0
+	github.com/google/go-cmp v0.2.0
+	github.com/hashicorp/errwrap v1.0.0
+	github.com/hashicorp/go-cleanhttp v0.5.0
+	github.com/hashicorp/go-getter v1.0.1
+	github.com/hashicorp/go-hclog v0.0.0-20190109152822-4783caec6f2e
+	github.com/hashicorp/go-multierror v1.0.0
+	github.com/hashicorp/go-plugin v0.0.0-20181212150838-f444068e8f5a
+	github.com/hashicorp/go-safetemp v1.0.0
+	github.com/hashicorp/go-uuid v1.0.1
+	github.com/hashicorp/go-version v1.1.0
+	github.com/hashicorp/hcl v1.0.0
+	github.com/hashicorp/hcl2 v0.0.0-20190124230628-a9ca194bcdc3
+	github.com/hashicorp/hil v0.0.0-20170627220502-fa9f258a9250
+	github.com/hashicorp/logutils v1.0.0
+	github.com/hashicorp/terraform v0.11.11
+	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
+	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
+	github.com/jonboydell/logzio_client v0.0.0-20190716094520-3f8722dfdc81
+	github.com/mattn/go-colorable v0.0.9
+	github.com/mattn/go-isatty v0.0.4
+	github.com/mitchellh/cli v1.0.0
+	github.com/mitchellh/copystructure v1.0.0
+	github.com/mitchellh/go-homedir v1.0.0
+	github.com/mitchellh/go-testing-interface v1.0.0
+	github.com/mitchellh/go-wordwrap v1.0.0
+	github.com/mitchellh/hashstructure v1.0.0
+	github.com/mitchellh/mapstructure v1.1.2
+	github.com/mitchellh/reflectwalk v1.0.0
+	github.com/oklog/run v1.0.0
+	github.com/pmezard/go-difflib v1.0.0
+	github.com/posener/complete v1.2.1
+	github.com/stretchr/testify v1.3.0
+	github.com/ulikunitz/xz v0.5.5
+	github.com/zclconf/go-cty v0.0.0-20190124225737-a385d646c1e9
+	golang.org/x/crypto v0.0.0-20190123085648-057139ce5d2b
+	golang.org/x/net v0.0.0-20190125091013-d26f9f9a57f3
+	golang.org/x/sys v0.0.0-20190124100055-b90733256f2e
+	golang.org/x/text v0.3.0
+	google.golang.org/genproto v0.0.0-20190123001331-8819c946db44
+	google.golang.org/grpc v1.18.0
+)
