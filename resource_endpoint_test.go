@@ -170,6 +170,7 @@ func testAccCheckLogzioEndpointExists(n string) resource.TestCheckFunc {
 
 		var client *endpoints.EndpointsClient
 		client, _ = endpoints.New(os.Getenv(envLogzioApiToken))
+		client.BaseUrl = "https://api.logz.io"
 
 		_, err = client.GetEndpoint(int64(id))
 
@@ -190,6 +191,7 @@ func testAccLogzioEndpointDestroy(s *terraform.State) error {
 
 		var client *endpoints.EndpointsClient
 		client, _ = endpoints.New(os.Getenv(envLogzioApiToken))
+		client.BaseUrl = "https://api.logz.io"
 
 		_, err = client.GetEndpoint(int64(id))
 		if err == nil {

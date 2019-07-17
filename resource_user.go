@@ -54,6 +54,7 @@ func usersClient(m interface{}) *users.UsersClient {
 	apiToken := m.(Config).apiToken
 	var client *users.UsersClient
 	client, _ = users.New(apiToken)
+	client.BaseUrl = m.(Config).baseUrl
 	return client
 }
 

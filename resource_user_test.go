@@ -49,6 +49,7 @@ func testAccCheckLogzioUserExists(n string) resource.TestCheckFunc {
 
 		var client *users.UsersClient
 		client, _ = users.New(os.Getenv(envLogzioApiToken))
+		client.BaseUrl = "https://api.logz.io"
 
 		_, err = client.GetUser(int64(id))
 

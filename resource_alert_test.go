@@ -70,6 +70,7 @@ func testAccCheckLogzioAlertExists(n string) resource.TestCheckFunc {
 
 		var client *alerts.AlertsClient
 		client, _ = alerts.New(os.Getenv(envLogzioApiToken))
+		client.BaseUrl = "https://api.logz.io"
 
 		_, err = client.GetAlert(int64(id))
 
@@ -91,7 +92,8 @@ func testAccLogzioAlertDestroy(s *terraform.State) error {
 
 		var client *alerts.AlertsClient
 		client, _ = alerts.New(os.Getenv(envLogzioApiToken))
-
+		client.BaseUrl = "https://api.logz.io"
+		
 		_, err = client.GetAlert(int64(id))
 
 		if err == nil {

@@ -174,6 +174,7 @@ func endpointClient(m interface{}) *endpoints.EndpointsClient {
 	apiToken := m.(Config).apiToken
 	var client *endpoints.EndpointsClient
 	client, _ = endpoints.New(apiToken)
+	client.BaseUrl = m.(Config).baseUrl
 	return client
 }
 
