@@ -24,9 +24,11 @@ func dataSourceEndpoint() *schema.Resource {
 
 func dataSourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 	apiToken := m.(Config).apiToken
+	baseUrl := m.(Config).baseUrl
 
 	var client *endpoints.EndpointsClient
 	client, _ = endpoints.New(apiToken)
+	client.BaseUrl = baseUrl
 
 	endpointId, ok := d.GetOk(endpointId)
 	if ok {

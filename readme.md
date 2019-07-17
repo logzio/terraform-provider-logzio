@@ -1,5 +1,13 @@
 # Logz.io Terraform provider
 
+develop
+[![Build Status](https://travis-ci.org/jonboydell/logzio_terraform_provider.svg?branch=develop)](https://travis-ci.org/jonboydell/logzio_terraform_provider)
+[![Coverage Status](https://coveralls.io/repos/github/jonboydell/logzio_terraform_provider/badge.svg?branch=develop)](https://coveralls.io/github/jonboydell/logzio_terraform_provider?branch=develop)
+
+master
+[![Build Status](https://travis-ci.org/jonboydell/logzio_terraform_provider.svg?branch=master)](https://travis-ci.org/jonboydell/logzio_terraform_provider)
+[![Coverage Status](https://coveralls.io/repos/github/jonboydell/logzio_terraform_provider/badge.svg?branch=master)](https://coveralls.io/github/jonboydell/logzio_terraform_provider?branch=master)
+
 ### Supports CRUD of Logz.io alerts and notification endpoints
 
 This provider is based on the Logz.io client library - https://github.com/jonboydell/logzio_client
@@ -15,6 +23,14 @@ You can [get a release from here](https://github.com/jonboydell/logzio_terraform
 You'll need to do a `terraform init` for it to pick up the provider.
 
 ##### Using the provider
+
+Note: logz.io provides multiple endpoints for their service, if you are not using the default, `https://api.logz.io` then you'll have to specify an override in the provider.
+```hcl-terraform
+provider "logzio" {
+  api_token = "${var.api_token}"
+  base_url = "${var.your_api_endpoint}" #e.g. https://api-au.logz.io
+}
+```
 
 This simple example will create a Logz.io Slack notification endpoint (you'll need to provide the right URL) and an alert that
 is triggered should Logz.io record 10 loglevel:ERROR messages in 5 minutes.  To make this example work you will also need to provide
@@ -53,12 +69,11 @@ resource "logzio_alert" "my_alert" {
 ```
 ## How to run the tests
 1. `dep ensure -v`
-2. `go test -v .`
+2. `TF_ACC=true go test -v .`
 
 ##### Doens't work?
 
 Do an [https://github.com/jonboydell/logzio_terraform_provider/issues](issue).
-
 Fix it yourself and do a [https://github.com/jonboydell/logzio_terraform_provider/pulls](PR), please create any fix branches from `develop`.  They'll be merged back into `develop` and go `master` from there.  Releases are from `master`.
 
 #### License

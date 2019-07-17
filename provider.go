@@ -8,9 +8,12 @@ import (
 
 const (
 	providerApiToken     = "api_token"
+	providerBaseUrl      = "base_url"
 	resourceAlertType    = "logzio_alert"
 	resourceEndpointType = "logzio_endpoint"
+	resourceUserType     = "logzio_user"
 	envLogzioApiToken    = "LOGZIO_API_TOKEN"
+	envLogzioAccountId   = "LOGZIO_ACCOUNT_ID"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -23,14 +26,23 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc(envLogzioApiToken, nil),
 				Sensitive:   true,
 			},
+			providerBaseUrl: {
+				Type:        schema.TypeString,
+				Optional: true,
+				Description: descriptions[providerBaseUrl],
+				Default: "https://api.logz.io",
+				Sensitive:   false,
+			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			resourceAlertType:    dataSourceAlert(),
 			resourceEndpointType: dataSourceEndpoint(),
+			resourceUserType: dataSourceUser(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			resourceAlertType:    resourceAlert(),
 			resourceEndpointType: resourceEndpoint(),
+			resourceUserType:     resourceUser(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
@@ -39,16 +51,18 @@ func Provider() terraform.ResourceProvider {
 var descriptions map[string]string
 
 func init() {
-	descriptions = map[string]string{providerApiToken: "Your API token"}
+	descriptions = map[string]string{providerApiToken: "Your API token", providerBaseUrl: "API base URL"}
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	apiToken, ok := d.GetOk(providerApiToken)
+	baseUrl, ok := d.GetOk(providerBaseUrl)
 	if !ok {
 		return nil, fmt.Errorf("can't find the %s, either set it in the provider or set the %s env var", providerApiToken, envLogzioApiToken)
 	}
 	config := Config{
 		apiToken: apiToken.(string),
+		baseUrl: baseUrl.(string),
 	}
 	return config, nil
 }
