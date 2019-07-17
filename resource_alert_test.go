@@ -3,12 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
-	"github.com/jonboydell/logzio_client/alerts"
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
+	"github.com/jonboydell/logzio_client/alerts"
 )
 
 func TestAccLogzioAlert_Basic(t *testing.T) {
@@ -21,8 +22,10 @@ func TestAccLogzioAlert_Basic(t *testing.T) {
 				Config: testAccCheckLogzioAlertConfig("name"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLogzioAlertExists("logzio_alert.name"),
-					resource.TestCheckResourceAttr(
-						"logzio_alert.name", "title", "my_other_title"),
+					resource.TestCheckResourceAttr("logzio_alert.name", "title", "my_other_title"),
+					resource.TestCheckResourceAttr("logzio_alert.name", "severity_threshold_tiers.#", "1"),
+					resource.TestCheckResourceAttr("logzio_alert.name", "severity_threshold_tiers.0.severity", "HIGH"),
+					resource.TestCheckResourceAttr("logzio_alert.name", "severity_threshold_tiers.0.threshold", "10"),
 				),
 			},
 		},
