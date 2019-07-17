@@ -46,6 +46,11 @@ func resourceUser() *schema.Resource {
 					Type: schema.TypeInt,
 				},
 			},
+			userActive: {
+				Type: schema.TypeBool,
+				Optional: true,
+				Default: true,
+			},
 		},
 	}
 }

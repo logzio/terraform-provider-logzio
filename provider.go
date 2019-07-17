@@ -37,6 +37,7 @@ func Provider() terraform.ResourceProvider {
 		DataSourcesMap: map[string]*schema.Resource{
 			resourceAlertType:    dataSourceAlert(),
 			resourceEndpointType: dataSourceEndpoint(),
+			resourceUserType: dataSourceUser(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			resourceAlertType:    resourceAlert(),

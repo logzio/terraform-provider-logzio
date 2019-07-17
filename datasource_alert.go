@@ -97,9 +97,11 @@ func dataSourceAlert() *schema.Resource {
 
 func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
 	apiToken := m.(Config).apiToken
+	baseUrl := m.(Config).baseUrl
 
 	var client *alerts.AlertsClient
 	client, _ = alerts.New(apiToken)
+	client.BaseUrl = baseUrl
 
 	alertId, ok := d.GetOk(alertId)
 	if ok {

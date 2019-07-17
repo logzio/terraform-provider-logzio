@@ -24,8 +24,7 @@ func TestAccLogzioEndpoint_Slack_HappyPath(t *testing.T) {
 					testAccCheckLogzioEndpointExists("logzio_endpoint.slack"),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.slack", "title", "my_slack_title"),
-					testAccCheckOutputExists("logzio_endpoint.slack"),
-					resource.TestMatchOutput("test", regexp.MustCompile("\\d")),
+					testAccCheckOutputExists("logzio_endpoint.slack", "test_id"),
 					resource.TestMatchOutput("test_id", regexp.MustCompile("\\d")),
 				),
 			},
@@ -47,7 +46,7 @@ func TestAccLogzioEndpoint_Slack_BadUrl(t *testing.T) {
 	})
 }
 
-func TestAccLogzioEndpoint_Slack_UpdateHappyPath(t *testing.T) {
+func 	TestAccLogzioEndpoint_Slack_UpdateHappyPath(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -133,7 +132,7 @@ func TestAccLogzioEndpoint_BigPanda_HappyPath(t *testing.T) {
 	})
 }
 
-func testAccCheckOutputExists(n string) resource.TestCheckFunc {
+func testAccCheckOutputExists(n string, o string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -141,7 +140,7 @@ func testAccCheckOutputExists(n string) resource.TestCheckFunc {
 		}
 
 		id := rs.Primary.ID
-		os, ok := s.RootModule().Outputs["test"]
+		os, ok := s.RootModule().Outputs[o]
 
 		if rs.Primary.ID == "" {
 			return errors.New("no endpoint ID is set")
@@ -211,10 +210,6 @@ resource "logzio_endpoint" "slack" {
   slack {
 	url = "https://www.test.com"
   }
-}
-
-output "test" {
-	value = "${logzio_endpoint.slack.endpoint_id}"
 }
 
 output "test_id" {
