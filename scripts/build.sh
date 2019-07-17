@@ -1,3 +1,3 @@
-#!/usr/bin/env bash -xe
+#!/usr/bin/env bash
+rm -rf ./build
 go build -o ./build/terraform-provider-logzio
-cp ./build/terraform-provider-logzio ~/.terraform.d/plugins
