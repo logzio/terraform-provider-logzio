@@ -24,6 +24,14 @@ You'll need to do a `terraform init` for it to pick up the provider.
 
 ##### Using the provider
 
+Note: logz.io provides multiple endpoints for their service, if you are not using the default, `https://api.logz.io` then you'll have to specify an override in the provider.
+```hcl-terraform
+provider "logzio" {
+  api_token = "${var.api_token}"
+  base_url = "${var.your_api_endpoint}" #e.g. https://api-au.logz.io
+}
+```
+
 This simple example will create a Logz.io Slack notification endpoint (you'll need to provide the right URL) and an alert that
 is triggered should Logz.io record 10 loglevel:ERROR messages in 5 minutes.  To make this example work you will also need to provide
 your Logz.io API token.
@@ -66,7 +74,6 @@ resource "logzio_alert" "my_alert" {
 ##### Doens't work?
 
 Do an [https://github.com/jonboydell/logzio_terraform_provider/issues](issue).
-
 Fix it yourself and do a [https://github.com/jonboydell/logzio_terraform_provider/pulls](PR), please create any fix branches from `develop`.  They'll be merged back into `develop` and go `master` from there.  Releases are from `master`.
 
 #### License
