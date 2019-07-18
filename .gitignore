@@ -3,11 +3,9 @@
 
 # terraform
 .terraform
-terraform
 terraform.plan
 terraform.tfstate*
 terraform/crash.log
-jon.boydell.tfvars
 
 # build and vendor
 vendor
