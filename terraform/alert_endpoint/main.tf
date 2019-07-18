@@ -1,3 +1,8 @@
+variable "api_token" {
+  type = "string"
+  description = "your logzio API token"
+}
+
 provider "logzio" {
   api_token = "${var.api_token}"
 }
