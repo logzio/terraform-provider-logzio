@@ -267,6 +267,19 @@ func resourceAlertRead(d *schema.ResourceData, m interface{}) error {
 	d.Set(alert_value_aggregation_field, alert.ValueAggregationField)
 	d.Set(alert_value_aggregation_type, alert.ValueAggregationType)
 
+	if len(alert.SeverityThresholdTiers) > 0 {
+		var sttList []map[string]interface{}
+		for _, stt := range alert.SeverityThresholdTiers {
+			mapping := map[string]interface{}{
+				alert_severity:  stt.Severity,
+				alert_threshold: stt.Threshold,
+			}
+			sttList = append(sttList, mapping)
+		}
+
+		d.Set(alert_severity_threshold_tiers, sttList)
+	}
+
 	return nil
 }
 
