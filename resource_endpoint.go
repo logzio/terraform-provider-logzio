@@ -213,10 +213,11 @@ func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
 		Description:  d.Get(endpointDescription).(string),
 	}
 
-	if strings.EqualFold(endpoint.EndpointType, endpointSlack) {
+	switch strings.ToLower(endpoint.EndpointType) {
+	case endpointSlack:
 		opts, _ := mappingsFromResourceData(d, endpointSlack)
 		endpoint.Url = opts[endpointUrl].(string)
-	} else if endpoint.EndpointType == endpointCustom {
+	case endpointCustom:
 		opts, _ := mappingsFromResourceData(d, endpointCustom)
 		endpoint.Url = opts[endpointUrl].(string)
 		endpoint.Method = opts[endpointMethod].(string)
@@ -226,20 +227,20 @@ func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
 			headerMap[k] = v.(string)
 		}
 		endpoint.Headers = headerMap
-	} else if endpoint.EndpointType == endpointPagerDuty {
+	case endpointPagerDuty:
 		opts, _ := mappingsFromResourceData(d, endpointPagerDuty)
-		endpoint.EndpointType = "pager-duty"
+		endpoint.EndpointType = endpoints.EndpointTypePagerDuty
 		endpoint.ServiceKey = opts[endpointServiceKey].(string)
-	} else if endpoint.EndpointType == endpointBigPanda {
+	case endpointBigPanda:
 		opts, _ := mappingsFromResourceData(d, endpointBigPanda)
-		endpoint.EndpointType = "big-panda"
+		endpoint.EndpointType = endpoints.EndpointTypeBigPanda
 		endpoint.ApiToken = opts[endpointApiToken].(string)
 		endpoint.AppKey = opts[endpointAppKey].(string)
-	} else if endpoint.EndpointType == endpointDataDog {
+	case endpointDataDog:
 		opts, _ := mappingsFromResourceData(d, endpointDataDog)
-		endpoint.EndpointType = "data-dog"
+		endpoint.EndpointType = endpoints.EndpointTypeDataDog
 		endpoint.ApiKey = opts[endpointApiKey].(string)
-	} else if endpoint.EndpointType == endpointVictorOps {
+	case endpointVictorOps:
 		opts, _ := mappingsFromResourceData(d, endpointVictorOps)
 		endpoint.RoutingKey = opts[endpointRoutingKey].(string)
 		endpoint.MessageType = opts[endpointMessageType].(string)
@@ -283,24 +284,25 @@ func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 	d.Set(endpointTitle, endpoint.Title)
 	d.Set(endpointDescription, endpoint.Description)
 
-	if endpoint.EndpointType == endpointSlack {
+	switch strings.ToLower(endpoint.EndpointType) {
+	case endpointSlack:
 		d.Set(endpointUrl, endpoint.Url)
-	} else if endpoint.EndpointType == endpointCustom {
+	case endpointCustom:
 		d.Set(endpointUrl, endpoint.Url)
 		d.Set(endpointMethod, endpoint.Method)
 		d.Set(endpointHeaders, endpoint.Headers)
 		d.Set(endpointBodyTemplate, endpoint.BodyTemplate)
-	} else if endpoint.EndpointType == endpointPagerDuty {
+	case endpointPagerDuty:
 		d.Set(endpointType, endpointPagerDuty)
 		d.Set(endpointServiceKey, endpoint.ServiceKey)
-	} else if endpoint.EndpointType == endpointBigPanda {
+	case endpointBigPanda:
 		d.Set(endpointType, endpointBigPanda)
 		d.Set(endpointApiToken, endpoint.ApiToken)
 		d.Set(endpointAppKey, endpoint.AppKey)
-	} else if endpoint.EndpointType == endpointDataDog {
+	case endpointDataDog:
 		d.Set(endpointType, endpointDataDog)
 		d.Set(endpointApiKey, endpoint.ApiKey)
-	} else if endpoint.EndpointType == endpointVictorOps {
+	case endpointVictorOps:
 		d.Set(endpointType, endpointVictorOps)
 		d.Set(endpointRoutingKey, endpoint.RoutingKey)
 		d.Set(endpointMessageType, endpoint.MessageType)
