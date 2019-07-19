@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jonboydell/logzio_client/endpoints"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/jonboydell/logzio_client/endpoints"
 )
 
 const (
@@ -62,7 +63,7 @@ func resourceEndpoint() *schema.Resource {
 			},
 			endpointDescription: {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			endpointSlack: {
 				Type:     schema.TypeSet,
