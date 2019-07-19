@@ -18,7 +18,7 @@ require (
 	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/terraform v0.11.11
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
-	github.com/jonboydell/logzio_client v0.0.0-20190718193741-d89fa27c5c0a
+	github.com/jonboydell/logzio_client v0.0.0-20190719124443-5e42bfdf749f
 	github.com/mitchellh/cli v1.0.0 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect

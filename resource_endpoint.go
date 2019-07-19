@@ -245,6 +245,8 @@ func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
 		endpoint.RoutingKey = opts[endpointRoutingKey].(string)
 		endpoint.MessageType = opts[endpointMessageType].(string)
 		endpoint.ServiceApiKey = opts[endpointServiceApiKey].(string)
+	default:
+		panic(fmt.Sprintf("unhandled endpoint type %s", endpoint.EndpointType))
 	}
 	return endpoint
 }
@@ -284,29 +286,55 @@ func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 	d.Set(endpointTitle, endpoint.Title)
 	d.Set(endpointDescription, endpoint.Description)
 
+	set := make([]map[string]interface{}, 1)
+
 	switch strings.ToLower(endpoint.EndpointType) {
 	case endpointSlack:
-		d.Set(endpointUrl, endpoint.Url)
+		set[0] = map[string]interface{}{
+			endpointUrl: endpoint.Url,
+		}
+		d.Set(endpointSlack, set)
 	case endpointCustom:
-		d.Set(endpointUrl, endpoint.Url)
-		d.Set(endpointMethod, endpoint.Method)
-		d.Set(endpointHeaders, endpoint.Headers)
-		d.Set(endpointBodyTemplate, endpoint.BodyTemplate)
+		set[0] = map[string]interface{}{
+			endpointUrl:          endpoint.Url,
+			endpointMethod:       endpoint.Method,
+			endpointHeaders:      endpoint.Headers,
+			endpointBodyTemplate: endpoint.BodyTemplate,
+		}
+		d.Set(endpointCustom, set)
 	case endpointPagerDuty:
 		d.Set(endpointType, endpointPagerDuty)
-		d.Set(endpointServiceKey, endpoint.ServiceKey)
+
+		set[0] = map[string]interface{}{
+			endpointServiceKey: endpoint.ServiceKey,
+		}
+		d.Set(endpointPagerDuty, set)
 	case endpointBigPanda:
 		d.Set(endpointType, endpointBigPanda)
-		d.Set(endpointApiToken, endpoint.ApiToken)
-		d.Set(endpointAppKey, endpoint.AppKey)
+
+		set[0] = map[string]interface{}{
+			endpointApiToken: endpoint.ApiToken,
+			endpointAppKey:   endpoint.AppKey,
+		}
+		d.Set(endpointBigPanda, set)
 	case endpointDataDog:
 		d.Set(endpointType, endpointDataDog)
-		d.Set(endpointApiKey, endpoint.ApiKey)
+
+		set[0] = map[string]interface{}{
+			endpointApiKey: endpoint.ApiKey,
+		}
+		d.Set(endpointDataDog, set)
 	case endpointVictorOps:
 		d.Set(endpointType, endpointVictorOps)
-		d.Set(endpointRoutingKey, endpoint.RoutingKey)
-		d.Set(endpointMessageType, endpoint.MessageType)
-		d.Set(endpointServiceApiKey, endpoint.ServiceApiKey)
+
+		set[0] = map[string]interface{}{
+			endpointRoutingKey:    endpoint.RoutingKey,
+			endpointMessageType:   endpoint.MessageType,
+			endpointServiceApiKey: endpoint.ApiKey,
+		}
+		d.Set(endpointVictorOps, set)
+	default:
+		return fmt.Errorf("unhandled endpoint type: %s", endpoint.EndpointType)
 	}
 
 	return nil
