@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -28,16 +29,16 @@ func Provider() terraform.ResourceProvider {
 			},
 			providerBaseUrl: {
 				Type:        schema.TypeString,
-				Optional: true,
+				Optional:    true,
 				Description: descriptions[providerBaseUrl],
-				Default: "https://api.logz.io",
+				Default:     "https://api.logz.io",
 				Sensitive:   false,
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			resourceAlertType:    dataSourceAlert(),
 			resourceEndpointType: dataSourceEndpoint(),
-			resourceUserType: dataSourceUser(),
+			resourceUserType:     dataSourceUser(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			resourceAlertType:    resourceAlert(),
@@ -62,7 +63,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 	config := Config{
 		apiToken: apiToken.(string),
-		baseUrl: baseUrl.(string),
+		baseUrl:  baseUrl.(string),
 	}
 	return config, nil
 }

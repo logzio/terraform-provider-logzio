@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jonboydell/logzio_client/users"
-	"strconv"
 )
 
 const (
@@ -47,9 +48,9 @@ func resourceUser() *schema.Resource {
 				},
 			},
 			userActive: {
-				Type: schema.TypeBool,
+				Type:     schema.TypeBool,
 				Optional: true,
-				Default: true,
+				Default:  true,
 			},
 		},
 	}

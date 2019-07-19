@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jonboydell/logzio_client/endpoints"
 )
