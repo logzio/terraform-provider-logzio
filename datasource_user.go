@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jonboydell/logzio_client/users"
 )
@@ -15,8 +16,8 @@ func dataSourceUser() *schema.Resource {
 				Optional: true,
 			},
 			userUsername: {
-				Type: schema.TypeString,
-				Optional:true,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			userFullname: {
 				Type:     schema.TypeString,
@@ -34,7 +35,7 @@ func dataSourceUser() *schema.Resource {
 				},
 			},
 			userActive: {
-				Type: schema.TypeBool,
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 		},
@@ -98,4 +99,3 @@ func dataSourceUserRead(d *schema.ResourceData, m interface{}) error {
 
 	return fmt.Errorf("couldn't find user with specified attributes")
 }
-
