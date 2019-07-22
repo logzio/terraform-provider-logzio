@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/jonboydell/logzio_client/client"
 )
 
 const (
@@ -14,6 +15,7 @@ const (
 	resourceEndpointType = "logzio_endpoint"
 	resourceUserType     = "logzio_user"
 	envLogzioApiToken    = "LOGZIO_API_TOKEN"
+	envLogzioBaseURL     = "LOGZIO_BASE_URL"
 	envLogzioAccountId   = "LOGZIO_ACCOUNT_ID"
 )
 
@@ -31,7 +33,7 @@ func Provider() terraform.ResourceProvider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions[providerBaseUrl],
-				Default:     "https://api.logz.io",
+				DefaultFunc: schema.EnvDefaultFunc(envLogzioBaseURL, client.LOGZIO_BASE_URL),
 				Sensitive:   false,
 			},
 		},
