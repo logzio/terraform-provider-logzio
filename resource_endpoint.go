@@ -205,17 +205,20 @@ func mappingsFromResourceData(d *schema.ResourceData, key string) (map[string]in
  * returns an endpoint object populated from a resource data object, used for creates and updates
  */
 func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
+	eType := d.Get(endpointType).(string)
+
 	endpoint := endpoints.Endpoint{
-		EndpointType: d.Get(endpointType).(string),
-		Title:        d.Get(endpointTitle).(string),
-		Description:  d.Get(endpointDescription).(string),
+		Title:       d.Get(endpointTitle).(string),
+		Description: d.Get(endpointDescription).(string),
 	}
 
-	switch strings.ToLower(endpoint.EndpointType) {
-	case endpointSlack:
+	switch eType {
+	case string(endpoints.EndpointTypeSlack):
+		endpoint.EndpointType = endpoints.EndpointTypeSlack
 		opts, _ := mappingsFromResourceData(d, endpointSlack)
 		endpoint.Url = opts[endpointUrl].(string)
-	case endpointCustom:
+	case string(endpoints.EndpointTypeCustom):
+		endpoint.EndpointType = endpoints.EndpointTypeCustom
 		opts, _ := mappingsFromResourceData(d, endpointCustom)
 		endpoint.Url = opts[endpointUrl].(string)
 		endpoint.Method = opts[endpointMethod].(string)
@@ -225,20 +228,21 @@ func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
 			headerMap[k] = v.(string)
 		}
 		endpoint.Headers = headerMap
-	case endpointPagerDuty:
-		opts, _ := mappingsFromResourceData(d, endpointPagerDuty)
+	case string(endpoints.EndpointTypePagerDuty):
 		endpoint.EndpointType = endpoints.EndpointTypePagerDuty
+		opts, _ := mappingsFromResourceData(d, endpointPagerDuty)
 		endpoint.ServiceKey = opts[endpointServiceKey].(string)
-	case endpointBigPanda:
-		opts, _ := mappingsFromResourceData(d, endpointBigPanda)
+	case string(endpoints.EndpointTypeBigPanda):
 		endpoint.EndpointType = endpoints.EndpointTypeBigPanda
+		opts, _ := mappingsFromResourceData(d, endpointBigPanda)
 		endpoint.ApiToken = opts[endpointApiToken].(string)
 		endpoint.AppKey = opts[endpointAppKey].(string)
-	case endpointDataDog:
-		opts, _ := mappingsFromResourceData(d, endpointDataDog)
+	case string(endpoints.EndpointTypeDataDog):
 		endpoint.EndpointType = endpoints.EndpointTypeDataDog
+		opts, _ := mappingsFromResourceData(d, endpointDataDog)
 		endpoint.ApiKey = opts[endpointApiKey].(string)
-	case endpointVictorOps:
+	case string(endpoints.EndpointTypeVictorOps):
+		endpoint.EndpointType = endpoints.EndpointTypeVictorOps
 		opts, _ := mappingsFromResourceData(d, endpointVictorOps)
 		endpoint.RoutingKey = opts[endpointRoutingKey].(string)
 		endpoint.MessageType = opts[endpointMessageType].(string)
@@ -286,13 +290,13 @@ func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 
 	set := make([]map[string]interface{}, 1)
 
-	switch strings.ToLower(endpoint.EndpointType) {
-	case endpointSlack:
+	switch endpoint.EndpointType {
+	case endpoints.EndpointTypeSlack:
 		set[0] = map[string]interface{}{
 			endpointUrl: endpoint.Url,
 		}
 		d.Set(endpointSlack, set)
-	case endpointCustom:
+	case endpoints.EndpointTypeCustom:
 		set[0] = map[string]interface{}{
 			endpointUrl:          endpoint.Url,
 			endpointMethod:       endpoint.Method,
@@ -300,14 +304,14 @@ func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 			endpointBodyTemplate: endpoint.BodyTemplate,
 		}
 		d.Set(endpointCustom, set)
-	case endpointPagerDuty:
+	case endpoints.EndpointTypePagerDuty:
 		d.Set(endpointType, endpointPagerDuty)
 
 		set[0] = map[string]interface{}{
 			endpointServiceKey: endpoint.ServiceKey,
 		}
 		d.Set(endpointPagerDuty, set)
-	case endpointBigPanda:
+	case endpoints.EndpointTypeBigPanda:
 		d.Set(endpointType, endpointBigPanda)
 
 		set[0] = map[string]interface{}{
@@ -315,14 +319,14 @@ func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 			endpointAppKey:   endpoint.AppKey,
 		}
 		d.Set(endpointBigPanda, set)
-	case endpointDataDog:
+	case endpoints.EndpointTypeDataDog:
 		d.Set(endpointType, endpointDataDog)
 
 		set[0] = map[string]interface{}{
 			endpointApiKey: endpoint.ApiKey,
 		}
 		d.Set(endpointDataDog, set)
-	case endpointVictorOps:
+	case endpoints.EndpointTypeVictorOps:
 		d.Set(endpointType, endpointVictorOps)
 
 		set[0] = map[string]interface{}{

@@ -49,8 +49,11 @@ func testAccCheckLogzioUserExists(n string) resource.TestCheckFunc {
 		id, err := strconv.ParseInt(rs.Primary.ID, BASE_10, BITSIZE_64)
 
 		var client *users.UsersClient
-		client, _ = users.New(os.Getenv(envLogzioApiToken))
-		client.BaseUrl = "https://api.logz.io"
+		baseURL := defaultBaseUrl
+		if len(os.Getenv(envLogzioBaseURL)) > 0 {
+			baseURL = os.Getenv(envLogzioBaseURL)
+		}
+		client, _ = users.New(os.Getenv(envLogzioApiToken), baseURL)
 
 		_, err = client.GetUser(int64(id))
 
@@ -70,7 +73,11 @@ func testAccLogzioUserDestroy(s *terraform.State) error {
 		}
 
 		var client *users.UsersClient
-		client, _ = users.New(os.Getenv(envLogzioApiToken))
+		baseURL := defaultBaseUrl
+		if len(os.Getenv(envLogzioBaseURL)) > 0 {
+			baseURL = os.Getenv(envLogzioBaseURL)
+		}
+		client, _ = users.New(os.Getenv(envLogzioApiToken), baseURL)
 
 		err = client.DeleteUser(int64(id))
 		if err == nil {
