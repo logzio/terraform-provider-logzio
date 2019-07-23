@@ -43,12 +43,8 @@ func dataSourceUser() *schema.Resource {
 }
 
 func dataSourceUserRead(d *schema.ResourceData, m interface{}) error {
-	apiToken := m.(Config).apiToken
-	baseUrl := m.(Config).baseUrl
-
 	var client *users.UsersClient
-	client, _ = users.New(apiToken)
-	client.BaseUrl = baseUrl
+	client, _ = users.New(m.(Config).apiToken, m.(Config).baseUrl)
 
 	userId, ok := d.GetOk(userId)
 	if ok {

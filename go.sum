@@ -107,6 +107,8 @@ github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af h1:pmfjZENx5i
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/jonboydell/logzio_client v0.0.0-20190719124443-5e42bfdf749f h1:kASfbngq48p4bXixKJGRrP4EhGKTUJ/ETLBVOYn6Jbw=
 github.com/jonboydell/logzio_client v0.0.0-20190719124443-5e42bfdf749f/go.mod h1:ZXJYF4M9/chuG+4fQDS9BN6CqXqokUjtQOjdMqzGC/Y=
+github.com/jonboydell/logzio_client v0.0.0-20190723094220-24301f99a0b1 h1:lIkJxqAqjDvXfVZf7uNzo19Y7xfBERYNN+E5PnFMltU=
+github.com/jonboydell/logzio_client v0.0.0-20190723094220-24301f99a0b1/go.mod h1:ZXJYF4M9/chuG+4fQDS9BN6CqXqokUjtQOjdMqzGC/Y=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
