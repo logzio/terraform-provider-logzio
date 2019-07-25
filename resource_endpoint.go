@@ -305,30 +305,22 @@ func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 		}
 		d.Set(endpointCustom, set)
 	case endpoints.EndpointTypePagerDuty:
-		d.Set(endpointType, endpointPagerDuty)
-
 		set[0] = map[string]interface{}{
 			endpointServiceKey: endpoint.ServiceKey,
 		}
 		d.Set(endpointPagerDuty, set)
 	case endpoints.EndpointTypeBigPanda:
-		d.Set(endpointType, endpointBigPanda)
-
 		set[0] = map[string]interface{}{
 			endpointApiToken: endpoint.ApiToken,
 			endpointAppKey:   endpoint.AppKey,
 		}
 		d.Set(endpointBigPanda, set)
 	case endpoints.EndpointTypeDataDog:
-		d.Set(endpointType, endpointDataDog)
-
 		set[0] = map[string]interface{}{
 			endpointApiKey: endpoint.ApiKey,
 		}
 		d.Set(endpointDataDog, set)
 	case endpoints.EndpointTypeVictorOps:
-		d.Set(endpointType, endpointVictorOps)
-
 		set[0] = map[string]interface{}{
 			endpointRoutingKey:    endpoint.RoutingKey,
 			endpointMessageType:   endpoint.MessageType,
