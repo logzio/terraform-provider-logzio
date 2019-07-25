@@ -57,10 +57,8 @@ func resourceUser() *schema.Resource {
 }
 
 func usersClient(m interface{}) *users.UsersClient {
-	apiToken := m.(Config).apiToken
 	var client *users.UsersClient
-	client, _ = users.New(apiToken)
-	client.BaseUrl = m.(Config).baseUrl
+	client, _ = users.New(m.(Config).apiToken, m.(Config).baseUrl)
 	return client
 }
 
