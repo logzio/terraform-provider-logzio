@@ -248,7 +248,7 @@ func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
 		endpoint.MessageType = opts[endpointMessageType].(string)
 		endpoint.ServiceApiKey = opts[endpointServiceApiKey].(string)
 	default:
-		panic(fmt.Sprintf("unhandled endpoint type %s", endpoint.EndpointType))
+		panic(fmt.Sprintf("unhandled endpoint type %s", eType))
 	}
 	return endpoint
 }
@@ -380,7 +380,14 @@ func resourceEndpointDelete(d *schema.ResourceData, m interface{}) error {
 func validateEndpointType(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
-	if !findStringInArray(value, []string{endpointSlack, endpointCustom, endpointPagerDuty, endpointBigPanda, endpointDataDog, endpointVictorOps}) {
+	if !findStringInArray(value, []string{
+		string(endpoints.EndpointTypeSlack),
+		string(endpoints.EndpointTypeCustom),
+		string(endpoints.EndpointTypePagerDuty),
+		string(endpoints.EndpointTypeBigPanda),
+		string(endpoints.EndpointTypeDataDog),
+		string(endpoints.EndpointTypeVictorOps),
+	}) {
 		errors = append(errors, fmt.Errorf("value for endpoint type is unknown"))
 	}
 
