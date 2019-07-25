@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jonboydell/logzio_client/alerts"
 )
@@ -96,10 +97,8 @@ func dataSourceAlert() *schema.Resource {
 }
 
 func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
-	apiToken := m.(Config).apiToken
-
-	var client *alerts.Alerts
-	client, _ = alerts.New(apiToken)
+	var client *alerts.AlertsClient
+	client, _ = alerts.New(m.(Config).apiToken, m.(Config).baseUrl)
 
 	alertId, ok := d.GetOk(alertId)
 	if ok {

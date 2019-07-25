@@ -3,12 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
-	"github.com/jonboydell/logzio_client/alerts"
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
+	"github.com/jonboydell/logzio_client/alerts"
 )
 
 func TestAccLogzioAlert_Basic(t *testing.T) {
@@ -21,8 +22,10 @@ func TestAccLogzioAlert_Basic(t *testing.T) {
 				Config: testAccCheckLogzioAlertConfig("name"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLogzioAlertExists("logzio_alert.name"),
-					resource.TestCheckResourceAttr(
-						"logzio_alert.name", "title", "my_other_title"),
+					resource.TestCheckResourceAttr("logzio_alert.name", "title", "my_other_title"),
+					resource.TestCheckResourceAttr("logzio_alert.name", "severity_threshold_tiers.#", "1"),
+					resource.TestCheckResourceAttr("logzio_alert.name", "severity_threshold_tiers.0.severity", "HIGH"),
+					resource.TestCheckResourceAttr("logzio_alert.name", "severity_threshold_tiers.0.threshold", "10"),
 				),
 			},
 		},
@@ -68,8 +71,12 @@ func testAccCheckLogzioAlertExists(n string) resource.TestCheckFunc {
 
 		id, err := strconv.ParseInt(rs.Primary.ID, 10, 64)
 
-		var client *alerts.Alerts
-		client, _ = alerts.New(os.Getenv(envLogzioApiToken))
+		var client *alerts.AlertsClient
+		baseURL := defaultBaseUrl
+		if len(os.Getenv(envLogzioBaseURL)) > 0 {
+			baseURL = os.Getenv(envLogzioBaseURL)
+		}
+		client, _ = alerts.New(os.Getenv(envLogzioApiToken), baseURL)
 
 		_, err = client.GetAlert(int64(id))
 
@@ -89,8 +96,12 @@ func testAccLogzioAlertDestroy(s *terraform.State) error {
 			return err
 		}
 
-		var client *alerts.Alerts
-		client, _ = alerts.New(os.Getenv(envLogzioApiToken))
+		var client *alerts.AlertsClient
+		baseURL := defaultBaseUrl
+		if len(os.Getenv(envLogzioBaseURL)) > 0 {
+			baseURL = os.Getenv(envLogzioBaseURL)
+		}
+		client, _ = alerts.New(os.Getenv(envLogzioApiToken), baseURL)
 
 		_, err = client.GetAlert(int64(id))
 

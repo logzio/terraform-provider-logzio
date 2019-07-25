@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jonboydell/logzio_client/alerts"
 	"log"
 	"strconv"
+
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/jonboydell/logzio_client/alerts"
 )
 
 const (
@@ -37,10 +38,9 @@ const (
 /**
  * returns the alert client with the api token from the provider
  */
-func alertClient(m interface{}) *alerts.Alerts {
-	apiToken := m.(Config).apiToken
-	var client *alerts.Alerts
-	client, _ = alerts.New(apiToken)
+func alertClient(m interface{}) *alerts.AlertsClient {
+	var client *alerts.AlertsClient
+	client, _ = alerts.New(m.(Config).apiToken, m.(Config).baseUrl)
 	return client
 }
 
@@ -218,9 +218,13 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 	a, err := client.CreateAlert(createAlert)
 
 	if err != nil {
-		ferr := err.(alerts.FieldError)
-		if ferr.Field == "valueAggregationTypeComposite" {
-			return fmt.Errorf("if valueAggregationType is set to None, valueAggregationField and groupByAggregationFields must not be set")
+		switch typedError := err.(type) {
+		case alerts.FieldError:
+			if typedError.Field == "valueAggregationTypeComposite" {
+				return fmt.Errorf("if valueAggregationType is set to None, valueAggregationField and groupByAggregationFields must not be set")
+			}
+		default:
+			return fmt.Errorf("resourceAlertCreate failed: %v", typedError)
 		}
 		return err
 	}
@@ -260,6 +264,19 @@ func resourceAlertRead(d *schema.ResourceData, m interface{}) error {
 	d.Set(alert_suppress_notifications_minutes, alert.SuppressNotificationsMinutes)
 	d.Set(alert_value_aggregation_field, alert.ValueAggregationField)
 	d.Set(alert_value_aggregation_type, alert.ValueAggregationType)
+
+	if len(alert.SeverityThresholdTiers) > 0 {
+		var sttList []map[string]interface{}
+		for _, stt := range alert.SeverityThresholdTiers {
+			mapping := map[string]interface{}{
+				alert_severity:  stt.Severity,
+				alert_threshold: stt.Threshold,
+			}
+			sttList = append(sttList, mapping)
+		}
+
+		d.Set(alert_severity_threshold_tiers, sttList)
+	}
 
 	return nil
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jonboydell/logzio_client/endpoints"
 )
@@ -23,10 +24,8 @@ func dataSourceEndpoint() *schema.Resource {
 }
 
 func dataSourceEndpointRead(d *schema.ResourceData, m interface{}) error {
-	apiToken := m.(Config).apiToken
-
-	var client *endpoints.Endpoints
-	client, _ = endpoints.New(apiToken)
+	var client *endpoints.EndpointsClient
+	client, _ = endpoints.New(m.(Config).apiToken, m.(Config).baseUrl)
 
 	endpointId, ok := d.GetOk(endpointId)
 	if ok {

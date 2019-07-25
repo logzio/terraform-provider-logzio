@@ -3,13 +3,14 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
-	"github.com/jonboydell/logzio_client/endpoints"
 	"os"
 	"regexp"
 	"strconv"
 	"testing"
+
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
+	"github.com/jonboydell/logzio_client/endpoints"
 )
 
 func TestAccLogzioEndpoint_Slack_HappyPath(t *testing.T) {
@@ -24,8 +25,7 @@ func TestAccLogzioEndpoint_Slack_HappyPath(t *testing.T) {
 					testAccCheckLogzioEndpointExists("logzio_endpoint.slack"),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.slack", "title", "my_slack_title"),
-					testAccCheckOutputExists("logzio_endpoint.slack"),
-					resource.TestMatchOutput("test", regexp.MustCompile("\\d")),
+					testAccCheckOutputExists("logzio_endpoint.slack", "test_id"),
 					resource.TestMatchOutput("test_id", regexp.MustCompile("\\d")),
 				),
 			},
@@ -133,7 +133,7 @@ func TestAccLogzioEndpoint_BigPanda_HappyPath(t *testing.T) {
 	})
 }
 
-func testAccCheckOutputExists(n string) resource.TestCheckFunc {
+func testAccCheckOutputExists(n string, o string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -141,7 +141,7 @@ func testAccCheckOutputExists(n string) resource.TestCheckFunc {
 		}
 
 		id := rs.Primary.ID
-		os, ok := s.RootModule().Outputs["test"]
+		os, ok := s.RootModule().Outputs[o]
 
 		if rs.Primary.ID == "" {
 			return errors.New("no endpoint ID is set")
@@ -168,8 +168,12 @@ func testAccCheckLogzioEndpointExists(n string) resource.TestCheckFunc {
 
 		id, err := strconv.ParseInt(rs.Primary.ID, BASE_10, BITSIZE_64)
 
-		var client *endpoints.Endpoints
-		client, _ = endpoints.New(os.Getenv(envLogzioApiToken))
+		var client *endpoints.EndpointsClient
+		baseURL := defaultBaseUrl
+		if len(os.Getenv(envLogzioBaseURL)) > 0 {
+			baseURL = os.Getenv(envLogzioBaseURL)
+		}
+		client, _ = endpoints.New(os.Getenv(envLogzioApiToken), baseURL)
 
 		_, err = client.GetEndpoint(int64(id))
 
@@ -188,8 +192,12 @@ func testAccLogzioEndpointDestroy(s *terraform.State) error {
 			return err
 		}
 
-		var client *endpoints.Endpoints
-		client, _ = endpoints.New(os.Getenv(envLogzioApiToken))
+		var client *endpoints.EndpointsClient
+		baseURL := defaultBaseUrl
+		if len(os.Getenv(envLogzioBaseURL)) > 0 {
+			baseURL = os.Getenv(envLogzioBaseURL)
+		}
+		client, _ = endpoints.New(os.Getenv(envLogzioApiToken), baseURL)
 
 		_, err = client.GetEndpoint(int64(id))
 		if err == nil {
@@ -209,10 +217,6 @@ resource "logzio_endpoint" "slack" {
   slack {
 	url = "https://www.test.com"
   }
-}
-
-output "test" {
-	value = "${logzio_endpoint.slack.endpoint_id}"
 }
 
 output "test_id" {

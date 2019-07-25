@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jonboydell/logzio_client/endpoints"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/jonboydell/logzio_client/endpoints"
 )
 
 const (
@@ -62,7 +63,7 @@ func resourceEndpoint() *schema.Resource {
 			},
 			endpointDescription: {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			endpointSlack: {
 				Type:     schema.TypeSet,
@@ -170,10 +171,9 @@ func resourceEndpoint() *schema.Resource {
 /**
  * returns the endpoints client with the api token from the provider
  */
-func endpointClient(m interface{}) *endpoints.Endpoints {
-	apiToken := m.(Config).apiToken
-	var client *endpoints.Endpoints
-	client, _ = endpoints.New(apiToken)
+func endpointClient(m interface{}) *endpoints.EndpointsClient {
+	var client *endpoints.EndpointsClient
+	client, _ = endpoints.New(m.(Config).apiToken, m.(Config).baseUrl)
 	return client
 }
 
@@ -205,16 +205,20 @@ func mappingsFromResourceData(d *schema.ResourceData, key string) (map[string]in
  * returns an endpoint object populated from a resource data object, used for creates and updates
  */
 func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
+	eType := d.Get(endpointType).(string)
+
 	endpoint := endpoints.Endpoint{
-		EndpointType: d.Get(endpointType).(string),
-		Title:        d.Get(endpointTitle).(string),
-		Description:  d.Get(endpointDescription).(string),
+		Title:       d.Get(endpointTitle).(string),
+		Description: d.Get(endpointDescription).(string),
 	}
 
-	if strings.EqualFold(endpoint.EndpointType, endpointSlack) {
+	switch eType {
+	case string(endpoints.EndpointTypeSlack):
+		endpoint.EndpointType = endpoints.EndpointTypeSlack
 		opts, _ := mappingsFromResourceData(d, endpointSlack)
 		endpoint.Url = opts[endpointUrl].(string)
-	} else if endpoint.EndpointType == endpointCustom {
+	case string(endpoints.EndpointTypeCustom):
+		endpoint.EndpointType = endpoints.EndpointTypeCustom
 		opts, _ := mappingsFromResourceData(d, endpointCustom)
 		endpoint.Url = opts[endpointUrl].(string)
 		endpoint.Method = opts[endpointMethod].(string)
@@ -224,24 +228,27 @@ func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
 			headerMap[k] = v.(string)
 		}
 		endpoint.Headers = headerMap
-	} else if endpoint.EndpointType == endpointPagerDuty {
+	case string(endpoints.EndpointTypePagerDuty):
+		endpoint.EndpointType = endpoints.EndpointTypePagerDuty
 		opts, _ := mappingsFromResourceData(d, endpointPagerDuty)
-		endpoint.EndpointType = "pager-duty"
 		endpoint.ServiceKey = opts[endpointServiceKey].(string)
-	} else if endpoint.EndpointType == endpointBigPanda {
+	case string(endpoints.EndpointTypeBigPanda):
+		endpoint.EndpointType = endpoints.EndpointTypeBigPanda
 		opts, _ := mappingsFromResourceData(d, endpointBigPanda)
-		endpoint.EndpointType = "big-panda"
 		endpoint.ApiToken = opts[endpointApiToken].(string)
 		endpoint.AppKey = opts[endpointAppKey].(string)
-	} else if endpoint.EndpointType == endpointDataDog {
+	case string(endpoints.EndpointTypeDataDog):
+		endpoint.EndpointType = endpoints.EndpointTypeDataDog
 		opts, _ := mappingsFromResourceData(d, endpointDataDog)
-		endpoint.EndpointType = "data-dog"
 		endpoint.ApiKey = opts[endpointApiKey].(string)
-	} else if endpoint.EndpointType == endpointVictorOps {
+	case string(endpoints.EndpointTypeVictorOps):
+		endpoint.EndpointType = endpoints.EndpointTypeVictorOps
 		opts, _ := mappingsFromResourceData(d, endpointVictorOps)
 		endpoint.RoutingKey = opts[endpointRoutingKey].(string)
 		endpoint.MessageType = opts[endpointMessageType].(string)
 		endpoint.ServiceApiKey = opts[endpointServiceApiKey].(string)
+	default:
+		panic(fmt.Sprintf("unhandled endpoint type %s", endpoint.EndpointType))
 	}
 	return endpoint
 }
@@ -281,28 +288,55 @@ func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 	d.Set(endpointTitle, endpoint.Title)
 	d.Set(endpointDescription, endpoint.Description)
 
-	if endpoint.EndpointType == endpointSlack {
-		d.Set(endpointUrl, endpoint.Url)
-	} else if endpoint.EndpointType == endpointCustom {
-		d.Set(endpointUrl, endpoint.Url)
-		d.Set(endpointMethod, endpoint.Method)
-		d.Set(endpointHeaders, endpoint.Headers)
-		d.Set(endpointBodyTemplate, endpoint.BodyTemplate)
-	} else if endpoint.EndpointType == endpointPagerDuty {
+	set := make([]map[string]interface{}, 1)
+
+	switch endpoint.EndpointType {
+	case endpoints.EndpointTypeSlack:
+		set[0] = map[string]interface{}{
+			endpointUrl: endpoint.Url,
+		}
+		d.Set(endpointSlack, set)
+	case endpoints.EndpointTypeCustom:
+		set[0] = map[string]interface{}{
+			endpointUrl:          endpoint.Url,
+			endpointMethod:       endpoint.Method,
+			endpointHeaders:      endpoint.Headers,
+			endpointBodyTemplate: endpoint.BodyTemplate,
+		}
+		d.Set(endpointCustom, set)
+	case endpoints.EndpointTypePagerDuty:
 		d.Set(endpointType, endpointPagerDuty)
-		d.Set(endpointServiceKey, endpoint.ServiceKey)
-	} else if endpoint.EndpointType == endpointBigPanda {
+
+		set[0] = map[string]interface{}{
+			endpointServiceKey: endpoint.ServiceKey,
+		}
+		d.Set(endpointPagerDuty, set)
+	case endpoints.EndpointTypeBigPanda:
 		d.Set(endpointType, endpointBigPanda)
-		d.Set(endpointApiToken, endpoint.ApiToken)
-		d.Set(endpointAppKey, endpoint.AppKey)
-	} else if endpoint.EndpointType == endpointDataDog {
+
+		set[0] = map[string]interface{}{
+			endpointApiToken: endpoint.ApiToken,
+			endpointAppKey:   endpoint.AppKey,
+		}
+		d.Set(endpointBigPanda, set)
+	case endpoints.EndpointTypeDataDog:
 		d.Set(endpointType, endpointDataDog)
-		d.Set(endpointApiKey, endpoint.ApiKey)
-	} else if endpoint.EndpointType == endpointVictorOps {
+
+		set[0] = map[string]interface{}{
+			endpointApiKey: endpoint.ApiKey,
+		}
+		d.Set(endpointDataDog, set)
+	case endpoints.EndpointTypeVictorOps:
 		d.Set(endpointType, endpointVictorOps)
-		d.Set(endpointRoutingKey, endpoint.RoutingKey)
-		d.Set(endpointMessageType, endpoint.MessageType)
-		d.Set(endpointServiceApiKey, endpoint.ServiceApiKey)
+
+		set[0] = map[string]interface{}{
+			endpointRoutingKey:    endpoint.RoutingKey,
+			endpointMessageType:   endpoint.MessageType,
+			endpointServiceApiKey: endpoint.ApiKey,
+		}
+		d.Set(endpointVictorOps, set)
+	default:
+		return fmt.Errorf("unhandled endpoint type: %s", endpoint.EndpointType)
 	}
 
 	return nil
