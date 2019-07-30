@@ -248,7 +248,7 @@ func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
 		endpoint.MessageType = opts[endpointMessageType].(string)
 		endpoint.ServiceApiKey = opts[endpointServiceApiKey].(string)
 	default:
-		panic(fmt.Sprintf("unhandled endpoint type %s", endpoint.EndpointType))
+		panic(fmt.Sprintf("unhandled endpoint type %s", eType))
 	}
 	return endpoint
 }
@@ -305,30 +305,22 @@ func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 		}
 		d.Set(endpointCustom, set)
 	case endpoints.EndpointTypePagerDuty:
-		d.Set(endpointType, endpointPagerDuty)
-
 		set[0] = map[string]interface{}{
 			endpointServiceKey: endpoint.ServiceKey,
 		}
 		d.Set(endpointPagerDuty, set)
 	case endpoints.EndpointTypeBigPanda:
-		d.Set(endpointType, endpointBigPanda)
-
 		set[0] = map[string]interface{}{
 			endpointApiToken: endpoint.ApiToken,
 			endpointAppKey:   endpoint.AppKey,
 		}
 		d.Set(endpointBigPanda, set)
 	case endpoints.EndpointTypeDataDog:
-		d.Set(endpointType, endpointDataDog)
-
 		set[0] = map[string]interface{}{
 			endpointApiKey: endpoint.ApiKey,
 		}
 		d.Set(endpointDataDog, set)
 	case endpoints.EndpointTypeVictorOps:
-		d.Set(endpointType, endpointVictorOps)
-
 		set[0] = map[string]interface{}{
 			endpointRoutingKey:    endpoint.RoutingKey,
 			endpointMessageType:   endpoint.MessageType,
@@ -380,7 +372,14 @@ func resourceEndpointDelete(d *schema.ResourceData, m interface{}) error {
 func validateEndpointType(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
-	if !findStringInArray(value, []string{endpointSlack, endpointCustom, endpointPagerDuty, endpointBigPanda, endpointDataDog, endpointVictorOps}) {
+	if !findStringInArray(value, []string{
+		string(endpoints.EndpointTypeSlack),
+		string(endpoints.EndpointTypeCustom),
+		string(endpoints.EndpointTypePagerDuty),
+		string(endpoints.EndpointTypeBigPanda),
+		string(endpoints.EndpointTypeDataDog),
+		string(endpoints.EndpointTypeVictorOps),
+	}) {
 		errors = append(errors, fmt.Errorf("value for endpoint type is unknown"))
 	}
 
