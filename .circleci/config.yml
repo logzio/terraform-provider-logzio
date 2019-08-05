@@ -9,13 +9,10 @@ jobs:
     working_directory: /go/src/github.com/jonboydell/logzio_client
     steps:
       - checkout
-      - run: go get golang.org/x/tools/cmd/cover
-      - run: go get github.com/mattn/goveralls
-      - run: go get -v -t ./...
-      - run: TF_ACC=true go test -v ./... -covermode=count -coverprofile=coverage.out
-      - run: goveralls -coverprofile=coverage.out -service=circle-ci -repotoken $COVERALLS_TOKEN
+      - run: GO111MODULE=on go get -v -t ./...
+      - run: GO111MODULE=on go build
 workflows:
   version: 2
-  workflow:
+  build:
     jobs:
       - build
