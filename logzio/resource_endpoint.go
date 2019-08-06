@@ -63,7 +63,7 @@ func resourceEndpoint() *schema.Resource {
 			},
 			endpointDescription: {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			endpointSlack: {
 				Type:     schema.TypeSet,

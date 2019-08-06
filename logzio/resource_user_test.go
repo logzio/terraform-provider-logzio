@@ -14,7 +14,7 @@ import (
 
 func TestAccLogzioUser_CreateUser(t *testing.T) {
 
-	username := "test@sometest.com"
+	username := "test_resource_user@tfacctest.com"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
 	terraformPlan := testAccCheckLogzioUserConfig(username, "test test", accountId)
 
@@ -81,7 +81,7 @@ func testAccLogzioUserDestroy(s *terraform.State) error {
 
 		err = client.DeleteUser(int64(id))
 		if err == nil {
-			return fmt.Errorf("endpoint still exists")
+			return fmt.Errorf("user still exists")
 		}
 	}
 	return nil

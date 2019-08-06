@@ -3,26 +3,29 @@ package logzio
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jonboydell/logzio_client/alerts"
 )
 
-func TestAccLogzioAlert_Basic(t *testing.T) {
+func TestAccLogzioAlert_CreateAlert(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccLogzioAlertDestroy,
+		CheckDestroy: checkAlertDestroyed,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccCheckLogzioAlertConfig("name"),
+				Config: testAccDataSourceLogzioAlertBase("name"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLogzioAlertExists("logzio_alert.name"),
-					resource.TestCheckResourceAttr("logzio_alert.name", "title", "my_other_title"),
+					checkAlertExists("logzio_alert.name"),
+					resource.TestCheckResourceAttr("logzio_alert.name", "title", "hello"),
 					resource.TestCheckResourceAttr("logzio_alert.name", "severity_threshold_tiers.#", "1"),
 					resource.TestCheckResourceAttr("logzio_alert.name", "severity_threshold_tiers.0.severity", "HIGH"),
 					resource.TestCheckResourceAttr("logzio_alert.name", "severity_threshold_tiers.0.threshold", "10"),
@@ -32,33 +35,33 @@ func TestAccLogzioAlert_Basic(t *testing.T) {
 	})
 }
 
-func TestAccLogzioAlert_SomeTest(t *testing.T) {
+func TestAccLogzioAlert_UpdateAlert(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccLogzioAlertDestroy,
+		CheckDestroy: checkAlertDestroyed,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccCheckLogzioAlertConfig("name"),
+				Config: resourceCreateAlert("name"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLogzioAlertExists("logzio_alert.name"),
+					checkAlertExists("logzio_alert.name"),
 					resource.TestCheckResourceAttr(
-						"logzio_alert.name", "title", "my_other_title"),
+						"logzio_alert.name", "title", "hello"),
 				),
 			},
 			resource.TestStep{
-				Config: testAccUpdateLogzioAlertConfig("name"),
+				Config: resourceUpdateAlert("name"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLogzioAlertExists("logzio_alert.name"),
+					checkAlertExists("logzio_alert.name"),
 					resource.TestCheckResourceAttr(
-						"logzio_alert.name", "title", "this_is_my_title"),
+						"logzio_alert.name", "title", "updated_alert"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckLogzioAlertExists(n string) resource.TestCheckFunc {
+func checkAlertExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -78,6 +81,7 @@ func testAccCheckLogzioAlertExists(n string) resource.TestCheckFunc {
 		}
 		client, _ = alerts.New(os.Getenv(envLogzioApiToken), baseURL)
 
+		time.Sleep(2 * time.Second)
 		_, err = client.GetAlert(int64(id))
 
 		if err != nil {
@@ -88,7 +92,7 @@ func testAccCheckLogzioAlertExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccLogzioAlertDestroy(s *terraform.State) error {
+func checkAlertDestroyed(s *terraform.State) error {
 
 	for _, r := range s.RootModule().Resources {
 		id, err := strconv.ParseInt(r.Primary.ID, 10, 64)
@@ -103,8 +107,8 @@ func testAccLogzioAlertDestroy(s *terraform.State) error {
 		}
 		client, _ = alerts.New(os.Getenv(envLogzioApiToken), baseURL)
 
+		time.Sleep(2 * time.Second)
 		_, err = client.GetAlert(int64(id))
-
 		if err == nil {
 			return fmt.Errorf("alert still exists")
 		}
@@ -112,44 +116,18 @@ func testAccLogzioAlertDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckLogzioAlertConfig(rName string) string {
-	return fmt.Sprintf(`
-resource "logzio_alert" "%s" {
-  title = "my_other_title"
-  query_string = "loglevel:ERROR"
-  operation = "GREATER_THAN"
-  notification_emails = ["testx@test.com"]
-  search_timeframe_minutes = 5
-  value_aggregation_type = "NONE"
-  alert_notification_endpoints = []
-  suppress_notifications_minutes = 5
-  severity_threshold_tiers = [
-    {
-      "severity" = "HIGH",
-      "threshold" = 10
-    }
-  ]
-}
-`, rName)
+func resourceCreateAlert(name string) string {
+	content, err := ioutil.ReadFile("testdata/fixtures/create_alert.tf")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return fmt.Sprintf(fmt.Sprintf("%s", content), name)
 }
 
-func testAccUpdateLogzioAlertConfig(rName string) string {
-	return fmt.Sprintf(`
-resource "logzio_alert" "%s" {
-  title = "this_is_my_title"
-  query_string = "loglevel:ERROR"
-  operation = "GREATER_THAN"
-  notification_emails = ["testx@test.com"]
-  search_timeframe_minutes = 5
-  value_aggregation_type = "NONE"
-  alert_notification_endpoints = []
-  suppress_notifications_minutes = 5
-  severity_threshold_tiers = [
-    {
-      "severity" = "HIGH",
-      "threshold" = 10
-    }
-  ]
-}
-`, rName)
+func resourceUpdateAlert(name string) string {
+	content, err := ioutil.ReadFile("testdata/fixtures/update_alert.tf")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return fmt.Sprintf(fmt.Sprintf("%s", content), name)
 }

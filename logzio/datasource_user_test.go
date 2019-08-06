@@ -11,7 +11,7 @@ import (
 
 func TestAccDataSourceUser(t *testing.T) {
 
-	username := "test@sometest.com"
+	username := "test_datasource_user@tfacctest.com"
 	fullname := "test test"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
 	terraformPlan := testAccCheckLogzioUserDatasourceConfig(username, fullname, accountId)

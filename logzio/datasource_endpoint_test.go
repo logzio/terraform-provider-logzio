@@ -1,7 +1,6 @@
 package logzio
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"regexp"
 	"testing"
@@ -14,36 +13,14 @@ func TestAccDataSourceEndpoint(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExpectNonEmptyPlan:        true,
-				Config:                    endpointDatasourceConfig(),
+				Config:                    readFixtureFromFile("valid_slack_endpoint_datasource.tf"),
 				PreventPostDestroyRefresh: true,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.logzio_endpoint.by_title", "title", "ATestStaticEndpoint"),
+					resource.TestCheckResourceAttr("data.logzio_endpoint.by_title", "title", "valid_slack_endpoint_datasource"),
 					resource.TestMatchResourceAttr("data.logzio_endpoint.by_title", "id", regexp.MustCompile("\\d")),
-					resource.TestMatchOutput("test", regexp.MustCompile("\\d")),
+					resource.TestMatchOutput("valid_slack_endpoint_datasource_id", regexp.MustCompile("\\d")),
 				),
 			},
 		},
 	})
-}
-
-func endpointDatasourceConfig() string {
-	return fmt.Sprintf(`
-resource "logzio_endpoint" "slack" {
-  endpoint_type = "slack"
-  title = "ATestStaticEndpoint"
-  description = "this_is_my_description"
-  slack {
-	url = "https://www.test.com"
-  }
-}
-
-data "logzio_endpoint" "by_title" {
-  title = "ATestStaticEndpoint"
-  depends_on = ["logzio_endpoint.slack"]
-}
-
-output "test" {
-  value = "${data.logzio_endpoint.by_title.id}"
-}
-`)
 }

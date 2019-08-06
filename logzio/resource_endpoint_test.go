@@ -3,29 +3,32 @@ package logzio
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jonboydell/logzio_client/endpoints"
 )
 
-func TestAccLogzioEndpoint_Slack_HappyPath(t *testing.T) {
+func TestAccLogzioEndpoint_CreateSlackEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccLogzioEndpointDestroy,
+		CheckDestroy: checkEndpointDestroyed,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckLogzioEndpointConfig("slackHappyPath"),
+				Config: readFixtureFromFile("valid_slack_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLogzioEndpointExists("logzio_endpoint.slack"),
+					checkEndpointExists("logzio_endpoint.valid_slack_endpoint"),
 					resource.TestCheckResourceAttr(
-						"logzio_endpoint.slack", "title", "my_slack_title"),
-					testAccCheckOutputExists("logzio_endpoint.slack", "test_id"),
+						"logzio_endpoint.valid_slack_endpoint", "title", "valid_slack_endpoint"),
+					testAccCheckOutputExists("logzio_endpoint.valid_slack_endpoint", "test_id"),
 					resource.TestMatchOutput("test_id", regexp.MustCompile("\\d")),
 				),
 			},
@@ -33,30 +36,39 @@ func TestAccLogzioEndpoint_Slack_HappyPath(t *testing.T) {
 	})
 }
 
-func TestAccLogzioEndpoint_Slack_BadUrl(t *testing.T) {
+func TestAccLogzioEndpoint_CreateInvalidSlackEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccLogzioEndpointDestroy,
+		CheckDestroy: checkEndpointDestroyed,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccCheckLogzioEndpointConfig("slackBadUrl"),
-				ExpectError: regexp.MustCompile("Bad URL provided"),
+				Config:      readFixtureFromFile("invalid_slack_endpoint.tf"),
+				ExpectError: regexp.MustCompile("Bad URL provided. no protocol"),
 			},
 		},
 	})
 }
 
-func TestAccLogzioEndpoint_Slack_UpdateHappyPath(t *testing.T) {
+func readFixtureFromFile(name string) string {
+	content, err := ioutil.ReadFile("testdata/fixtures/"+name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return fmt.Sprintf("%s", content)
+}
+
+
+func TestAccLogzioEndpoint_UpdateSlackEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccLogzioEndpointDestroy,
+		CheckDestroy: checkEndpointDestroyed,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLogzioEndpointConfig("slackHappyPath"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLogzioEndpointExists("logzio_endpoint.slack"),
+					checkEndpointExists("logzio_endpoint.slack"),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.slack", "title", "my_slack_title"),
 				),
@@ -64,7 +76,7 @@ func TestAccLogzioEndpoint_Slack_UpdateHappyPath(t *testing.T) {
 			{
 				Config: testAccCheckLogzioEndpointConfig("slackUpdateHappyPath"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLogzioEndpointExists("logzio_endpoint.slack"),
+					checkEndpointExists("logzio_endpoint.slack"),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.slack", "title", "my_updated_slack_title"),
 				),
@@ -73,16 +85,16 @@ func TestAccLogzioEndpoint_Slack_UpdateHappyPath(t *testing.T) {
 	})
 }
 
-func TestAccLogzioEndpoint_Custom_HappyPath(t *testing.T) {
+func TestAccLogzioEndpoint_CreateCustomEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccLogzioEndpointDestroy,
+		CheckDestroy: checkEndpointDestroyed,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckLogzioEndpointConfig("customHappyPath"),
+				Config: createCustomEndpoint("custom"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLogzioEndpointExists("logzio_endpoint.custom"),
+					checkEndpointExists("logzio_endpoint.custom"),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.custom", "title", "my_custom_title"),
 				),
@@ -95,12 +107,12 @@ func TestAccLogzioEndpoint_PagerDuty_HappyPath(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccLogzioEndpointDestroy,
+		CheckDestroy: checkEndpointDestroyed,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLogzioEndpointConfig("pagerDutyHappyPath"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLogzioEndpointExists("logzio_endpoint.pagerduty"),
+					checkEndpointExists("logzio_endpoint.pagerduty"),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.pagerduty", "title", "my_pagerduty_title"),
 				),
@@ -113,12 +125,12 @@ func TestAccLogzioEndpoint_BigPanda_HappyPath(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccLogzioEndpointDestroy,
+		CheckDestroy: checkEndpointDestroyed,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLogzioEndpointConfig("bigPandaHappyPath"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLogzioEndpointExists("logzio_endpoint.bigpanda"),
+					checkEndpointExists("logzio_endpoint.bigpanda"),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.bigpanda", "title", "my_bigpanda_title"),
 					resource.TestCheckResourceAttr(
@@ -155,7 +167,7 @@ func testAccCheckOutputExists(n string, o string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckLogzioEndpointExists(n string) resource.TestCheckFunc {
+func checkEndpointExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -185,7 +197,7 @@ func testAccCheckLogzioEndpointExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccLogzioEndpointDestroy(s *terraform.State) error {
+func checkEndpointDestroyed(s *terraform.State) error {
 	for _, r := range s.RootModule().Resources {
 		id, err := strconv.ParseInt(r.Primary.ID, BASE_10, BITSIZE_64)
 		if err != nil {
@@ -199,6 +211,7 @@ func testAccLogzioEndpointDestroy(s *terraform.State) error {
 		}
 		client, _ = endpoints.New(os.Getenv(envLogzioApiToken), baseURL)
 
+		time.Sleep(3 * time.Second)
 		_, err = client.GetEndpoint(int64(id))
 		if err == nil {
 			return fmt.Errorf("endpoint still exists")
@@ -212,7 +225,7 @@ func testAccCheckLogzioEndpointConfig(key string) string {
 		"slackHappyPath": `
 resource "logzio_endpoint" "slack" {
   title = "my_slack_title"
-  endpoint_type = "slack"
+  endpoint_type = "Slack"
   description = "this_is_my_description"
   slack {
 	url = "https://www.test.com"
@@ -226,7 +239,7 @@ output "test_id" {
 		"slackBadUrl": `
 resource "logzio_endpoint" "slack" {
   title = "my_slack_title"
-  endpoint_type = "slack"
+  endpoint_type = "Slack"
   description = "this_is_my_description"
   slack {
 	url = "https://not_a_url"
@@ -236,7 +249,7 @@ resource "logzio_endpoint" "slack" {
 		"slackUpdateHappyPath": `
 resource "logzio_endpoint" "slack" {
   title = "my_updated_slack_title"
-  endpoint_type = "slack"
+  endpoint_type = "Slack"
   description = "this_is_my_description"
   slack {
 	url = "https://www.test.com"
@@ -246,18 +259,18 @@ resource "logzio_endpoint" "slack" {
 		"customHappyPath": `
 resource "logzio_endpoint" "custom" {
   title = "my_custom_title"
-  endpoint_type = "custom"
+  endpoint_type = "Custom"
   description = "this_is_my_description"
   custom {
 	url = "https://www.test.com"
 	method = "POST"
 	headers = {
-		"this" = "is"
-		"a" = "header"
+		this = "is"
+		a = "header"
 	}
 	body_template = {
-		"this" = "is"
-		"my" = "template"
+		this = "is"
+		my = "template"
 	}
   }
 }
@@ -265,7 +278,7 @@ resource "logzio_endpoint" "custom" {
 		"pagerDutyHappyPath": `
 	resource "logzio_endpoint" "pagerduty" {
 		title = "my_pagerduty_title"
-		endpoint_type = "pager_duty"
+		endpoint_type = "PagerDuty"
 		description = "this is my description"
 		pager_duty {
 			service_key = "my_service_key"
@@ -275,7 +288,7 @@ resource "logzio_endpoint" "custom" {
 		"bigPandaHappyPath": `
 	resource "logzio_endpoint" "bigpanda" {
 		title = "my_bigpanda_title"
-		endpoint_type = "big_panda"
+		endpoint_type = "BigPanda"
 		description = "this is my description"
 		big_panda {
 			api_token = "my_api_token"
@@ -285,4 +298,13 @@ resource "logzio_endpoint" "custom" {
 `,
 	}
 	return templates[key]
+}
+
+
+func createCustomEndpoint(name string) string {
+	content, err := ioutil.ReadFile("testdata/fixtures/create_custom_endpoint.tf")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return fmt.Sprintf(fmt.Sprintf("%s", content), name)
 }
