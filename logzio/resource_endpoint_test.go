@@ -3,29 +3,22 @@ package logzio
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
-	"regexp"
-	"strconv"
-	"testing"
-	"time"
-
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/jonboydell/logzio_client/endpoints"
+	"io/ioutil"
+	"log"
+	"regexp"
+	"testing"
 )
 
 func TestAccLogzioEndpoint_CreateSlackEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: checkEndpointDestroyed,
 		Steps: []resource.TestStep{
 			{
 				Config: readFixtureFromFile("valid_slack_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					checkEndpointExists("logzio_endpoint.valid_slack_endpoint"),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.valid_slack_endpoint", "title", "valid_slack_endpoint"),
 					testAccCheckOutputExists("logzio_endpoint.valid_slack_endpoint", "test_id"),
@@ -40,7 +33,6 @@ func TestAccLogzioEndpoint_CreateInvalidSlackEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: checkEndpointDestroyed,
 		Steps: []resource.TestStep{
 			{
 				Config:      readFixtureFromFile("invalid_slack_endpoint.tf"),
@@ -63,12 +55,10 @@ func TestAccLogzioEndpoint_UpdateSlackEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: checkEndpointDestroyed,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLogzioEndpointConfig("slackHappyPath"),
 				Check: resource.ComposeTestCheckFunc(
-					checkEndpointExists("logzio_endpoint.slack"),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.slack", "title", "my_slack_title"),
 				),
@@ -76,7 +66,6 @@ func TestAccLogzioEndpoint_UpdateSlackEndpoint(t *testing.T) {
 			{
 				Config: testAccCheckLogzioEndpointConfig("slackUpdateHappyPath"),
 				Check: resource.ComposeTestCheckFunc(
-					checkEndpointExists("logzio_endpoint.slack"),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.slack", "title", "my_updated_slack_title"),
 				),
@@ -89,12 +78,10 @@ func TestAccLogzioEndpoint_CreateCustomEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: checkEndpointDestroyed,
 		Steps: []resource.TestStep{
 			{
 				Config: createCustomEndpoint("custom"),
 				Check: resource.ComposeTestCheckFunc(
-					checkEndpointExists("logzio_endpoint.custom"),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.custom", "title", "my_custom_title"),
 				),
@@ -107,12 +94,10 @@ func TestAccLogzioEndpoint_PagerDuty_HappyPath(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: checkEndpointDestroyed,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLogzioEndpointConfig("pagerDutyHappyPath"),
 				Check: resource.ComposeTestCheckFunc(
-					checkEndpointExists("logzio_endpoint.pagerduty"),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.pagerduty", "title", "my_pagerduty_title"),
 				),
@@ -125,12 +110,10 @@ func TestAccLogzioEndpoint_BigPanda_HappyPath(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: checkEndpointDestroyed,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLogzioEndpointConfig("bigPandaHappyPath"),
 				Check: resource.ComposeTestCheckFunc(
-					checkEndpointExists("logzio_endpoint.bigpanda"),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.bigpanda", "title", "my_bigpanda_title"),
 					resource.TestCheckResourceAttr(
@@ -165,59 +148,6 @@ func testAccCheckOutputExists(n string, o string) resource.TestCheckFunc {
 
 		return nil
 	}
-}
-
-func checkEndpointExists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return errors.New("no endpoint ID is set")
-		}
-
-		id, err := strconv.ParseInt(rs.Primary.ID, BASE_10, BITSIZE_64)
-
-		var client *endpoints.EndpointsClient
-		baseURL := defaultBaseUrl
-		if len(os.Getenv(envLogzioBaseURL)) > 0 {
-			baseURL = os.Getenv(envLogzioBaseURL)
-		}
-		client, _ = endpoints.New(os.Getenv(envLogzioApiToken), baseURL)
-
-		_, err = client.GetEndpoint(int64(id))
-
-		if err != nil {
-			return fmt.Errorf("endpoint doesn't exist")
-		}
-
-		return nil
-	}
-}
-
-func checkEndpointDestroyed(s *terraform.State) error {
-	for _, r := range s.RootModule().Resources {
-		id, err := strconv.ParseInt(r.Primary.ID, BASE_10, BITSIZE_64)
-		if err != nil {
-			return err
-		}
-
-		var client *endpoints.EndpointsClient
-		baseURL := defaultBaseUrl
-		if len(os.Getenv(envLogzioBaseURL)) > 0 {
-			baseURL = os.Getenv(envLogzioBaseURL)
-		}
-		client, _ = endpoints.New(os.Getenv(envLogzioApiToken), baseURL)
-
-		time.Sleep(3 * time.Second)
-		_, err = client.GetEndpoint(int64(id))
-		if err == nil {
-			return fmt.Errorf("endpoint still exists")
-		}
-	}
-	return nil
 }
 
 func testAccCheckLogzioEndpointConfig(key string) string {
