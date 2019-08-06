@@ -14,12 +14,27 @@ This provider is based on the Logz.io client library - https://github.com/jonboy
 
 ##### Obtaining the provider
 
+I recommend, using the following short shell script.
+```
+PROVIDER_VERSION=v1.1.2
+DOWNLOAD_URL=https://github.com/jonboydell/logzio_terraform_provider/releases/download/${PROVIDER_VERSION}
+
+rm ~/.terraform.d/plugins/terraform-provider-logzio
+wget ${DOWNLOAD_URL}/terraform-provider-logzio_${PROVIDER_VERSION}_darwin_amd64 -O $HOME/.terraform.d/plugins/terraform-provider-logzio
+chmod +x ~/.terraform.d/plugins/terraform-provider-logzio
+```
+For IntellJ/WebStorm/PyCharm/GoLand HCL plugin completion, then also run
+```
+mkdir -p ~/.terraform.d/metadata-repo/terraform/model/providers
+wget ${DOWNLOAD_URL}/providers.json ~/.terraform.d/metadata-repo/terraform/model/providers.json
+wget ${DOWNLOAD_URL}/providers/logzio.json ~/.terraform.d/metadata-repo/terraform/model/providers/providers.json
+```
+
 To build; from the project root (on a *nix style system), this will copy it into your [plugins directory](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins).  You can copy it into your Terraform templates folder too.
 ```bash
 ./scripts/build.sh
 ```
 
-You can [get a release from here](https://github.com/jonboydell/logzio_terraform_provider/releases) and follow these [instructions](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins)
 You'll need to do a `terraform init` for it to pick up the provider.
 
 ##### Using the provider
