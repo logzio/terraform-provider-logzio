@@ -1,4 +1,4 @@
-package main
+package logzio
 
 import (
 	"github.com/jonboydell/logzio_client/alerts"

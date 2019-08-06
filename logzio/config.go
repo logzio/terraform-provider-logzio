@@ -1,4 +1,4 @@
-package main
+package logzio
 
 type Config struct {
 	apiToken string

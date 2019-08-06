@@ -8,36 +8,28 @@ master
 [![Build Status](https://travis-ci.org/jonboydell/logzio_terraform_provider.svg?branch=master)](https://travis-ci.org/jonboydell/logzio_terraform_provider)
 [![Coverage Status](https://coveralls.io/repos/github/jonboydell/logzio_terraform_provider/badge.svg?branch=master)](https://coveralls.io/github/jonboydell/logzio_terraform_provider?branch=master)
 
-### Supports CRUD of Logz.io alerts and notification endpoints
+### Supports CRUD of Logz.io user, alerts and notification endpoints
 
 This provider is based on the Logz.io client library - https://github.com/jonboydell/logzio_client
 
-##### Obtaining the provider
+#### What's new?
 
-I recommend, using the following short shell script.
-```
-PROVIDER_VERSION=v1.1.2
-DOWNLOAD_URL=https://github.com/jonboydell/logzio_terraform_provider/releases/download/${PROVIDER_VERSION}
+- Version bump to use the latest TF library (0.12.6)
+- Moved some of the source code around to comply with TF provider layout convention
+- Moved the examples into an examples directory
 
-rm ~/.terraform.d/plugins/terraform-provider-logzio
-wget ${DOWNLOAD_URL}/terraform-provider-logzio_${PROVIDER_VERSION}_darwin_amd64 -O $HOME/.terraform.d/plugins/terraform-provider-logzio
-chmod +x ~/.terraform.d/plugins/terraform-provider-logzio
-```
-For IntellJ/WebStorm/PyCharm/GoLand HCL plugin completion, then also run
-```
-mkdir -p ~/.terraform.d/metadata-repo/terraform/model/providers
-wget ${DOWNLOAD_URL}/providers.json ~/.terraform.d/metadata-repo/terraform/model/providers.json
-wget ${DOWNLOAD_URL}/providers/logzio.json ~/.terraform.d/metadata-repo/terraform/model/providers/providers.json
-```
+#### Obtaining the provider
+
+The easiest way to get the provider and the JetBrains IDE HCL meta-data is to run the `./scripts/update_plugin.sh` and edit the `PROVIDER_VERSION` variable to get the right provider version.
+
+However...
 
 To build; from the project root (on a *nix style system), this will copy it into your [plugins directory](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins).  You can copy it into your Terraform templates folder too.
 ```bash
 ./scripts/build.sh
 ```
 
-You'll need to do a `terraform init` for it to pick up the provider.
-
-##### Using the provider
+#### Using the provider
 
 Note: logz.io provides multiple endpoints for their service, if you are not using the default, `https://api.logz.io` then you'll have to specify an override in the provider.
 ```hcl-terraform
@@ -74,19 +66,17 @@ resource "logzio_alert" "my_alert" {
   value_aggregation_type = "NONE"
   alert_notification_endpoints = ["${logzio_endpoint.my_endpoint.id}"]
   suppress_notifications_minutes = 5
-  severity_threshold_tiers = [
-    {
-      "severity" = "HIGH",
-      "threshold" = 10
-    }
-  ]
+  severity_threshold_tiers {
+      severity = "HIGH",
+      threshold = 10
+  }
 }
 ```
-## How to run the tests
-1. `dep ensure -v`
-2. `TF_ACC=true go test -v .`
 
-##### Doens't work?
+#### Running the tests
+`GO111MODULE=on TF_ACC=true go test -v .`
+
+#### Doens't work?
 
 Do an [https://github.com/jonboydell/logzio_terraform_provider/issues](issue).
 Fix it yourself and do a [https://github.com/jonboydell/logzio_terraform_provider/pulls](PR), please create any fix branches from `develop`.  They'll be merged back into `develop` and go `master` from there.  Releases are from `master`.
