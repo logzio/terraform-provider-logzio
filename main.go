@@ -3,12 +3,13 @@ package main
 import (
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/jonboydell/logzio_terraform_provider/logzio"
 )
 
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
 		ProviderFunc: func() terraform.ResourceProvider {
-			return Provider()
+			return logzio.Provider()
 		},
 	})
 }
