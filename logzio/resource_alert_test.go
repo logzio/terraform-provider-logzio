@@ -9,17 +9,20 @@ import (
 )
 
 func TestAccLogzioAlert_CreateAlert(t *testing.T) {
+	alertName := "test_create_alert"
+	resourceName := "logzio_alert." + alertName
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccDataSourceLogzioAlertBase("name"),
+				Config: testAccDataSourceLogzioAlertBase(alertName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("logzio_alert.name", "title", "hello"),
-					resource.TestCheckResourceAttr("logzio_alert.name", "severity_threshold_tiers.#", "1"),
-					resource.TestCheckResourceAttr("logzio_alert.name", "severity_threshold_tiers.0.severity", "HIGH"),
-					resource.TestCheckResourceAttr("logzio_alert.name", "severity_threshold_tiers.0.threshold", "10"),
+					resource.TestCheckResourceAttr(resourceName, "title", "hello"),
+					resource.TestCheckResourceAttr(resourceName, "severity_threshold_tiers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "severity_threshold_tiers.0.severity", "HIGH"),
+					resource.TestCheckResourceAttr(resourceName, "severity_threshold_tiers.0.threshold", "10"),
 				),
 			},
 		},
@@ -32,17 +35,17 @@ func TestAccLogzioAlert_UpdateAlert(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: resourceCreateAlert("name"),
+				Config: resourceCreateAlert("test_update_alert"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"logzio_alert.name", "title", "hello"),
+						"logzio_alert.test_update_alert", "title", "hello"),
 				),
 			},
 			resource.TestStep{
-				Config: resourceUpdateAlert("name"),
+				Config: resourceUpdateAlert("test_update_alert"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"logzio_alert.name", "title", "updated_alert"),
+						"logzio_alert.test_update_alert", "title", "updated_alert"),
 				),
 			},
 		},

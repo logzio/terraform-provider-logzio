@@ -2,11 +2,10 @@ package logzio
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform/helper/resource"
 	"os"
 	"strconv"
 	"testing"
-
-	"github.com/hashicorp/terraform/helper/resource"
 )
 
 func TestAccLogzioUser_CreateUser(t *testing.T) {

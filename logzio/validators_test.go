@@ -19,7 +19,7 @@ func TestValidateOperation(t *testing.T) {
 	for _, s := range validOperations {
 		_, errors := validateOperation(s, "operation")
 		if len(errors) > 0 {
-			t.Fatalf("%q should be a valid operation: %v", s, errors)
+			t.Fatalf("%q should be a validd operation: %v", s, errors)
 		}
 	}
 
