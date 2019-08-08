@@ -42,32 +42,26 @@ func TestAccLogzioEndpoint_CreateInvalidSlackEndpoint(t *testing.T) {
 	})
 }
 
-func readFixtureFromFile(name string) string {
-	content, err := ioutil.ReadFile("testdata/fixtures/"+name)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return fmt.Sprintf("%s", content)
-}
-
-
 func TestAccLogzioEndpoint_UpdateSlackEndpoint(t *testing.T) {
+	endpointName := "test_create_slack_endpoint"
+	resourceName := "logzio_endpoint." + endpointName
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckLogzioEndpointConfig("slackHappyPath"),
+				Config: ReadResourceFromFile("create_slack_endpoint.tf", endpointName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"logzio_endpoint.slack", "title", "my_slack_title"),
+						resourceName, "title", "slack_endpoint"),
 				),
 			},
 			{
-				Config: testAccCheckLogzioEndpointConfig("slackUpdateHappyPath"),
+				Config: ReadResourceFromFile("update_slack_endpoint.tf", endpointName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"logzio_endpoint.slack", "title", "my_updated_slack_title"),
+						resourceName, "title", "updated_slack_endpoint"),
 				),
 			},
 		},
