@@ -51,14 +51,14 @@ func TestAccLogzioEndpoint_UpdateSlackEndpoint(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadResourceFromFile("create_slack_endpoint.tf", endpointName),
+				Config: ReadResourceFromFile(endpointName, "create_slack_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "slack_endpoint"),
 				),
 			},
 			{
-				Config: ReadResourceFromFile("update_slack_endpoint.tf", endpointName),
+				Config: ReadResourceFromFile(endpointName,"update_slack_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "updated_slack_endpoint"),
