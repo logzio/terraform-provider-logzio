@@ -98,14 +98,14 @@ func dataSourceAlert() *schema.Resource {
 func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
 	var client *alerts.AlertsClient
 	client, _ = alerts.New(m.(Config).apiToken, m.(Config).baseUrl)
-
-	alertId, ok := d.GetOk(alertId)
+	alertIdString, ok := d.GetOk(alertId);
 	if ok {
-		alert, err := client.GetAlert(alertId.(int64))
+		id := int64(alertIdString.(int))
+		alert, err := client.GetAlert(id)
 		if err != nil {
 			return err
 		}
-		d.SetId(fmt.Sprintf("%d", alertId.(int64)))
+		d.SetId(fmt.Sprintf("%d", id))
 		d.Set(alertNotificationEndpoints, alert.AlertNotificationEndpoints)
 		d.Set(alertCreatedAt, alert.CreatedAt)
 		d.Set(alertCreatedBy, alert.CreatedBy)

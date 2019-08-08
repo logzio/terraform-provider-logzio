@@ -17,7 +17,7 @@ func TestAccLogzioAlert_CreateAlert(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccDataSourceLogzioAlertBase(alertName),
+				Config: resourceCreateAlert(alertName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "hello"),
 					resource.TestCheckResourceAttr(resourceName, "severity_threshold_tiers.#", "1"),
@@ -51,6 +51,7 @@ func TestAccLogzioAlert_UpdateAlert(t *testing.T) {
 		},
 	})
 }
+
 func resourceCreateAlert(name string) string {
 	content, err := ioutil.ReadFile("testdata/fixtures/create_alert.tf")
 	if err != nil {
