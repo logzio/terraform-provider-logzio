@@ -13,7 +13,7 @@ func TestAccDataSourceEndpoint(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExpectNonEmptyPlan:        true,
-				Config:                    readFixtureFromFile("valid_slack_endpoint_datasource.tf"),
+				Config:                    ReadFixtureFromFile("valid_slack_endpoint_datasource.tf"),
 				PreventPostDestroyRefresh: true,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.logzio_endpoint.by_title", "title", "valid_slack_endpoint_datasource"),

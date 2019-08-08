@@ -17,7 +17,7 @@ func TestAccLogzioEndpoint_CreateSlackEndpoint(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: readFixtureFromFile("valid_slack_endpoint.tf"),
+				Config: ReadFixtureFromFile("valid_slack_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.valid_slack_endpoint", "title", "valid_slack_endpoint"),
@@ -35,7 +35,7 @@ func TestAccLogzioEndpoint_CreateInvalidSlackEndpoint(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      readFixtureFromFile("invalid_slack_endpoint.tf"),
+				Config:      ReadFixtureFromFile("invalid_slack_endpoint.tf"),
 				ExpectError: regexp.MustCompile("Bad URL provided. no protocol"),
 			},
 		},
