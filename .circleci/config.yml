@@ -25,3 +25,13 @@ workflows:
   build:
     jobs:
       - build
+  acceptance_test:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - develop
+    jobs:
+      - acceptance_test

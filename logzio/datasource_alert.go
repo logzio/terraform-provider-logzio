@@ -96,19 +96,22 @@ func dataSourceAlert() *schema.Resource {
 	}
 }
 
+func getAlert(client *alerts.AlertsClient, alertId int64, retries int) (*alerts.AlertType, error) {
+	alert, err := client.GetAlert(alertId)
+	if err != nil && retries > 0 {
+		time.Sleep(time.Second * 2)
+		alert, err = getAlert(client, alertId, retries-1)
+	}
+	return alert, err
+}
+
 func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
 	var client *alerts.AlertsClient
 	client, _ = alerts.New(m.(Config).apiToken, m.(Config).baseUrl)
 	alertIdString, ok := d.GetOk(alertId);
 	if ok {
 		id := int64(alertIdString.(int))
-		alert, err := client.GetAlert(id)
-		for i := 3; i <= 0; i-- {
-			if err != nil {
-				time.Sleep(time.Second * 2)
-				alert, err = client.GetAlert(id)
-			}
-		}
+		alert, err := getAlert(client, id, 3)
 		if err != nil {
 			return err
 		}
