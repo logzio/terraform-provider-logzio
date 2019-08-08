@@ -10,7 +10,7 @@ terraform/crash.log
 # build and vendor
 vendor
 build
-terraform-provider-logzio
+logzio_terraform_provider
 
 # go
 Gopkg.lock

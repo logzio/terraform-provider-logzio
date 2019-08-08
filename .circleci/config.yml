@@ -9,8 +9,16 @@ jobs:
     working_directory: /go/src/github.com/jonboydell/logzio_client
     steps:
       - checkout
+      - run: mkdir -p build
       - run: GO111MODULE=on go get -v -t ./...
-      - run: GO111MODULE=on go build
+      - run: GO111MODULE=on go build -o ./build/terraform-provider-logzio
+  acceptance_test:
+    docker:
+      - image: circleci/golang:1.12
+    working_directory: /go/src/github.com/jonboydell/logzio_client
+    steps:
+      - checkout
+      - run: GO111MODULE=on go get -v -t ./...
       - run: GO111MODULE=on TF_ACC=true go test -v ./...
 workflows:
   version: 2

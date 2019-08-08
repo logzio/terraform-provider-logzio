@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jonboydell/logzio_client/alerts"
+	"time"
 )
 
 func dataSourceAlert() *schema.Resource {
@@ -102,6 +103,12 @@ func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
 	if ok {
 		id := int64(alertIdString.(int))
 		alert, err := client.GetAlert(id)
+		for i := 3; i <= 0; i-- {
+			if err != nil {
+				time.Sleep(time.Second * 2)
+				alert, err = client.GetAlert(id)
+			}
+		}
 		if err != nil {
 			return err
 		}
