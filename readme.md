@@ -10,9 +10,12 @@ This provider is based on the Logz.io client library - https://github.com/jonboy
 
 #### What's new?
 
-- Version bump to use the latest TF library (0.12.6)
-- Moved some of the source code around to comply with TF provider layout convention
-- Moved the examples into an examples directory
+- 1.1.3 - examples now use TF12
+- 1.1.3 - will now generate the meta data needed for the IntelliJ type IDE HCL plugin
+- 1.1.3 - no more travis - just circle CI
+- 1.1.3 - version bump to use the latest TF library (0.12.6), now compatible with TF12
+- 1.1.2 - Moved some of the source code around to comply with TF provider layout convention
+- 1.1.2 - Moved the examples into an examples directory
 
 #### Obtaining the provider
 
