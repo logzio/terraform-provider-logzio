@@ -1,8 +1,7 @@
-package main
+package logzio
 
 import (
 	"fmt"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jonboydell/logzio_client/users"
 )

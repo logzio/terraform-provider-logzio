@@ -1,10 +1,10 @@
-package main
+package logzio
 
 import (
 	"fmt"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jonboydell/logzio_client/alerts"
+	"time"
 )
 
 func dataSourceAlert() *schema.Resource {
@@ -96,17 +96,26 @@ func dataSourceAlert() *schema.Resource {
 	}
 }
 
+func getAlert(client *alerts.AlertsClient, alertId int64, retries int) (*alerts.AlertType, error) {
+	alert, err := client.GetAlert(alertId)
+	if err != nil && retries > 0 {
+		time.Sleep(time.Second * 2)
+		alert, err = getAlert(client, alertId, retries-1)
+	}
+	return alert, err
+}
+
 func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
 	var client *alerts.AlertsClient
 	client, _ = alerts.New(m.(Config).apiToken, m.(Config).baseUrl)
-
-	alertId, ok := d.GetOk(alertId)
+	alertIdString, ok := d.GetOk(alertId);
 	if ok {
-		alert, err := client.GetAlert(alertId.(int64))
+		id := int64(alertIdString.(int))
+		alert, err := getAlert(client, id, 3)
 		if err != nil {
 			return err
 		}
-		d.SetId(fmt.Sprintf("%d", alertId.(int64)))
+		d.SetId(fmt.Sprintf("%d", id))
 		d.Set(alertNotificationEndpoints, alert.AlertNotificationEndpoints)
 		d.Set(alertCreatedAt, alert.CreatedAt)
 		d.Set(alertCreatedBy, alert.CreatedBy)
