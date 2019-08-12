@@ -1,12 +1,8 @@
 # Logz.io Terraform provider
 
-develop
-[![Build Status](https://travis-ci.org/jonboydell/logzio_terraform_provider.svg?branch=develop)](https://travis-ci.org/jonboydell/logzio_terraform_provider)
-[![Coverage Status](https://coveralls.io/repos/github/jonboydell/logzio_terraform_provider/badge.svg?branch=develop)](https://coveralls.io/github/jonboydell/logzio_terraform_provider?branch=develop)
-
-master
-[![Build Status](https://travis-ci.org/jonboydell/logzio_terraform_provider.svg?branch=master)](https://travis-ci.org/jonboydell/logzio_terraform_provider)
-[![Coverage Status](https://coveralls.io/repos/github/jonboydell/logzio_terraform_provider/badge.svg?branch=master)](https://coveralls.io/github/jonboydell/logzio_terraform_provider?branch=master)
+|branch|build status|
+|---|---|
+|develop|[![CircleCI](https://circleci.com/gh/jonboydell/logzio_terraform_provider/tree/develop.svg?style=svg)](https://circleci.com/gh/jonboydell/logzio_terraform_provider/tree/develop)|
 
 ### Supports CRUD of Logz.io user, alerts and notification endpoints
 
