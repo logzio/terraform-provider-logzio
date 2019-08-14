@@ -179,6 +179,12 @@ github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8/go.mod h1:Nht
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/jonboulle/clockwork v0.1.0/go.mod h1:Ii8DK3G1RaLaWxj9trq07+26W01tbo22gdxWY5EU2bo=
+github.com/jonboydell/logzio_client v0.0.0-20190812160321-fee3ffc6b674 h1:QB7xKMCNTvQuumDhKAaXL2ChBPRl5RIDkgCqzhTyf8Q=
+github.com/jonboydell/logzio_client v0.0.0-20190812160321-fee3ffc6b674/go.mod h1:ZXJYF4M9/chuG+4fQDS9BN6CqXqokUjtQOjdMqzGC/Y=
+github.com/jonboydell/logzio_client v0.0.0-20190812161207-ef32c6e63aa7 h1:jLl1HHaGSBFBcrTEWAXRnoHt7PBHuu7Q9hYUVIeieO8=
+github.com/jonboydell/logzio_client v0.0.0-20190812161207-ef32c6e63aa7/go.mod h1:ZXJYF4M9/chuG+4fQDS9BN6CqXqokUjtQOjdMqzGC/Y=
+github.com/jonboydell/logzio_client v0.0.0-20190813155138-286fe319d6b2 h1:QWnqdUEeqvGBcKhcmE0Fi2B9ABbqRaoqPv3E74gHQcY=
+github.com/jonboydell/logzio_client v0.0.0-20190813155138-286fe319d6b2/go.mod h1:ZXJYF4M9/chuG+4fQDS9BN6CqXqokUjtQOjdMqzGC/Y=
 github.com/jonboydell/logzio_client v1.2.0 h1:SkvYSgpJcLG0P9agjwF99oFiKtBiaXH8MZt7OmtwmvQ=
 github.com/jonboydell/logzio_client v1.2.0/go.mod h1:ZXJYF4M9/chuG+4fQDS9BN6CqXqokUjtQOjdMqzGC/Y=
 github.com/joyent/triton-go v0.0.0-20180313100802-d8f9c0314926/go.mod h1:U+RSyWxWd04xTqnuOQxnai7XGS2PrPY2cfGoDKtMHjA=

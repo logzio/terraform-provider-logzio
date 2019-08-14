@@ -239,7 +239,7 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
  * reads an endpoint from logzio
  */
 func resourceAlertRead(d *schema.ResourceData, m interface{}) error {
-	alertId, _ := idFromResourceData(d)
+	alertId, _ := IdFromResourceData(d)
 	client := alertClient(m)
 
 	var alert *alerts.AlertType
@@ -285,7 +285,7 @@ func resourceAlertRead(d *schema.ResourceData, m interface{}) error {
  * updates an existing alert in logzio, returns an error if it doesn't exist
  */
 func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
-	alertId, _ := idFromResourceData(d)
+	alertId, _ := IdFromResourceData(d)
 
 	alertNotificationEndpoints := d.Get(alertNotificationEndpoints).([]interface{})
 	description := d.Get(alertDescription).(string)
@@ -371,7 +371,7 @@ deletes an existing alert in logzio, returns an error if it doesn't exist
 */
 func resourceAlertDelete(d *schema.ResourceData, m interface{}) error {
 	client := alertClient(m)
-	alertId, _ := idFromResourceData(d)
+	alertId, _ := IdFromResourceData(d)
 	err := client.DeleteAlert(alertId)
 	return err
 }

@@ -86,7 +86,7 @@ func resourceUserCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceUserRead(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := IdFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func resourceUserRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceUserUpdate(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := IdFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func resourceUserUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceUserDelete(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := IdFromResourceData(d)
 	if err != nil {
 		return err
 	}

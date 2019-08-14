@@ -181,7 +181,7 @@ func endpointClient(m interface{}) *endpoints.EndpointsClient {
  * returns the id from terraform, parsed to an int64
  * @todo: needs to be moved out of this file and into the commons
  */
-func idFromResourceData(d *schema.ResourceData) (int64, error) {
+func IdFromResourceData(d *schema.ResourceData) (int64, error) {
 	return strconv.ParseInt(d.Id(), BASE_10, BITSIZE_64)
 }
 
@@ -189,7 +189,7 @@ func idFromResourceData(d *schema.ResourceData) (int64, error) {
  * returns the mapping stored in a terraform map value - who knows why this is not "just" a map, but instead a map
  * wrapped in an array
  */
-func mappingsFromResourceData(d *schema.ResourceData, key string) (map[string]interface{}, error) {
+func MappingsFromResourceData(d *schema.ResourceData, key string) (map[string]interface{}, error) {
 	if v, ok := d.GetOk(key); ok {
 		rawMappings := v.(*schema.Set).List()
 		for i := 0; i < len(rawMappings); i++ {
@@ -215,11 +215,11 @@ func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
 	switch eType {
 	case string(endpoints.EndpointTypeSlack):
 		endpoint.EndpointType = endpoints.EndpointTypeSlack
-		opts, _ := mappingsFromResourceData(d, endpointSlack)
+		opts, _ := MappingsFromResourceData(d, endpointSlack)
 		endpoint.Url = opts[endpointUrl].(string)
 	case string(endpoints.EndpointTypeCustom):
 		endpoint.EndpointType = endpoints.EndpointTypeCustom
-		opts, _ := mappingsFromResourceData(d, endpointCustom)
+		opts, _ := MappingsFromResourceData(d, endpointCustom)
 		endpoint.Url = opts[endpointUrl].(string)
 		endpoint.Method = opts[endpointMethod].(string)
 		endpoint.BodyTemplate = opts[endpointBodyTemplate]
@@ -230,20 +230,20 @@ func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
 		endpoint.Headers = headerMap
 	case string(endpoints.EndpointTypePagerDuty):
 		endpoint.EndpointType = endpoints.EndpointTypePagerDuty
-		opts, _ := mappingsFromResourceData(d, endpointPagerDuty)
+		opts, _ := MappingsFromResourceData(d, endpointPagerDuty)
 		endpoint.ServiceKey = opts[endpointServiceKey].(string)
 	case string(endpoints.EndpointTypeBigPanda):
 		endpoint.EndpointType = endpoints.EndpointTypeBigPanda
-		opts, _ := mappingsFromResourceData(d, endpointBigPanda)
+		opts, _ := MappingsFromResourceData(d, endpointBigPanda)
 		endpoint.ApiToken = opts[endpointApiToken].(string)
 		endpoint.AppKey = opts[endpointAppKey].(string)
 	case string(endpoints.EndpointTypeDataDog):
 		endpoint.EndpointType = endpoints.EndpointTypeDataDog
-		opts, _ := mappingsFromResourceData(d, endpointDataDog)
+		opts, _ := MappingsFromResourceData(d, endpointDataDog)
 		endpoint.ApiKey = opts[endpointApiKey].(string)
 	case string(endpoints.EndpointTypeVictorOps):
 		endpoint.EndpointType = endpoints.EndpointTypeVictorOps
-		opts, _ := mappingsFromResourceData(d, endpointVictorOps)
+		opts, _ := MappingsFromResourceData(d, endpointVictorOps)
 		endpoint.RoutingKey = opts[endpointRoutingKey].(string)
 		endpoint.MessageType = opts[endpointMessageType].(string)
 		endpoint.ServiceApiKey = opts[endpointServiceApiKey].(string)
@@ -276,7 +276,7 @@ func resourceEndpointCreate(d *schema.ResourceData, m interface{}) error {
  */
 func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 	client := endpointClient(m)
-	endpointId, _ := idFromResourceData(d)
+	endpointId, _ := IdFromResourceData(d)
 
 	var endpoint *endpoints.Endpoint
 	endpoint, err := client.GetEndpoint(endpointId)
@@ -339,7 +339,7 @@ func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
  */
 func resourceEndpointUpdate(d *schema.ResourceData, m interface{}) error {
 	endpoint := endpointFromResourceData(d)
-	endpoint.Id, _ = idFromResourceData(d)
+	endpoint.Id, _ = IdFromResourceData(d)
 	client := endpointClient(m)
 	_, err := client.UpdateEndpoint(endpoint.Id, endpoint)
 
@@ -354,7 +354,7 @@ func resourceEndpointUpdate(d *schema.ResourceData, m interface{}) error {
  * deletes an existing endpoint, returns an error if the endpoint can't be found
  */
 func resourceEndpointDelete(d *schema.ResourceData, m interface{}) error {
-	endpointId, _ := idFromResourceData(d)
+	endpointId, _ := IdFromResourceData(d)
 	client := endpointClient(m)
 	err := client.DeleteEndpoint(endpointId)
 	if err != nil {
