@@ -207,7 +207,7 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 	if g {
 		createAlert.GroupByAggregationFields = d.Get(alert_group_by_aggregation_fields).([]interface{})
 	} else {
-		createAlert.GroupByAggregationFields = make([]interface{}, 0)
+		createAlert.GroupByAggregationFields = []
 	}
 
 	jsonBytes, err := json.Marshal(createAlert)
