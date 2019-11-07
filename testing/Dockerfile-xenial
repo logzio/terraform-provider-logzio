@@ -1,0 +1,27 @@
+FROM ubuntu:xenial
+RUN apt-get update
+RUN apt-get -y upgrade
+RUN apt-get -y install wget zip git
+WORKDIR /root
+
+RUN wget https://releases.hashicorp.com/terraform/0.12.8/terraform_0.12.8_linux_amd64.zip
+RUN unzip terraform_0.12.8_linux_amd64.zip
+RUN rm terraform_0.12.8_linux_amd64.zip
+RUN mv terraform /usr/local/bin/terraform
+
+RUN wget https://dl.google.com/go/go1.13.linux-amd64.tar.gz
+RUN tar -C /usr/local -xzf go1.13.linux-amd64.tar.gz
+RUN rm go1.13.linux-amd64.tar.gz
+
+ENV PATH=/usr/local/go/bin:$PATH
+RUN mkdir -p /root/go/src/github.com
+
+ENV GOPATH=/root/go
+WORKDIR /root/go/src/github.com
+RUN wget https://codeload.github.com/jonboydell/logzio_terraform_provider/zip/develop -O logzio_terraform_provider-develop.zip
+RUN unzip logzio_terraform_provider-develop.zip
+RUN rm logzio_terraform_provider-develop.zip
+WORKDIR /root/go/src/github.com/logzio_terraform_provider-develop
+
+RUN mkdir -p /root/terraform.d/plugins
+RUN ./scripts/build.sh
