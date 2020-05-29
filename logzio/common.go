@@ -1,6 +1,9 @@
 package logzio
 
-import "strings"
+import (
+	"strings"
+	"unicode"
+)
 
 const (
 	BASE_10            int    = 10
@@ -16,4 +19,15 @@ func findStringInArray(v string, values []string) bool {
 		}
 	}
 	return false
+}
+
+func stripAllWhitespace(inputString string) string {
+	var b strings.Builder
+	b.Grow(len(inputString))
+	for _, ch := range inputString {
+		if !unicode.IsSpace(ch) {
+			b.WriteRune(ch)
+		}
+	}
+	return b.String()
 }
