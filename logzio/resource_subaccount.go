@@ -1,7 +1,6 @@
 package logzio
 
 import (
-	"fmt"
 	"github.com/yyyogev/logzio_terraform_provider/logzio"
 	"strconv"
 
@@ -29,66 +28,66 @@ const (
 func resourceSubAccount() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSubAccountCreate,
-		Read:   resourceUserRead,
-		Update: resourceUserUpdate,
-		Delete: resourceUserDelete,
+		Read:   resourceSubAccountRead,
+		Update: resourceSubAccountUpdate,
+		Delete: resourceSubAccountDelete,
 
 		Schema: map[string]*schema.Schema{
-			logzio.userUsername: {
-				Type:     schema.TypeString,
-				Required: true,
+			subAccountEmail: {
+				Type:	schema.TypeString,
 			},
-			logzio.userFullname: {
-				Type:     schema.TypeString,
-				Required: true,
+			subAccountToken: {
+				Type:	schema.TypeString,
 			},
-			logzio.userAccountId: {
-				Type:     schema.TypeInt,
-				Required: true,
+			subAccountMaxDailyGB: {
+				Type:	schema.TypeFloat,
 			},
-			logzio.userRoles: {
-				Type:     schema.TypeList,
-				Required: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeInt,
-				},
+			subAccountRetentionDays: {
+				Type:	schema.TypeInt,
 			},
-			logzio.userActive: {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
+			subAccountSearchable: {
+				Type:	schema.TypeBool,
+			},
+			subAccountDocSizeSetting: {
+				Type:	schema.TypeBool,
+			},
+			subAccountSharingObjectsAccounts: {
+				Type:	schema.TypeList,
+			},
+			subAccountUtilizationSettings: {
+				Type:	schema.TypeMap,
+
 			},
 		},
 	}
 }
 
+func getSubAccountFromResource(data *schema.ResourceData, id int64) sub_accounts.SubAccount {
+	return sub_accounts.SubAccount{
+		Id:                    id,
+		AccountName:           data.Get(subAccountName).(string),
+		AccountToken:          data.Get(subAccountToken).(string),
+		Email:                 data.Get(subAccountEmail).(string),
+		MaxDailyGB:            data.Get(subAccountMaxDailyGB).(float32),
+		RetentionDays:         data.Get(subAccountRetentionDays).(int32),
+		Searchable:            data.Get(subAccountSearchable).(bool),
+		Accessible:            data.Get(subAccountAccessible).(bool),
+		SharingObjectAccounts: data.Get(subAccountSharingObjectsAccounts).([]interface{}),
+		UtilizationSettings:   data.Get(subAccountUtilizationSettings).(map[string]interface{}),
+		DocSizeSetting:        data.Get(subAccountDocSizeSetting).(bool),
+	}
+}
+
 func subAccountClient(m interface{}) *sub_accounts.SubAccountClient {
-	var client *users.UsersClient
-	client, _ = users.New(m.(logzio.Config).apiToken, m.(logzio.Config).baseUrl)
+	var client *sub_accounts.SubAccountClient
+	client, _ = sub_accounts.New(m.(Config).apiToken, m.(Config).baseUrl)
 	return client
 }
 
 func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
-	var sharingObjectsAccounts []int32
-	for _, id := range d.Get(subAccountSharingObjectsAccounts).([]int32) {
-		sharingObjectsAccounts = append(sharingObjectsAccounts, id)
-	}
+	subAccount := getSubAccountFromResource(d, int64(d.Get(subAccountId).(int)))
 
-	subAccount := sub_accounts.SubAccount{
-		Id: 					int64(d.Get(subAccountId).(int)),
-		AccountName:  			d.Get(subAccountName).(string),
-		AccountToken:			d.Get(subAccountToken).(string),
-		Email:  				d.Get(subAccountEmail).(string),
-		MaxDailyGB:  			d.Get(subAccountMaxDailyGB).(float32),
-		RetentionDays:  		d.Get(subAccountRetentionDays).(int32),
-		Searchable:  			d.Get(subAccountSearchable).(bool),
-		Accessible:  			d.Get(subAccountAccessible).(bool),
-		SharingObjectAccounts:  d.Get(subAccountSharingObjectsAccounts).([]interface{}),
-		UtilizationSettings:	d.Get(subAccountUtilizationSettings).(map[string]interface{}),
-		DocSizeSetting:			d.Get(subAccountDocSizeSetting).(bool),
-	}
-
-	u, err := usersClient(m).CreateUser(subAccount)
+	u, err := subAccountClient(m).CreateSubAccount(subAccount)
 	if err != nil {
 		return err
 	}
@@ -98,54 +97,30 @@ func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceUserRead(d *schema.ResourceData, m interface{}) error {
-	id, err := logzio.idFromResourceData(d)
+func resourceSubAccountRead(d *schema.ResourceData, m interface{}) error {
+	id, err := idFromResourceData(d)
 	if err != nil {
 		return err
 	}
 
-	user, err := usersClient(m).GetUser(id)
+	subAccount, err := subAccountClient(m).GetSubAccount(id)
 	if err != nil {
 		return err
 	}
 
-	d.SetId(fmt.Sprintf("%d", user.Id))
-	d.Set(logzio.userAccountId, fmt.Sprintf("%d", user.AccountId))
-	d.Set(logzio.userUsername, user.Username)
-	d.Set(logzio.userFullname, user.Fullname)
-
-	var roles []interface{}
-	for _, v := range user.Roles {
-		roles = append(roles, int(v))
-	}
-
-	d.Set(logzio.userRoles, roles)
-	d.Set(logzio.userActive, user.Active)
-
+	setSubAccount(d, subAccount)
 	return nil
 }
 
-func resourceUserUpdate(d *schema.ResourceData, m interface{}) error {
-	id, err := logzio.idFromResourceData(d)
+func resourceSubAccountUpdate(d *schema.ResourceData, m interface{}) error {
+	id, err := idFromResourceData(d)
 	if err != nil {
 		return err
 	}
 
-	accountId, err := strconv.ParseInt(d.Get(logzio.userAccountId).(string), logzio.BASE_10, logzio.BITSIZE_64)
-	if err != nil {
-		return err
-	}
+	subAccount := getSubAccountFromResource(d, id)
 
-	user := users.User{
-		Id:        id,
-		AccountId: accountId,
-		Username:  d.Get(logzio.userUsername).(string),
-		Fullname:  d.Get(logzio.userFullname).(string),
-		Roles:     d.Get(logzio.userRoles).([]int32),
-		Active:    d.Get(logzio.userActive).(bool),
-	}
-
-	_, err = usersClient(m).UpdateUser(user)
+	err = subAccountClient(m).UpdateSubAccount(id, subAccount)
 	if err != nil {
 		return err
 	}
@@ -153,13 +128,13 @@ func resourceUserUpdate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceUserDelete(d *schema.ResourceData, m interface{}) error {
-	id, err := logzio.idFromResourceData(d)
+func resourceSubAccountDelete(d *schema.ResourceData, m interface{}) error {
+	id, err := idFromResourceData(d)
 	if err != nil {
 		return err
 	}
 
-	err = usersClient(m).DeleteUser(id)
+	err = subAccountClient(m).DeleteSubAccount(id)
 	if err != nil {
 		return err
 	}
