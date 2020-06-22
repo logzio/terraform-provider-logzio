@@ -91,8 +91,8 @@ func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	userId := strconv.FormatInt(u.Id, logzio.BASE_10)
-	d.SetId(userId)
+	subAccountId := strconv.FormatInt(u.Id, logzio.BASE_10)
+	d.SetId(subAccountId)
 
 	return nil
 }

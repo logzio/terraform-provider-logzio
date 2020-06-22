@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jonboydell/logzio_client/sub_accounts"
-	"github.com/yyyogev/logzio_terraform_provider/logzio"
 )
 
 func dataSourceSubAccount() *schema.Resource {
@@ -45,7 +44,7 @@ func dataSourceSubAccount() *schema.Resource {
 
 func dataSourceSubaccountRead(d *schema.ResourceData, m interface{}) error {
 	var client *sub_accounts.SubAccountClient
-	client, _ = sub_accounts.New(m.(logzio.Config).apiToken, m.(logzio.Config).baseUrl)
+	client, _ = sub_accounts.New(m.(Config).apiToken, m.(Config).baseUrl)
 
 	accountId, ok := d.GetOk(subAccountId)
 	if ok {
@@ -53,7 +52,7 @@ func dataSourceSubaccountRead(d *schema.ResourceData, m interface{}) error {
 		if err != nil {
 			return err
 		}
-		setSubaccount(d, subAccount)
+		setSubAccount(d, subAccount)
 		return nil
 	}
 
@@ -66,7 +65,7 @@ func dataSourceSubaccountRead(d *schema.ResourceData, m interface{}) error {
 		for i := 0; i < len(list); i++ {
 			subAccount := list[i]
 			if subAccount.AccountToken == accountToken {
-				setSubaccount(d, &subAccount)
+				setSubAccount(d, &subAccount)
 				return nil
 			}
 		}
@@ -75,7 +74,7 @@ func dataSourceSubaccountRead(d *schema.ResourceData, m interface{}) error {
 	return fmt.Errorf("couldn't find sub-account with specified attributes")
 }
 
-func setSubaccount(data *schema.ResourceData, subAccount *sub_accounts.SubAccount) {
+func setSubAccount(data *schema.ResourceData, subAccount *sub_accounts.SubAccount) {
 	data.SetId(fmt.Sprintf("%d", subAccount.Id))
 	data.Set(subAccountName, subAccount.AccountName)
 	data.Set(subAccountEmail, subAccount.Email)
