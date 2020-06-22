@@ -12,7 +12,7 @@ const (
 	resourceAlertType    	= "logzio_alert"
 	resourceEndpointType 	= "logzio_endpoint"
 	resourceUserType     	= "logzio_user"
-	resourceSubAccountType  = "logzio_subAccount"
+	resourceSubAccountType  = "logzio_subaccount"
 	envLogzioApiToken    	= "LOGZIO_API_TOKEN"
 	envLogzioBaseURL     	= "LOGZIO_BASE_URL"
 	envLogzioAccountId   	= "LOGZIO_ACCOUNT_ID"
