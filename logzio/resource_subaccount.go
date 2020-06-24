@@ -1,7 +1,6 @@
 package logzio
 
 import (
-	"github.com/yyyogev/logzio_terraform_provider/logzio"
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -44,18 +43,22 @@ func resourceSubAccount() *schema.Resource {
 			subAccountMaxDailyGB: {
 				Type:	schema.TypeFloat,
 				Optional:	true,
+				Default:	3,
 			},
 			subAccountRetentionDays: {
 				Type:	schema.TypeInt,
 				Optional:	true,
+				Default:	3,
 			},
 			subAccountSearchable: {
 				Type:	schema.TypeBool,
 				Optional:	true,
+				Default:	true,
 			},
 			subAccountDocSizeSetting: {
 				Type:	schema.TypeBool,
 				Optional:	true,
+
 			},
 			subAccountSharingObjectsAccounts: {
 				Type:	schema.TypeList,
@@ -98,7 +101,7 @@ func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	subAccountId := strconv.FormatInt(u.Id, logzio.BASE_10)
+	subAccountId := strconv.FormatInt(u.Id, BASE_10)
 	d.SetId(subAccountId)
 
 	return nil
