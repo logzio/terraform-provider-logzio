@@ -39,7 +39,10 @@ func dataSourceSubAccount() *schema.Resource {
 				Optional:	true,
 			},
 			subAccountSharingObjectsAccounts: {
-				Type:	schema.TypeList,
+				Type:	schema.TypeSet,
+				Elem: &schema.Schema{
+					Type: schema.TypeInt,
+				},
 				Optional:	true,
 			},
 			subAccountUtilizationSettings: {

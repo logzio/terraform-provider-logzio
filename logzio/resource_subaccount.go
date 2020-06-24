@@ -34,35 +34,39 @@ func resourceSubAccount() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			subAccountEmail: {
 				Type:	schema.TypeString,
-				Optional:	true,
+				Required:	true,
 			},
-			subAccountToken: {
+			subAccountName: {
 				Type:	schema.TypeString,
 				Required:	true,
 			},
 			subAccountMaxDailyGB: {
 				Type:	schema.TypeFloat,
 				Optional:	true,
-				Default:	3,
 			},
 			subAccountRetentionDays: {
 				Type:	schema.TypeInt,
-				Optional:	true,
-				Default:	3,
+				Required:	true,
 			},
 			subAccountSearchable: {
 				Type:	schema.TypeBool,
 				Optional:	true,
-				Default:	true,
+			},
+			subAccountAccessible: {
+				Type:	schema.TypeBool,
+				Optional:	true,
+			},
+			subAccountSharingObjectsAccounts: {
+				Type:	schema.TypeSet,
+				Elem: &schema.Schema{
+					Type: schema.TypeInt,
+				},
+				Required:	true,
 			},
 			subAccountDocSizeSetting: {
 				Type:	schema.TypeBool,
 				Optional:	true,
 
-			},
-			subAccountSharingObjectsAccounts: {
-				Type:	schema.TypeList,
-				Optional:	true,
 			},
 			subAccountUtilizationSettings: {
 				Type:	schema.TypeMap,
