@@ -76,19 +76,13 @@ func resourceSubAccount() *schema.Resource {
 	}
 }
 
-func getSubAccountFromResource(data *schema.ResourceData, id int64) sub_accounts.SubAccount {
+func getMinimalSubAccountFromResource(data *schema.ResourceData) sub_accounts.SubAccount {
 	return sub_accounts.SubAccount{
-		Id:                    id,
 		AccountName:           data.Get(subAccountName).(string),
-		AccountToken:          data.Get(subAccountToken).(string),
 		Email:                 data.Get(subAccountEmail).(string),
-		MaxDailyGB:            data.Get(subAccountMaxDailyGB).(float32),
-		RetentionDays:         data.Get(subAccountRetentionDays).(int32),
-		Searchable:            data.Get(subAccountSearchable).(bool),
-		Accessible:            data.Get(subAccountAccessible).(bool),
+		RetentionDays:         int32(data.Get(subAccountRetentionDays).(int)),
 		SharingObjectAccounts: data.Get(subAccountSharingObjectsAccounts).([]interface{}),
-		UtilizationSettings:   data.Get(subAccountUtilizationSettings).(map[string]interface{}),
-		DocSizeSetting:        data.Get(subAccountDocSizeSetting).(bool),
+
 	}
 }
 
@@ -99,7 +93,7 @@ func subAccountClient(m interface{}) *sub_accounts.SubAccountClient {
 }
 
 func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
-	subAccount := getSubAccountFromResource(d, int64(d.Get(subAccountId).(int)))
+	subAccount := getMinimalSubAccountFromResource(d)
 
 	u, err := subAccountClient(m).CreateSubAccount(subAccount)
 	if err != nil {
@@ -132,7 +126,8 @@ func resourceSubAccountUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	subAccount := getSubAccountFromResource(d, id)
+	subAccount := getMinimalSubAccountFromResource(d)
+	subAccount.Id = id
 
 	err = subAccountClient(m).UpdateSubAccount(id, subAccount)
 	if err != nil {
