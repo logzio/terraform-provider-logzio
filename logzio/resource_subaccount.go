@@ -8,17 +8,17 @@ import (
 )
 
 const (
-	subAccountId  						string = "accountId"
+	subAccountId  						string = "account_id"
 	subAccountEmail						string = "email"
-	subAccountName  					string = "accountName"
-	subAccountToken 					string = "accountToken"
-	subAccountMaxDailyGB				string = "maxDailyGB"
-	subAccountRetentionDays				string = "retentionDays"
+	subAccountName  					string = "account_name"
+	subAccountToken 					string = "account_token"
+	subAccountMaxDailyGB				string = "max_daily_gb"
+	subAccountRetentionDays				string = "retention_days"
 	subAccountSearchable				string = "searchable"
 	subAccountAccessible				string = "accessible"
-	subAccountDocSizeSetting			string = "docSizeSetting"
-	subAccountSharingObjectsAccounts	string = "sharingObjectsAccounts"
-	subAccountUtilizationSettings		string = "utilizationSettings"
+	subAccountDocSizeSetting			string = "doc_size_setting"
+	subAccountSharingObjectsAccounts	string = "sharing_objects_accounts"
+	subAccountUtilizationSettings		string = "utilization_settings"
 )
 
 /**
