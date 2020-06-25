@@ -179,8 +179,8 @@ github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8/go.mod h1:Nht
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/jonboulle/clockwork v0.1.0/go.mod h1:Ii8DK3G1RaLaWxj9trq07+26W01tbo22gdxWY5EU2bo=
-github.com/jonboydell/logzio_client v1.2.0 h1:SkvYSgpJcLG0P9agjwF99oFiKtBiaXH8MZt7OmtwmvQ=
-github.com/jonboydell/logzio_client v1.2.0/go.mod h1:ZXJYF4M9/chuG+4fQDS9BN6CqXqokUjtQOjdMqzGC/Y=
+github.com/logzio/logzio_terraform_client v1.2.0 h1:SkvYSgpJcLG0P9agjwF99oFiKtBiaXH8MZt7OmtwmvQ=
+github.com/logzio/logzio_terraform_client v1.2.0/go.mod h1:ZXJYF4M9/chuG+4fQDS9BN6CqXqokUjtQOjdMqzGC/Y=
 github.com/joyent/triton-go v0.0.0-20180313100802-d8f9c0314926/go.mod h1:U+RSyWxWd04xTqnuOQxnai7XGS2PrPY2cfGoDKtMHjA=
 github.com/json-iterator/go v1.1.5/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
 github.com/jtolds/gls v4.2.1+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfVYBRgL+9YlvaHOwJU=

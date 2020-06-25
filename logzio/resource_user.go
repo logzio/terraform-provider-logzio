@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jonboydell/logzio_client/users"
+	"github.com/logzio/logzio_terraform_client/users"
 )
 
 const (

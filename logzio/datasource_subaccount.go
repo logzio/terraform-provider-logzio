@@ -3,7 +3,7 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jonboydell/logzio_client/sub_accounts"
+	"github.com/logzio/logzio_terraform_client/sub_accounts"
 )
 
 func dataSourceSubAccount() *schema.Resource {

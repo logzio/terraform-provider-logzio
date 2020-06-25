@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jonboydell/logzio_client/sub_accounts"
+	"github.com/logzio/logzio_terraform_client/sub_accounts"
 )
 
 const (
@@ -76,16 +76,6 @@ func resourceSubAccount() *schema.Resource {
 	}
 }
 
-func getMinimalSubAccountFromResource(data *schema.ResourceData) sub_accounts.SubAccount {
-	return sub_accounts.SubAccount{
-		AccountName:           data.Get(subAccountName).(string),
-		Email:                 data.Get(subAccountEmail).(string),
-		RetentionDays:         int32(data.Get(subAccountRetentionDays).(int)),
-		SharingObjectAccounts: data.Get(subAccountSharingObjectsAccounts).([]interface{}),
-
-	}
-}
-
 func subAccountClient(m interface{}) *sub_accounts.SubAccountClient {
 	var client *sub_accounts.SubAccountClient
 	client, _ = sub_accounts.New(m.(Config).apiToken, m.(Config).baseUrl)
@@ -93,7 +83,12 @@ func subAccountClient(m interface{}) *sub_accounts.SubAccountClient {
 }
 
 func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
-	subAccount := getMinimalSubAccountFromResource(d)
+	subAccount := sub_accounts.SubAccount{
+		AccountName:           d.Get(subAccountName).(string),
+		Email:                 d.Get(subAccountEmail).(string),
+		RetentionDays:         int32(d.Get(subAccountRetentionDays).(int)),
+		SharingObjectAccounts: d.Get(subAccountSharingObjectsAccounts).([]interface{}),
+	}
 
 	u, err := subAccountClient(m).CreateSubAccount(subAccount)
 	if err != nil {

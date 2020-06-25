@@ -6,7 +6,7 @@ jobs:
   build:
     docker:
       - image: circleci/golang:1.12
-    working_directory: /go/src/github.com/jonboydell/logzio_client
+    working_directory: /go/src/github.com/logzio/logzio_terraform_client
     steps:
       - checkout
       - run: mkdir -p build
@@ -15,7 +15,7 @@ jobs:
   acceptance_test:
     docker:
       - image: circleci/golang:1.12
-    working_directory: /go/src/github.com/jonboydell/logzio_client
+    working_directory: /go/src/github.com/logzio/logzio_terraform_client
     steps:
       - checkout
       - run: GO111MODULE=on go get -v -t ./...
