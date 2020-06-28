@@ -57,7 +57,7 @@ func resourceSubAccount() *schema.Resource {
 				Optional:	true,
 			},
 			subAccountSharingObjectsAccounts: {
-				Type:	schema.TypeSet,
+				Type:	schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
@@ -83,11 +83,17 @@ func subAccountClient(m interface{}) *sub_accounts.SubAccountClient {
 }
 
 func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
-	subAccount := sub_accounts.SubAccount{
+	sharingAccounts := d.Get(subAccountSharingObjectsAccounts).([]interface{})
+	var sharingObjectAccounts []int32
+	for _, accountId := range sharingAccounts {
+		sharingObjectAccounts = append(sharingObjectAccounts, int32(accountId.(int)))
+	}
+
+	subAccount := sub_accounts.SubAccountCreate{
 		AccountName:           d.Get(subAccountName).(string),
 		Email:                 d.Get(subAccountEmail).(string),
 		RetentionDays:         int32(d.Get(subAccountRetentionDays).(int)),
-		SharingObjectAccounts: d.Get(subAccountSharingObjectsAccounts).([]interface{}),
+		SharingObjectAccounts: sharingObjectAccounts,
 	}
 
 	u, err := subAccountClient(m).CreateSubAccount(subAccount)
@@ -121,8 +127,19 @@ func resourceSubAccountUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	subAccount := getMinimalSubAccountFromResource(d)
-	subAccount.Id = id
+	subAccount := sub_accounts.SubAccount{
+		Id:					   	id,
+		AccountName:           	d.Get(subAccountName).(string),
+		Email:                 	d.Get(subAccountEmail).(string),
+		RetentionDays:         	int32(d.Get(subAccountRetentionDays).(int)),
+		SharingObjectAccounts: 	d.Get(subAccountSharingObjectsAccounts).([]interface{}),
+		MaxDailyGB:			   	d.Get(subAccountMaxDailyGB).(float32),
+		AccountToken:			d.Get(subAccountToken).(string),
+		Searchable:			   	d.Get(subAccountSearchable).(bool),
+		Accessible:			   	d.Get(subAccountAccessible).(bool),
+		DocSizeSetting:			d.Get(subAccountDocSizeSetting).(bool),
+		UtilizationSettings:	d.Get(subAccountUtilizationSettings).(map[string]interface{}),
+	}
 
 	err = subAccountClient(m).UpdateSubAccount(id, subAccount)
 	if err != nil {
