@@ -16,7 +16,8 @@ bash <(curl -s https://raw.githubusercontent.com/logzio/logzio_terraform_provide
 
 #### Using the provider
 
-Note: logz.io provides multiple endpoints for their service, if you are not using the default, `https://api.logz.io` then you'll have to specify an override in the provider.
+**Note**: We provide multiple API endpoints by region, find your API host in [accounts & regions](https://docs.logz.io/user-guide/accounts/account-region.html#regions-and-urls). Default: api.logz.io
+
 ```hcl-terraform
 provider "logzio" {
   api_token = "${var.api_token}"
