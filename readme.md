@@ -1,31 +1,17 @@
 # Logz.io Terraform provider
 
-|branch|build status|
-|---|---|
-|develop|[![CircleCI](https://circleci.com/gh/jonboydell/logzio_terraform_provider/tree/develop.svg?style=svg)](https://circleci.com/gh/jonboydell/logzio_terraform_provider/tree/develop)|
-
-### Supports CRUD of Logz.io user, alerts and notification endpoints
+### Supports CRUD of Logz.io users, alerts and notification endpoints
 
 This provider is based on the Logz.io client library - https://github.com/jonboydell/logzio_client
 
-#### What's new?
-
-- 1.1.3 - examples now use TF12
-- 1.1.3 - will now generate the meta data needed for the IntelliJ type IDE HCL plugin
-- 1.1.3 - no more travis - just circle CI
-- 1.1.3 - version bump to use the latest TF library (0.12.6), now compatible with TF12
-- 1.1.2 - Moved some of the source code around to comply with TF provider layout convention
-- 1.1.2 - Moved the examples into an examples directory
+#### Requirements
+Terraform 0.10.x
 
 #### Obtaining the provider
 
-The easiest way to get the provider and the JetBrains IDE HCL meta-data is to run the `./scripts/update_plugin.sh` and edit the `PROVIDER_VERSION` variable to get the right provider version.
-
-However...
-
-To build; from the project root (on a *nix style system), this will copy it into your [plugins directory](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins).  You can copy it into your Terraform templates folder too.
+The easiest way to get the provider is to run the `./scripts/update_plugin.sh` and edit the `PROVIDER_VERSION` variable to get the desired provider version. To get the latest:
 ```bash
-./scripts/build.sh
+bash <(curl -s https://raw.githubusercontent.com/logzio/logzio_terraform_provider/master/scripts/update_plugin.sh) 
 ```
 
 #### Using the provider
@@ -75,10 +61,30 @@ resource "logzio_alert" "my_alert" {
 #### Running the tests
 `GO111MODULE=on TF_ACC=true go test -v .`
 
+#### Build from source
+
+To build from the project root, this will copy it into your [plugins directory](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins).  You can copy it into your Terraform templates folder too.
+```bash
+./scripts/build.sh
+```
+**Note**: This build would work on Unix system, for other OSs, set the `GOOS` env variable before running the build script. For example:
+```bash
+export GOOS=windows
+```
+
+#### Changelog?
+
+- 1.1.3 - examples now use TF12
+- 1.1.3 - will now generate the meta data needed for the IntelliJ type IDE HCL plugin
+- 1.1.3 - no more travis - just circle CI
+- 1.1.3 - version bump to use the latest TF library (0.12.6), now compatible with TF12
+- 1.1.2 - Moved some of the source code around to comply with TF provider layout convention
+- 1.1.2 - Moved the examples into an examples directory
+
 #### Doens't work?
 
-Do an [https://github.com/jonboydell/logzio_terraform_provider/issues](issue).
-Fix it yourself and do a [https://github.com/jonboydell/logzio_terraform_provider/pulls](PR), please create any fix branches from `develop`.  They'll be merged back into `develop` and go `master` from there.  Releases are from `master`.
+Do an [https://github.com/logzio/logzio_terraform_provider/issues](issue).
+Or fix it yourself and do a [https://github.com/logzio/logzio_terraform_provider/pulls](PR).
 
 #### License
 
