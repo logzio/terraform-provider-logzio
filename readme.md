@@ -59,12 +59,17 @@ resource "logzio_alert" "my_alert" {
 }
 ```
 
+See more of our examples at https://github.com/logzio/logzio_terraform_provider/tree/master/examples
+
 #### Running the tests
 `GO111MODULE=on TF_ACC=true go test -v .`
 
 #### Build from source
 
-To build from the project root, this will copy it into your [plugins directory](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins).  You can copy it into your Terraform templates folder too.
+#### Requirements
+* Go 1.11
+
+To build from the project root, this will copy it into your [plugins directory](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins). 
 ```bash
 ./scripts/build.sh
 ```
@@ -75,18 +80,17 @@ export GOOS=windows
 
 #### Changelog?
 
-- 1.1.3 - examples now use TF12
-- 1.1.3 - will now generate the meta data needed for the IntelliJ type IDE HCL plugin
-- 1.1.3 - no more travis - just circle CI
-- 1.1.3 - version bump to use the latest TF library (0.12.6), now compatible with TF12
-- 1.1.2 - Moved some of the source code around to comply with TF provider layout convention
-- 1.1.2 - Moved the examples into an examples directory
+- v1.1.3 
+    - examples now use TF12
+    - will now generate the meta data needed for the IntelliJ type IDE HCL plugin
+    - no more travis - just circle CI
+    - version bump to use the latest TF library (0.12.6), now compatible with TF12
+- 1.1.2 
+    - Moved some of the source code around to comply with TF provider layout convention
+    - Moved the examples into an examples directory
 
 #### Doens't work?
 
-Do an [https://github.com/logzio/logzio_terraform_provider/issues](issue).
-Or fix it yourself and do a [https://github.com/logzio/logzio_terraform_provider/pulls](PR).
+Open an [issue](https://github.com/logzio/logzio_terraform_provider/issues).
+Or fix it yourself and open a [PR](https://github.com/logzio/logzio_terraform_provider/pulls).
 
-#### License
-
-[![FOSSA Status](https://app.fossa.io/api/projects/custom%2B8359%2Fgit%40github.com%3Ajonboydell%2Flogzio_terraform_provider.git.svg?type=large)](https://app.fossa.io/projects/custom%2B8359%2Fgit%40github.com%3Ajonboydell%2Flogzio_terraform_provider.git?ref=badge_large)
