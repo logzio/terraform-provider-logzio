@@ -67,20 +67,20 @@ func dataSourceSubaccountRead(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	accountToken, ok := d.GetOk(subAccountToken)
-	if ok {
-		list, err := client.ListSubAccounts()
-		if err != nil {
-			return err
-		}
-		for i := 0; i < len(list); i++ {
-			subAccount := list[i]
-			if subAccount.AccountToken == accountToken {
-				setSubAccount(d, &subAccount)
-				return nil
-			}
-		}
-	}
+	//accountToken, ok := d.GetOk(subAccountToken)
+	//if ok {
+	//	list, err := client.ListSubAccounts()
+	//	if err != nil {
+	//		return err
+	//	}
+	//	for i := 0; i < len(list); i++ {
+	//		subAccount := list[i]
+	//		if subAccount.AccountToken == accountToken {
+	//			setSubAccount(d, &subAccount)
+	//			return nil
+	//		}
+	//	}
+	//}
 
 	return fmt.Errorf("couldn't find sub-account with specified attributes")
 }
@@ -88,8 +88,8 @@ func dataSourceSubaccountRead(d *schema.ResourceData, m interface{}) error {
 func setSubAccount(data *schema.ResourceData, subAccount *sub_accounts.SubAccount) {
 	data.SetId(fmt.Sprintf("%d", subAccount.Id))
 	data.Set(subAccountName, subAccount.AccountName)
-	data.Set(subAccountEmail, subAccount.Email)
-	data.Set(subAccountToken, subAccount.AccountToken)
+	//data.Set(subAccountEmail, subAccount.Email)
+	//data.Set(subAccountToken, subAccount.AccountToken)
 	data.Set(subAccountDocSizeSetting, subAccount.DocSizeSetting)
 	data.Set(subAccountUtilizationSettings, subAccount.UtilizationSettings)
 	data.Set(subAccountAccessible, subAccount.Accessible)

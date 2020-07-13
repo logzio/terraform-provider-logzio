@@ -130,7 +130,7 @@ func resourceSubAccountUpdate(d *schema.ResourceData, m interface{}) error {
 	subAccount := sub_accounts.SubAccount{
 		Id:					   	id,
 		AccountName:           	d.Get(subAccountName).(string),
-		Email:                 	d.Get(subAccountEmail).(string),
+		//Email:                 	d.Get(subAccountEmail).(string),
 		RetentionDays:         	int32(d.Get(subAccountRetentionDays).(int)),
 		SharingObjectAccounts: 	d.Get(subAccountSharingObjectsAccounts).([]interface{}),
 		MaxDailyGB:			   	float32(d.Get(subAccountMaxDailyGB).(float64)),
