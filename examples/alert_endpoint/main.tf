@@ -10,7 +10,7 @@ provider "logzio" {
 resource "logzio_endpoint" "my_endpoint" {
   title = "my_endpoint"
   description = "hello"
-  endpoint_type = "slack"
+  endpoint_type = "Slack"
   slack {
     url = "https://this.is.com/some/url"
   }
@@ -25,10 +25,12 @@ resource "logzio_alert" "my_alert" {
   value_aggregation_type = "NONE"
   alert_notification_endpoints = ["${logzio_endpoint.my_endpoint.id}"]
   suppress_notifications_minutes = 5
-  severity_threshold_tiers = [
-    {
-      "severity" = "HIGH",
-      "threshold" = 10
+  severity_threshold_tiers {
+      severity = "HIGH"
+      threshold = 100
     }
-  ]
+  severity_threshold_tiers {
+    severity = "LOW"
+    threshold = 20
+  }
 }
