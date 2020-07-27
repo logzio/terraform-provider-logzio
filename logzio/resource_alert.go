@@ -66,7 +66,7 @@ func resourceAlert() *schema.Resource {
 			alertFilter: {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "{\"bool\":{\"must\":[], \"must_not\":[]}}",
+				Default:  "{\"bool\":{\"must\":[],\"should\":[],\"filter\":[],\"must_not\":[]}}",
 			},
 			alert_group_by_aggregation_fields: {
 				Type:     schema.TypeList,
