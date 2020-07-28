@@ -12,7 +12,11 @@ func dataSourceSubAccount() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			subAccountId: {
 				Type:	schema.TypeInt,
-				Required:	true,
+				Optional:	true,
+			},
+			subAccountName: {
+				Type:	schema.TypeString,
+				Optional: true,
 			},
 			subAccountEmail: {
 				Type:	schema.TypeString,
@@ -20,7 +24,7 @@ func dataSourceSubAccount() *schema.Resource {
 			},
 			subAccountToken: {
 				Type:	schema.TypeString,
-				Required:	true,
+				Optional:	true,
 			},
 			subAccountMaxDailyGB: {
 				Type:	schema.TypeFloat,
@@ -59,7 +63,7 @@ func dataSourceSubaccountRead(d *schema.ResourceData, m interface{}) error {
 
 	accountId, ok := d.GetOk(subAccountId)
 	if ok {
-		subAccount, err := client.GetSubAccount(accountId.(int64))
+		subAccount, err := client.GetSubAccount(int64(accountId.(int)))
 		if err != nil {
 			return err
 		}
