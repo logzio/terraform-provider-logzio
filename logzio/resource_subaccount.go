@@ -89,11 +89,41 @@ func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 		sharingObjectAccounts = append(sharingObjectAccounts, int32(accountId.(int)))
 	}
 
+	var maxDailyGB float32 = 0
+	if _, ok := d.GetOk(subAccountMaxDailyGB); ok {
+		maxDailyGB = float32(d.Get(subAccountMaxDailyGB).(float64))
+	}
+
+	searchable := false
+	if _, ok := d.GetOk(subAccountSearchable); ok {
+		searchable = d.Get(subAccountSearchable).(bool)
+	}
+
+	accessible := false
+	if _, ok := d.GetOk(subAccountAccessible); ok {
+		accessible = d.Get(subAccountAccessible).(bool)
+	}
+
+	docSizeSetting := false
+	if _, ok := d.GetOk(subAccountDocSizeSetting); ok {
+		docSizeSetting = d.Get(subAccountDocSizeSetting).(bool)
+	}
+
+	var utilizationSettings map[string]interface{} = nil
+	if _, ok := d.GetOk(subAccountUtilizationSettings); ok {
+		utilizationSettings = d.Get(subAccountUtilizationSettings).( map[string]interface{})
+	}
+
 	subAccount := sub_accounts.SubAccountCreate{
 		AccountName:           d.Get(subAccountName).(string),
 		Email:                 d.Get(subAccountEmail).(string),
 		RetentionDays:         int32(d.Get(subAccountRetentionDays).(int)),
 		SharingObjectAccounts: sharingObjectAccounts,
+		MaxDailyGB:				maxDailyGB,
+		Searchable:				searchable,
+		Accessible:				accessible,
+		DocSizeSetting:			docSizeSetting,
+		UtilizationSettings:	utilizationSettings,
 	}
 
 	u, err := subAccountClient(m).CreateSubAccount(subAccount)
