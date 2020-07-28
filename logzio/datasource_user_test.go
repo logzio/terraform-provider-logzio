@@ -13,15 +13,14 @@ func TestAccDataSourceUser(t *testing.T) {
 
 	username := "test_datasource_user@tfacctest.com"
 	fullname := "test test"
-	if v := os.Getenv(envLogzioAccountId); v == "" {
-		t.Log(v)
-		t.Fatalf("%s must be set for acceptance tests", envLogzioAccountId)
-	}
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
 	terraformPlan := testAccCheckLogzioUserDatasourceConfig(username, fullname, accountId)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() {
+			testAccPreCheckApiToken(t)
+			testAccPreCheckAccountId(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

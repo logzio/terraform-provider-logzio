@@ -14,21 +14,17 @@ const (
 
 func TestAccDataSourceSubaccount(t *testing.T) {
 	resourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
-	if v := os.Getenv(envLogzioAccountId); v == "" {
-		t.Log(v)
-		t.Fatalf("%s must be set for acceptance tests", envLogzioAccountId)
-	}
-	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
 
-	if v := os.Getenv(envLogzioEmail); v == "" {
-		t.Log(v)
-		t.Fatalf("%s must be set for acceptance tests", envLogzioEmail)
-	}
+	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
 	terraformPlan := testAccCheckLogzioSubaccountDatasourceConfig(email, accountId)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() {
+			testAccPreCheckApiToken(t)
+			testAccPreCheckEmail(t)
+			testAccPreCheckAccountId(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
