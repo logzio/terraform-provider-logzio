@@ -108,7 +108,7 @@ func getAlert(client *alerts.AlertsClient, alertId int64, retries int) (*alerts.
 func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
 	var client *alerts.AlertsClient
 	client, _ = alerts.New(m.(Config).apiToken, m.(Config).baseUrl)
-	alertIdString, ok := d.GetOk(alertId);
+	alertIdString, ok := d.GetOk(alertId)
 	if ok {
 		id := int64(alertIdString.(int))
 		alert, err := getAlert(client, id, 3)
