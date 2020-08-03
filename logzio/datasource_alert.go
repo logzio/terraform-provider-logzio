@@ -34,6 +34,13 @@ func dataSourceAlert() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			alertTags: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			alert_group_by_aggregation_fields: {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -121,6 +128,7 @@ func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
 		d.Set(alertCreatedBy, alert.CreatedBy)
 		d.Set(alertDescription, alert.Description)
 		d.Set(alertFilter, alert.Filter)
+		d.Set(alertTags, alert.Tags)
 		d.Set(alert_group_by_aggregation_fields, alert.GroupByAggregationFields)
 		d.Set(alert_last_triggered_at, alert.LastTriggeredAt)
 		d.Set(alert_last_updated, alert.LastUpdated)
@@ -150,6 +158,7 @@ func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
 				d.Set(alertCreatedBy, alert.CreatedBy)
 				d.Set(alertDescription, alert.Description)
 				d.Set(alertFilter, alert.Filter)
+				d.Set(alertTags, alert.Tags)
 				d.Set(alert_group_by_aggregation_fields, alert.GroupByAggregationFields)
 				d.Set(alert_last_triggered_at, alert.LastTriggeredAt)
 				d.Set(alert_last_updated, alert.LastUpdated)
