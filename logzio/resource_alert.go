@@ -320,7 +320,7 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 	title := d.Get(alert_title).(string)
 	searchTimeFrameMinutes := d.Get(alert_search_timeframe_minutes).(int)
 
-	var tags []string
+	tags := []string{}
 	for _, tag := range d.Get(alertTags).([]interface{}) {
 		tags = append(tags, tag.(string))
 	}

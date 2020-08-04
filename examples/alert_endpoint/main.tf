@@ -33,4 +33,5 @@ resource "logzio_alert" "my_alert" {
     severity = "LOW"
     threshold = 20
   }
+  tags = ["some", "words"]
 }
