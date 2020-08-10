@@ -15,7 +15,7 @@ func TestAccLogzioUser_CreateUser(t *testing.T) {
 	terraformPlan := testAccCheckLogzioUserConfig(username, "test test", accountId)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckApiToken(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{

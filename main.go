@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/jonboydell/logzio_terraform_provider/logzio"
+	"github.com/logzio/logzio_terraform_provider/logzio"
 )
 
 func main() {

@@ -6,7 +6,7 @@
 
 ### Supports CRUD of Logz.io user, alerts and notification endpoints
 
-This provider is based on the Logz.io client library - https://github.com/jonboydell/logzio_client
+This provider is based on the Logz.io client library - https://github.com/logzio/logzio_terraform_client
 
 #### What's new?
 

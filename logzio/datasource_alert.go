@@ -3,7 +3,7 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jonboydell/logzio_client/alerts"
+	"github.com/logzio/logzio_terraform_client/alerts"
 	"time"
 )
 
@@ -33,6 +33,13 @@ func dataSourceAlert() *schema.Resource {
 			alertFilter: {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			alertTags: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			alert_group_by_aggregation_fields: {
 				Type:     schema.TypeList,
@@ -108,7 +115,7 @@ func getAlert(client *alerts.AlertsClient, alertId int64, retries int) (*alerts.
 func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
 	var client *alerts.AlertsClient
 	client, _ = alerts.New(m.(Config).apiToken, m.(Config).baseUrl)
-	alertIdString, ok := d.GetOk(alertId);
+	alertIdString, ok := d.GetOk(alertId)
 	if ok {
 		id := int64(alertIdString.(int))
 		alert, err := getAlert(client, id, 3)
@@ -121,6 +128,7 @@ func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
 		d.Set(alertCreatedBy, alert.CreatedBy)
 		d.Set(alertDescription, alert.Description)
 		d.Set(alertFilter, alert.Filter)
+		d.Set(alertTags, alert.Tags)
 		d.Set(alert_group_by_aggregation_fields, alert.GroupByAggregationFields)
 		d.Set(alert_last_triggered_at, alert.LastTriggeredAt)
 		d.Set(alert_last_updated, alert.LastUpdated)
@@ -150,6 +158,7 @@ func dataSourceAlertRead(d *schema.ResourceData, m interface{}) error {
 				d.Set(alertCreatedBy, alert.CreatedBy)
 				d.Set(alertDescription, alert.Description)
 				d.Set(alertFilter, alert.Filter)
+				d.Set(alertTags, alert.Tags)
 				d.Set(alert_group_by_aggregation_fields, alert.GroupByAggregationFields)
 				d.Set(alert_last_triggered_at, alert.LastTriggeredAt)
 				d.Set(alert_last_updated, alert.LastUpdated)

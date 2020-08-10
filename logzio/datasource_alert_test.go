@@ -9,7 +9,7 @@ func TestAccDataSourceLogzIoAlert(t *testing.T) {
 	resourceName := "data.logzio_alert.alert_datasource_by_id"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

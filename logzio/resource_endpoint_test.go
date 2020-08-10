@@ -13,7 +13,7 @@ import (
 
 func TestAccLogzioEndpoint_CreateSlackEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckApiToken(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -31,7 +31,7 @@ func TestAccLogzioEndpoint_CreateSlackEndpoint(t *testing.T) {
 
 func TestAccLogzioEndpoint_CreateInvalidSlackEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckApiToken(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -47,7 +47,7 @@ func TestAccLogzioEndpoint_UpdateSlackEndpoint(t *testing.T) {
 	resourceName := "logzio_endpoint." + endpointName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckApiToken(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -70,7 +70,7 @@ func TestAccLogzioEndpoint_UpdateSlackEndpoint(t *testing.T) {
 
 func TestAccLogzioEndpoint_CreateCustomEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckApiToken(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -86,7 +86,7 @@ func TestAccLogzioEndpoint_CreateCustomEndpoint(t *testing.T) {
 
 func TestAccLogzioEndpoint_PagerDuty_HappyPath(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckApiToken(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -102,7 +102,7 @@ func TestAccLogzioEndpoint_PagerDuty_HappyPath(t *testing.T) {
 
 func TestAccLogzioEndpoint_BigPanda_HappyPath(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckApiToken(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
