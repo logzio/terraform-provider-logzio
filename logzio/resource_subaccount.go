@@ -94,15 +94,8 @@ func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 		maxDailyGB = float32(d.Get(subAccountMaxDailyGB).(float64))
 	}
 
-	searchable := false
-	if _, ok := d.GetOk(subAccountSearchable); ok {
-		searchable = d.Get(subAccountSearchable).(bool)
-	}
-
-	accessible := false
-	if _, ok := d.GetOk(subAccountAccessible); ok {
-		accessible = d.Get(subAccountAccessible).(bool)
-	}
+	searchable := d.Get(subAccountSearchable).(bool)
+	accessible := d.Get(subAccountAccessible).(bool)
 
 	docSizeSetting := false
 	if _, ok := d.GetOk(subAccountDocSizeSetting); ok {

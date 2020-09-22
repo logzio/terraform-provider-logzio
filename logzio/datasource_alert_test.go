@@ -19,6 +19,7 @@ func TestAccDataSourceLogzIoAlert(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "title", "hello"),
 					resource.TestCheckResourceAttr(resourceName, "query_string", "loglevel:ERROR"),
 					resource.TestCheckResourceAttr(resourceName, "operation", "GREATER_THAN"),
+					resource.TestCheckResourceAttr(resourceName, "is_enabled", "false"),
 				),
 			},
 		},

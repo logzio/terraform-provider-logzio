@@ -23,6 +23,7 @@ func TestAccLogzioAlert_CreateAlert(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "severity_threshold_tiers.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "severity_threshold_tiers.0.severity", "HIGH"),
 					resource.TestCheckResourceAttr(resourceName, "severity_threshold_tiers.0.threshold", "10"),
+					resource.TestCheckResourceAttr(resourceName, "is_enabled", "false"),
 				),
 			},
 		},
