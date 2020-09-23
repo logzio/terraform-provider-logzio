@@ -30,6 +30,13 @@ func TestAccLogzioSubaccount_CreateSubaccount(t *testing.T) {
 						"logzio_subaccount.test_subaccount", "email", email),
 				),
 			},
+			{
+				Config: terraformPlan,
+				ResourceName:      "logzio_subaccount.test_subaccount",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"email"},
+			},
 		},
 	})
 }

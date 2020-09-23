@@ -83,5 +83,9 @@ func setSubAccount(data *schema.ResourceData, subAccount *sub_accounts.SubAccoun
 	data.Set(subAccountSearchable, subAccount.Searchable)
 	data.Set(subAccountRetentionDays, subAccount.RetentionDays)
 	data.Set(subAccountMaxDailyGB, subAccount.MaxDailyGB)
-	data.Set(subAccountSharingObjectsAccounts, subAccount.SharingObjectAccounts)
+	var sharingObjectAccounts []int32
+	for _, account := range subAccount.SharingObjectAccounts {
+		sharingObjectAccounts = append(sharingObjectAccounts, int32((account.(map[string]interface{}))["accountId"].(float64)))
+	}
+	data.Set(subAccountSharingObjectsAccounts, sharingObjectAccounts)
 }

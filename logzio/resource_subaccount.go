@@ -30,6 +30,9 @@ func resourceSubAccount() *schema.Resource {
 		Read:   resourceSubAccountRead,
 		Update: resourceSubAccountUpdate,
 		Delete: resourceSubAccountDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			subAccountEmail: {
