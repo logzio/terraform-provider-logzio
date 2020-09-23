@@ -25,6 +25,12 @@ func TestAccLogzioUser_CreateUser(t *testing.T) {
 						"logzio_user.test_user", "username", username),
 				),
 			},
+			{
+				Config: terraformPlan,
+				ResourceName:      "logzio_user.test_user",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
