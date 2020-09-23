@@ -43,6 +43,9 @@ func resourceEndpoint() *schema.Resource {
 		Read:   resourceEndpointRead,
 		Update: resourceEndpointUpdate,
 		Delete: resourceEndpointDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			endpointType: {

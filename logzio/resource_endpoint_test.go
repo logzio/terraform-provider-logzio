@@ -25,6 +25,11 @@ func TestAccLogzioEndpoint_CreateSlackEndpoint(t *testing.T) {
 					resource.TestMatchOutput("test_id", regexp.MustCompile("\\d")),
 				),
 			},
+			{
+				ResourceName:      "logzio_endpoint.valid_slack_endpoint",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
