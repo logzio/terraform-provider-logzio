@@ -26,6 +26,12 @@ func TestAccLogzioAlert_CreateAlert(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "false"),
 				),
 			},
+			{
+				Config: resourceCreateAlert(alertName),
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

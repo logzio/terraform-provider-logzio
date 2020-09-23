@@ -51,6 +51,9 @@ func resourceAlert() *schema.Resource {
 		Read:   resourceAlertRead,
 		Update: resourceAlertUpdate,
 		Delete: resourceAlertDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			alertNotificationEndpoints: {
