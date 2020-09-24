@@ -148,7 +148,6 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
 - v1.1.5
     - Fix boolean parameters not parsed bug
     - Support import command to state
-    - Endpoints types are now case insensitive
 - v1.1.4
     - Support Sub Accounts resource
     - few bug fixes
