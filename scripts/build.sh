@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -xe
+#!/usr/bin/env bash
 TERRAFORM_HOME=~/.terraform.d
 
 #GO111MODULE=on go get -v -t ./...
