@@ -10,18 +10,17 @@ import (
 
 func TestAccLogzioSubaccount_CreateSubaccount(t *testing.T) {
 
-
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountId)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() {
+		PreCheck: func() {
 			testAccPreCheckApiToken(t)
 			testAccPreCheckAccountId(t)
 			testAccPreCheckEmail(t)
 		},
-		Providers:    testAccProviders,
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,

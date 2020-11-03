@@ -18,7 +18,7 @@ const (
 	alertCreatedBy                       string = "created_by"
 	alertDescription                     string = "description"
 	alertFilter                          string = "filter"
-	alertTags							 string = "tags"
+	alertTags                            string = "tags"
 	alert_group_by_aggregation_fields    string = "group_by_aggregation_fields"
 	alert_is_enabled                     string = "is_enabled"
 	alert_query_string                   string = "query_string"
@@ -206,7 +206,7 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 		AlertNotificationEndpoints:   alertNotificationEndpoints,
 		Description:                  description,
 		Filter:                       filter,
-		Tags:						  tags,
+		Tags:                         tags,
 		IsEnabled:                    isEnabled,
 		NotificationEmails:           notificationEmails,
 		Operation:                    operation,
@@ -351,7 +351,7 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 		AlertNotificationEndpoints:   alertNotificationEndpoints,
 		Description:                  description,
 		Filter:                       filter,
-		Tags:						  tags,
+		Tags:                         tags,
 		IsEnabled:                    isEnabled,
 		NotificationEmails:           notificationEmails,
 		Operation:                    operation,

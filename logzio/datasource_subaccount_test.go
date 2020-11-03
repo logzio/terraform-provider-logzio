@@ -20,7 +20,7 @@ func TestAccDataSourceSubaccount(t *testing.T) {
 	terraformPlan := testAccCheckLogzioSubaccountDatasourceConfig(email, accountId)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() {
+		PreCheck: func() {
 			testAccPreCheckApiToken(t)
 			testAccPreCheckEmail(t)
 			testAccPreCheckAccountId(t)
@@ -29,7 +29,7 @@ func TestAccDataSourceSubaccount(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExpectNonEmptyPlan: true,
-				Config: terraformPlan,
+				Config:             terraformPlan,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "account_name", "test"),
 					resource.TestCheckResourceAttr(resourceName, "retention_days", "2"),

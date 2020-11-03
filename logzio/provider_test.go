@@ -47,4 +47,3 @@ func testAccPreCheckAccountId(t *testing.T) {
 func testAccPreCheckEmail(t *testing.T) {
 	testAccPreCheckEnv(t, envLogzioEmail)
 }
-

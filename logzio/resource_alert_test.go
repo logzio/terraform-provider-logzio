@@ -13,8 +13,8 @@ func TestAccLogzioAlert_CreateAlert(t *testing.T) {
 	resourceName := "logzio_alert." + alertName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckApiToken(t) },
-		Providers:    testAccProviders,
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: resourceCreateAlert(alertName),
@@ -31,8 +31,8 @@ func TestAccLogzioAlert_CreateAlert(t *testing.T) {
 
 func TestAccLogzioAlert_UpdateAlert(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckApiToken(t) },
-		Providers:    testAccProviders,
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: resourceCreateAlert("test_update_alert"),
