@@ -104,7 +104,6 @@ func resourceUserRead(d *schema.ResourceData, m interface{}) error {
 	d.Set(userUsername, user.Username)
 	d.Set(userFullname, user.Fullname)
 
-
 	var roles []interface{}
 	for _, v := range user.Roles {
 		roles = append(roles, int(v))

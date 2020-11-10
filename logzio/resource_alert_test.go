@@ -13,10 +13,10 @@ func TestAccLogzioAlert_CreateAlert(t *testing.T) {
 	resourceName := "logzio_alert." + alertName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckApiToken(t) },
-		Providers:    testAccProviders,
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: resourceCreateAlert(alertName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "hello"),
@@ -27,7 +27,7 @@ func TestAccLogzioAlert_CreateAlert(t *testing.T) {
 				),
 			},
 			{
-				Config: resourceCreateAlert(alertName),
+				Config:            resourceCreateAlert(alertName),
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -38,17 +38,17 @@ func TestAccLogzioAlert_CreateAlert(t *testing.T) {
 
 func TestAccLogzioAlert_UpdateAlert(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckApiToken(t) },
-		Providers:    testAccProviders,
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: resourceCreateAlert("test_update_alert"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"logzio_alert.test_update_alert", "title", "hello"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: resourceUpdateAlert("test_update_alert"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(

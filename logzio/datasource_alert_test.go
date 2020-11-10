@@ -14,7 +14,7 @@ func TestAccDataSourceLogzIoAlert(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExpectNonEmptyPlan: true,
-				Config: ReadFixtureFromFile("create_alert_datasource.tf"),
+				Config:             ReadFixtureFromFile("create_alert_datasource.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "hello"),
 					resource.TestCheckResourceAttr(resourceName, "query_string", "loglevel:ERROR"),

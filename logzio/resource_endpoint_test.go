@@ -13,8 +13,8 @@ import (
 
 func TestAccLogzioEndpoint_CreateSlackEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckApiToken(t) },
-		Providers:    testAccProviders,
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: ReadFixtureFromFile("valid_slack_endpoint.tf"),
@@ -36,8 +36,8 @@ func TestAccLogzioEndpoint_CreateSlackEndpoint(t *testing.T) {
 
 func TestAccLogzioEndpoint_CreateInvalidSlackEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckApiToken(t) },
-		Providers:    testAccProviders,
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config:      ReadFixtureFromFile("invalid_slack_endpoint.tf"),
@@ -52,8 +52,8 @@ func TestAccLogzioEndpoint_UpdateSlackEndpoint(t *testing.T) {
 	resourceName := "logzio_endpoint." + endpointName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckApiToken(t) },
-		Providers:    testAccProviders,
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: ReadResourceFromFile(endpointName, "create_slack_endpoint.tf"),
@@ -63,7 +63,7 @@ func TestAccLogzioEndpoint_UpdateSlackEndpoint(t *testing.T) {
 				),
 			},
 			{
-				Config: ReadResourceFromFile(endpointName,"update_slack_endpoint.tf"),
+				Config: ReadResourceFromFile(endpointName, "update_slack_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "updated_slack_endpoint"),
@@ -75,8 +75,8 @@ func TestAccLogzioEndpoint_UpdateSlackEndpoint(t *testing.T) {
 
 func TestAccLogzioEndpoint_CreateCustomEndpoint(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckApiToken(t) },
-		Providers:    testAccProviders,
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: createCustomEndpoint("custom"),
@@ -91,8 +91,8 @@ func TestAccLogzioEndpoint_CreateCustomEndpoint(t *testing.T) {
 
 func TestAccLogzioEndpoint_PagerDuty_HappyPath(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckApiToken(t) },
-		Providers:    testAccProviders,
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLogzioEndpointConfig("pagerDutyHappyPath"),
@@ -107,8 +107,8 @@ func TestAccLogzioEndpoint_PagerDuty_HappyPath(t *testing.T) {
 
 func TestAccLogzioEndpoint_BigPanda_HappyPath(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckApiToken(t) },
-		Providers:    testAccProviders,
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLogzioEndpointConfig("bigPandaHappyPath"),
@@ -228,7 +228,6 @@ resource "logzio_endpoint" "custom" {
 	}
 	return templates[key]
 }
-
 
 func createCustomEndpoint(name string) string {
 	content, err := ioutil.ReadFile("testdata/fixtures/create_custom_endpoint.tf")
