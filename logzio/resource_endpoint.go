@@ -215,7 +215,7 @@ func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
 		Description: d.Get(endpointDescription).(string),
 	}
 
-	switch eType {
+	switch strings.ToLower(eType) {
 	case string(endpoints.EndpointTypeSlack):
 		endpoint.EndpointType = endpoints.EndpointTypeSlack
 		opts, _ := mappingsFromResourceData(d, endpointSlack)
