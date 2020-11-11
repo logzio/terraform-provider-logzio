@@ -17,7 +17,10 @@ func TestAccDataSourceUser(t *testing.T) {
 	terraformPlan := testAccCheckLogzioUserDatasourceConfig(username, fullname, accountId)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheckApiToken(t)
+			testAccPreCheckAccountId(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

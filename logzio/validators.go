@@ -2,7 +2,7 @@ package logzio
 
 import (
 	"fmt"
-	"github.com/jonboydell/logzio_client/alerts"
+	"github.com/logzio/logzio_terraform_client/alerts"
 )
 
 func contains(slice []string, s string) bool {

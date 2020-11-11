@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jonboydell/logzio_client/users"
+	"github.com/logzio/logzio_terraform_client/users"
 )
 
 const (
@@ -26,6 +26,9 @@ func resourceUser() *schema.Resource {
 		Read:   resourceUserRead,
 		Update: resourceUserUpdate,
 		Delete: resourceUserDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			userUsername: {
@@ -97,7 +100,7 @@ func resourceUserRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(fmt.Sprintf("%d", user.Id))
-	d.Set(userAccountId, fmt.Sprintf("%d", user.AccountId))
+	d.Set(userAccountId, user.AccountId)
 	d.Set(userUsername, user.Username)
 	d.Set(userFullname, user.Fullname)
 

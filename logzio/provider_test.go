@@ -32,9 +32,18 @@ func TestProviderImpl(t *testing.T) {
 	var _ terraform.ResourceProvider = Provider()
 }
 
-func testAccPreCheck(t *testing.T) {
-	if v := os.Getenv(envLogzioApiToken); v == "" {
-		t.Log(v)
-		t.Fatalf("%s must be set for acceptance tests", envLogzioApiToken)
+func testAccPreCheckEnv(t *testing.T, env string) {
+	if v := os.Getenv(env); v == "" {
+		t.Errorf("%s must be set for acceptance tests", env)
 	}
+}
+
+func testAccPreCheckApiToken(t *testing.T) {
+	testAccPreCheckEnv(t, envLogzioApiToken)
+}
+func testAccPreCheckAccountId(t *testing.T) {
+	testAccPreCheckEnv(t, envLogzioAccountId)
+}
+func testAccPreCheckEmail(t *testing.T) {
+	testAccPreCheckEnv(t, envLogzioEmail)
 }

@@ -8,12 +8,12 @@ variable "account_id" {
 }
 
 provider "logzio" {
-  api_token = "${var.api_token}"
+  api_token = var.api_token
 }
 
 resource "logzio_user" "my_user" {
   username = "test.user@this.test"
   fullname = "test user"
   roles = [ 2 ]
-  account_id = "${var.account_id}"
+  account_id = var.account_id
 }

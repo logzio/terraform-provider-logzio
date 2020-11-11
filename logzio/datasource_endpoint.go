@@ -3,7 +3,7 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jonboydell/logzio_client/endpoints"
+	"github.com/logzio/logzio_terraform_client/endpoints"
 )
 
 func dataSourceEndpoint() *schema.Resource {

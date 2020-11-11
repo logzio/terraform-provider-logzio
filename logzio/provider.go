@@ -7,16 +7,19 @@ import (
 )
 
 const (
-	providerApiToken     = "api_token"
-	providerBaseUrl      = "base_url"
-	resourceAlertType    = "logzio_alert"
-	resourceEndpointType = "logzio_endpoint"
-	resourceUserType     = "logzio_user"
-	envLogzioApiToken    = "LOGZIO_API_TOKEN"
-	envLogzioBaseURL     = "LOGZIO_BASE_URL"
-	envLogzioAccountId   = "LOGZIO_ACCOUNT_ID"
+	providerApiToken       = "api_token"
+	providerBaseUrl        = "base_url"
+	providerRegion         = "region"
+	resourceAlertType      = "logzio_alert"
+	resourceEndpointType   = "logzio_endpoint"
+	resourceUserType       = "logzio_user"
+	resourceSubAccountType = "logzio_subaccount"
+	envLogzioApiToken      = "LOGZIO_API_TOKEN"
+	envLogzioRegion        = "LOGZIO_REGION"
+	envLogzioBaseURL       = "LOGZIO_BASE_URL"
+	envLogzioAccountId     = "LOGZIO_ACCOUNT_ID"
 
-	defaultBaseUrl = "https://api.logz.io"
+	baseUrl = "https://api%s.logz.io"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -29,23 +32,25 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc(envLogzioApiToken, nil),
 				Sensitive:   true,
 			},
-			providerBaseUrl: {
+			providerRegion: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: descriptions[providerBaseUrl],
-				DefaultFunc: schema.EnvDefaultFunc(envLogzioBaseURL, defaultBaseUrl),
+				Description: descriptions[providerRegion],
+				DefaultFunc: schema.EnvDefaultFunc(envLogzioRegion, ""),
 				Sensitive:   false,
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			resourceAlertType:    dataSourceAlert(),
-			resourceEndpointType: dataSourceEndpoint(),
-			resourceUserType:     dataSourceUser(),
+			resourceAlertType:      dataSourceAlert(),
+			resourceEndpointType:   dataSourceEndpoint(),
+			resourceUserType:       dataSourceUser(),
+			resourceSubAccountType: dataSourceSubAccount(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			resourceAlertType:    resourceAlert(),
-			resourceEndpointType: resourceEndpoint(),
-			resourceUserType:     resourceUser(),
+			resourceAlertType:      resourceAlert(),
+			resourceEndpointType:   resourceEndpoint(),
+			resourceUserType:       resourceUser(),
+			resourceSubAccountType: resourceSubAccount(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
@@ -54,18 +59,24 @@ func Provider() terraform.ResourceProvider {
 var descriptions map[string]string
 
 func init() {
-	descriptions = map[string]string{providerApiToken: "Your API token", providerBaseUrl: "API base URL"}
+	descriptions = map[string]string{providerApiToken: "Your API token", providerRegion: "Your logz.io region"}
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	apiToken, ok := d.GetOk(providerApiToken)
-	baseUrl, ok := d.GetOk(providerBaseUrl)
 	if !ok {
 		return nil, fmt.Errorf("can't find the %s, either set it in the provider or set the %s env var", providerApiToken, envLogzioApiToken)
 	}
+	region := d.Get(providerRegion).(string)
+	regionCode := ""
+	if region != "" && region != "us" {
+		regionCode = fmt.Sprintf("-%s", region)
+	}
+	apiUrl := fmt.Sprintf(baseUrl, regionCode)
+
 	config := Config{
 		apiToken: apiToken.(string),
-		baseUrl:  baseUrl.(string),
+		baseUrl:  apiUrl,
 	}
 	return config, nil
 }
