@@ -25,6 +25,7 @@ resource "logzio_alert" "my_alert" {
   value_aggregation_type = "NONE"
   alert_notification_endpoints = [logzio_endpoint.my_endpoint.id]
   suppress_notifications_minutes = 5
+  is_enabled = false
   severity_threshold_tiers {
       severity = "HIGH"
       threshold = 100

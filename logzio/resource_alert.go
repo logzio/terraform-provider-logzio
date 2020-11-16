@@ -18,7 +18,7 @@ const (
 	alertCreatedBy                       string = "created_by"
 	alertDescription                     string = "description"
 	alertFilter                          string = "filter"
-	alertTags							 string = "tags"
+	alertTags                            string = "tags"
 	alert_group_by_aggregation_fields    string = "group_by_aggregation_fields"
 	alert_is_enabled                     string = "is_enabled"
 	alert_query_string                   string = "query_string"
@@ -51,6 +51,9 @@ func resourceAlert() *schema.Resource {
 		Read:   resourceAlertRead,
 		Update: resourceAlertUpdate,
 		Delete: resourceAlertDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			alertNotificationEndpoints: {
@@ -161,10 +164,7 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 	filter := d.Get(alertFilter).(string)
 
 	var isEnabled bool = true
-	_, e := d.GetOk(alert_is_enabled)
-	if e {
-		isEnabled = d.Get(alert_is_enabled).(bool)
-	}
+	isEnabled = d.Get(alert_is_enabled).(bool)
 
 	notificationEmails := d.Get(alert_notification_emails).([]interface{})
 	operation := d.Get(alert_operation).(string)
@@ -206,7 +206,7 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 		AlertNotificationEndpoints:   alertNotificationEndpoints,
 		Description:                  description,
 		Filter:                       filter,
-		Tags:						  tags,
+		Tags:                         tags,
 		IsEnabled:                    isEnabled,
 		NotificationEmails:           notificationEmails,
 		Operation:                    operation,
@@ -270,6 +270,7 @@ func resourceAlertRead(d *schema.ResourceData, m interface{}) error {
 	d.Set(alertDescription, alert.Description)
 	d.Set(alertFilter, alert.Filter)
 	d.Set(alertTags, alert.Tags)
+	d.Set(alert_is_enabled, alert.IsEnabled)
 	d.Set(alert_group_by_aggregation_fields, alert.GroupByAggregationFields)
 	d.Set(alert_last_triggered_at, alert.LastTriggeredAt)
 	d.Set(alert_last_updated, alert.LastUpdated)
@@ -309,10 +310,7 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 	filter := d.Get(alertFilter).(string)
 
 	var isEnabled = true
-	_, e := d.GetOk(alert_is_enabled)
-	if e {
-		isEnabled = d.Get(alert_is_enabled).(bool)
-	}
+	isEnabled = d.Get(alert_is_enabled).(bool)
 
 	notificationEmails := d.Get(alert_notification_emails).([]interface{})
 	operation := d.Get(alert_operation).(string)
@@ -351,7 +349,7 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 		AlertNotificationEndpoints:   alertNotificationEndpoints,
 		Description:                  description,
 		Filter:                       filter,
-		Tags:						  tags,
+		Tags:                         tags,
 		IsEnabled:                    isEnabled,
 		NotificationEmails:           notificationEmails,
 		Operation:                    operation,

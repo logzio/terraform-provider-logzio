@@ -7,7 +7,7 @@ import (
 )
 
 func ReadFixtureFromFile(fileName string) string {
-	content, err := ioutil.ReadFile("testdata/fixtures/"+fileName)
+	content, err := ioutil.ReadFile("testdata/fixtures/" + fileName)
 	if err != nil {
 		log.Fatal(err)
 	}

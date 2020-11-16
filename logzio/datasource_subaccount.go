@@ -11,47 +11,47 @@ func dataSourceSubAccount() *schema.Resource {
 		Read: dataSourceSubaccountRead,
 		Schema: map[string]*schema.Schema{
 			subAccountId: {
-				Type:	schema.TypeInt,
-				Optional:	true,
+				Type:     schema.TypeInt,
+				Optional: true,
 			},
 			subAccountName: {
-				Type:	schema.TypeString,
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 			subAccountEmail: {
-				Type:	schema.TypeString,
-				Optional:	true,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			subAccountToken: {
-				Type:	schema.TypeString,
-				Optional:	true,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			subAccountMaxDailyGB: {
-				Type:	schema.TypeFloat,
-				Optional:	true,
+				Type:     schema.TypeFloat,
+				Optional: true,
 			},
 			subAccountRetentionDays: {
-				Type:	schema.TypeInt,
-				Optional:	true,
+				Type:     schema.TypeInt,
+				Optional: true,
 			},
 			subAccountSearchable: {
-				Type:	schema.TypeBool,
-				Optional:	true,
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			subAccountDocSizeSetting: {
-				Type:	schema.TypeBool,
-				Optional:	true,
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			subAccountSharingObjectsAccounts: {
-				Type:	schema.TypeSet,
+				Type: schema.TypeSet,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
-				Optional:	true,
+				Optional: true,
 			},
 			subAccountUtilizationSettings: {
-				Type:	schema.TypeMap,
-				Optional:	true,
+				Type:     schema.TypeMap,
+				Optional: true,
 			},
 		},
 	}
@@ -83,5 +83,9 @@ func setSubAccount(data *schema.ResourceData, subAccount *sub_accounts.SubAccoun
 	data.Set(subAccountSearchable, subAccount.Searchable)
 	data.Set(subAccountRetentionDays, subAccount.RetentionDays)
 	data.Set(subAccountMaxDailyGB, subAccount.MaxDailyGB)
-	data.Set(subAccountSharingObjectsAccounts, subAccount.SharingObjectAccounts)
+	var sharingObjectAccounts []int32
+	for _, account := range subAccount.SharingObjectAccounts {
+		sharingObjectAccounts = append(sharingObjectAccounts, int32((account.(map[string]interface{}))["accountId"].(float64)))
+	}
+	data.Set(subAccountSharingObjectsAccounts, sharingObjectAccounts)
 }

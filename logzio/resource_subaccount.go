@@ -8,17 +8,17 @@ import (
 )
 
 const (
-	subAccountId  						string = "account_id"
-	subAccountEmail						string = "email"
-	subAccountName  					string = "account_name"
-	subAccountToken 					string = "account_token"
-	subAccountMaxDailyGB				string = "max_daily_gb"
-	subAccountRetentionDays				string = "retention_days"
-	subAccountSearchable				string = "searchable"
-	subAccountAccessible				string = "accessible"
-	subAccountDocSizeSetting			string = "doc_size_setting"
-	subAccountSharingObjectsAccounts	string = "sharing_objects_accounts"
-	subAccountUtilizationSettings		string = "utilization_settings"
+	subAccountId                     string = "account_id"
+	subAccountEmail                  string = "email"
+	subAccountName                   string = "account_name"
+	subAccountToken                  string = "account_token"
+	subAccountMaxDailyGB             string = "max_daily_gb"
+	subAccountRetentionDays          string = "retention_days"
+	subAccountSearchable             string = "searchable"
+	subAccountAccessible             string = "accessible"
+	subAccountDocSizeSetting         string = "doc_size_setting"
+	subAccountSharingObjectsAccounts string = "sharing_objects_accounts"
+	subAccountUtilizationSettings    string = "utilization_settings"
 )
 
 /**
@@ -30,47 +30,49 @@ func resourceSubAccount() *schema.Resource {
 		Read:   resourceSubAccountRead,
 		Update: resourceSubAccountUpdate,
 		Delete: resourceSubAccountDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			subAccountEmail: {
-				Type:	schema.TypeString,
-				Required:	true,
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			subAccountName: {
-				Type:	schema.TypeString,
-				Required:	true,
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			subAccountMaxDailyGB: {
-				Type:	schema.TypeFloat,
-				Optional:	true,
+				Type:     schema.TypeFloat,
+				Optional: true,
 			},
 			subAccountRetentionDays: {
-				Type:	schema.TypeInt,
-				Required:	true,
+				Type:     schema.TypeInt,
+				Required: true,
 			},
 			subAccountSearchable: {
-				Type:	schema.TypeBool,
-				Optional:	true,
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			subAccountAccessible: {
-				Type:	schema.TypeBool,
-				Optional:	true,
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			subAccountSharingObjectsAccounts: {
-				Type:	schema.TypeList,
+				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
-				Required:	true,
+				Required: true,
 			},
 			subAccountDocSizeSetting: {
-				Type:	schema.TypeBool,
-				Optional:	true,
-
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			subAccountUtilizationSettings: {
-				Type:	schema.TypeMap,
-				Optional:	true,
+				Type:     schema.TypeMap,
+				Optional: true,
 			},
 		},
 	}
@@ -94,15 +96,8 @@ func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 		maxDailyGB = float32(d.Get(subAccountMaxDailyGB).(float64))
 	}
 
-	searchable := false
-	if _, ok := d.GetOk(subAccountSearchable); ok {
-		searchable = d.Get(subAccountSearchable).(bool)
-	}
-
-	accessible := false
-	if _, ok := d.GetOk(subAccountAccessible); ok {
-		accessible = d.Get(subAccountAccessible).(bool)
-	}
+	searchable := d.Get(subAccountSearchable).(bool)
+	accessible := d.Get(subAccountAccessible).(bool)
 
 	docSizeSetting := false
 	if _, ok := d.GetOk(subAccountDocSizeSetting); ok {
@@ -111,7 +106,7 @@ func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 
 	var utilizationSettings map[string]interface{} = nil
 	if _, ok := d.GetOk(subAccountUtilizationSettings); ok {
-		utilizationSettings = d.Get(subAccountUtilizationSettings).( map[string]interface{})
+		utilizationSettings = d.Get(subAccountUtilizationSettings).(map[string]interface{})
 	}
 
 	subAccount := sub_accounts.SubAccountCreate{
@@ -119,11 +114,11 @@ func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 		Email:                 d.Get(subAccountEmail).(string),
 		RetentionDays:         int32(d.Get(subAccountRetentionDays).(int)),
 		SharingObjectAccounts: sharingObjectAccounts,
-		MaxDailyGB:				maxDailyGB,
-		Searchable:				searchable,
-		Accessible:				accessible,
-		DocSizeSetting:			docSizeSetting,
-		UtilizationSettings:	utilizationSettings,
+		MaxDailyGB:            maxDailyGB,
+		Searchable:            searchable,
+		Accessible:            accessible,
+		DocSizeSetting:        docSizeSetting,
+		UtilizationSettings:   utilizationSettings,
 	}
 
 	u, err := subAccountClient(m).CreateSubAccount(subAccount)
@@ -158,15 +153,15 @@ func resourceSubAccountUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	subAccount := sub_accounts.SubAccount{
-		Id:					   	id,
-		AccountName:           	d.Get(subAccountName).(string),
-		RetentionDays:         	int32(d.Get(subAccountRetentionDays).(int)),
-		SharingObjectAccounts: 	d.Get(subAccountSharingObjectsAccounts).([]interface{}),
-		MaxDailyGB:			   	float32(d.Get(subAccountMaxDailyGB).(float64)),
-		Searchable:			   	d.Get(subAccountSearchable).(bool),
-		Accessible:			   	d.Get(subAccountAccessible).(bool),
-		DocSizeSetting:			d.Get(subAccountDocSizeSetting).(bool),
-		UtilizationSettings:	d.Get(subAccountUtilizationSettings).(map[string]interface{}),
+		Id:                    id,
+		AccountName:           d.Get(subAccountName).(string),
+		RetentionDays:         int32(d.Get(subAccountRetentionDays).(int)),
+		SharingObjectAccounts: d.Get(subAccountSharingObjectsAccounts).([]interface{}),
+		MaxDailyGB:            float32(d.Get(subAccountMaxDailyGB).(float64)),
+		Searchable:            d.Get(subAccountSearchable).(bool),
+		Accessible:            d.Get(subAccountAccessible).(bool),
+		DocSizeSetting:        d.Get(subAccountDocSizeSetting).(bool),
+		UtilizationSettings:   d.Get(subAccountUtilizationSettings).(map[string]interface{}),
 	}
 
 	err = subAccountClient(m).UpdateSubAccount(id, subAccount)

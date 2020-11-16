@@ -7,17 +7,17 @@ import (
 )
 
 const (
-	providerApiToken     	= "api_token"
-	providerBaseUrl      	= "base_url"
-	providerRegion 			= "region"
-	resourceAlertType    	= "logzio_alert"
-	resourceEndpointType 	= "logzio_endpoint"
-	resourceUserType     	= "logzio_user"
-	resourceSubAccountType  = "logzio_subaccount"
-	envLogzioApiToken    	= "LOGZIO_API_TOKEN"
-	envLogzioRegion			= "LOGZIO_REGION"
-	envLogzioBaseURL     	= "LOGZIO_BASE_URL"
-	envLogzioAccountId   	= "LOGZIO_ACCOUNT_ID"
+	providerApiToken       = "api_token"
+	providerBaseUrl        = "base_url"
+	providerRegion         = "region"
+	resourceAlertType      = "logzio_alert"
+	resourceEndpointType   = "logzio_endpoint"
+	resourceUserType       = "logzio_user"
+	resourceSubAccountType = "logzio_subaccount"
+	envLogzioApiToken      = "LOGZIO_API_TOKEN"
+	envLogzioRegion        = "LOGZIO_REGION"
+	envLogzioBaseURL       = "LOGZIO_BASE_URL"
+	envLogzioAccountId     = "LOGZIO_ACCOUNT_ID"
 
 	baseUrl = "https://api%s.logz.io"
 )
@@ -41,16 +41,16 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			resourceAlertType:    		dataSourceAlert(),
-			resourceEndpointType: 		dataSourceEndpoint(),
-			resourceUserType:     		dataSourceUser(),
-			resourceSubAccountType:     dataSourceSubAccount(),
+			resourceAlertType:      dataSourceAlert(),
+			resourceEndpointType:   dataSourceEndpoint(),
+			resourceUserType:       dataSourceUser(),
+			resourceSubAccountType: dataSourceSubAccount(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			resourceAlertType:    		resourceAlert(),
-			resourceEndpointType: 		resourceEndpoint(),
-			resourceUserType:     		resourceUser(),
-			resourceSubAccountType:     resourceSubAccount(),
+			resourceAlertType:      resourceAlert(),
+			resourceEndpointType:   resourceEndpoint(),
+			resourceUserType:       resourceUser(),
+			resourceSubAccountType: resourceSubAccount(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
