@@ -14,4 +14,8 @@ resource "logzio_subaccount" "my_subaccount" {
   sharing_objects_accounts = [
     12345
   ]
+  utilization_settings = {
+    frequencyMinutes = 3
+    utilizationEnabled = true
+  }
 }
