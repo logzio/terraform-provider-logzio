@@ -8,7 +8,6 @@ Provides a Logz.io Log Management subaccount resource. This can be used to creat
 ## Example Usage
 
 ```hcl
-# Create a new Logz.io subaccount
 variable "api_token" {
   type = "string"
   description = "your logzio API token"
@@ -25,8 +24,11 @@ resource "logzio_subaccount" "my_subaccount" {
   sharing_objects_accounts = [
     12345
   ]
+  utilization_settings = {
+    frequencyMinutes = 3
+    utilizationEnabled = true
+  }
 }
-
 ```
 
 ## Argument Reference
