@@ -7,20 +7,6 @@ Use this data source to access information about existing Logz.io users.
 ## Example Usage
 
 ```hcl
-variable "api_token" {
-  type = "string"
-  description = "your logzio API token"
-}
-
-variable "account_id" {
-  description = "the account id you want to use to create your user in"
-}
-
-provider "logzio" {
-  api_token = var.api_token
-}
-
-# Create a new user
 resource "logzio_user" "my_user" {
   username = "test.user@this.test"
   fullname = "test user"
@@ -31,16 +17,16 @@ resource "logzio_user" "my_user" {
 
 ## Argument Reference
 
+* `fullname` - (Required) First and last name of the user.
+* `username` - (Required) Username credential.
 * `roles` - (Required) For User access, `2`. For Admin access, `3`.
 * `active` - (Required) If `true`, the user is active, if `false`, the user is suspended.
-* `account_id` - (Optional) Logz.io account ID.
-* `fullname` - (Optional) First and last name of the user.
+* `account_id` - (Required) Logz.io account ID.
 
 
 ##  Attribute Reference
 
-* `id` - (Optional) ID of the user in the Logz.io platform.
-* `username` - (Optional) Username credential.
+* `id` - ID of the user in the Logz.io platform.
 
 ## Endpoints used
 
