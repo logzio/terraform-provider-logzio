@@ -7,7 +7,7 @@ Provides a Logz.io log monitoring alert resource. This can be used to create and
 ## Example Usage
 
 ```hcl
-# Create a new alert and a new endpoint
+# Create a new alert and a new endpoint for use as the alert notification channel
 variable "api_token" {
   type = "string"
   description = "your logzio API token"
@@ -51,35 +51,28 @@ resource "logzio_alert" "my_alert" {
 
 ## Argument Reference
 
-*	`alert_notification_endpoints` - (Required) 
+*	`title` - (Required) Alert title.
+*	`alert_notification_endpoints` - (Optional) 
 *	`description` - (Optional) A description of the event, its significance, and suggested next steps or instructions for the team. 
 *	`filter` - (Optional) 
 *	`tags` - (Optional) Tags for filtering alerts and triggered alerts. Can be used in Kibana Discover, Kibana dashboards, and more.
 *	`group_by_aggregation_fields` - (Optional)
 *	`is_enabled` - (Optional) True by default. If `true`, the alert is currently active.
-*	`query_string` - (Optional)
-*	`last_triggered_at` - (Optional)
-*	`last_updated` - (Optional) Date and time in UTC when the alert was last updated. | 
-*	`notification_emails` - (Optional) 
-*	`operation` - (Optional) 
-*	`search_timeframe_minutes` - (Optional)  The time frame for evaluating the log data is a sliding window, with 1 minute granularity.
-
-  The recommended minimum and maximum values are not validated, but needed to guarantee the alert's accuracy.
-
-  The minimum recommended time frame is 5 minutes, as anything shorter will be less reliable and unnecessarily resource-heavy.
-
-  The maximum recommended time frame is 1440 minutes (24 hours). The alert runs on the index from today and yesterday (in UTC) and the maximum time frame increases throughout the day, reaching 48 hours exactly before midnight UTC.  
-*	`severity` - (Optional)
-*	`severity_threshold_tiers` - (Optional)
-*	`suppress_notifications_minutes` - (Optional)
-*	`threshold` - (Optional)
-*	`title` - (Optional)
-* `Alert title` - (Optional) 
-*	`value_aggregation_field` - (Optional)
-* `value_aggregation_type` - (Optional)
+*	`query_string` - (Optional) Search query in Lucene syntax. Determines when the alert should trigger in combination with filters, group by aggregations, accounts to search, and trigger conditions.
+*	`last_triggered_at` - (Optional) Date and time in UTC when the alert last triggered.
+*	`last_updated` - (Optional) Date and time in UTC when the alert was last updated.
+*	`notification_emails` - (Optional) Array of email addresses to be notified when the alert triggers.
+*	`operation` - (Optional) Specifies the operator for evaluating the results. Enum: `LESS_THAN`, `GREATER_THAN`, `LESS_THAN_OR_EQUALS`, `GREATER_THAN_OR_EQUALS`, `EQUALS`, `NOT_EQUALS`.
+*	`search_timeframe_minutes` - (Required)  The time frame for evaluating the log data is a sliding window, with 1 minute granularity.
+*	`severity` - (Optional) Defaults to `MEDIUM`. Specifies a severity for the event when the alert triggers. Can be `INFO`, `LOW`, `MEDIUM`, `HIGH`, `SEVERE`.
+*	`threshold` - (Optional) 
+*	`severity_threshold_tiers` - (Optional) Set per trigger threshold.
+*	`suppress_notifications_minutes` - (Optional) 
+*	`value_aggregation_field` - (Optional) 
+* `value_aggregation_type` - (Required)
 
 ## Attribute Reference
 
-*	`id` - (Required) Logz.io alert ID. 
-*	`created_at` - (Required) Date and time in UTC when the alert was first created.
-*	`created_by` - (Optional) Email of the user who first created the alert.
+*	`id` - Logz.io alert ID. 
+*	`created_at` - Date and time in UTC when the alert was first created.
+*	`created_by` - Email of the user who first created the alert.
