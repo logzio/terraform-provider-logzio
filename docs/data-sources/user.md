@@ -17,17 +17,15 @@ resource "logzio_user" "my_user" {
 
 ## Argument Reference
 
-* `fullname` - (Required) First and last name of the user.
-* `username` - (Required) Username credential.
-* `roles` - (Required) For User access, `2`. For Admin access, `3`.
-* `active` - (Required) If `true`, the user is active, if `false`, the user is suspended.
-* `account_id` - (Required) Logz.io account ID.
-
+* `id` - ID of the user in the Logz.io platform.
+* `username` - Username credential.
 
 ##  Attribute Reference
 
-* `id` - ID of the user in the Logz.io platform.
-
+* `fullname` - First and last name of the user.
+* `roles` - For User access, `2`. For Admin access, `3`.
+* `active` - If `true`, the user is active, if `false`, the user is suspended.
+* `account_id` - Logz.io account ID.
 ## Endpoints used
 
 * [Get all users in main account and associated subaccounts](https://docs.logz.io/api/#operation/listAllAccountUsers)

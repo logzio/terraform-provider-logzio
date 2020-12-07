@@ -24,7 +24,10 @@ resource "logzio_subaccount" "my_subaccount" {
 
 ## Argument Reference
 
+* `account_id` - ID of the subaccount.
+##  Attribute Reference
 
+* `account_token` - Log shipping token for the subaccount. [Learn more](https://docs.logz.io/user-guide/tokens/log-shipping-tokens/)
 * `email` - (Required) Email address of an existing admin user on the main account which will also become the admin of the subaccount being created.
 * `account_name` - (Required) Name of the subaccount.
 * `max_daily_gb` - (Required) Maximum daily log volume that the subaccount can index, in GB.
@@ -36,13 +39,6 @@ resource "logzio_subaccount" "my_subaccount" {
 * `utilization_settings` - (Optional) If enabled, account utilization metrics and expected utilization at the current indexing rate are measured at a pre-defined sampling rate. Useful for managing account utilization and avoiding running out of capacity. [Learn more about managing account capacity](https://docs.logz.io/user-guide/accounts/manage-account-usage.html)
   * `frequencyMinutes` - Determines the sampling rate in minutes.
   * `utilizationEnabled` - Enables the feature.
-
-
-##  Attribute Reference
-
-* `account_id` - ID of the subaccount.
-* `account_token` - Log shipping token for the subaccount. [Learn more](https://docs.logz.io/user-guide/tokens/log-shipping-tokens/)
-
 
 ## Endpoints used
 
