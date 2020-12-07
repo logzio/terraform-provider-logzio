@@ -7,7 +7,7 @@ Provides a Logz.io log monitoring alert resource. This can be used to create and
 ## Example Usage
 
 ```hcl
-# Create a new alert and a new endpoint for use as the alert notification channel
+# Create a new alert and endpoint
 variable "api_token" {
   type = "string"
   description = "your logzio API token"
@@ -17,6 +17,7 @@ provider "logzio" {
   api_token = var.api_token
 }
 
+# Create a new endpoint
 resource "logzio_endpoint" "my_endpoint" {
   title = "my_endpoint"
   description = "hello"
@@ -26,6 +27,7 @@ resource "logzio_endpoint" "my_endpoint" {
   }
 }
 
+# Create a new alert
 resource "logzio_alert" "my_alert" {
   title = "my_other_title"
   query_string = "loglevel:ERROR"
@@ -53,15 +55,12 @@ resource "logzio_alert" "my_alert" {
 
 *	`title` - (Required) Alert title.
 *	`search_timeframe_minutes` - (Required)  The time frame for evaluating the log data is a sliding window, with 1 minute granularity.
-*	`operation` - (Optional) Specifies the operator for evaluating the results. Enum: `LESS_THAN`, `GREATER_THAN`, `LESS_THAN_OR_EQUALS`, `GREATER_THAN_OR_EQUALS`, `EQUALS`, `NOT_EQUALS`.
-*	`severity_threshold_tiers` - (Required) Set as many as
-5 thresholds, each with its own severity level. Map schema sets a severity per trigger threshold. 
-
-  If setting several thresholds, you must adhere to the logic of the operator. See the [API docs](https://docs.logz.io/api/#operation/createAlert) for futher details.
+*	`operation` - Defaults to `GREATER_THAN`. Specifies the operator for evaluating the `severity_threshold_tiers` results. Enum: `LESS_THAN`, `GREATER_THAN`, `LESS_THAN_OR_EQUALS`, `GREATER_THAN_OR_EQUALS`, `EQUALS`, `NOT_EQUALS`.
+*	`severity_threshold_tiers` - (Required) Set as many as 5 thresholds, each with its own severity level.
   *	`severity` - Defaults to `MEDIUM`. Labels the event with a severity tag. Available severity tags are: `INFO`, `LOW`, `MEDIUM`, `HIGH`, `SEVERE`.
-  *	`threshold` - (Required) 
-
-*	`alert_notification_endpoints` - (Required) Add email addresses and/or endpoint channels to automatically receive notifications with sample data when the alert triggers.
+  *	`threshold` - Number of logs per search timeframe.
+*	`alert_notification_endpoints` - (Required but can be sent empty) Add IDs of endpoint channels to automatically receive notifications with sample data when the alert triggers.
+* `notification_emails` - (Required but can be sent empty) Add email addresses to automatically receive notifications with sample data when the alert triggers.
 *	`description` - (Optional) A description of the event, its significance, and suggested next steps or instructions for the team.
 *	`query_string` - (Required) Search query in Lucene syntax. You can combine filters and a search query to specify the logs you are looking for. You can combine filters and a search query to specify the logs you are looking for.
 *	`filter` - (Optional) You can use `must` and `must_not` filters. Filters are more efficient compared to a query, so it's recommended to opt for a filter over a `query_string`, where possible.
@@ -70,8 +69,7 @@ resource "logzio_alert" "my_alert" {
 *	`is_enabled` - (Optional) True by default. If `true`, the alert is currently active.
 *	`last_triggered_at` - (Optional) Date and time in UTC when the alert last triggered.
 *	`last_updated` - (Optional) Date and time in UTC when the alert was last updated.
-*	`notification_emails` - (Optional) Array of email addresses to be notified when the alert triggers.
-*	`suppress_notifications_minutes` - (Optional)
+*	`suppress_notifications_minutes` - (Optional) Add a waiting period in minutes to space out notifications. (The alert will still trigger but will not send out notifications during the waiting period.)
 *	`value_aggregation_field` - (Optional) Specify the field on which to run the aggregation for the trigger condition.
 * `value_aggregation_type` - (Required) Specifies the aggregation operator. Can be: `SUM`, `MIN`, `MAX`, `AVG`, `COUNT`, `UNIQUE_COUNT`, `NONE`.
 
