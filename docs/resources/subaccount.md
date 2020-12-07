@@ -1,6 +1,6 @@
 # Subaccount Provider
 
-Provides a Logz.io Log Management subaccount resource. This can be used to create and manage Logz.io log monitoring subaccounts. 
+Provides a Logz.io Log Management subaccount resource. This can be used to create and manage Logz.io log monitoring subaccounts.
 
 * Learn more about accounts in the [Logz.io Docs](https://docs.logz.io/user-guide/accounts/manage-the-main-account-and-sub-accounts.html)
 * Learn more about available [APIs for managing Logz.io subaccounts](https://docs.logz.io/api/#tag/Manage-sub-accounts)
