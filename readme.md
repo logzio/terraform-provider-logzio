@@ -145,6 +145,11 @@ Want to do it yourself? We are more than happy to accept external contributions 
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
 
 ### Changelog 
+- v1.1.8
+    - Update client version 
+    - Fix custom endpoint headers bug
+- v1.1.7
+    - Published to Terraform registry    
 - v1.1.5
     - Fix boolean parameters not parsed bug
     - Support import command to state
