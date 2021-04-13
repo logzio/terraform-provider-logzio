@@ -2,6 +2,7 @@ package logzio
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/logzio/logzio_terraform_client/endpoints"
 )
@@ -28,11 +29,11 @@ func dataSourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 
 	endpointId, ok := d.GetOk(endpointId)
 	if ok {
-		endpoint, err := client.GetEndpoint(endpointId.(int64))
+		endpoint, err := client.GetEndpoint(int64(endpointId.(int)))
 		if err != nil {
 			return err
 		}
-		d.SetId(fmt.Sprintf("%d", endpointId.(int64)))
+		d.SetId(fmt.Sprintf("%d", endpointId))
 		d.Set(endpointTitle, endpoint.Title)
 		d.Set(endpointDescription, endpoint.Description)
 		d.Set(endpointType, endpoint.EndpointType)
