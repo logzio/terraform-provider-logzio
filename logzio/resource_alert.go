@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
-	"strconv"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/logzio/logzio_terraform_client/alerts"
+	"log"
+	"strconv"
+	"time"
 )
 
 const (
@@ -159,6 +159,7 @@ func prettyprint(b []byte) ([]byte, error) {
  * creates a new alert in logzio
  */
 func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
+	log.Print("Please note that this version of Alerts is deprecated. We advise you to use Alerts V2.")
 	alertNotificationEndpoints := d.Get(alertNotificationEndpoints).([]interface{})
 	description := d.Get(alertDescription).(string)
 	filter := d.Get(alertFilter).(string)
@@ -248,6 +249,8 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 	alertId := strconv.FormatInt(a.AlertId, BASE_10)
 	d.SetId(alertId)
 
+	// A temporary solution to handle a 404 error that happens otherwise
+	time.Sleep(delayGet * time.Second)
 	return resourceAlertRead(d, m)
 }
 
@@ -384,6 +387,8 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
+	// A temporary solution to handle a 404 error that happens otherwise
+	time.Sleep(delayGet * time.Second)
 	return resourceAlertRead(d, m)
 }
 
