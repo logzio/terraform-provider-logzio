@@ -177,6 +177,22 @@ func dataSourceAlertV2() *schema.Resource {
 					},
 				},
 			},
+			alertV2CreatedAt: {
+				Type: schema.TypeInt,
+				Computed: true,
+			},
+			alertV2CreatedBy: {
+				Type: schema.TypeString,
+				Computed: true,
+			},
+			alertV2UpdatedAt: {
+				Type: schema.TypeInt,
+				Computed: true,
+			},
+			alertV2UpdatedBy: {
+				Type: schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -203,6 +219,7 @@ func dataSourceAlertV2Read(d *schema.ResourceData, m interface{}) error {
 
 		d.SetId(fmt.Sprintf("%d", id))
 		setValuesAlertV2(d, alert)
+		setCreatedUpdatedFields(d, alert)
 
 		return nil
 	}
@@ -217,6 +234,7 @@ func dataSourceAlertV2Read(d *schema.ResourceData, m interface{}) error {
 			alert := list[i]
 			if alert.Title == alertTitle {
 				setValuesAlertV2(d, &alert)
+				setCreatedUpdatedFields(d, &alert)
 
 				return nil
 			}

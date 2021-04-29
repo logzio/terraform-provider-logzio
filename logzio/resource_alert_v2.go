@@ -44,6 +44,11 @@ const (
 	alertV2CorrelationOperator string = "correlation_operator"
 	alertV2Joins string = "joins"
 
+	alertV2CreatedAt string = "created_at"
+	alertV2CreatedBy string = "created_by"
+	alertV2UpdatedAt string = "updated_at"
+	alertV2UpdatedBy string = "updated_by"
+
 	groupByMaxItems int = 3
 
 	delayGet time.Duration = 4
@@ -238,6 +243,22 @@ func resourceAlertV2() *schema.Resource {
 					},
 				},
 			},
+			alertV2CreatedAt: {
+				Type: schema.TypeString,
+				Computed: true,
+			},
+			alertV2CreatedBy: {
+				Type: schema.TypeString,
+				Computed: true,
+			},
+			alertV2UpdatedAt: {
+				Type: schema.TypeString,
+				Computed: true,
+			},
+			alertV2UpdatedBy: {
+				Type: schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -289,6 +310,7 @@ func resourceAlertV2Read(d *schema.ResourceData, m interface{}) error {
 	}
 
 	setValuesAlertV2(d, alert)
+	setCreatedUpdatedFields(d, alert)
 
 	return nil
 }
@@ -570,6 +592,13 @@ func setValuesAlertV2(d *schema.ResourceData, alert *alerts_v2.AlertType) {
 	subComponentsMapping := getSubComponentMapping(alert.SubComponents)
 
 	d.Set(alertV2SubComponents, subComponentsMapping)
+}
+
+func setCreatedUpdatedFields(d *schema.ResourceData, alert *alerts_v2.AlertType) {
+	d.Set(alertV2CreatedAt, alert.CreatedAt)
+	d.Set(alertV2CreatedBy, alert.CreatedBy)
+	d.Set(alertV2UpdatedAt, alert.UpdatedAt)
+	d.Set(alertV2UpdatedBy, alert.UpdatedBy)
 }
 
 func setCorrelationDefault() (interface{}, error){
