@@ -1,5 +1,7 @@
 # Alert Provider
 
+**Note:** This version refers to the Alerts V1 API. We recommend using the Alerts V2 API.
+
 Provides a Logz.io log monitoring alert resource. This can be used to create and manage Logz.io log monitoring alerts.
 
 * Learn more about log alerts in the [Logz.io Docs](https://docs.logz.io/user-guide/alerts/)
