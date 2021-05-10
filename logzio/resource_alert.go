@@ -54,6 +54,7 @@ func resourceAlert() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+		DeprecationMessage: "Please note that this version of Alerts is deprecated. We advise you to use Alerts V2.",
 
 		Schema: map[string]*schema.Schema{
 			alertNotificationEndpoints: {
@@ -159,7 +160,6 @@ func prettyprint(b []byte) ([]byte, error) {
  * creates a new alert in logzio
  */
 func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
-	log.Print("Please note that this version of Alerts is deprecated. We advise you to use Alerts V2.")
 	alertNotificationEndpoints := d.Get(alertNotificationEndpoints).([]interface{})
 	description := d.Get(alertDescription).(string)
 	filter := d.Get(alertFilter).(string)
