@@ -27,11 +27,9 @@ func TestAccLogzioAlertV2_CreateAlert(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "hello"),
 					resource.TestCheckResourceAttr(resourceName, "sub_components.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.severity", "HIGH"),
 					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.threshold", "10"),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.1.severity", "INFO"),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.1.threshold", "5"),
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "false"),
 				),
 			},

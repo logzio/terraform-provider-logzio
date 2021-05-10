@@ -16,9 +16,5 @@ resource "logzio_alert_v2" "%s" {
       severity = "HIGH"
       threshold = 10
     }
-    severity_threshold_tiers {
-      severity = "INFO"
-      threshold = 5
-    }
   }
 }

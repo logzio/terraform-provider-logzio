@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
 	"log"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -51,7 +53,7 @@ const (
 
 	groupByMaxItems int = 3
 
-	delayGet time.Duration = 4
+	delayGetAlertV2 = 1 * time.Second
 )
 
 /**
@@ -292,9 +294,19 @@ func resourceAlertV2Create(d *schema.ResourceData, m interface{}) error {
 	alertId := strconv.FormatInt(a.AlertId, BASE_10)
 	d.SetId(alertId)
 
-	// A temporary solution to handle a 404 error that happens otherwise
-	time.Sleep(delayGet * time.Second)
-	return resourceAlertV2Read(d, m)
+	return retry.Do(
+		func() error {
+			return resourceAlertV2Read(d, m)
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if strings.Contains(err.Error(), "missing alert"){
+					return true
+				}
+				return false
+			}),
+		retry.Delay(delayGetAlertV2),
+	)
 }
 
 /**
@@ -341,9 +353,20 @@ func resourceAlertV2Update(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	// A temporary solution to handle a 404 error that happens otherwise
-	time.Sleep(delayGet * time.Second)
-	return resourceAlertV2Read(d, m)
+	return retry.Do(
+		func() error {
+			return resourceAlertV2Read(d, m)
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				createAlert := createCreateAlertType(d)
+				if !reflect.DeepEqual(createAlert, updateAlert) || err != nil {
+					return true
+				}
+				return false
+			}),
+		retry.Delay(delayGetAlertV2),
+	)
 }
 
 /**

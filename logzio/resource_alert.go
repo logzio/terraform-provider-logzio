@@ -34,6 +34,8 @@ const (
 	alert_title                          string = "title"
 	alert_value_aggregation_field        string = "value_aggregation_field"
 	alert_value_aggregation_type         string = "value_aggregation_type"
+
+	delayGetAlert = 4 * time.Second
 )
 
 /**
@@ -249,8 +251,8 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 	alertId := strconv.FormatInt(a.AlertId, BASE_10)
 	d.SetId(alertId)
 
-	// A temporary solution to handle a 404 error that happens otherwise
-	time.Sleep(delayGet * time.Second)
+	//A temporary solution to handle a 404 error that happens otherwise
+	time.Sleep(delayGetAlert)
 	return resourceAlertRead(d, m)
 }
 
@@ -388,7 +390,7 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// A temporary solution to handle a 404 error that happens otherwise
-	time.Sleep(delayGet * time.Second)
+	time.Sleep(delayGetAlert)
 	return resourceAlertRead(d, m)
 }
 
