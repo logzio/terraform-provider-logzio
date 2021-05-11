@@ -15,36 +15,36 @@ import (
 )
 
 const (
-	alertV2Id string = "id"
-	alertV2Title string = "title"
-	alertV2Description string = "description"
-	alertV2Tags string = "tags"
-	alertV2SearchTimeFrameMinutes string = "search_timeframe_minutes"
-	alertV2IsEnabled string = "is_enabled"
-	alertV2NotificationEmails string = "notification_emails"
-	alertV2NotificationEndpoints string = "alert_notification_endpoints"
+	alertV2Id                          string = "id"
+	alertV2Title                       string = "title"
+	alertV2Description                 string = "description"
+	alertV2Tags                        string = "tags"
+	alertV2SearchTimeFrameMinutes      string = "search_timeframe_minutes"
+	alertV2IsEnabled                   string = "is_enabled"
+	alertV2NotificationEmails          string = "notification_emails"
+	alertV2NotificationEndpoints       string = "alert_notification_endpoints"
 	alertV2SuppressNotificationMinutes string = "suppress_notifications_minutes"
-	alertV2OutputType string = "output_type"
-	alertV2QueryString string = "query_string"
-	alertV2FilterMust string = "filter_must"
-	alertV2FilterMustNot string = "filter_must_not"
-	alertV2GroupBy string = "group_by_aggregation_fields"
-	alertV2AggregationType string = "value_aggregation_type"
-	alertV2AggregationField string = "value_aggregation_field"
-	alertV2ShouldQueryOnAllAccounts string = "should_query_on_all_accounts"
-	alertV2AccountIdsToQuery string = "account_ids_to_query_on"
-	alertV2Operation string = "operation"
-	alertV2SeverityThresholdTiers string = "severity_threshold_tiers"
-	alertV2Severity string = "severity"
-	alertV2Threshold string = "threshold"
-	alertV2Columns string = "columns"
-	alertV2ColumnsFieldName string = "field_name"
-	alertV2ColumnsRegex string = "regex"
-	alertV2ColumnSort string = "sort"
-	alertV2OutputShouldUseAllFields string = "output_should_use_all_fields"
-	alertV2SubComponents string = "sub_components"
-	alertV2CorrelationOperator string = "correlation_operator"
-	alertV2Joins string = "joins"
+	alertV2OutputType                  string = "output_type"
+	alertV2QueryString                 string = "query_string"
+	alertV2FilterMust                  string = "filter_must"
+	alertV2FilterMustNot               string = "filter_must_not"
+	alertV2GroupBy                     string = "group_by_aggregation_fields"
+	alertV2AggregationType             string = "value_aggregation_type"
+	alertV2AggregationField            string = "value_aggregation_field"
+	alertV2ShouldQueryOnAllAccounts    string = "should_query_on_all_accounts"
+	alertV2AccountIdsToQuery           string = "account_ids_to_query_on"
+	alertV2Operation                   string = "operation"
+	alertV2SeverityThresholdTiers      string = "severity_threshold_tiers"
+	alertV2Severity                    string = "severity"
+	alertV2Threshold                   string = "threshold"
+	alertV2Columns                     string = "columns"
+	alertV2ColumnsFieldName            string = "field_name"
+	alertV2ColumnsRegex                string = "regex"
+	alertV2ColumnSort                  string = "sort"
+	alertV2OutputShouldUseAllFields    string = "output_should_use_all_fields"
+	alertV2SubComponents               string = "sub_components"
+	alertV2CorrelationOperator         string = "correlation_operator"
+	alertV2Joins                       string = "joins"
 
 	alertV2CreatedAt string = "created_at"
 	alertV2CreatedBy string = "created_by"
@@ -81,22 +81,22 @@ func resourceAlertV2() *schema.Resource {
 				Required: true,
 			},
 			alertV2Description: {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 			alertV2Tags: {
-				Type: schema.TypeList,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			alertV2SearchTimeFrameMinutes: {
-				Type: schema.TypeInt,
+				Type:     schema.TypeInt,
 				Required: true,
 			},
 			alertV2IsEnabled: {
-				Type: schema.TypeBool,
+				Type:     schema.TypeBool,
 				Optional: true,
 			},
 			alertV2NotificationEmails: {
@@ -119,12 +119,12 @@ func resourceAlertV2() *schema.Resource {
 				Default:  5,
 			},
 			alertV2OutputType: {
-				Type: schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validateOutputType,
 			},
 			alertV2SubComponents: {
-				Type: schema.TypeList,
+				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -133,7 +133,7 @@ func resourceAlertV2() *schema.Resource {
 							Required: true,
 						},
 						alertV2FilterMust: {
-							Type: schema.TypeList,
+							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeMap,
@@ -143,7 +143,7 @@ func resourceAlertV2() *schema.Resource {
 							},
 						},
 						alertV2FilterMustNot: {
-							Type: schema.TypeList,
+							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeMap,
@@ -169,12 +169,12 @@ func resourceAlertV2() *schema.Resource {
 							Optional: true,
 						},
 						alertV2ShouldQueryOnAllAccounts: {
-							Type: schema.TypeBool,
+							Type:     schema.TypeBool,
 							Optional: true,
-							Default: true,
+							Default:  true,
 						},
 						alertV2AccountIdsToQuery: {
-							Type: schema.TypeList,
+							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeInt,
@@ -202,7 +202,7 @@ func resourceAlertV2() *schema.Resource {
 							},
 						},
 						alertV2Columns: {
-							Type: schema.TypeList,
+							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -215,28 +215,28 @@ func resourceAlertV2() *schema.Resource {
 										Optional: true,
 									},
 									alertV2ColumnSort: {
-										Type: schema.TypeString,
-										Optional: true,
+										Type:         schema.TypeString,
+										Optional:     true,
 										ValidateFunc: validateSortTypes,
 									},
 								},
 							},
 						},
 						alertV2OutputShouldUseAllFields: {
-							Type: schema.TypeBool,
+							Type:     schema.TypeBool,
 							Optional: true,
-							Default: true,
+							Default:  true,
 						},
 					},
 				},
 			},
 			alertV2CorrelationOperator: {
-				Type: schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
 				DefaultFunc: setCorrelationDefault,
 			},
 			alertV2Joins: {
-				Type: schema.TypeList,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeMap,
@@ -246,19 +246,19 @@ func resourceAlertV2() *schema.Resource {
 				},
 			},
 			alertV2CreatedAt: {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			alertV2CreatedBy: {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			alertV2UpdatedAt: {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			alertV2UpdatedBy: {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -300,7 +300,7 @@ func resourceAlertV2Create(d *schema.ResourceData, m interface{}) error {
 		},
 		retry.RetryIf(
 			func(err error) bool {
-				if strings.Contains(err.Error(), "missing alert"){
+				if strings.Contains(err.Error(), "missing alert") {
 					return true
 				}
 				return false
@@ -379,7 +379,7 @@ func resourceAlertV2Delete(d *schema.ResourceData, m interface{}) error {
 	return err
 }
 
-func getSubComponentMapping(sc []alerts_v2.SubAlert) []map[string]interface{}{
+func getSubComponentMapping(sc []alerts_v2.SubAlert) []map[string]interface{} {
 	var subComponentsMapping []map[string]interface{}
 	for _, subComponent := range sc {
 		var columns []map[string]string
@@ -387,30 +387,30 @@ func getSubComponentMapping(sc []alerts_v2.SubAlert) []map[string]interface{}{
 		for _, column := range subComponent.Output.Columns {
 			columnMapping := map[string]string{
 				alertV2ColumnsFieldName: column.FieldName,
-				alertV2ColumnsRegex: column.Regex,
-				alertV2ColumnSort: column.Sort,
+				alertV2ColumnsRegex:     column.Regex,
+				alertV2ColumnSort:       column.Sort,
 			}
 
 			columns = append(columns, columnMapping)
 		}
 
-		for key, val := range subComponent.Trigger.SeverityThresholdTiers{
+		for key, val := range subComponent.Trigger.SeverityThresholdTiers {
 			severityElement := map[string]interface{}{alertV2Severity: key, alertV2Threshold: val}
 			severityThreshold = append(severityThreshold, severityElement)
 		}
 
 		mapping := map[string]interface{}{
-			alertV2QueryString: subComponent.QueryDefinition.Query,
-			alertV2FilterMust: subComponent.QueryDefinition.Filters.Bool.Must,
-			alertV2FilterMustNot: subComponent.QueryDefinition.Filters.Bool.MustNot,
-			alertV2GroupBy: subComponent.QueryDefinition.GroupBy,
-			alertV2AggregationField: subComponent.QueryDefinition.Aggregation.FieldToAggregateOn,
-			alertV2AggregationType: subComponent.QueryDefinition.Aggregation.AggregationType,
+			alertV2QueryString:              subComponent.QueryDefinition.Query,
+			alertV2FilterMust:               subComponent.QueryDefinition.Filters.Bool.Must,
+			alertV2FilterMustNot:            subComponent.QueryDefinition.Filters.Bool.MustNot,
+			alertV2GroupBy:                  subComponent.QueryDefinition.GroupBy,
+			alertV2AggregationField:         subComponent.QueryDefinition.Aggregation.FieldToAggregateOn,
+			alertV2AggregationType:          subComponent.QueryDefinition.Aggregation.AggregationType,
 			alertV2ShouldQueryOnAllAccounts: subComponent.QueryDefinition.ShouldQueryOnAllAccounts,
-			alertV2AccountIdsToQuery: subComponent.QueryDefinition.AccountIdsToQueryOn,
-			alertV2Operation: subComponent.Trigger.Operator,
-			alertV2SeverityThresholdTiers: severityThreshold,
-			alertV2Columns: columns,
+			alertV2AccountIdsToQuery:        subComponent.QueryDefinition.AccountIdsToQueryOn,
+			alertV2Operation:                subComponent.Trigger.Operator,
+			alertV2SeverityThresholdTiers:   severityThreshold,
+			alertV2Columns:                  columns,
 			alertV2OutputShouldUseAllFields: subComponent.Output.ShouldUseAllFields,
 		}
 
@@ -468,7 +468,6 @@ func getSubComponents(subComponentsFromConfig []interface{}) []alerts_v2.SubAler
 			for _, m := range mustInterface {
 				subAlertElement.QueryDefinition.Filters.Bool.Must = append(subAlertElement.QueryDefinition.Filters.Bool.Must, m.(map[string]interface{}))
 			}
-
 		}
 
 		if _, ok := element[alertV2FilterMustNot]; ok {
@@ -493,7 +492,7 @@ func getSubComponents(subComponentsFromConfig []interface{}) []alerts_v2.SubAler
 		}
 
 		var columnsCreateAlert []alerts_v2.ColumnConfig
-		if _,ok := element[alertV2Columns]; ok {
+		if _, ok := element[alertV2Columns]; ok {
 			columns := element[alertV2Columns].([]interface{})
 			for _, columnElement := range columns {
 				column := columnElement.(map[string]string)
@@ -536,19 +535,19 @@ func getVariousFields(d *schema.ResourceData) map[string]interface{} {
 
 	var joins []map[string]string
 	joinsInterface := d.Get(alertV2Joins).([]interface{})
-	for _, j := range joinsInterface{
+	for _, j := range joinsInterface {
 		joins = append(joins, j.(map[string]string))
 	}
 
 	mappedComponents := map[string]interface{}{
-		alertV2Title: d.Get(alertV2Title).(string),
-		alertV2Description: d.Get(alertV2Description).(string),
-		alertV2SearchTimeFrameMinutes: d.Get(alertV2SearchTimeFrameMinutes).(int),
-		alertV2IsEnabled: strconv.FormatBool(d.Get(alertV2IsEnabled).(bool)),
+		alertV2Title:                       d.Get(alertV2Title).(string),
+		alertV2Description:                 d.Get(alertV2Description).(string),
+		alertV2SearchTimeFrameMinutes:      d.Get(alertV2SearchTimeFrameMinutes).(int),
+		alertV2IsEnabled:                   strconv.FormatBool(d.Get(alertV2IsEnabled).(bool)),
 		alertV2SuppressNotificationMinutes: d.Get(alertV2SuppressNotificationMinutes).(int),
-		alertV2OutputType: d.Get(alertV2OutputType).(string),
-		alertV2CorrelationOperator: correlations,
-		alertV2Joins: joins,
+		alertV2OutputType:                  d.Get(alertV2OutputType).(string),
+		alertV2CorrelationOperator:         correlations,
+		alertV2Joins:                       joins,
 	}
 
 	return mappedComponents
@@ -584,14 +583,14 @@ func createCreateAlertType(d *schema.ResourceData) alerts_v2.CreateAlertType {
 	}
 
 	createAlert := alerts_v2.CreateAlertType{
-		Title: mappedFlatComponents[alertV2Title].(string),
-		Description: mappedFlatComponents[alertV2Description].(string),
-		Tags: tags,
+		Title:                  mappedFlatComponents[alertV2Title].(string),
+		Description:            mappedFlatComponents[alertV2Description].(string),
+		Tags:                   tags,
 		SearchTimeFrameMinutes: mappedFlatComponents[alertV2SearchTimeFrameMinutes].(int),
-		Enabled: mappedFlatComponents[alertV2IsEnabled].(string),
-		Output: alertOutput,
-		SubComponents: subComponents,
-		Correlations: correlations,
+		Enabled:                mappedFlatComponents[alertV2IsEnabled].(string),
+		Output:                 alertOutput,
+		SubComponents:          subComponents,
+		Correlations:           correlations,
 	}
 
 	return createAlert
@@ -609,7 +608,7 @@ func setValuesAlertV2(d *schema.ResourceData, alert *alerts_v2.AlertType) {
 	d.Set(alertV2OutputType, alert.Output.Type)
 	d.Set(alertV2Joins, alert.Correlations.Joins)
 
-	correlationString := strings.Join(alert.Correlations.CorrelationOperators,",")
+	correlationString := strings.Join(alert.Correlations.CorrelationOperators, ",")
 	d.Set(alertV2CorrelationOperator, correlationString)
 
 	subComponentsMapping := getSubComponentMapping(alert.SubComponents)
@@ -624,7 +623,7 @@ func setCreatedUpdatedFields(d *schema.ResourceData, alert *alerts_v2.AlertType)
 	d.Set(alertV2UpdatedBy, alert.UpdatedBy)
 }
 
-func setCorrelationDefault() (interface{}, error){
+func setCorrelationDefault() (interface{}, error) {
 	operators := []string{alerts_v2.CorrelationOperatorAnd}
 	correlationsOperators := strings.Join(operators, ",")
 

@@ -27,7 +27,7 @@ func dataSourceAlertV2() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Schema{
-					Type:     schema.TypeString,
+					Type: schema.TypeString,
 				},
 			},
 			alertV2SearchTimeFrameMinutes: {
@@ -42,14 +42,14 @@ func dataSourceAlertV2() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Schema{
-					Type:     schema.TypeString,
+					Type: schema.TypeString,
 				},
 			},
 			alertV2NotificationEndpoints: {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Schema{
-					Type:     schema.TypeInt,
+					Type: schema.TypeInt,
 				},
 			},
 			alertV2SuppressNotificationMinutes: {
@@ -57,8 +57,8 @@ func dataSourceAlertV2() *schema.Resource {
 				Computed: true,
 			},
 			alertV2OutputType: {
-				Type:         schema.TypeString,
-				Computed:     true,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			alertV2SubComponents: {
 				Type:     schema.TypeList,
@@ -73,9 +73,9 @@ func dataSourceAlertV2() *schema.Resource {
 							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Schema{
-								Type:     schema.TypeMap,
+								Type: schema.TypeMap,
 								Elem: &schema.Schema{
-									Type:     schema.TypeString,
+									Type: schema.TypeString,
 								},
 							},
 						},
@@ -83,9 +83,9 @@ func dataSourceAlertV2() *schema.Resource {
 							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Schema{
-								Type:     schema.TypeMap,
+								Type: schema.TypeMap,
 								Elem: &schema.Schema{
-									Type:     schema.TypeString,
+									Type: schema.TypeString,
 								},
 							},
 						},
@@ -94,7 +94,7 @@ func dataSourceAlertV2() *schema.Resource {
 							Computed: true,
 							MaxItems: groupByMaxItems,
 							Elem: &schema.Schema{
-								Type:     schema.TypeString,
+								Type: schema.TypeString,
 							},
 						},
 						alertV2AggregationType: {
@@ -113,12 +113,12 @@ func dataSourceAlertV2() *schema.Resource {
 							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Schema{
-								Type:     schema.TypeInt,
+								Type: schema.TypeInt,
 							},
 						},
 						alertV2Operation: {
-							Type:         schema.TypeString,
-							Computed:     true,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						alertV2SeverityThresholdTiers: {
 							Type:     schema.TypeList,
@@ -150,8 +150,8 @@ func dataSourceAlertV2() *schema.Resource {
 										Computed: true,
 									},
 									alertV2ColumnSort: {
-										Type:         schema.TypeString,
-										Computed:     true,
+										Type:     schema.TypeString,
+										Computed: true,
 									},
 								},
 							},
@@ -164,33 +164,33 @@ func dataSourceAlertV2() *schema.Resource {
 				},
 			},
 			alertV2CorrelationOperator: {
-				Type:         schema.TypeString,
-				Computed:     true,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			alertV2Joins: {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Schema{
-					Type:     schema.TypeMap,
+					Type: schema.TypeMap,
 					Elem: &schema.Schema{
-						Type:     schema.TypeString,
+						Type: schema.TypeString,
 					},
 				},
 			},
 			alertV2CreatedAt: {
-				Type: schema.TypeInt,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			alertV2CreatedBy: {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			alertV2UpdatedAt: {
-				Type: schema.TypeInt,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			alertV2UpdatedBy: {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -243,4 +243,3 @@ func dataSourceAlertV2Read(d *schema.ResourceData, m interface{}) error {
 
 	return fmt.Errorf("couldn't find alert with specified attributes")
 }
-

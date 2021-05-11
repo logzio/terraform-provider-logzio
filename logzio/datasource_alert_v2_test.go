@@ -14,7 +14,7 @@ func TestAccDataSourceLogzIoAlertV2(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExpectNonEmptyPlan: true,
-				Config: ReadFixtureFromFile("create_alert_v2_datasource.tf"),
+				Config:             ReadFixtureFromFile("create_alert_v2_datasource.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "hello"),
 					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.#", "1"),

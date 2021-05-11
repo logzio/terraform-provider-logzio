@@ -34,7 +34,7 @@ func TestAccLogzioAlertV2_CreateAlert(t *testing.T) {
 				),
 			},
 			{
-				Config: resourceTestAlertV2(alertName, alertsV2ResourceCreateAlert),
+				Config:            resourceTestAlertV2(alertName, alertsV2ResourceCreateAlert),
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
