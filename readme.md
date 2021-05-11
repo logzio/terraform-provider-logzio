@@ -16,6 +16,7 @@ The following Logz.io API endpoints are supported by this provider:
 * [Notification channels](https://docs.logz.io/api/#tag/Manage-notification-endpoints)
 * [Log-based alerts](https://github.com/logzio/public-api/tree/master/alerts)
 * [Sub accounts](https://docs.logz.io/api/#tag/Manage-sub-accounts)
+* [Alerts(v2)](https://docs.logz.io/api/#tag/Alerts)
 
 #### Working with Terraform
 
@@ -155,7 +156,7 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
 
 ### Changelog 
 - v1.2
-    - Update client version.
+    - Update client version(v1.5.0).
     - Support Alerts v2 resource.
     - Fix 404 error for Alerts.
 - v1.1.8
@@ -178,3 +179,4 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
 - 1.1.2 
     - Moved some of the source code around to comply with TF provider layout convention
     - Moved the examples into an examples directory
+    
