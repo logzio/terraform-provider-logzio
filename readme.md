@@ -16,6 +16,7 @@ The following Logz.io API endpoints are supported by this provider:
 * [Notification channels](https://docs.logz.io/api/#tag/Manage-notification-endpoints)
 * [Log-based alerts](https://github.com/logzio/public-api/tree/master/alerts)
 * [Sub accounts](https://docs.logz.io/api/#tag/Manage-sub-accounts)
+* [Alerts(v2)](https://docs.logz.io/api/#tag/Alerts)
 
 #### Working with Terraform
 
@@ -84,18 +85,27 @@ resource "logzio_endpoint" "my_endpoint" {
   }
 }
 
-resource "logzio_alert" "my_alert" {
-  title = "my_other_title"
-  query_string = "loglevel:ERROR"
-  operation = "GREATER_THAN"
-  notification_emails = []
-  search_timeframe_minutes = 10
-  value_aggregation_type = "NONE"
+resource "logzio_alert_v2" "my_alert" {
+  title = "hello_there"
+  search_timeframe_minutes = 5
+  is_enabled = false
+  tags = ["some", "words"]
+  suppress_notifications_minutes = 5
   alert_notification_endpoints = ["${logzio_endpoint.my_endpoint.id}"]
-  suppress_notifications_minutes = 30
-  severity_threshold_tiers {
-      severity = "HIGH",
+  output_type = "JSON"
+  sub_components {
+    query_string = "loglevel:ERROR"
+    should_query_on_all_accounts = true
+    operation = "GREATER_THAN"
+    value_aggregation_type = "COUNT"
+    severity_threshold_tiers {
+      severity = "HIGH"
       threshold = 10
+    }
+    severity_threshold_tiers {
+      severity = "INFO"
+      threshold = 5
+    }
   }
 }
 ```
@@ -145,6 +155,10 @@ Want to do it yourself? We are more than happy to accept external contributions 
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
 
 ### Changelog 
+- v1.2
+    - Update client version(v1.5.0).
+    - Support Alerts v2 resource.
+    - Fix 404 error for Alerts.
 - v1.1.8
     - Update client version 
     - Fix custom endpoint headers bug
@@ -165,3 +179,4 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
 - 1.1.2 
     - Moved some of the source code around to comply with TF provider layout convention
     - Moved the examples into an examples directory
+    

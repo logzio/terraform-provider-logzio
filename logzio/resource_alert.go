@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
-	"strconv"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/logzio/logzio_terraform_client/alerts"
+	"log"
+	"strconv"
+	"time"
 )
 
 const (
@@ -34,6 +34,8 @@ const (
 	alert_title                          string = "title"
 	alert_value_aggregation_field        string = "value_aggregation_field"
 	alert_value_aggregation_type         string = "value_aggregation_type"
+
+	delayGetAlert = 4 * time.Second
 )
 
 /**
@@ -54,6 +56,7 @@ func resourceAlert() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+		DeprecationMessage: "Please note that this version of Alerts is deprecated. We advise you to use Alerts V2.",
 
 		Schema: map[string]*schema.Schema{
 			alertNotificationEndpoints: {
@@ -248,6 +251,8 @@ func resourceAlertCreate(d *schema.ResourceData, m interface{}) error {
 	alertId := strconv.FormatInt(a.AlertId, BASE_10)
 	d.SetId(alertId)
 
+	//A temporary solution to handle a 404 error that happens otherwise
+	time.Sleep(delayGetAlert)
 	return resourceAlertRead(d, m)
 }
 
@@ -384,6 +389,8 @@ func resourceAlertUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
+	// A temporary solution to handle a 404 error that happens otherwise
+	time.Sleep(delayGetAlert)
 	return resourceAlertRead(d, m)
 }
 

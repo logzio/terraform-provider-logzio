@@ -11,6 +11,7 @@ const (
 	providerBaseUrl        = "base_url"
 	providerRegion         = "region"
 	resourceAlertType      = "logzio_alert"
+	resourceAlertV2Type = "logzio_alert_v2"
 	resourceEndpointType   = "logzio_endpoint"
 	resourceUserType       = "logzio_user"
 	resourceSubAccountType = "logzio_subaccount"
@@ -45,12 +46,14 @@ func Provider() terraform.ResourceProvider {
 			resourceEndpointType:   dataSourceEndpoint(),
 			resourceUserType:       dataSourceUser(),
 			resourceSubAccountType: dataSourceSubAccount(),
+			resourceAlertV2Type: dataSourceAlertV2(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			resourceAlertType:      resourceAlert(),
 			resourceEndpointType:   resourceEndpoint(),
 			resourceUserType:       resourceUser(),
 			resourceSubAccountType: resourceSubAccount(),
+			resourceAlertV2Type: resourceAlertV2(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
