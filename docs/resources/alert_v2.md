@@ -76,7 +76,6 @@ resource "logzio_alert_v2" "my_alert" {
 * `account_ids_to_query_on` - (Integer list) Specify Account IDs to select which accounts the alert should monitor. The alert will be checked only on these accounts.
 * `operation` - (String) Specifies the operator for evaluating the results. Can be: `"LESS_THAN"`, `"GREATER_THAN"`, `"LESS_THAN_OR_EQUALS"`, `"GREATER_THAN_OR_EQUALS"`, `"EQUALS"`, `"NOT_EQUALS"`.
 * `columns` - (Block list) See  below for **nested schema**.
-* `output_should_use_all_fields` (Boolean) Defaults to true. If true, the notification output will include entire logs with all of their fields in the sample data.
 
 #### Nested schema for `sub_components.severity_threshold_tiers`:
 

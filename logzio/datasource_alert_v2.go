@@ -156,10 +156,6 @@ func dataSourceAlertV2() *schema.Resource {
 								},
 							},
 						},
-						alertV2OutputShouldUseAllFields: {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
 					},
 				},
 			},

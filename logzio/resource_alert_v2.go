@@ -41,7 +41,6 @@ const (
 	alertV2ColumnsFieldName            string = "field_name"
 	alertV2ColumnsRegex                string = "regex"
 	alertV2ColumnSort                  string = "sort"
-	alertV2OutputShouldUseAllFields    string = "output_should_use_all_fields"
 	alertV2SubComponents               string = "sub_components"
 	alertV2CorrelationOperator         string = "correlation_operator"
 	alertV2Joins                       string = "joins"
@@ -221,11 +220,6 @@ func resourceAlertV2() *schema.Resource {
 									},
 								},
 							},
-						},
-						alertV2OutputShouldUseAllFields: {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
 						},
 					},
 				},
@@ -411,7 +405,6 @@ func getSubComponentMapping(sc []alerts_v2.SubAlert) []map[string]interface{} {
 			alertV2Operation:                subComponent.Trigger.Operator,
 			alertV2SeverityThresholdTiers:   severityThreshold,
 			alertV2Columns:                  columns,
-			alertV2OutputShouldUseAllFields: subComponent.Output.ShouldUseAllFields,
 		}
 
 		subComponentsMapping = append(subComponentsMapping, mapping)
@@ -461,7 +454,6 @@ func getSubComponents(subComponentsFromConfig []interface{}) []alerts_v2.SubAler
 		subAlertElement.QueryDefinition.Aggregation.FieldToAggregateOn = element[alertV2AggregationField].(string)
 		subAlertElement.QueryDefinition.ShouldQueryOnAllAccounts = element[alertV2ShouldQueryOnAllAccounts].(bool)
 		subAlertElement.Trigger.Operator = element[alertV2Operation].(string)
-		subAlertElement.Output.ShouldUseAllFields = element[alertV2OutputShouldUseAllFields].(bool)
 
 		if _, ok := element[alertV2FilterMust]; ok {
 			mustInterface := element[alertV2FilterMust].([]interface{})
@@ -495,18 +487,18 @@ func getSubComponents(subComponentsFromConfig []interface{}) []alerts_v2.SubAler
 		if _, ok := element[alertV2Columns]; ok {
 			columns := element[alertV2Columns].([]interface{})
 			for _, columnElement := range columns {
-				column := columnElement.(map[string]string)
+				column := columnElement.(map[string]interface{})
 				var columnCreateAlert alerts_v2.ColumnConfig
 				if _, ok := column[alertV2ColumnsFieldName]; ok {
-					columnCreateAlert.FieldName = column[alertV2ColumnsFieldName]
+					columnCreateAlert.FieldName = column[alertV2ColumnsFieldName].(string)
 				}
 
 				if _, ok := column[alertV2ColumnsRegex]; ok {
-					columnCreateAlert.Regex = column[alertV2ColumnsRegex]
+					columnCreateAlert.Regex = column[alertV2ColumnsRegex].(string)
 				}
 
 				if _, ok := column[alertV2ColumnSort]; ok {
-					columnCreateAlert.Sort = column[alertV2ColumnSort]
+					columnCreateAlert.Sort = column[alertV2ColumnSort].(string)
 				}
 
 				columnsCreateAlert = append(columnsCreateAlert, columnCreateAlert)
