@@ -155,6 +155,8 @@ Want to do it yourself? We are more than happy to accept external contributions 
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
 
 ### Changelog 
+- v1.2.1
+    - Fix alerts_v2 type "TABLE" bug.
 - v1.2
     - Update client version(v1.5.0).
     - Support Alerts v2 resource.
