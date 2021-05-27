@@ -156,6 +156,9 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
 
 ### Changelog 
 - v1.2.1
+    - Update client version.
+    - Fix alerts_v2 sort bug.
+- v1.2.1
     - Fix alerts_v2 type "TABLE" bug.
 - v1.2
     - Update client version(v1.5.0).
