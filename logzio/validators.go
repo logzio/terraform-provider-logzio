@@ -134,8 +134,8 @@ func validateSortTypes(v interface{}, k string) (ws []string, errors []error) {
 		alerts_v2.SortDesc,
 	}
 
-	if !contains(validTypes, value){
-		errors = append(errors, fmt.Errorf("severity type %q must be one of %s", k, validTypes))
+	if !contains(validTypes, value) {
+		errors = append(errors, fmt.Errorf("sort type %q must be one of %s", k, validTypes))
 	}
 
 	return
