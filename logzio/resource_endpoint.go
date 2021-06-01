@@ -98,7 +98,7 @@ func resourceEndpoint() *schema.Resource {
 						},
 						endpointHeaders: {
 							Type:     schema.TypeMap,
-							Required: true,
+							Optional: true,
 						},
 						endpointBodyTemplate: {
 							Type:     schema.TypeMap,

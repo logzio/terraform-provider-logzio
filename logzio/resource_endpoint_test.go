@@ -236,3 +236,32 @@ func createCustomEndpoint(name string) string {
 	}
 	return fmt.Sprintf(fmt.Sprintf("%s", content), name)
 }
+
+func TestAccLogzioEndpoint_CreateCustomEndpointNoHeaders(t *testing.T) {
+	config := `resource "logzio_endpoint" "custom" {
+  title = "my_custom_title_no_headers"
+  endpoint_type = "Custom"
+  description = "this_is_my_description"
+  custom {
+    url = "https://www.test.com"
+    method = "POST"
+    body_template = {
+      this = "is"
+      my = "template"
+    }
+  }
+}`
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"logzio_endpoint.custom", "title", "my_custom_title_no_headers"),
+				),
+			},
+		},
+	})
+}
