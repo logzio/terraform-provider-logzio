@@ -157,6 +157,9 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
 ### Changelog 
 - v1.2.3
     - Fix bug for `custom endpoint` empty headers.
+    - Allow empty sharing accounts array in `sub account`.
+    - Replace module `terraform` with `terraform-plugin-sdk`. See further explanation [here](https://www.terraform.io/docs/extend/guides/v1-upgrade-guide.html).
+    - Upgrade to Go v1.15.
 - v1.2.2
     - Update client version(v1.5.1).
     - Fix alerts_v2 sort bug.

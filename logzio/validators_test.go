@@ -44,7 +44,7 @@ func TestValidUrl(t *testing.T) {
 }
 
 func TestValidateOutputTypes(t *testing.T) {
-	validOptions := []string {
+	validOptions := []string{
 		alerts_v2.OutputTypeJson,
 		alerts_v2.OutputTypeTable,
 	}

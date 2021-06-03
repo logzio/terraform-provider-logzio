@@ -1,9 +1,13 @@
 package logzio
 
 import (
+	"github.com/avast/retry-go"
+	"reflect"
+	"regexp"
 	"strconv"
+	"time"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/sub_accounts"
 )
 
@@ -19,6 +23,8 @@ const (
 	subAccountDocSizeSetting         string = "doc_size_setting"
 	subAccountSharingObjectsAccounts string = "sharing_objects_accounts"
 	subAccountUtilizationSettings    string = "utilization_settings"
+
+	delayGetSubAccount = 2 * time.Second
 )
 
 /**
@@ -64,7 +70,7 @@ func resourceSubAccount() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
-				Required: true,
+				Optional: true,
 			},
 			subAccountDocSizeSetting: {
 				Type:     schema.TypeBool,
@@ -86,7 +92,9 @@ func subAccountClient(m interface{}) *sub_accounts.SubAccountClient {
 
 func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 	sharingAccounts := d.Get(subAccountSharingObjectsAccounts).([]interface{})
-	var sharingObjectAccounts []int32
+
+	// Allows users to insert empty array of sharingObjectAccounts, but avoiding `nil`
+	sharingObjectAccounts := make([]int32, 0)
 	for _, accountId := range sharingAccounts {
 		sharingObjectAccounts = append(sharingObjectAccounts, int32(accountId.(int)))
 	}
@@ -128,7 +136,22 @@ func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 	subAccountId := strconv.FormatInt(u.Id, BASE_10)
 	d.SetId(subAccountId)
 
-	return nil
+	return retry.Do(
+		func() error {
+			return resourceSubAccountRead(d, m)
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					match, _ := regexp.MatchString("^404.*errorCode", err.Error())
+					if match {
+						return true
+					}
+				}
+				return false
+			}),
+		retry.Delay(delayGetSubAccount),
+	)
 }
 
 func resourceSubAccountRead(d *schema.ResourceData, m interface{}) error {
@@ -152,24 +175,29 @@ func resourceSubAccountUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	subAccount := sub_accounts.SubAccount{
-		Id:                    id,
-		AccountName:           d.Get(subAccountName).(string),
-		RetentionDays:         int32(d.Get(subAccountRetentionDays).(int)),
-		SharingObjectAccounts: d.Get(subAccountSharingObjectsAccounts).([]interface{}),
-		MaxDailyGB:            float32(d.Get(subAccountMaxDailyGB).(float64)),
-		Searchable:            d.Get(subAccountSearchable).(bool),
-		Accessible:            d.Get(subAccountAccessible).(bool),
-		DocSizeSetting:        d.Get(subAccountDocSizeSetting).(bool),
-		UtilizationSettings:   d.Get(subAccountUtilizationSettings).(map[string]interface{}),
-	}
+	subAccount := createSubAccountObject(d, id)
 
 	err = subAccountClient(m).UpdateSubAccount(id, subAccount)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return retry.Do(
+		func() error {
+			return resourceSubAccountRead(d, m)
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					updated := createSubAccountObject(d, id)
+					if !reflect.DeepEqual(subAccount, updated) {
+						return true
+					}
+				}
+				return false
+			}),
+		retry.Delay(delayGetSubAccount),
+	)
 }
 
 func resourceSubAccountDelete(d *schema.ResourceData, m interface{}) error {
@@ -184,4 +212,18 @@ func resourceSubAccountDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	return nil
+}
+
+func createSubAccountObject(d *schema.ResourceData, id int64) sub_accounts.SubAccount {
+	return sub_accounts.SubAccount{
+		Id:                    id,
+		AccountName:           d.Get(subAccountName).(string),
+		RetentionDays:         int32(d.Get(subAccountRetentionDays).(int)),
+		SharingObjectAccounts: d.Get(subAccountSharingObjectsAccounts).([]interface{}),
+		MaxDailyGB:            float32(d.Get(subAccountMaxDailyGB).(float64)),
+		Searchable:            d.Get(subAccountSearchable).(bool),
+		Accessible:            d.Get(subAccountAccessible).(bool),
+		DocSizeSetting:        d.Get(subAccountDocSizeSetting).(bool),
+		UtilizationSettings:   d.Get(subAccountUtilizationSettings).(map[string]interface{}),
+	}
 }
