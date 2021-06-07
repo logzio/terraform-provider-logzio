@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
-	tf "github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	tf "github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/logzio/logzio_terraform_provider/logzio"
 
 	"encoding/json"

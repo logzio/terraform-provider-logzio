@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/avast/retry-go"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
 	"log"
 	"reflect"
@@ -300,6 +300,9 @@ func resourceAlertV2Create(d *schema.ResourceData, m interface{}) error {
 				return false
 			}),
 		retry.Delay(delayGetAlertV2),
+		retry.DelayType(func(n uint, err error, config *retry.Config) time.Duration{
+			return retry.BackOffDelay(n, err, config)
+		}),
 	)
 }
 
@@ -360,6 +363,9 @@ func resourceAlertV2Update(d *schema.ResourceData, m interface{}) error {
 				return false
 			}),
 		retry.Delay(delayGetAlertV2),
+		retry.DelayType(func(n uint, err error, config *retry.Config) time.Duration{
+			return retry.BackOffDelay(n, err, config)
+		}),
 	)
 }
 

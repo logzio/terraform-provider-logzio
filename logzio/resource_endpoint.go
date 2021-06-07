@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/endpoints"
 )
 
@@ -98,7 +98,7 @@ func resourceEndpoint() *schema.Resource {
 						},
 						endpointHeaders: {
 							Type:     schema.TypeMap,
-							Required: true,
+							Optional: true,
 						},
 						endpointBodyTemplate: {
 							Type:     schema.TypeMap,
