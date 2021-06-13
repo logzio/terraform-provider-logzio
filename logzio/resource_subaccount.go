@@ -41,6 +41,14 @@ func resourceSubAccount() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			subAccountId: {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			subAccountToken: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			subAccountEmail: {
 				Type:     schema.TypeString,
 				Required: true,
@@ -133,8 +141,11 @@ func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	subAccountId := strconv.FormatInt(u.Id, BASE_10)
-	d.SetId(subAccountId)
+	subAccountIdValue := strconv.FormatInt(u.Id, BASE_10)
+	d.SetId(subAccountIdValue)
+
+	d.Set(subAccountToken, u.Token)
+	d.Set(subAccountId, u.AccountId)
 
 	return retry.Do(
 		func() error {
@@ -166,6 +177,19 @@ func resourceSubAccountRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	setSubAccount(d, subAccount)
+
+	// Sub accounts created before v1.2.4 had no account_id, account_token attributes.
+	// These lines add those attributes to already existing resources on Read
+	accountToken, okToken := d.GetOk(subAccountToken)
+	accountId, okId := d.GetOk(subAccountId)
+
+	if !okToken && !okId && accountId.(int) == 0 && len(accountToken.(string)) == 0 {
+		err = insertAccountTokenAndId(d, m, id)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -226,4 +250,40 @@ func createSubAccountObject(d *schema.ResourceData, id int64) sub_accounts.SubAc
 		DocSizeSetting:        d.Get(subAccountDocSizeSetting).(bool),
 		UtilizationSettings:   d.Get(subAccountUtilizationSettings).(map[string]interface{}),
 	}
+}
+
+func insertAccountTokenAndId(d *schema.ResourceData, m interface{}, id int64) error {
+	return retry.Do(
+		func() error {
+			detailed, err := getDetailedSubAccount(m, id)
+			if err != nil {
+				return err
+			}
+
+			d.Set(subAccountId, detailed.Account.AccountId)
+			d.Set(subAccountToken, detailed.Account.AccountToken)
+
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					match, _ := regexp.MatchString("^404.*errorCode", err.Error())
+					if match {
+						return true
+					}
+				}
+				return false
+			}),
+		retry.Delay(delayGetSubAccount),
+	)
+}
+
+func getDetailedSubAccount(m interface{}, id int64) (*sub_accounts.SubAccountDetailed, error) {
+	subAccount, err := subAccountClient(m).GetDetailedSubAccount(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return subAccount, nil
 }

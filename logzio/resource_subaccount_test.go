@@ -33,7 +33,7 @@ func TestAccLogzioSubaccount_CreateSubaccount(t *testing.T) {
 				ResourceName:            "logzio_subaccount.test_subaccount",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"email"},
+				ImportStateVerifyIgnore: []string{subAccountEmail},
 			},
 		},
 	})
@@ -63,7 +63,7 @@ func TestAccLogzioSubaccount_CreateSubaccountEmptySharingObject(t *testing.T) {
 				ResourceName:            "logzio_subaccount.test_subaccount",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"email"},
+				ImportStateVerifyIgnore: []string{subAccountEmail},
 			},
 		},
 	})
