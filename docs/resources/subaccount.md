@@ -52,6 +52,7 @@ resource "logzio_subaccount" "my_subaccount" {
 * `account_id` - ID of the subaccount.
 * `account_token` - Log shipping token for the subaccount. [Learn more](https://docs.logz.io/user-guide/tokens/log-shipping-tokens/)
 
+**Note:** The above attributes displayed only from v1.2.4. If you're using an earlier version, please upgrade and use `terraform apply -refersh` to add those attributes to your existing resources.
 
 ## Endpoints used
 
