@@ -155,6 +155,9 @@ Want to do it yourself? We are more than happy to accept external contributions 
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
 
 ### Changelog 
+- v1.2.4
+    - Update client version(v1.5.3).
+    - Fix `sub account` to return attributes `account_token` & `account_id`.
 - v1.2.3
     - Fix bug for `custom endpoint` empty headers.
     - Allow empty sharing accounts array in `sub account`.
