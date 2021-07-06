@@ -25,7 +25,6 @@ func TestAccLogzioLogShippingToken_CreateLogShippingToken(t *testing.T) {
 				Config: resourceTestLogShippingToken(tokenName, logShippingTokenResourceCreateToken),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, logShippingTokenName, "tf_test_create"),
-					resource.TestCheckResourceAttr(resourceName, logShippingTokenEnabled, "true"),
 				),
 			},
 			{

@@ -43,7 +43,8 @@ func resourceLogShippingToken() *schema.Resource {
 			},
 			logShippingTokenEnabled: {
 				Type:     schema.TypeBool,
-				Required: true,
+				Optional: true,
+				Computed: true,
 			},
 			logShippingTokenToken: {
 				Type:     schema.TypeString,
