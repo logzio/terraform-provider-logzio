@@ -1,25 +1,26 @@
 package logzio
 
 import (
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/log_shipping_tokens"
+	"reflect"
 	"strconv"
+	"strings"
+	"time"
 )
 
 const (
-	logShippingTokenId        string = "id"
-	logShippingTokenName      string = "name"
-	logShippingTokenEnabled   string = "enabled"
-	logShippingTokenToken     string = "token"
-	logShippingTokenUpdatedAt        = "updated_at"
-	logShippingTokenUpdatedBy        = "updated_by"
-	logShippingTokenCreatedAt        = "created_at"
-	logShippingTokenCreatedBy        = "created_by"
+	logShippingTokenId        = "token_id"
+	logShippingTokenName      = "name"
+	logShippingTokenEnabled   = "enabled"
+	logShippingTokenToken     = "token"
+	logShippingTokenUpdatedAt = "updated_at"
+	logShippingTokenUpdatedBy = "updated_by"
+	logShippingTokenCreatedAt = "created_at"
+	logShippingTokenCreatedBy = "created_by"
 )
-
-// TODO:
-// 1. What to do with ENABLED - required? computed? optional? instructions to always set on create to true?
-// 2. Retry + timeout
 
 func resourceLogShippingToken() *schema.Resource {
 	return &schema.Resource{
@@ -65,6 +66,10 @@ func resourceLogShippingToken() *schema.Resource {
 				Computed: true,
 			},
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(10 * time.Second),
+			Update: schema.DefaultTimeout(10 * time.Second),
+		},
 	}
 }
 
@@ -78,7 +83,16 @@ func resourceLogShippingTokenCreate(d *schema.ResourceData, m interface{}) error
 
 	d.SetId(strconv.FormatInt(int64(token.Id), 10))
 
-	return resourceLogShippingTokenRead(d, m)
+	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		err = resourceLogShippingTokenRead(d, m)
+		if err != nil {
+			if strings.Contains(err.Error(), "failed with missing log shipping") {
+				return resource.RetryableError(err)
+			}
+		}
+
+		return resource.NonRetryableError(err)
+	})
 }
 
 func resourceLogShippingTokenRead(d *schema.ResourceData, m interface{}) error {
@@ -107,12 +121,27 @@ func resourceLogShippingTokenUpdate(d *schema.ResourceData, m interface{}) error
 		Enabled: strconv.FormatBool(d.Get(logShippingTokenEnabled).(bool)),
 	}
 
-	token, err := logShippingTokenClient(m).UpdateLogShippingToken(int32(id), updateToken)
+	_, err = logShippingTokenClient(m).UpdateLogShippingToken(int32(id), updateToken)
 	if err != nil {
 		return err
 	}
 
-	return resourceLogShippingTokenRead(d, token)
+	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
+		err = resourceLogShippingTokenRead(d, m)
+		if err != nil {
+			tokenFromSchema := log_shipping_tokens.UpdateLogShippingToken{
+				Name:    d.Get(logShippingTokenName).(string),
+				Enabled: strconv.FormatBool(d.Get(logShippingTokenEnabled).(bool)),
+			}
+
+			if strings.Contains(err.Error(), "failed with missing log shipping") &&
+				!reflect.DeepEqual(updateToken, tokenFromSchema) {
+				return resource.RetryableError(fmt.Errorf("log shipping token is not updated yet: %s", err.Error()))
+			}
+		}
+
+		return resource.NonRetryableError(err)
+	})
 }
 
 func resourceLogShippingTokenDelete(d *schema.ResourceData, m interface{}) error {
