@@ -13,15 +13,15 @@ func dataSourceLogShippingToken() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			logShippingTokenId: {
 				Type:     schema.TypeInt,
-				Computed: true,
+				Optional: true,
 			},
 			logShippingTokenName: {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			logShippingTokenEnabled: {
 				Type:     schema.TypeBool,
-				Computed: true,
+				Optional: true,
 			},
 			logShippingTokenToken: {
 				Type:     schema.TypeString,
@@ -70,11 +70,11 @@ func dataSourceLogShippingTokenRead(d *schema.ResourceData, m interface{}) error
 
 	// If for some reason we couldn't find the token by id,
 	// looking for the token by it's name
-	tokenName, ok := d.GetOk(logShippingTokenEnabled)
+	tokenName, ok := d.GetOk(logShippingTokenName)
 	if ok {
-		tokenEnabled, ok := d.GetOk(logShippingTokenEnabled)
-		if ok {
-			token, err := findLogShippingTokenByName(tokenName.(string), tokenEnabled.(bool), client)
+		enabledValues := []bool{true, false}
+		for _, v := range enabledValues {
+			token, err := findLogShippingTokenByName(tokenName.(string), v, client)
 			if err != nil {
 				return err
 			}
@@ -85,6 +85,7 @@ func dataSourceLogShippingTokenRead(d *schema.ResourceData, m interface{}) error
 				return nil
 			}
 		}
+
 	}
 
 	return fmt.Errorf("couldn't find log shipping token with specified attributes")

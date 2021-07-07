@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	logShippingTokenId        = "token_id"
+	logShippingTokenId        = "id"
 	logShippingTokenName      = "name"
 	logShippingTokenEnabled   = "enabled"
 	logShippingTokenToken     = "token"
@@ -20,6 +20,7 @@ const (
 	logShippingTokenUpdatedBy = "updated_by"
 	logShippingTokenCreatedAt = "created_at"
 	logShippingTokenCreatedBy = "created_by"
+	logShippingTokenTokenId   = "token_id"
 )
 
 func resourceLogShippingToken() *schema.Resource {
@@ -33,7 +34,7 @@ func resourceLogShippingToken() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			logShippingTokenId: {
+			logShippingTokenTokenId: {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
@@ -166,7 +167,7 @@ func logShippingTokenClient(m interface{}) *log_shipping_tokens.LogShippingToken
 }
 
 func setLogShippingToken(d *schema.ResourceData, token *log_shipping_tokens.LogShippingToken) {
-	d.Set(logShippingTokenId, token.Id)
+	d.Set(logShippingTokenTokenId, token.Id)
 	d.Set(logShippingTokenName, token.Name)
 	d.Set(logShippingTokenEnabled, token.Enabled)
 	d.Set(logShippingTokenToken, token.Token)
