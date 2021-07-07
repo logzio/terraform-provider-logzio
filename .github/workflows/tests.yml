@@ -2,19 +2,18 @@ name: Tests
 
 on: [push, pull_request]
 
-env:
-  LOGZIO_API_TOKEN: ${{ secrets.LOGZIO_API_TOKEN }}
-  TF_ACC: true
-  LOGZIO_EMAIL: ${{ secrets.LOGZIO_EMAIL }}
-  LOGZIO_ACCOUNT_ID: ${{ secrets.LOGZIO_ACCOUNT_ID }}
-
 jobs:
   test:
+    env:
+      LOGZIO_API_TOKEN: ${{ secrets.LOGZIO_API_TOKEN }}
+      TF_ACC: true
+      LOGZIO_EMAIL: ${{ secrets.LOGZIO_EMAIL }}
+      LOGZIO_ACCOUNT_ID: ${{ secrets.LOGZIO_ACCOUNT_ID }}
+      GO111MODULE: on
     name: Test
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
-
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
