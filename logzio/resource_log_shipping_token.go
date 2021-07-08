@@ -71,6 +71,7 @@ func resourceLogShippingToken() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Second),
 			Update: schema.DefaultTimeout(10 * time.Second),
+			Delete: schema.DefaultTimeout(10 * time.Second),
 		},
 	}
 }
@@ -78,23 +79,34 @@ func resourceLogShippingToken() *schema.Resource {
 // Creates a new log shipping token in logz.io
 func resourceLogShippingTokenCreate(d *schema.ResourceData, m interface{}) error {
 	createToken := log_shipping_tokens.CreateLogShippingToken{Name: d.Get(logShippingTokenName).(string)}
-	token, err := logShippingTokenClient(m).CreateLogShippingToken(createToken)
+	tokenLimits, err := logShippingTokenClient(m).GetLogShippingLimitsToken()
 	if err != nil {
 		return err
 	}
 
-	d.SetId(strconv.FormatInt(int64(token.Id), 10))
-
-	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		err = resourceLogShippingTokenRead(d, m)
+	if tokenLimits.MaxAllowedTokens > tokenLimits.NumOfEnabledTokens {
+		token, err := logShippingTokenClient(m).CreateLogShippingToken(createToken)
 		if err != nil {
-			if strings.Contains(err.Error(), "failed with missing log shipping") {
-				return resource.RetryableError(err)
-			}
+			return err
 		}
 
-		return resource.NonRetryableError(err)
-	})
+		d.SetId(strconv.FormatInt(int64(token.Id), 10))
+
+		return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+			err = resourceLogShippingTokenRead(d, m)
+			if err != nil {
+				if strings.Contains(err.Error(), "failed with missing log shipping") {
+					return resource.RetryableError(err)
+				}
+			}
+
+			return resource.NonRetryableError(err)
+		})
+	}
+
+	return fmt.Errorf("cannot create new log shipping token. max allowed tokens for account: %d. number of enabled tokens: :%d",
+		tokenLimits.MaxAllowedTokens, tokenLimits.NumOfEnabledTokens)
+
 }
 
 func resourceLogShippingTokenRead(d *schema.ResourceData, m interface{}) error {
@@ -152,12 +164,14 @@ func resourceLogShippingTokenDelete(d *schema.ResourceData, m interface{}) error
 		return err
 	}
 
-	err = logShippingTokenClient(m).DeleteLogShippingToken(int32(id))
-	if err != nil {
-		return err
-	}
+	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
+		err = logShippingTokenClient(m).DeleteLogShippingToken(int32(id))
+		if err != nil {
+			return resource.RetryableError(err)
+		}
 
-	return nil
+		return resource.NonRetryableError(err)
+	})
 }
 
 func logShippingTokenClient(m interface{}) *log_shipping_tokens.LogShippingTokensClient {
