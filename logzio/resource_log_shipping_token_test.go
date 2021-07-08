@@ -35,7 +35,6 @@ func TestAccLogzioLogShippingToken_CreateLogShippingToken(t *testing.T) {
 			},
 		},
 	})
-
 }
 
 func TestAccLogzioLogShippingToken_UpdateLogShippingToken(t *testing.T) {
