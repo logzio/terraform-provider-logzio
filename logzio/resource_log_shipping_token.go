@@ -69,9 +69,9 @@ func resourceLogShippingToken() *schema.Resource {
 			},
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(10 * time.Second),
-			Update: schema.DefaultTimeout(10 * time.Second),
-			Delete: schema.DefaultTimeout(10 * time.Second),
+			Create: schema.DefaultTimeout(5 * time.Second),
+			Update: schema.DefaultTimeout(5 * time.Second),
+			Delete: schema.DefaultTimeout(5 * time.Second),
 		},
 	}
 }
@@ -84,6 +84,7 @@ func resourceLogShippingTokenCreate(d *schema.ResourceData, m interface{}) error
 		return err
 	}
 
+	// Check if we exceeded the number of max allowed tokens
 	if tokenLimits.MaxAllowedTokens > tokenLimits.NumOfEnabledTokens {
 		token, err := logShippingTokenClient(m).CreateLogShippingToken(createToken)
 		if err != nil {
@@ -109,6 +110,7 @@ func resourceLogShippingTokenCreate(d *schema.ResourceData, m interface{}) error
 
 }
 
+// Gets log shipping token by id
 func resourceLogShippingTokenRead(d *schema.ResourceData, m interface{}) error {
 	id, err := idFromResourceData(d)
 	if err != nil {
@@ -124,6 +126,7 @@ func resourceLogShippingTokenRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
+// Updates log shipping token by id
 func resourceLogShippingTokenUpdate(d *schema.ResourceData, m interface{}) error {
 	id, err := idFromResourceData(d)
 	if err != nil {
@@ -158,6 +161,7 @@ func resourceLogShippingTokenUpdate(d *schema.ResourceData, m interface{}) error
 	})
 }
 
+// Deletes log shipping token by id
 func resourceLogShippingTokenDelete(d *schema.ResourceData, m interface{}) error {
 	id, err := idFromResourceData(d)
 	if err != nil {
