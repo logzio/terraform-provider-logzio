@@ -66,7 +66,6 @@ func TestAccLogzioLogShippingToken_UpdateLogShippingToken(t *testing.T) {
 			},
 		},
 	})
-
 }
 
 func resourceTestLogShippingToken(name string, path string) string {
