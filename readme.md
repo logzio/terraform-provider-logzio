@@ -29,15 +29,20 @@ The following Logz.io API endpoints are supported by this provider:
 
 #### Get the Terraform Logz.io Provider
 
-The easiest way to get the provider and the JetBrains IDE HCL meta-data is to run the script provided in the [Logz.io GitHub repo](https://github.com/logzio/logzio_terraform_provider/blob/master/scripts/update_plugin.sh).
+To install this provider, copy and paste this code into your Terraform configuration:
 
-The script is found under `./scripts/update_plugin.sh`. (If you ever encounter the need to update the version, you can edit the variable: `PROVIDER_VERSION`. But this shouldn't be necessary.)
-
-Run it:
-
-```bash
-./scripts/build.sh
+```hcl
+terraform {
+  required_providers {
+    logzio = {
+      source = "logzio/logzio"
+    }
+  }
+}
 ```
+
+This will install the latest Logz.io provider.
+If you wish to use a specific version of the provider, add under `source` the field `version` and specify your preferred version.
 
 
 ##### Configuring the provider
@@ -71,6 +76,14 @@ This example adds a new Slack notification channel and creates a new alert in Ki
 The alert in this example will trigger whenever Logz.io records 10 loglevel:ERROR messages in 10 minutes.
 
 ```
+terraform {
+  required_providers {
+    logzio = {
+      source = "logzio/logzio"
+    }
+  }
+}
+
 provider "logzio" {
   api_token = "8387abb8-4831-53af-91de-5cd3784d9774"
   region= "au"
@@ -115,6 +128,14 @@ resource "logzio_alert_v2" "my_alert" {
 This example will create a user in your Logz.io account.
 
 ```
+terraform {
+  required_providers {
+    logzio = {
+      source = "logzio/logzio"
+    }
+  }
+}
+
 variable "api_token" {
   type = "string"
   description = "Your logzio API token"
