@@ -2,7 +2,7 @@
 
 Provides a Logz.io log shipping token resource. This can be used to create and manage Logz.io log shipping tokens.
 
-* Learn more about log alerts in the [Logz.io Docs](https://docs.logz.io/api/#tag/Manage-log-shipping-tokens)
+* Learn more about log shipping tokens in the [Logz.io Docs](https://docs.logz.io/api/#tag/Manage-log-shipping-tokens)
 
 ## Argument Reference
 

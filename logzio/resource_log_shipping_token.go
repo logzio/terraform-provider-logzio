@@ -85,7 +85,7 @@ func resourceLogShippingTokenCreate(d *schema.ResourceData, m interface{}) error
 	}
 
 	// Check if we exceeded the number of max allowed tokens
-	if tokenLimits.MaxAllowedTokens > tokenLimits.NumOfEnabledTokens {
+	if tokenLimits.NumOfEnabledTokens < tokenLimits.MaxAllowedTokens {
 		token, err := logShippingTokenClient(m).CreateLogShippingToken(createToken)
 		if err != nil {
 			return err
