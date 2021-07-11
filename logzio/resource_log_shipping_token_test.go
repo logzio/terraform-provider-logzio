@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"io/ioutil"
 	"log"
+	"regexp"
 	"testing"
 )
 
@@ -63,6 +64,43 @@ func TestAccLogzioLogShippingToken_UpdateLogShippingToken(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccLogzioLogShippingToken_CreateLogShippingTokenEmptyName(t *testing.T) {
+	tokenName := "tf_test_create_fail_on_name"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config:      resourceTestLogShippingToken(tokenName, "create_log_shipping_token_invalid_name"),
+				ExpectError: regexp.MustCompile("name must be set"),
+			},
+		},
+	})
+}
+
+func TestAccLogzioLogShippingToken_UpdateLogShippingTokenEmptyName(t *testing.T) {
+	tokenName := "tf_test_update_fail_on_name"
+	resourceName := "logzio_log_shipping_token." + tokenName
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: resourceTestLogShippingToken(tokenName, logShippingTokenResourceCreateToken),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, logShippingTokenName, "tf_test_create"),
+				),
+			},
+			{
+				Config:      resourceTestLogShippingToken(tokenName, "update_log_shipping_token_invalid_name"),
+				ExpectError: regexp.MustCompile("name must be set"),
 			},
 		},
 	})
