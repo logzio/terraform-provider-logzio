@@ -17,6 +17,7 @@ The following Logz.io API endpoints are supported by this provider:
 * [Log-based alerts](https://github.com/logzio/public-api/tree/master/alerts)
 * [Sub accounts](https://docs.logz.io/api/#tag/Manage-sub-accounts)
 * [Alerts(v2)](https://docs.logz.io/api/#tag/Alerts)
+* [Log shipping token](https://docs.logz.io/api/#tag/Manage-log-shipping-tokens)
 
 #### Working with Terraform
 
@@ -176,6 +177,9 @@ Want to do it yourself? We are more than happy to accept external contributions 
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
 
 ### Changelog 
+- v1.3
+    - Update client version(v1.6).
+    - Support Log Shipping Token resource.
 - v1.2.4
     - Update client version(v1.5.3).
     - Fix `sub account` to return attributes `account_token` & `account_id`.

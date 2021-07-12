@@ -7,18 +7,19 @@ import (
 )
 
 const (
-	providerApiToken       = "api_token"
-	providerBaseUrl        = "base_url"
-	providerRegion         = "region"
-	resourceAlertType      = "logzio_alert"
-	resourceAlertV2Type    = "logzio_alert_v2"
-	resourceEndpointType   = "logzio_endpoint"
-	resourceUserType       = "logzio_user"
-	resourceSubAccountType = "logzio_subaccount"
-	envLogzioApiToken      = "LOGZIO_API_TOKEN"
-	envLogzioRegion        = "LOGZIO_REGION"
-	envLogzioBaseURL       = "LOGZIO_BASE_URL"
-	envLogzioAccountId     = "LOGZIO_ACCOUNT_ID"
+	providerApiToken             = "api_token"
+	providerBaseUrl              = "base_url"
+	providerRegion               = "region"
+	resourceAlertType            = "logzio_alert"
+	resourceAlertV2Type          = "logzio_alert_v2"
+	resourceEndpointType         = "logzio_endpoint"
+	resourceUserType             = "logzio_user"
+	resourceSubAccountType       = "logzio_subaccount"
+	resourceLogShippingTokenType = "logzio_log_shipping_token"
+	envLogzioApiToken            = "LOGZIO_API_TOKEN"
+	envLogzioRegion              = "LOGZIO_REGION"
+	envLogzioBaseURL             = "LOGZIO_BASE_URL"
+	envLogzioAccountId           = "LOGZIO_ACCOUNT_ID"
 
 	baseUrl = "https://api%s.logz.io"
 )
@@ -42,18 +43,20 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			resourceAlertType:      dataSourceAlert(),
-			resourceEndpointType:   dataSourceEndpoint(),
-			resourceUserType:       dataSourceUser(),
-			resourceSubAccountType: dataSourceSubAccount(),
-			resourceAlertV2Type:    dataSourceAlertV2(),
+			resourceAlertType:            dataSourceAlert(),
+			resourceEndpointType:         dataSourceEndpoint(),
+			resourceUserType:             dataSourceUser(),
+			resourceSubAccountType:       dataSourceSubAccount(),
+			resourceAlertV2Type:          dataSourceAlertV2(),
+			resourceLogShippingTokenType: dataSourceLogShippingToken(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			resourceAlertType:      resourceAlert(),
-			resourceEndpointType:   resourceEndpoint(),
-			resourceUserType:       resourceUser(),
-			resourceSubAccountType: resourceSubAccount(),
-			resourceAlertV2Type:    resourceAlertV2(),
+			resourceAlertType:            resourceAlert(),
+			resourceEndpointType:         resourceEndpoint(),
+			resourceUserType:             resourceUser(),
+			resourceSubAccountType:       resourceSubAccount(),
+			resourceAlertV2Type:          resourceAlertV2(),
+			resourceLogShippingTokenType: resourceLogShippingToken(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
