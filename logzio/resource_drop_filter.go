@@ -1,21 +1,23 @@
 package logzio
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/drop_filters"
+	"strconv"
 	"strings"
 	"time"
 )
 
 const (
-	dropFilterIdField = "drop_filter_id"
-	dropFilterActive = "active"
-	dropFilterLogType = "log_type"
+	dropFilterIdField         = "drop_filter_id"
+	dropFilterActive          = "active"
+	dropFilterLogType         = "log_type"
 	dropFilterFieldConditions = "field_conditions"
-	dropFilterFieldName = "field_name"
-	dropFilterValue = "value"
+	dropFilterFieldName       = "field_name"
+	dropFilterValue           = "value"
 )
 
 // Returns the drop filters client with the api token from the provider
@@ -36,29 +38,32 @@ func resourceDropFilter() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			dropFilterIdField: {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			dropFilterActive: {
-				Type: schema.TypeBool,
+				Type:     schema.TypeBool,
 				Computed: true,
 				Optional: true,
 			},
 			dropFilterLogType: {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 			dropFilterFieldConditions: {
-				Type: schema.TypeList,
+				Type:     schema.TypeList,
 				Required: true,
-				Elem: map[string]*schema.Schema{
-					dropFilterFieldName: {
-						Type: schema.TypeString,
-						Required: true,
-					},
-					dropFilterValue: {
-						Required: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						dropFilterFieldName: {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						dropFilterValue: {
+							Type:     schema.TypeString,
+							Required: true,
+						},
 					},
 				},
 			},
@@ -161,7 +166,7 @@ func resourceDropFilterDelete(d *schema.ResourceData, m interface{}) error {
 	})
 }
 
-func setDropFilter (d *schema.ResourceData, dropFilter *drop_filters.DropFilter) {
+func setDropFilter(d *schema.ResourceData, dropFilter *drop_filters.DropFilter) {
 	d.Set(dropFilterIdField, dropFilter.Id)
 	d.Set(dropFilterActive, dropFilter.Active)
 	d.Set(dropFilterLogType, dropFilter.LogType)
@@ -170,13 +175,13 @@ func setDropFilter (d *schema.ResourceData, dropFilter *drop_filters.DropFilter)
 	d.Set(dropFilterFieldConditions, fieldConditions)
 }
 
-func getFieldConditionsMapping(conditions []drop_filters.FieldConditionObject) []map[string]interface{}{
+func getFieldConditionsMapping(conditions []drop_filters.FieldConditionObject) []map[string]interface{} {
 	var conditionsMapping []map[string]interface{}
 
 	for _, condition := range conditions {
 		mapping := map[string]interface{}{
 			dropFilterFieldName: condition.FieldName,
-			dropFilterValue: condition.Value,
+			dropFilterValue:     convertObjectToString(condition.Value),
 		}
 
 		conditionsMapping = append(conditionsMapping, mapping)
@@ -195,17 +200,55 @@ func createCreatDropFilterFromSchema(d *schema.ResourceData) drop_filters.Create
 	}
 }
 
-func getFieldConditionsList(conditionsFromSchems []interface{}) []drop_filters.FieldConditionObject {
+func getFieldConditionsList(conditionsFromSchemas []interface{}) []drop_filters.FieldConditionObject {
 	var fieldConditions []drop_filters.FieldConditionObject
 	var conditionToAppend drop_filters.FieldConditionObject
-	for _, element := range conditionsFromSchems {
+	for _, element := range conditionsFromSchemas {
 		condition := element.(map[string]interface{})
 		conditionToAppend.FieldName = condition[dropFilterFieldName].(string)
-		conditionToAppend.Value = condition[dropFilterValue]
+		conditionToAppend.Value = getValueObjectByType(condition[dropFilterValue].(string))
 		fieldConditions = append(fieldConditions, conditionToAppend)
 	}
 
 	return fieldConditions
+}
+
+func getValueObjectByType(value string) interface{} {
+	// will try to parse in this order: json, float, int, bool, string
+	var returnObject map[string]interface{}
+	err := json.Unmarshal([]byte(value), &returnObject)
+	if err == nil {
+		return returnObject
+	}
+
+	returnFloat, err := strconv.ParseFloat(value, 64)
+	if err == nil {
+		return returnFloat
+	}
+
+	returnInt, err := strconv.Atoi(value)
+	if err == nil {
+		return returnInt
+	}
+
+	returnBool, err := strconv.ParseBool(value)
+	if err == nil {
+		return returnBool
+	}
+
+	return value
+}
+
+func convertObjectToString(value interface{}) string {
+	switch value.(type) {
+	case map[string]interface{}:
+		byteArray, _ := json.Marshal(value)
+		return string(byteArray)
+	case string:
+		return value.(string)
+	default:
+		return fmt.Sprintf("%v", value)
+	}
 }
 
 func createDropFilterFromSchema(d *schema.ResourceData) drop_filters.DropFilter {
