@@ -24,7 +24,7 @@ func TestAccLogzioDropFilter_CreateDropFilter(t *testing.T) {
 				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateAlert),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type"),
-					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "3"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
 				),
 			},
 			{
