@@ -50,19 +50,23 @@ func resourceDropFilter() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			dropFilterFieldConditions: {
 				Type:     schema.TypeList,
 				Required: true,
+				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						dropFilterFieldName: {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						dropFilterValue: {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 					},
 				},
