@@ -40,6 +40,7 @@ func resourceDropFilter() *schema.Resource {
 			dropFilterIdField: {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
 			},
 			dropFilterActive: {
 				Type:     schema.TypeBool,
@@ -109,21 +110,13 @@ func resourceDropFilterRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	foundFilter := false
-	var dropFilter drop_filters.DropFilter
-	for _, filter := range dropFilters {
-		if filter.Id == d.Id() {
-			dropFilter = filter
-			foundFilter = true
-			break
-		}
-	}
-
-	if !foundFilter {
+	dropFilter := findDropFilterById(d.Id(), dropFilters)
+	if dropFilter == nil {
 		return fmt.Errorf("could not find drop filter with id: %s", d.Id())
+
 	}
 
-	setDropFilter(d, &dropFilter)
+	setDropFilter(d, dropFilter)
 	return nil
 }
 
@@ -258,11 +251,25 @@ func convertObjectToString(value interface{}) string {
 func createDropFilterFromSchema(d *schema.ResourceData) drop_filters.DropFilter {
 	fieldConditionsFromSchema := d.Get(dropFilterFieldConditions).([]interface{})
 	fieldConditions := getFieldConditionsList(fieldConditionsFromSchema)
+	id, ok := d.GetOk(dropFilterIdField)
+	if !ok {
+		id = d.Id()
+	}
 
 	return drop_filters.DropFilter{
-		Id:             d.Id(),
+		Id:             id.(string),
 		Active:         d.Get(dropFilterActive).(bool),
 		LogType:        d.Get(dropFilterLogType).(string),
 		FieldCondition: fieldConditions,
 	}
+}
+
+func findDropFilterById(dropFilterId string, dropFilters []drop_filters.DropFilter) *drop_filters.DropFilter {
+	for _, filter := range dropFilters {
+		if filter.Id == dropFilterId {
+			return &filter
+		}
+	}
+
+	return nil
 }

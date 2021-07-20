@@ -50,6 +50,7 @@ func Provider() terraform.ResourceProvider {
 			resourceSubAccountType:       dataSourceSubAccount(),
 			resourceAlertV2Type:          dataSourceAlertV2(),
 			resourceLogShippingTokenType: dataSourceLogShippingToken(),
+			resourceDropFilterType:       dataSourceDropFilter(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			resourceAlertType:            resourceAlert(),
