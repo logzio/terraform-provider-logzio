@@ -8,7 +8,7 @@ provider "logzio" {
 }
 
 resource "logzio_drop_filter" "test_filter" {
-  log_type = "other_type"
+  log_type = "some_type"
 
   field_conditions {
     field_name = "some_field"
