@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/drop_filters"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -84,6 +85,10 @@ func resourceDropFilter() *schema.Resource {
 // Creates a new drop filter in logzio
 func resourceDropFilterCreate(d *schema.ResourceData, m interface{}) error {
 	createDropFilter := createCreatDropFilterFromSchema(d)
+	active, isSet := d.GetOkExists(dropFilterActive)
+	if isSet {
+		log.Printf("active attribute is set to %t, note that this field is ignored for creation. A drop filter will always be active after creation.\n", active)
+	}
 	dropFilter, err := dropFilterClient(m).CreateDropFilter(createDropFilter)
 	if err != nil {
 		return err
