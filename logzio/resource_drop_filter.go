@@ -51,7 +51,6 @@ func resourceDropFilter() *schema.Resource {
 			dropFilterLogType: {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 				ForceNew: true,
 			},
 			dropFilterFieldConditions: {
