@@ -16,6 +16,8 @@ const (
 	dropFilterResourceCreateDropFilterNoValue           = "create_drop_filter_no_value"
 	dropFilterResourceCreateDropFilterEmptyLogType      = "create_drop_filter_empty_log_type"
 	dropFilterResourceUpdateDropFilter                  = "update_drop_filter"
+	dropFilterResourceUpdateDropFilterChangeLogType     = "update_drop_filter_change_log_type"
+	dropFilterResourceUpdateDropFilterRemoveLogType     = "update_drop_filter_remove_log_type"
 )
 
 func TestAccLogzioDropFilter_CreateDropFilter(t *testing.T) {
@@ -89,6 +91,58 @@ func TestAccLogzioDropFilter_UpdateDropFilter(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterActive, "false"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccLogzioDropFilter_UpdateDropFilterChangeLogType(t *testing.T) {
+	filterName := "test_update_drop_filter_change_log_type"
+	resourceName := "logzio_drop_filter." + filterName
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilter),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
+				),
+			},
+			{
+				Config: resourceTestDropFilter(filterName, dropFilterResourceUpdateDropFilterChangeLogType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "other_type"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccLogzioDropFilter_UpdateDropFilterRemoveLogType(t *testing.T) {
+	filterName := "test_update_drop_filter_remove_log_type"
+	resourceName := "logzio_drop_filter." + filterName
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheckApiToken(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilter),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
+				),
+			},
+			{
+				Config: resourceTestDropFilter(filterName, dropFilterResourceUpdateDropFilterRemoveLogType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, ""),
+					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
 				),
 			},
 		},
