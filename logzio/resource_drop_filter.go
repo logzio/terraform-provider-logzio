@@ -1,13 +1,11 @@
 package logzio
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/drop_filters"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -182,7 +180,7 @@ func getFieldConditionsMapping(conditions []drop_filters.FieldConditionObject) [
 	for _, condition := range conditions {
 		mapping := map[string]interface{}{
 			dropFilterFieldName: condition.FieldName,
-			dropFilterValue:     convertObjectToString(condition.Value),
+			dropFilterValue:     parseObjectToString(condition.Value),
 		}
 
 		conditionsMapping = append(conditionsMapping, mapping)
@@ -207,49 +205,11 @@ func getFieldConditionsList(conditionsFromSchemas []interface{}) []drop_filters.
 	for _, element := range conditionsFromSchemas {
 		condition := element.(map[string]interface{})
 		conditionToAppend.FieldName = condition[dropFilterFieldName].(string)
-		conditionToAppend.Value = getValueObjectByType(condition[dropFilterValue].(string))
+		conditionToAppend.Value = parseFromStringToType(condition[dropFilterValue].(string))
 		fieldConditions = append(fieldConditions, conditionToAppend)
 	}
 
 	return fieldConditions
-}
-
-func getValueObjectByType(value string) interface{} {
-	// will try to parse in this order: json, float, int, bool, string
-	var returnObject map[string]interface{}
-	err := json.Unmarshal([]byte(value), &returnObject)
-	if err == nil {
-		return returnObject
-	}
-
-	returnFloat, err := strconv.ParseFloat(value, 64)
-	if err == nil {
-		return returnFloat
-	}
-
-	returnInt, err := strconv.Atoi(value)
-	if err == nil {
-		return returnInt
-	}
-
-	returnBool, err := strconv.ParseBool(value)
-	if err == nil {
-		return returnBool
-	}
-
-	return value
-}
-
-func convertObjectToString(value interface{}) string {
-	switch value.(type) {
-	case map[string]interface{}:
-		byteArray, _ := json.Marshal(value)
-		return string(byteArray)
-	case string:
-		return value.(string)
-	default:
-		return fmt.Sprintf("%v", value)
-	}
 }
 
 func createDropFilterFromSchema(d *schema.ResourceData) drop_filters.DropFilter {
