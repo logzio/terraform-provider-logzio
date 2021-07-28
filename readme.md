@@ -178,6 +178,11 @@ Want to do it yourself? We are more than happy to accept external contributions 
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
 
 ### Changelog 
+- v1.4.1
+    - `alerts_v2`:
+        - Fix bug for `filter_must`,`filter_must_not` ([#82](https://github.com/logzio/terraform-provider-logzio/issues/82))
+        - Refactor tests.
+        - Refactor code to use Terraform's retry.
 - v1.4
     - Update client version(v1.7).
     - Support [Drop Filter](https://docs.logz.io/api/#tag/Drop-filters) resource.
