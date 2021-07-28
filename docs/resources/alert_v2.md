@@ -68,8 +68,8 @@ resource "logzio_alert_v2" "my_alert" {
 * `severity_threshold_tiers` - (Block) Sets a severity label per trigger threshold. If using more than one sub-component, only 1 severityThresholdTiers is allowed. Otherwise, 1 per enum are allowed (for a total of 5 thresholds of increasing severities). Increasing severity must adhere to the logic of the operator. See  below for **nested schema**.
 
 ##### Optional:
-* `filter_must`(Map) Runs Elasticsearch Bool Query filters on the data (before the search query is applied). The most efficient way to grab the logs you are looking for.
-* `filter_must_not` - (Map) Runs Elasticsearch Bool Query filters on the data (before the search query is applied). The most efficient way to grab the logs you are looking for.
+* `filter_must`(String) Runs Elasticsearch Bool Query filters on the data (before the search query is applied). The most efficient way to grab the logs you are looking for.
+* `filter_must_not` - (String) Runs Elasticsearch Bool Query filters on the data (before the search query is applied). The most efficient way to grab the logs you are looking for.
 * `group_by_aggregation_fields` - (String list) Specify 1-3 fields by which to group the results and count them. If you apply a group by operation, the alert returns a count of the results aggregated by unique values.
 * `value_aggregation_field` - (String) Selects the field on which to run the aggregation for the trigger condition. Cannot be a field already in use for `group_by_aggregation_fields`.
 * `should_query_on_all_accounts` - (Boolean) Defaults to true. Only applicable when the alert is run from the main account. If true, the alert runs on the main account and all associated searchable sub accounts. If false, specify relevant account IDs for the alert to monitor using the `account_ids_to_query_on` field.

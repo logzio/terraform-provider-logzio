@@ -70,24 +70,12 @@ func dataSourceAlertV2() *schema.Resource {
 							Computed: true,
 						},
 						alertV2FilterMust: {
-							Type:     schema.TypeList,
+							Type:     schema.TypeString,
 							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeMap,
-								Elem: &schema.Schema{
-									Type: schema.TypeString,
-								},
-							},
 						},
 						alertV2FilterMustNot: {
-							Type:     schema.TypeList,
+							Type:     schema.TypeString,
 							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeMap,
-								Elem: &schema.Schema{
-									Type: schema.TypeString,
-								},
-							},
 						},
 						alertV2GroupBy: {
 							Type:     schema.TypeList,

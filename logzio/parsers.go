@@ -3,6 +3,7 @@ package logzio
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 )
 
@@ -40,9 +41,26 @@ func parseObjectToString(value interface{}) string {
 	case map[string]interface{}:
 		byteArray, _ := json.Marshal(value)
 		return string(byteArray)
+	case []map[string]interface{}:
+		if len(value.([]map[string]interface{})) > 0 {
+			byteArray, _ := json.Marshal(value)
+			return string(byteArray)
+		}
+		return ""
 	case string:
 		return value.(string)
 	default:
 		return fmt.Sprintf("%v", value)
 	}
+}
+
+func parseStringToMapList(value string) []map[string]interface{} {
+	var returnObject []map[string]interface{}
+	err := json.Unmarshal([]byte(value), &returnObject)
+	if err != nil {
+		log.Println(err.Error())
+		return nil
+	}
+
+	return returnObject
 }

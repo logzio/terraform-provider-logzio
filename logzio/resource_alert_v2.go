@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
 	"log"
@@ -132,24 +132,12 @@ func resourceAlertV2() *schema.Resource {
 							Required: true,
 						},
 						alertV2FilterMust: {
-							Type:     schema.TypeList,
+							Type:     schema.TypeString,
 							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeMap,
-								Elem: &schema.Schema{
-									Type: schema.TypeString,
-								},
-							},
 						},
 						alertV2FilterMustNot: {
-							Type:     schema.TypeList,
+							Type:     schema.TypeString,
 							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeMap,
-								Elem: &schema.Schema{
-									Type: schema.TypeString,
-								},
-							},
 						},
 						alertV2GroupBy: {
 							Type:     schema.TypeList,
@@ -256,6 +244,10 @@ func resourceAlertV2() *schema.Resource {
 				Computed: true,
 			},
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(5 * time.Second),
+			Update: schema.DefaultTimeout(7 * time.Second),
+		},
 	}
 }
 
@@ -288,22 +280,33 @@ func resourceAlertV2Create(d *schema.ResourceData, m interface{}) error {
 	alertId := strconv.FormatInt(a.AlertId, BASE_10)
 	d.SetId(alertId)
 
-	return retry.Do(
-		func() error {
-			return resourceAlertV2Read(d, m)
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				if strings.Contains(err.Error(), "missing alert") {
-					return true
-				}
-				return false
-			}),
-		retry.Delay(delayGetAlertV2),
-		retry.DelayType(func(n uint, err error, config *retry.Config) time.Duration{
-			return retry.BackOffDelay(n, err, config)
-		}),
-	)
+	//TODO: remove commented section if tests pass
+	//return retry.Do(
+	//	func() error {
+	//		return resourceAlertV2Read(d, m)
+	//	},
+	//	retry.RetryIf(
+	//		func(err error) bool {
+	//			if strings.Contains(err.Error(), "missing alert") {
+	//				return true
+	//			}
+	//			return false
+	//		}),
+	//	retry.Delay(delayGetAlertV2),
+	//	retry.DelayType(func(n uint, err error, config *retry.Config) time.Duration{
+	//		return retry.BackOffDelay(n, err, config)
+	//	}),
+	//)
+	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		err = resourceAlertV2Read(d, m)
+		if err != nil {
+			if strings.Contains(err.Error(), "missing alert") {
+				return resource.RetryableError(err)
+			}
+		}
+
+		return resource.NonRetryableError(err)
+	})
 }
 
 /**
@@ -350,23 +353,33 @@ func resourceAlertV2Update(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	return retry.Do(
-		func() error {
-			return resourceAlertV2Read(d, m)
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				createAlert := createCreateAlertType(d)
-				if !reflect.DeepEqual(createAlert, updateAlert) || err != nil {
-					return true
-				}
-				return false
-			}),
-		retry.Delay(delayGetAlertV2),
-		retry.DelayType(func(n uint, err error, config *retry.Config) time.Duration{
-			return retry.BackOffDelay(n, err, config)
-		}),
-	)
+	//TODO: remove commented section if tests pass
+	//return retry.Do(
+	//	func() error {
+	//		return resourceAlertV2Read(d, m)
+	//	},
+	//	retry.RetryIf(
+	//		func(err error) bool {
+	//			createAlert := createCreateAlertType(d)
+	//			if !reflect.DeepEqual(createAlert, updateAlert) || err != nil {
+	//				return true
+	//			}
+	//			return false
+	//		}),
+	//	retry.Delay(delayGetAlertV2),
+	//	retry.DelayType(func(n uint, err error, config *retry.Config) time.Duration{
+	//		return retry.BackOffDelay(n, err, config)
+	//	}),
+	//)
+	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
+		err = resourceAlertV2Read(d, m)
+		createAlert := createCreateAlertType(d)
+		if !reflect.DeepEqual(createAlert, updateAlert) {
+			return resource.RetryableError(err)
+		}
+
+		return resource.NonRetryableError(err)
+	})
 }
 
 /**
@@ -401,8 +414,8 @@ func getSubComponentMapping(sc []alerts_v2.SubAlert) []map[string]interface{} {
 
 		mapping := map[string]interface{}{
 			alertV2QueryString:              subComponent.QueryDefinition.Query,
-			alertV2FilterMust:               subComponent.QueryDefinition.Filters.Bool.Must,
-			alertV2FilterMustNot:            subComponent.QueryDefinition.Filters.Bool.MustNot,
+			alertV2FilterMust:               parseObjectToString(subComponent.QueryDefinition.Filters.Bool.Must),
+			alertV2FilterMustNot:            parseObjectToString(subComponent.QueryDefinition.Filters.Bool.MustNot),
 			alertV2GroupBy:                  subComponent.QueryDefinition.GroupBy,
 			alertV2AggregationField:         subComponent.QueryDefinition.Aggregation.FieldToAggregateOn,
 			alertV2AggregationType:          subComponent.QueryDefinition.Aggregation.AggregationType,
@@ -462,17 +475,13 @@ func getSubComponents(subComponentsFromConfig []interface{}) []alerts_v2.SubAler
 		subAlertElement.Trigger.Operator = element[alertV2Operation].(string)
 
 		if _, ok := element[alertV2FilterMust]; ok {
-			mustInterface := element[alertV2FilterMust].([]interface{})
-			for _, m := range mustInterface {
-				subAlertElement.QueryDefinition.Filters.Bool.Must = append(subAlertElement.QueryDefinition.Filters.Bool.Must, m.(map[string]interface{}))
-			}
+			mustToAppend := parseStringToMapList(element[alertV2FilterMust].(string))
+			subAlertElement.QueryDefinition.Filters.Bool.Must = mustToAppend
 		}
 
 		if _, ok := element[alertV2FilterMustNot]; ok {
-			mustNotInterface := element[alertV2FilterMustNot].([]interface{})
-			for _, mn := range mustNotInterface {
-				subAlertElement.QueryDefinition.Filters.Bool.MustNot = append(subAlertElement.QueryDefinition.Filters.Bool.MustNot, mn.(map[string]interface{}))
-			}
+			mustNotToAppend := parseStringToMapList(element[alertV2FilterMustNot].(string))
+			subAlertElement.QueryDefinition.Filters.Bool.MustNot = mustNotToAppend
 		}
 
 		if _, ok := element[alertV2GroupBy]; ok {
