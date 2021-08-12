@@ -2,9 +2,11 @@ package logzio
 
 import (
 	"fmt"
-	"regexp"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/endpoints"
@@ -12,26 +14,25 @@ import (
 
 const (
 	endpointId            string = "id"
+	endpointIdField       string = "endpoint_id"
 	endpointType          string = "endpoint_type"
 	endpointTitle         string = "title"
 	endpointDescription   string = "description"
 	endpointUrl           string = "url"
-	endpointSlack         string = "slack"
-	endpointCustom        string = "custom"
 	endpointMethod        string = "method"
 	endpointHeaders       string = "headers"
 	endpointBodyTemplate  string = "body_template"
-	endpointPagerDuty     string = "pager_duty"
 	endpointServiceKey    string = "service_key"
-	endpointBigPanda      string = "big_panda"
 	endpointApiToken      string = "api_token"
 	endpointAppKey        string = "app_key"
-	endpointDataDog       string = "data_dog"
 	endpointApiKey        string = "api_key"
-	endpointVictorOps     string = "victorops"
 	endpointRoutingKey    string = "routing_key"
 	endpointMessageType   string = "message_type"
 	endpointServiceApiKey string = "service_api_key"
+	endpointUsername      string = "username"
+	endpointPassword      string = "password"
+
+	endpointTypeMicrosoftTeamsFromApi = "microsoft teams"
 )
 
 /**
@@ -46,15 +47,24 @@ func resourceEndpoint() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
-
 		Schema: map[string]*schema.Schema{
+			endpointIdField: {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 			endpointType: {
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validateEndpointType,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					new = strings.Replace(new, "_", "", 1)
-					if strings.EqualFold(old, new) {
+					new = strings.ToLower(new)
+					newUnderScore := strings.Replace(new, "_", "", 1)
+					if strings.EqualFold(old, newUnderScore) {
+						return true
+					}
+					newSpace := strings.Replace(new, " ", "", 1)
+					if strings.EqualFold(old, newSpace) {
 						return true
 					}
 					return false
@@ -66,11 +76,13 @@ func resourceEndpoint() *schema.Resource {
 			},
 			endpointDescription: {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
-			endpointSlack: {
+			endpoints.EndpointTypeSlack: {
 				Type:     schema.TypeSet,
 				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						endpointUrl: {
@@ -81,9 +93,11 @@ func resourceEndpoint() *schema.Resource {
 					},
 				},
 			},
-			endpointCustom: {
+			endpoints.EndpointTypeCustom: {
 				Type:     schema.TypeSet,
 				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						endpointUrl: {
@@ -101,15 +115,17 @@ func resourceEndpoint() *schema.Resource {
 							Optional: true,
 						},
 						endpointBodyTemplate: {
-							Type:     schema.TypeMap,
-							Required: true,
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 					},
 				},
 			},
-			endpointPagerDuty: {
+			endpoints.EndpointTypePagerDuty: {
 				Type:     schema.TypeSet,
 				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						endpointServiceKey: {
@@ -119,9 +135,11 @@ func resourceEndpoint() *schema.Resource {
 					},
 				},
 			},
-			endpointBigPanda: {
+			endpoints.EndpointTypeBigPanda: {
 				Type:     schema.TypeSet,
 				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						endpointApiToken: {
@@ -135,9 +153,11 @@ func resourceEndpoint() *schema.Resource {
 					},
 				},
 			},
-			endpointDataDog: {
+			endpoints.EndpointTypeDataDog: {
 				Type:     schema.TypeSet,
 				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						endpointApiKey: {
@@ -147,9 +167,11 @@ func resourceEndpoint() *schema.Resource {
 					},
 				},
 			},
-			endpointVictorOps: {
+			endpoints.EndpointTypeVictorOps: {
 				Type:     schema.TypeSet,
 				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						endpointRoutingKey: {
@@ -167,30 +189,192 @@ func resourceEndpoint() *schema.Resource {
 					},
 				},
 			},
+			endpoints.EndpointTypeOpsGenie: {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						endpointApiKey: {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+			endpoints.EndpointTypeServiceNow: {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						endpointUsername: {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						endpointPassword: {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						endpointUrl: {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+			endpoints.EndpointTypeMicrosoftTeams: {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						endpointUrl: {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(5 * time.Second),
+			Update: schema.DefaultTimeout(5 * time.Second),
+			Delete: schema.DefaultTimeout(5 * time.Second),
 		},
 	}
 }
 
-/**
- * returns the endpoints client with the api token from the provider
- */
+// returns the endpoints client with the api token from the provider
 func endpointClient(m interface{}) *endpoints.EndpointsClient {
 	var client *endpoints.EndpointsClient
 	client, _ = endpoints.New(m.(Config).apiToken, m.(Config).baseUrl)
 	return client
 }
 
-/*
- * returns the id from terraform, parsed to an int64
- * @todo: needs to be moved out of this file and into the commons
- */
-func idFromResourceData(d *schema.ResourceData) (int64, error) {
-	return strconv.ParseInt(d.Id(), BASE_10, BITSIZE_64)
+func resourceEndpointCreate(d *schema.ResourceData, m interface{}) error {
+	createEndpoint := getCreateOrUpdateEndpointFromSchema(d)
+	endpoint, err := endpointClient(m).CreateEndpoint(createEndpoint)
+	if err != nil {
+		return err
+	}
+
+	d.SetId(strconv.FormatInt(int64(endpoint.Id), 10))
+
+	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		err = resourceEndpointRead(d, m)
+		if err != nil {
+			if strings.Contains(err.Error(), "failed with missing endpoint") {
+				return resource.RetryableError(err)
+			}
+		}
+
+		return resource.NonRetryableError(err)
+	})
+}
+
+func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
+	id, err := idFromResourceData(d)
+	if err != nil {
+		return nil
+	}
+
+	endpoint, err := endpointClient(m).GetEndpoint(id)
+	if err != nil {
+		return err
+	}
+
+	setEndpoint(d, endpoint)
+	return nil
+}
+
+func resourceEndpointUpdate(d *schema.ResourceData, m interface{}) error {
+	id, _ := idFromResourceData(d)
+	updateEndpoint := getCreateOrUpdateEndpointFromSchema(d)
+	_, err := endpointClient(m).UpdateEndpoint(id, updateEndpoint)
+	if err != nil {
+		return err
+	}
+
+	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
+		err = resourceEndpointRead(d, m)
+		if err != nil {
+			endpointFromSchema := getCreateOrUpdateEndpointFromSchema(d)
+			if strings.Contains(err.Error(), "failed with missing endpoint") &&
+				!reflect.DeepEqual(updateEndpoint, endpointFromSchema) {
+				return resource.RetryableError(fmt.Errorf("endpoint is not updated yet: %s", err.Error()))
+			}
+		}
+
+		return resource.NonRetryableError(err)
+	})
+}
+
+func resourceEndpointDelete(d *schema.ResourceData, m interface{}) error {
+	endpointId, _ := idFromResourceData(d)
+
+	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
+		err := endpointClient(m).DeleteEndpoint(endpointId)
+		if err != nil {
+			return resource.RetryableError(err)
+		}
+
+		return resource.NonRetryableError(err)
+	})
+}
+
+func getCreateOrUpdateEndpointFromSchema(d *schema.ResourceData) endpoints.CreateOrUpdateEndpoint {
+	createEndpoint := endpoints.CreateOrUpdateEndpoint{
+		Title:       d.Get(endpointTitle).(string),
+		Description: d.Get(endpointDescription).(string),
+		Type:        d.Get(endpointType).(string),
+	}
+
+	opts, _ := mappingsFromResourceData(d, createEndpoint.Type)
+	switch createEndpoint.Type {
+	case endpoints.EndpointTypeSlack:
+		createEndpoint.Url = opts[endpointUrl].(string)
+	case endpoints.EndpointTypeCustom:
+		createEndpoint.Url = opts[endpointUrl].(string)
+		createEndpoint.Method = opts[endpointMethod].(string)
+		headerMap := make(map[string]string)
+		for k, v := range opts[endpointHeaders].(map[string]interface{}) {
+			headerMap[k] = v.(string)
+		}
+		createEndpoint.Headers = parseObjectToString(headerMap)
+		createEndpoint.BodyTemplate = parseFromStringToType(opts[endpointBodyTemplate].(string))
+	case endpoints.EndpointTypePagerDuty:
+		createEndpoint.ServiceKey = opts[endpointServiceKey].(string)
+	case endpoints.EndpointTypeBigPanda:
+		createEndpoint.ApiToken = opts[endpointApiToken].(string)
+		createEndpoint.AppKey = opts[endpointAppKey].(string)
+	case endpoints.EndpointTypeDataDog:
+		createEndpoint.ApiKey = opts[endpointApiKey].(string)
+	case endpoints.EndpointTypeVictorOps:
+		createEndpoint.RoutingKey = opts[endpointRoutingKey].(string)
+		createEndpoint.MessageType = opts[endpointMessageType].(string)
+		createEndpoint.ServiceApiKey = opts[endpointServiceApiKey].(string)
+	case endpoints.EndpointTypeOpsGenie:
+		createEndpoint.ApiKey = opts[endpointApiKey].(string)
+	case endpoints.EndpointTypeServiceNow:
+		createEndpoint.Username = opts[endpointUsername].(string)
+		createEndpoint.Password = opts[endpointPassword].(string)
+		createEndpoint.Url = opts[endpointUrl].(string)
+	case endpoints.EndpointTypeMicrosoftTeams:
+		createEndpoint.Url = opts[endpointUrl].(string)
+	default:
+		panic(fmt.Sprintf("unhandled endpoint type %s", createEndpoint.Type))
+	}
+
+	return createEndpoint
 }
 
 /*
- * returns the mapping stored in a terraform map value - who knows why this is not "just" a map, but instead a map
- * wrapped in an array
+* returns the mapping stored in a terraform map value - who knows why this is not "just" a map, but instead a map
+* wrapped in an array
  */
 func mappingsFromResourceData(d *schema.ResourceData, key string) (map[string]interface{}, error) {
 	if v, ok := d.GetOk(key); ok {
@@ -201,218 +385,69 @@ func mappingsFromResourceData(d *schema.ResourceData, key string) (map[string]in
 			return y, nil
 		}
 	}
+
 	return nil, fmt.Errorf("can't load mapping for key %s", key)
 }
 
-/**
- * returns an endpoint object populated from a resource data object, used for creates and updates
- */
-func endpointFromResourceData(d *schema.ResourceData) endpoints.Endpoint {
-	eType := d.Get(endpointType).(string)
-
-	endpoint := endpoints.Endpoint{
-		Title:       d.Get(endpointTitle).(string),
-		Description: d.Get(endpointDescription).(string),
-	}
-
-	switch strings.ToLower(eType) {
-	case string(endpoints.EndpointTypeSlack):
-		endpoint.EndpointType = endpoints.EndpointTypeSlack
-		opts, _ := mappingsFromResourceData(d, endpointSlack)
-		endpoint.Url = opts[endpointUrl].(string)
-	case string(endpoints.EndpointTypeCustom):
-		endpoint.EndpointType = endpoints.EndpointTypeCustom
-		opts, _ := mappingsFromResourceData(d, endpointCustom)
-		endpoint.Url = opts[endpointUrl].(string)
-		endpoint.Method = opts[endpointMethod].(string)
-		endpoint.BodyTemplate = opts[endpointBodyTemplate]
-		headerMap := make(map[string]string)
-		for k, v := range opts[endpointHeaders].(map[string]interface{}) {
-			headerMap[k] = v.(string)
-		}
-		endpoint.Headers = headerMap
-	case string(endpoints.EndpointTypePagerDuty):
-		endpoint.EndpointType = endpoints.EndpointTypePagerDuty
-		opts, _ := mappingsFromResourceData(d, endpointPagerDuty)
-		endpoint.ServiceKey = opts[endpointServiceKey].(string)
-	case string(endpoints.EndpointTypeBigPanda):
-		endpoint.EndpointType = endpoints.EndpointTypeBigPanda
-		opts, _ := mappingsFromResourceData(d, endpointBigPanda)
-		endpoint.ApiToken = opts[endpointApiToken].(string)
-		endpoint.AppKey = opts[endpointAppKey].(string)
-	case string(endpoints.EndpointTypeDataDog):
-		endpoint.EndpointType = endpoints.EndpointTypeDataDog
-		opts, _ := mappingsFromResourceData(d, endpointDataDog)
-		endpoint.ApiKey = opts[endpointApiKey].(string)
-	case string(endpoints.EndpointTypeVictorOps):
-		endpoint.EndpointType = endpoints.EndpointTypeVictorOps
-		opts, _ := mappingsFromResourceData(d, endpointVictorOps)
-		endpoint.RoutingKey = opts[endpointRoutingKey].(string)
-		endpoint.MessageType = opts[endpointMessageType].(string)
-		endpoint.ServiceApiKey = opts[endpointServiceApiKey].(string)
-	default:
-		panic(fmt.Sprintf("unhandled endpoint type %s", eType))
-	}
-	return endpoint
-}
-
-/**
- * creates a new endpoint in logzio
- */
-func resourceEndpointCreate(d *schema.ResourceData, m interface{}) error {
-	endpoint := endpointFromResourceData(d)
-	client := endpointClient(m)
-	e, err := client.CreateEndpoint(endpoint)
-
-	if err != nil {
-		return err
-	}
-
-	endpointId := strconv.FormatInt(e.Id, BASE_10)
-	d.SetId(endpointId)
-
-	return nil
-}
-
-/**
- * reads an endpoint from logzio
- */
-func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
-	client := endpointClient(m)
-	endpointId, _ := idFromResourceData(d)
-
-	var endpoint *endpoints.Endpoint
-	endpoint, err := client.GetEndpoint(endpointId)
-	if err != nil {
-		return err
-	}
-
-	d.Set(endpointType, endpoint.EndpointType)
+func setEndpoint(d *schema.ResourceData, endpoint *endpoints.Endpoint) {
+	d.Set(endpointIdField, endpoint.Id)
 	d.Set(endpointTitle, endpoint.Title)
 	d.Set(endpointDescription, endpoint.Description)
-
+	typeLowerCase := strings.ToLower(endpoint.Type)
+	if typeLowerCase == endpointTypeMicrosoftTeamsFromApi {
+		// microsoft teams is the only type that's being returned with space.
+		typeLowerCase = strings.Replace(typeLowerCase, " ", "", 1)
+	}
+	d.Set(endpointType, typeLowerCase)
 	set := make([]map[string]interface{}, 1)
-
-	switch endpoint.EndpointType {
+	switch typeLowerCase {
 	case endpoints.EndpointTypeSlack:
 		set[0] = map[string]interface{}{
 			endpointUrl: endpoint.Url,
 		}
-		d.Set(endpointSlack, set)
 	case endpoints.EndpointTypeCustom:
 		set[0] = map[string]interface{}{
 			endpointUrl:          endpoint.Url,
 			endpointMethod:       endpoint.Method,
-			endpointHeaders:      endpoint.Headers,
-			endpointBodyTemplate: endpoint.BodyTemplate,
+			endpointHeaders:      parseFromStringToType(endpoint.Headers),
+			endpointBodyTemplate: parseObjectToString(endpoint.BodyTemplate),
 		}
-		d.Set(endpointCustom, set)
 	case endpoints.EndpointTypePagerDuty:
 		set[0] = map[string]interface{}{
 			endpointServiceKey: endpoint.ServiceKey,
 		}
-		d.Set(endpointPagerDuty, set)
 	case endpoints.EndpointTypeBigPanda:
 		set[0] = map[string]interface{}{
 			endpointApiToken: endpoint.ApiToken,
 			endpointAppKey:   endpoint.AppKey,
 		}
-		d.Set(endpointBigPanda, set)
 	case endpoints.EndpointTypeDataDog:
 		set[0] = map[string]interface{}{
 			endpointApiKey: endpoint.ApiKey,
 		}
-		d.Set(endpointDataDog, set)
 	case endpoints.EndpointTypeVictorOps:
 		set[0] = map[string]interface{}{
 			endpointRoutingKey:    endpoint.RoutingKey,
 			endpointMessageType:   endpoint.MessageType,
-			endpointServiceApiKey: endpoint.ApiKey,
+			endpointServiceApiKey: endpoint.ServiceApiKey,
 		}
-		d.Set(endpointVictorOps, set)
+	case endpoints.EndpointTypeOpsGenie:
+		set[0] = map[string]interface{}{
+			endpointApiKey: endpoint.ApiKey,
+		}
+	case endpoints.EndpointTypeServiceNow:
+		set[0] = map[string]interface{}{
+			endpointUsername: endpoint.Username,
+			endpointPassword: endpoint.Password,
+			endpointUrl:      endpoint.Url,
+		}
+	case endpoints.EndpointTypeMicrosoftTeams:
+		set[0] = map[string]interface{}{
+			endpointUrl: endpoint.Url,
+		}
 	default:
-		return fmt.Errorf("unhandled endpoint type: %s", endpoint.EndpointType)
+		panic(fmt.Sprintf("unhandled endpoint type %s", typeLowerCase))
 	}
 
-	return nil
-}
-
-/**
- * Updates an existing endpoint, returns an error if the endpoint can't be found
- */
-func resourceEndpointUpdate(d *schema.ResourceData, m interface{}) error {
-	endpoint := endpointFromResourceData(d)
-	endpoint.Id, _ = idFromResourceData(d)
-	client := endpointClient(m)
-	_, err := client.UpdateEndpoint(endpoint.Id, endpoint)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-/**
- * deletes an existing endpoint, returns an error if the endpoint can't be found
- */
-func resourceEndpointDelete(d *schema.ResourceData, m interface{}) error {
-	endpointId, _ := idFromResourceData(d)
-	client := endpointClient(m)
-	err := client.DeleteEndpoint(endpointId)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// @todo - what's this structure - 	if v, ok := d.GetOk("enable_log_file_validation"); ok { some_function() } ??
-
-/**
- * checks that the endpoint type is something we recognize (see docs for the type of endpoints supported), is case sensitive
- */
-func validateEndpointType(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-
-	if !findStringInArray(value, []string{
-		string(endpoints.EndpointTypeSlack),
-		string(endpoints.EndpointTypeCustom),
-		string(endpoints.EndpointTypePagerDuty),
-		string(endpoints.EndpointTypeBigPanda),
-		string(endpoints.EndpointTypeDataDog),
-		string(endpoints.EndpointTypeVictorOps),
-	}) {
-		errors = append(errors, fmt.Errorf("value for endpoint type is unknown"))
-	}
-
-	return
-}
-
-/**
- * checks that a provided url is kind of in the right format, logzio will reject URLs that it can't resolve, and there's
- * no checking for that here
- */
-func validateUrl(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	b, err := regexp.Match(VALIDATE_URL_REGEX, []byte(value))
-
-	if !b || err != nil {
-		errors = append(errors, err)
-	}
-
-	return
-}
-
-/**
- * checks that the provided HTTP method is something we recognise (GET/POST/PUT/DELETE), is case sensitive
- */
-func validateHttpMethod(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-
-	if !findStringInArray(value, []string{"GET", "POST", "PUT", "DELETE"}) {
-		errors = append(errors, fmt.Errorf("invalid HTTP method specified"))
-	}
-
-	return
+	d.Set(typeLowerCase, set)
 }

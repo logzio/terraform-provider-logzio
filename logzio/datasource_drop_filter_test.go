@@ -25,9 +25,9 @@ func TestAccDataSourceDropFilter(t *testing.T) {
 			},
 			{
 				Config: resourceTestDropFilter(filterNameResource, dropFilterResourceCreateDropFilter) +
-					testAccKubernetesDataSourceDropFilterById(),
+					testAccDropFilterDataSourceDropFilterById(),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type"),
+					resource.TestCheckResourceAttr(dataSourceName, dropFilterLogType, "some_type"),
 					resource.TestCheckResourceAttr(dataSourceName, "field_conditions.#", "2"),
 				),
 			},
@@ -53,7 +53,7 @@ func TestAccDataSourceDropFilterByAttributes(t *testing.T) {
 			},
 			{
 				Config: resourceTestDropFilter(filterNameResource, dropFilterResourceCreateDropFilter) +
-					testAccKubernetesDataSourceDropFilterByAttributes(),
+					testAccDropFilterDataSourceDropFilterByAttributes(),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(dataSourceName, dropFilterLogType, "some_type"),
 					resource.TestCheckResourceAttr(dataSourceName, "field_conditions.#", "2"),
@@ -80,21 +80,21 @@ func TestAccDataSourceDropFilterNotExist(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccKubernetesDataSourceDropFilterByIdNotExists(),
+				Config:      testAccDropFilterDataSourceDropFilterByIdNotExists(),
 				ExpectError: regexp.MustCompile("couldn't find drop filter with specified attributes"),
 			},
 		},
 	})
 }
 
-func testAccKubernetesDataSourceDropFilterById() string {
+func testAccDropFilterDataSourceDropFilterById() string {
 	return fmt.Sprintf(`data "logzio_drop_filter" "my_drop_filter_datasource" {
 drop_filter_id = "${logzio_drop_filter.test_create_drop_filter.id}"
 }
 `)
 }
 
-func testAccKubernetesDataSourceDropFilterByAttributes() string {
+func testAccDropFilterDataSourceDropFilterByAttributes() string {
 	return fmt.Sprintf(`data "logzio_drop_filter" "my_drop_filter_datasource" {
   log_type = "some_type"
 
@@ -110,7 +110,7 @@ func testAccKubernetesDataSourceDropFilterByAttributes() string {
 `)
 }
 
-func testAccKubernetesDataSourceDropFilterByIdNotExists() string {
+func testAccDropFilterDataSourceDropFilterByIdNotExists() string {
 	return fmt.Sprintf(`data "logzio_drop_filter" "my_drop_filter_datasource" {
 drop_filter_id = "1234"
 }

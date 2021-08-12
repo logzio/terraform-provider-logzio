@@ -47,6 +47,9 @@ func parseObjectToString(value interface{}) string {
 			return string(byteArray)
 		}
 		return ""
+	case map[string]string:
+		byteArray, _ := json.Marshal(value)
+		return string(byteArray)
 	case string:
 		return value.(string)
 	default:

@@ -19,6 +19,10 @@ func dataSourceEndpoint() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			endpointType: {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -36,7 +40,7 @@ func dataSourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 		d.SetId(fmt.Sprintf("%d", endpointId))
 		d.Set(endpointTitle, endpoint.Title)
 		d.Set(endpointDescription, endpoint.Description)
-		d.Set(endpointType, endpoint.EndpointType)
+		d.Set(endpointType, endpoint.Type)
 		return nil
 	}
 
@@ -46,13 +50,12 @@ func dataSourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 		if err != nil {
 			return err
 		}
-		for i := 0; i < len(list); i++ {
-			endpoint := list[i]
+		for _, endpoint := range list {
 			if endpoint.Title == title {
 				d.SetId(fmt.Sprintf("%d", endpoint.Id))
 				d.Set(endpointTitle, endpoint.Title)
 				d.Set(endpointDescription, endpoint.Description)
-				d.Set(endpointType, endpoint.EndpointType)
+				d.Set(endpointType, endpoint.Type)
 				return nil
 			}
 		}

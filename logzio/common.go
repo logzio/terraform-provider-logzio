@@ -1,6 +1,10 @@
 package logzio
 
-import "strings"
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"strconv"
+	"strings"
+)
 
 const (
 	BASE_10            int    = 10
@@ -16,4 +20,8 @@ func findStringInArray(v string, values []string) bool {
 		}
 	}
 	return false
+}
+
+func idFromResourceData(d *schema.ResourceData) (int64, error) {
+	return strconv.ParseInt(d.Id(), BASE_10, BITSIZE_64)
 }

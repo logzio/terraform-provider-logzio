@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"os"
+	"regexp"
 	"testing"
 )
 
 func TestAccLogzioSubaccount_CreateSubaccount(t *testing.T) {
 	accountId := os.Getenv(envLogzioAccountId)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test"
+	accountName := "test_create_subaccount"
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, accountId)
 
 	resource.Test(t, resource.TestCase{
@@ -64,6 +65,67 @@ func TestAccLogzioSubaccount_CreateSubaccountEmptySharingObject(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{subAccountEmail},
+			},
+		},
+	})
+}
+
+func TestAccLogzioSubaccount_CreateSubaccountNoEmail(t *testing.T) {
+	email := ""
+	accountName := "test_no_email"
+	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, "")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckApiToken(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config:      terraformPlan,
+				ExpectError: regexp.MustCompile("email must be set"),
+			},
+		},
+	})
+}
+
+func TestAccLogzioSubaccount_CreateSubaccountInvalidEmail(t *testing.T) {
+	email := "some@invalid.mail"
+	accountName := "test_invalid_email"
+	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, "")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckApiToken(t)
+			testAccPreCheckEmail(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config:      terraformPlan,
+				ExpectError: regexp.MustCompile("Email must belong to an existing user"),
+			},
+		},
+	})
+}
+
+func TestAccLogzioSubaccount_CreateSubaccountNoName(t *testing.T) {
+	accountId := os.Getenv(envLogzioAccountId)
+	email := os.Getenv(envLogzioEmail)
+	accountName := ""
+	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, accountId)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckApiToken(t)
+			testAccPreCheckAccountId(t)
+			testAccPreCheckEmail(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config:      terraformPlan,
+				ExpectError: regexp.MustCompile("account name must be set"),
 			},
 		},
 	})

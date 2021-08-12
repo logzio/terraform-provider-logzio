@@ -280,23 +280,6 @@ func resourceAlertV2Create(d *schema.ResourceData, m interface{}) error {
 	alertId := strconv.FormatInt(a.AlertId, BASE_10)
 	d.SetId(alertId)
 
-	//TODO: remove commented section if tests pass
-	//return retry.Do(
-	//	func() error {
-	//		return resourceAlertV2Read(d, m)
-	//	},
-	//	retry.RetryIf(
-	//		func(err error) bool {
-	//			if strings.Contains(err.Error(), "missing alert") {
-	//				return true
-	//			}
-	//			return false
-	//		}),
-	//	retry.Delay(delayGetAlertV2),
-	//	retry.DelayType(func(n uint, err error, config *retry.Config) time.Duration{
-	//		return retry.BackOffDelay(n, err, config)
-	//	}),
-	//)
 	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		err = resourceAlertV2Read(d, m)
 		if err != nil {
@@ -353,24 +336,6 @@ func resourceAlertV2Update(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	//TODO: remove commented section if tests pass
-	//return retry.Do(
-	//	func() error {
-	//		return resourceAlertV2Read(d, m)
-	//	},
-	//	retry.RetryIf(
-	//		func(err error) bool {
-	//			createAlert := createCreateAlertType(d)
-	//			if !reflect.DeepEqual(createAlert, updateAlert) || err != nil {
-	//				return true
-	//			}
-	//			return false
-	//		}),
-	//	retry.Delay(delayGetAlertV2),
-	//	retry.DelayType(func(n uint, err error, config *retry.Config) time.Duration{
-	//		return retry.BackOffDelay(n, err, config)
-	//	}),
-	//)
 	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
 		err = resourceAlertV2Read(d, m)
 		createAlert := createCreateAlertType(d)

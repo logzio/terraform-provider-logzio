@@ -31,7 +31,7 @@ func TestAccLogzioDropFilter_CreateDropFilter(t *testing.T) {
 			{
 				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilter),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type_create"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
 				),
 			},
@@ -80,7 +80,7 @@ func TestAccLogzioDropFilter_UpdateDropFilter(t *testing.T) {
 			{
 				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilter),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type_create"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterActive, "true"),
 				),
@@ -88,7 +88,7 @@ func TestAccLogzioDropFilter_UpdateDropFilter(t *testing.T) {
 			{
 				Config: resourceTestDropFilter(filterName, dropFilterResourceUpdateDropFilter),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type_create"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterActive, "false"),
 				),
@@ -108,7 +108,7 @@ func TestAccLogzioDropFilter_UpdateDropFilterChangeLogType(t *testing.T) {
 			{
 				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilter),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type_create"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
 				),
 			},
@@ -134,7 +134,7 @@ func TestAccLogzioDropFilter_UpdateDropFilterRemoveLogType(t *testing.T) {
 			{
 				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilter),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type_create"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
 				),
 			},
