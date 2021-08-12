@@ -183,7 +183,7 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
     - `sub_account`:
         - **Breaking changes:**
             - Deprecated attribute `utilization_settings`. Use `frequency_minutes` and `utilization_enabled` instead. 
-        - Add attributes `flexible` and `reserved_daily_gb`.
+        - Added attributes `flexible` and `reserved_daily_gb`.
         - Refactor tests.
         - Refactor code to use Terraform's retry.
     - `endpoint`:
