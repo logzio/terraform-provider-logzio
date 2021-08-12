@@ -24,7 +24,7 @@ resource "logzio_endpoint" "my_endpoint" {
 
 ## Attribute Reference
 
-* `endpoint_type` - Specifies the endpoint resource type: `custom`, `slack`, `pager_duty`, `big_panda`, `data_dog`, `victorops`. Use the appropriate parameters for your selected endpoint type.
+* `endpoint_type` - Specifies the endpoint resource type: `custom`, `slack`, `pagerduty`, `bigpanda`, `datadog`, `victorops`, `opsgenie`, `servicenow`, `microsoftteams`. Use the appropriate parameters for your selected endpoint type.
 * `title` - Name of the endpoint.
 * `description` - Detailed description of the endpoint.
 ## Endpoints used
@@ -39,3 +39,7 @@ Logz.io integrates with:
 * [Datadog](https://docs.logz.io/api/#operation/updateDataDog)
 * [VictorOps](https://docs.logz.io/api/#operation/updateVictorops)
 * [Custom integration](https://docs.logz.io/api/#operation/updateCustom)
+* [OpsGenie](https://docs.logz.io/api/#operation/createOpsGenie).
+* [ServiceNow](https://docs.logz.io/api/#operation/createServiceNow).
+* [Microsoft Teams](https://docs.logz.io/api/#operation/createMicrosoftTeams).
+

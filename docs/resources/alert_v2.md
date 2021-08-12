@@ -89,3 +89,15 @@ resource "logzio_alert_v2" "my_alert" {
 * `field_name` - (String) Specify the fields to be included in the notification.
 * `regex` - (String) Trims the data using regex filters. [Learn more](https://docs.logz.io/user-guide/alerts/regex-filters.html).
 * `sort` - (String) Specify a single field to sort by. The field cannot be an analyzed field (a field that supports free text search or searching by part of a message, such as the 'message' field). Should be: `"DESC"`, `"ASC"`.
+
+## Importing resource:
+To import an alert you'll need to specify your logzio alert's id.
+For example, if you have in your Terraform configuration the following:
+
+resource "logzio_alert_v2" "imported" {
+}
+And your alert's id is 123456, then your import command should be:
+
+```bash
+terraform import logzio_alert_v2.imported 123456
+```
