@@ -1,8 +1,8 @@
 resource "logzio_endpoint" "%s" {
-  endpoint_type = "Slack"
+  endpoint_type = "slack"
   title = "updated_slack_endpoint"
   description = "some updated description"
   slack {
-    url = "https://www.test.com"
+    url = "https://jsonplaceholder.typicode.com/todos/2"
   }
 }

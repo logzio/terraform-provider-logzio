@@ -1,5 +1,5 @@
 resource "logzio_endpoint" "valid_slack_endpoint_datasource" {
-  endpoint_type = "Slack"
+  endpoint_type = "slack"
   title = "valid_slack_endpoint_datasource"
   description = "some valid description"
   slack {
