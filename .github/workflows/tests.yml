@@ -1,6 +1,6 @@
 name: Tests
 
-on: [push, pull_request]
+on: [pull_request]
 
 env:
   LOGZIO_API_TOKEN: ${{ secrets.LOGZIO_API_TOKEN }}
