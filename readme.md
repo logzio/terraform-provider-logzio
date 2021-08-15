@@ -177,6 +177,8 @@ Found a bug or want to suggest a feature? [Open an issue](https://github.com/log
 Want to do it yourself? We are more than happy to accept external contributions from the community.
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
 
+<pre id="contents"></pre>
+
 <script>
   
 function populatePre(url) {
@@ -191,5 +193,5 @@ populatePre('https://github.com/logzio/terraform-provider-logzio/blob/changelog/
  
 </script>
  
-<pre id="contents"></pre>
+
     
