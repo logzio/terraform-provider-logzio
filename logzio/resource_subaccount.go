@@ -93,6 +93,7 @@ func resourceSubAccount() *schema.Resource {
 					Type: schema.TypeInt,
 				},
 				Optional: true,
+				Computed: true,
 			},
 			subAccountDocSizeSetting: {
 				Type:     schema.TypeBool,

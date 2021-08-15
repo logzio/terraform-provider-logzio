@@ -18,7 +18,7 @@ func TestAccDataSourceSubaccount(t *testing.T) {
 	dataSourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_datasource"
+	accountName := "test_datasource_create"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -86,27 +86,19 @@ func TestAccDataSourceSubaccountByAccountName(t *testing.T) {
 }
 
 func TestAccDataSourceSubaccountNotExists(t *testing.T) {
-	resourceName := "logzio_subaccount.subaccount_datasource"
-	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
-	email := os.Getenv(envLogzioEmail)
-	accountName := "some_account_to_add"
+	//resourceName := "logzio_subaccount.subaccount_datasource"
+	//accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
+	//email := os.Getenv(envLogzioEmail)
+	//accountName := "some_account_to_add_ds"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheckApiToken(t)
-			testAccPreCheckEmail(t)
-			testAccPreCheckAccountId(t)
-		},
+		//PreCheck: func() {
+		//	testAccPreCheckApiToken(t)
+		//	testAccPreCheckEmail(t)
+		//	testAccPreCheckAccountId(t)
+		//},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			{
-				Config: testAccSubAccountDataSourceResource(email, accountId, accountName),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "account_name", accountName),
-					resource.TestCheckResourceAttr(resourceName, "retention_days", "2"),
-					resource.TestCheckResourceAttr(resourceName, "max_daily_gb", "1"),
-				),
-			},
 			{
 				Config:      testAccCheckLogzioSubaccountDatasourceConfigNotExist(),
 				ExpectError: regexp.MustCompile("couldn't find sub-account with specified attributes"),
