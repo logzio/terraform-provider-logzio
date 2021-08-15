@@ -19,7 +19,7 @@ func TestAccDataSourceDropFilter(t *testing.T) {
 			{
 				Config: resourceTestDropFilter(filterNameResource, dropFilterResourceCreateDropFilter),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type_create"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
 				),
 			},
@@ -47,7 +47,7 @@ func TestAccDataSourceDropFilterByAttributes(t *testing.T) {
 			{
 				Config: resourceTestDropFilter(filterNameResource, dropFilterResourceCreateDropFilter),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type_create"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
 				),
 			},
@@ -75,7 +75,7 @@ func TestAccDataSourceDropFilterNotExist(t *testing.T) {
 			{
 				Config: resourceTestDropFilter(filterNameResource, dropFilterResourceCreateDropFilter),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type_create"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
 				),
 			},
