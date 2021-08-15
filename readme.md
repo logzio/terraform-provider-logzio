@@ -189,7 +189,7 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
     - Fix `sub account` to return attributes `account_token` & `account_id`.
 
 <details>
-  <summary markdown="span">Exapnd to check old version </summary>
+  <summary markdown="span">Exapnd to check old versions </summary>
 
 - v1.2.3
     - Fix bug for `custom endpoint` empty headers.
