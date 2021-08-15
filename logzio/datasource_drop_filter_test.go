@@ -96,7 +96,7 @@ drop_filter_id = "${logzio_drop_filter.test_create_drop_filter.id}"
 
 func testAccDropFilterDataSourceDropFilterByAttributes() string {
 	return fmt.Sprintf(`data "logzio_drop_filter" "my_drop_filter_datasource" {
-  log_type = "some_type"
+  log_type = "some_type_create"
 
   field_conditions {
     field_name = "some_field"
