@@ -187,6 +187,10 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
 - v1.2.4
     - Update client version(v1.5.3).
     - Fix `sub account` to return attributes `account_token` & `account_id`.
+
+<details>
+  <summary markdown="span">Exapnd to check old version </summary>
+
 - v1.2.3
     - Fix bug for `custom endpoint` empty headers.
     - Allow empty sharing accounts array in `sub account`.
@@ -223,4 +227,5 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
 - 1.1.2 
     - Moved some of the source code around to comply with TF provider layout convention
     - Moved the examples into an examples directory
-    
+
+</details>
