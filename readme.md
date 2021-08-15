@@ -178,6 +178,7 @@ Want to do it yourself? We are more than happy to accept external contributions 
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
 
 <script>
+  
 function populatePre(url) {
     var xhr = new XMLHttpRequest();
     xhr.onload = function () {
@@ -187,7 +188,8 @@ function populatePre(url) {
     xhr.send();
 }
 populatePre('https://github.com/logzio/terraform-provider-logzio/blob/changelog/changelog.md');
- </script>
  
- <pre id="contents"></pre>
+</script>
+ 
+<pre id="contents"></pre>
     
