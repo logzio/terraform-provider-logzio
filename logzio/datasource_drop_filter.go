@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/drop_filters"
-	"log"
 	"reflect"
 )
 
@@ -55,11 +54,6 @@ func dataSourceDropFilterRead(d *schema.ResourceData, m interface{}) error {
 	dropFilters, err := client.RetrieveDropFilters()
 	if err != nil {
 		return err
-	}
-
-	if len(dropFilters) == 0 {
-		log.Println("no drop filters in account")
-		return nil
 	}
 
 	if ok {
