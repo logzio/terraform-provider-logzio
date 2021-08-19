@@ -203,7 +203,7 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
     - Update client version(v1.7).
     - Support [Drop Filter](https://docs.logz.io/api/#tag/Drop-filters) resource.
 <details>
-  <summary markdown="span"> Exapnd to check old versions </summary>
+  <summary markdown="span"> Expand to check old versions </summary>
   
 - v1.3
     - Update client version(v1.6).
