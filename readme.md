@@ -202,6 +202,9 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
 - v1.4
     - Update client version(v1.7).
     - Support [Drop Filter](https://docs.logz.io/api/#tag/Drop-filters) resource.
+<details>
+  <summary markdown="span"> Exapnd to check old versions </summary>
+  
 - v1.3
     - Update client version(v1.6).
     - Support Log Shipping Token resource.
@@ -244,4 +247,4 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
 - 1.1.2 
     - Moved some of the source code around to comply with TF provider layout convention
     - Moved the examples into an examples directory
-    
+</details>
