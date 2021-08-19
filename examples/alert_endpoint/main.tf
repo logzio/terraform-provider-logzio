@@ -30,6 +30,9 @@ resource "logzio_endpoint" "custom_endpoint" {
     body_template = jsonencode({
       this: "is"
       my: "template"
+      nested: {
+        also: "working"
+      }
     })
   }
 }
