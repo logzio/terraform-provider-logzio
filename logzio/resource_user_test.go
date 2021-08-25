@@ -3,6 +3,7 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"strconv"
 	"testing"
@@ -11,7 +12,7 @@ import (
 func TestAccLogzioUser_CreateUser(t *testing.T) {
 
 	username := "test_resource_user@tfacctest.com"
-	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
+	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	terraformPlan := testAccCheckLogzioUserConfig(username, "test test", accountId)
 
 	resource.Test(t, resource.TestCase{

@@ -1,4 +1,4 @@
-package logzio
+package utils
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ func contains(slice []string, s string) bool {
 	return false
 }
 
-func validateOperation(v interface{}, k string) (ws []string, errors []error) {
+func ValidateOperation(v interface{}, k string) (ws []string, errors []error) {
 
 	value := v.(string)
 
@@ -48,7 +48,7 @@ func validateOperation(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
-func validateOperationV2(v interface{}, k string) (ws []string, errors []error) {
+func ValidateOperationV2(v interface{}, k string) (ws []string, errors []error) {
 
 	value := v.(string)
 
@@ -114,7 +114,7 @@ func validateSeverityTypes(v interface{}, k string) (ws []string, errors []error
 	return
 }
 
-func validateOutputType(v interface{}, k string) (ws []string, errors []error) {
+func ValidateOutputType(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
 	validOutputTypes := []string{
@@ -128,7 +128,7 @@ func validateOutputType(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
-func validateSortTypes(v interface{}, k string) (ws []string, errors []error) {
+func ValidateSortTypes(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
 	validTypes := []string{
@@ -143,7 +143,7 @@ func validateSortTypes(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
-func validateUrl(v interface{}, k string) (ws []string, errors []error) {
+func ValidateUrl(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	b, err := regexp.Match(VALIDATE_URL_REGEX, []byte(value))
 
@@ -154,7 +154,7 @@ func validateUrl(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
-func validateHttpMethod(v interface{}, k string) (ws []string, errors []error) {
+func ValidateHttpMethod(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
 	if !findStringInArray(value, []string{"GET", "POST", "PUT", "DELETE"}) {
@@ -164,7 +164,7 @@ func validateHttpMethod(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
-func validateEndpointType(v interface{}, k string) (ws []string, errors []error) {
+func ValidateEndpointType(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	validTypes := []string{
 		string(endpoints.EndpointTypeSlack),

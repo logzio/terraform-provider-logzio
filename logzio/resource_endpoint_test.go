@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -24,7 +25,7 @@ func TestAccLogzioEndpoint_SlackCreateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("valid_slack_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("valid_slack_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.valid_slack_endpoint", "title", "valid_slack_endpoint"),
@@ -48,7 +49,7 @@ func TestAccLogzioEndpoint_SlackCreateInvalidEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      ReadFixtureFromFile("invalid_slack_endpoint.tf"),
+				Config:      utils.ReadFixtureFromFile("invalid_slack_endpoint.tf"),
 				ExpectError: regexp.MustCompile("Bad URL provided. no protocol"),
 			},
 		},
@@ -64,7 +65,7 @@ func TestAccLogzioEndpoint_SlackUpdateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadResourceFromFile(endpointName, "create_slack_endpoint.tf"),
+				Config: utils.ReadResourceFromFile(endpointName, "create_slack_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "slack_endpoint"),
@@ -72,7 +73,7 @@ func TestAccLogzioEndpoint_SlackUpdateEndpoint(t *testing.T) {
 				),
 			},
 			{
-				Config: ReadResourceFromFile(endpointName, "update_slack_endpoint.tf"),
+				Config: utils.ReadResourceFromFile(endpointName, "update_slack_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "updated_slack_endpoint"),
@@ -207,7 +208,7 @@ func TestAccLogzioEndpoint_CustomUpdateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadResourceFromFile(endpointName, "create_custom_endpoint.tf"),
+				Config: utils.ReadResourceFromFile(endpointName, "create_custom_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "my_custom_title"),
@@ -216,7 +217,7 @@ func TestAccLogzioEndpoint_CustomUpdateEndpoint(t *testing.T) {
 				),
 			},
 			{
-				Config: ReadResourceFromFile(endpointName, "update_custom_endpoint.tf"),
+				Config: utils.ReadResourceFromFile(endpointName, "update_custom_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "updated_custom_endpoint"),
@@ -237,7 +238,7 @@ func TestAccLogzioEndpoint_PagerDutyCreateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_pagerduty_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_pagerduty_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_pagerduty_title"),
 					resource.TestCheckResourceAttr(resourceName, "pagerduty.1955626064.service_key", "my_service_key"),
@@ -258,7 +259,7 @@ func TestAccLogzioEndpoint_PagerDutyCreateEndpointEmptyServiceKey(t *testing.T) 
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      ReadFixtureFromFile("create_pagerduty_endpoint_empty_service_key.tf"),
+				Config:      utils.ReadFixtureFromFile("create_pagerduty_endpoint_empty_service_key.tf"),
 				ExpectError: regexp.MustCompile("service key must be set for type pagerduty"),
 			},
 		},
@@ -272,14 +273,14 @@ func TestAccLogzioEndpoint_PagerDutyUpdateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_pagerduty_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_pagerduty_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_pagerduty_title"),
 					resource.TestCheckResourceAttr(resourceName, "pagerduty.1955626064.service_key", "my_service_key"),
 				),
 			},
 			{
-				Config: ReadFixtureFromFile("update_pagerduty_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("update_pagerduty_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "pagerduty_title_updated"),
 					resource.TestCheckResourceAttr(resourceName, "pagerduty.3330485350.service_key", "another_service_key"),
@@ -296,7 +297,7 @@ func TestAccLogzioEndpoint_BigPandaCreateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_bigpanda_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_bigpanda_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_bigpanda_title"),
 					resource.TestCheckResourceAttr(resourceName, "bigpanda.1922960384.api_token", "my_api_token"),
@@ -318,7 +319,7 @@ func TestAccLogzioEndpoint_BigPandaCreateEndpointEmptyApiToken(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      ReadFixtureFromFile("create_bigpanda_endpoint_empty_api_token.tf"),
+				Config:      utils.ReadFixtureFromFile("create_bigpanda_endpoint_empty_api_token.tf"),
 				ExpectError: regexp.MustCompile("api token must be set for type bigpanda"),
 			},
 		},
@@ -331,7 +332,7 @@ func TestAccLogzioEndpoint_BigPandaCreateEndpointEmptyAppKey(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      ReadFixtureFromFile("create_bigpanda_endpoint_empty_app_key.tf"),
+				Config:      utils.ReadFixtureFromFile("create_bigpanda_endpoint_empty_app_key.tf"),
 				ExpectError: regexp.MustCompile("app key must be set for type bigpanda"),
 			},
 		},
@@ -345,7 +346,7 @@ func TestAccLogzioEndpoint_BigPandaUpdateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_bigpanda_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_bigpanda_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_bigpanda_title"),
 					resource.TestCheckResourceAttr(resourceName, "bigpanda.1922960384.api_token", "my_api_token"),
@@ -353,7 +354,7 @@ func TestAccLogzioEndpoint_BigPandaUpdateEndpoint(t *testing.T) {
 				),
 			},
 			{
-				Config: ReadFixtureFromFile("update_bigpanda_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("update_bigpanda_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "bigpanda_title_updated"),
 					resource.TestCheckResourceAttr(resourceName, "bigpanda.1493627637.api_token", "updated_api_token"),
@@ -371,7 +372,7 @@ func TestAccLogzioEndpoint_DataDogCreateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_datadog_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_datadog_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_datadog_title"),
 					resource.TestCheckResourceAttr(resourceName, "datadog.411979392.api_key", "my_api_key"),
@@ -392,7 +393,7 @@ func TestAccLogzioEndpoint_DataDogCreateEndpointEmptyApiKey(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      ReadFixtureFromFile("create_datadog_endpoint_empty_api_key.tf"),
+				Config:      utils.ReadFixtureFromFile("create_datadog_endpoint_empty_api_key.tf"),
 				ExpectError: regexp.MustCompile("api key must be set for type datadog"),
 			},
 		},
@@ -406,14 +407,14 @@ func TestAccLogzioEndpoint_DataDogUpdateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_datadog_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_datadog_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_datadog_title"),
 					resource.TestCheckResourceAttr(resourceName, "datadog.411979392.api_key", "my_api_key"),
 				),
 			},
 			{
-				Config: ReadFixtureFromFile("update_datadog_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("update_datadog_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "datadog_title_updated"),
 					resource.TestCheckResourceAttr(resourceName, "datadog.2413799041.api_key", "updated_api_key"),
@@ -430,7 +431,7 @@ func TestAccLogzioEndpoint_VictorOpsCreateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_victorops_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_victorops_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_victorops_title"),
 					resource.TestCheckResourceAttr(resourceName, "victorops.3725242508.routing_key", "my_routing_key"),
@@ -453,7 +454,7 @@ func TestAccLogzioEndpoint_VictorOpsCreateEndpointEmptyRoutingKey(t *testing.T) 
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      ReadFixtureFromFile("create_victorops_endpoint_empty_routing_key.tf"),
+				Config:      utils.ReadFixtureFromFile("create_victorops_endpoint_empty_routing_key.tf"),
 				ExpectError: regexp.MustCompile("routing key must be set for type victorops"),
 			},
 		},
@@ -466,7 +467,7 @@ func TestAccLogzioEndpoint_VictorOpsCreateEndpointEmptyMessageType(t *testing.T)
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      ReadFixtureFromFile("create_victorops_endpoint_empty_message_type.tf"),
+				Config:      utils.ReadFixtureFromFile("create_victorops_endpoint_empty_message_type.tf"),
 				ExpectError: regexp.MustCompile("message type must be set for type victorops"),
 			},
 		},
@@ -479,7 +480,7 @@ func TestAccLogzioEndpoint_VictorOpsCreateEndpointEmptyServiceApiKey(t *testing.
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      ReadFixtureFromFile("create_victorops_endpoint_empty_service_api_key.tf"),
+				Config:      utils.ReadFixtureFromFile("create_victorops_endpoint_empty_service_api_key.tf"),
 				ExpectError: regexp.MustCompile("service api key must be set for type victorops"),
 			},
 		},
@@ -493,7 +494,7 @@ func TestAccLogzioEndpoint_VictorOpsUpdateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_victorops_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_victorops_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_victorops_title"),
 					resource.TestCheckResourceAttr(resourceName, "victorops.3725242508.routing_key", "my_routing_key"),
@@ -502,7 +503,7 @@ func TestAccLogzioEndpoint_VictorOpsUpdateEndpoint(t *testing.T) {
 				),
 			},
 			{
-				Config: ReadFixtureFromFile("update_victorops_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("update_victorops_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "updated_victorops_title"),
 					resource.TestCheckResourceAttr(resourceName, "victorops.1896695128.routing_key", "updated_routing_key"),
@@ -521,7 +522,7 @@ func TestAccLogzioEndpoint_OpsGenieCreateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_opsgenie_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_opsgenie_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_opsgenie_title"),
 					resource.TestCheckResourceAttr(resourceName, "opsgenie.411979392.api_key", "my_api_key"),
@@ -542,7 +543,7 @@ func TestAccLogzioEndpoint_OpsGenieCreateEndpointEmptyApiKey(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      ReadFixtureFromFile("create_opsgenie_endpoint_empty_api_key.tf"),
+				Config:      utils.ReadFixtureFromFile("create_opsgenie_endpoint_empty_api_key.tf"),
 				ExpectError: regexp.MustCompile("api key must be set for type opsgenie"),
 			},
 		},
@@ -556,14 +557,14 @@ func TestAccLogzioEndpoint_OpsGenieUpdateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_opsgenie_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_opsgenie_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_opsgenie_title"),
 					resource.TestCheckResourceAttr(resourceName, "opsgenie.411979392.api_key", "my_api_key"),
 				),
 			},
 			{
-				Config: ReadFixtureFromFile("update_opsgenie_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("update_opsgenie_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "updated_opsgenie_title"),
 					resource.TestCheckResourceAttr(resourceName, "opsgenie.2413799041.api_key", "updated_api_key"),
@@ -580,7 +581,7 @@ func TestAccLogzioEndpoint_ServiceNowCreateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_servicenow_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_servicenow_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_servicenow_title"),
 					resource.TestCheckResourceAttr(resourceName, "servicenow.500131967.username", "my_username"),
@@ -603,7 +604,7 @@ func TestAccLogzioEndpoint_ServiceNowCreateEndpointEmptyUsername(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      ReadFixtureFromFile("create_servicenow_endpoint_empty_username.tf"),
+				Config:      utils.ReadFixtureFromFile("create_servicenow_endpoint_empty_username.tf"),
 				ExpectError: regexp.MustCompile("username must be set for type servicenow"),
 			},
 		},
@@ -616,7 +617,7 @@ func TestAccLogzioEndpoint_ServiceNowCreateEndpointEmptyPassword(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      ReadFixtureFromFile("create_servicenow_endpoint_empty_password.tf"),
+				Config:      utils.ReadFixtureFromFile("create_servicenow_endpoint_empty_password.tf"),
 				ExpectError: regexp.MustCompile("password must be set for type servicenow"),
 			},
 		},
@@ -629,7 +630,7 @@ func TestAccLogzioEndpoint_ServiceNowCreateEndpointEmptyUrl(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      ReadFixtureFromFile("create_servicenow_endpoint_empty_url.tf"),
+				Config:      utils.ReadFixtureFromFile("create_servicenow_endpoint_empty_url.tf"),
 				ExpectError: regexp.MustCompile("url must be set for type servicenow"),
 			},
 		},
@@ -643,7 +644,7 @@ func TestAccLogzioEndpoint_ServiceNowUpdateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_servicenow_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_servicenow_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_servicenow_title"),
 					resource.TestCheckResourceAttr(resourceName, "servicenow.500131967.username", "my_username"),
@@ -652,7 +653,7 @@ func TestAccLogzioEndpoint_ServiceNowUpdateEndpoint(t *testing.T) {
 				),
 			},
 			{
-				Config: ReadFixtureFromFile("update_servicenow_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("update_servicenow_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "updated_servicenow_title"),
 					resource.TestCheckResourceAttr(resourceName, "servicenow.1337040240.username", "updated_username"),
@@ -671,7 +672,7 @@ func TestAccLogzioEndpoint_MicrosoftTeamsCreateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_microsoftteams_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_microsoftteams_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_microsoftteams_title"),
 					resource.TestCheckResourceAttr(resourceName, "microsoftteams.4281379687.url", testsUrl),
@@ -692,7 +693,7 @@ func TestAccLogzioEndpoint_MicrosoftTeamsCreateEndpointEmptyUrl(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      ReadFixtureFromFile("create_microsoftteams_endpoint_empty_url.tf"),
+				Config:      utils.ReadFixtureFromFile("create_microsoftteams_endpoint_empty_url.tf"),
 				ExpectError: regexp.MustCompile("url must be set for type microsoftteams"),
 			},
 		},
@@ -706,14 +707,14 @@ func TestAccLogzioEndpoint_MicrosoftTeamsUpdateEndpoint(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: ReadFixtureFromFile("create_microsoftteams_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("create_microsoftteams_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "my_microsoftteams_title"),
 					resource.TestCheckResourceAttr(resourceName, "microsoftteams.4281379687.url", testsUrl),
 				),
 			},
 			{
-				Config: ReadFixtureFromFile("update_microsoftteams_endpoint.tf"),
+				Config: utils.ReadFixtureFromFile("update_microsoftteams_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "updated_microsoftteams_title"),
 					resource.TestCheckResourceAttr(resourceName, "microsoftteams.3558733988.url", testsUrlUpdate),

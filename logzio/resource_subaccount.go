@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/sub_accounts"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -159,7 +160,7 @@ func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSubAccountRead(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -181,7 +182,7 @@ func resourceSubAccountRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSubAccountUpdate(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -211,7 +212,7 @@ func resourceSubAccountUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSubAccountDelete(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return err
 	}

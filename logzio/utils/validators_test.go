@@ -1,4 +1,4 @@
-package logzio
+package utils
 
 import (
 	"github.com/logzio/logzio_terraform_client/alerts"
@@ -18,7 +18,7 @@ func TestValidateOperation(t *testing.T) {
 	}
 
 	for _, s := range validOperations {
-		_, errors := validateOperation(s, "operation")
+		_, errors := ValidateOperation(s, "operation")
 		if len(errors) > 0 {
 			t.Fatalf("%q should be a validd operation: %v", s, errors)
 		}
@@ -30,7 +30,7 @@ func TestValidateOperation(t *testing.T) {
 	}
 
 	for _, s := range invalidNames {
-		_, errors := validateOperation(s, "operation")
+		_, errors := ValidateOperation(s, "operation")
 		if len(errors) == 0 {
 			t.Fatalf("%q should not be a valid operations: %v", s, errors)
 		}
@@ -39,7 +39,7 @@ func TestValidateOperation(t *testing.T) {
 
 func TestValidUrl(t *testing.T) {
 	str := "https://some.url"
-	_, errors := validateUrl(str, "url")
+	_, errors := ValidateUrl(str, "url")
 	assert.Len(t, errors, 0)
 }
 
@@ -50,7 +50,7 @@ func TestValidateOutputTypes(t *testing.T) {
 	}
 
 	for _, s := range validOptions {
-		_, errors := validateOutputType(s, "output_type")
+		_, errors := ValidateOutputType(s, "output_type")
 		assert.Empty(t, errors)
 	}
 
@@ -60,7 +60,7 @@ func TestValidateOutputTypes(t *testing.T) {
 	}
 
 	for _, s := range invalidNames {
-		_, errors := validateOutputType(s, "output_type")
+		_, errors := ValidateOutputType(s, "output_type")
 		assert.NotEmpty(t, errors)
 	}
 }
@@ -72,7 +72,7 @@ func TestValidateSortTypes(t *testing.T) {
 	}
 
 	for _, s := range validTypes {
-		_, errors := validateSortTypes(s, "sort")
+		_, errors := ValidateSortTypes(s, "sort")
 		assert.Empty(t, errors)
 	}
 
@@ -82,7 +82,7 @@ func TestValidateSortTypes(t *testing.T) {
 	}
 
 	for _, s := range invalidNames {
-		_, errors := validateSortTypes(s, "sort")
+		_, errors := ValidateSortTypes(s, "sort")
 		assert.NotEmpty(t, errors)
 	}
 }

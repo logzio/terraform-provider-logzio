@@ -33,12 +33,12 @@ resource "logzio_endpoint" "my_endpoint" {
 * [Get endpoint by ID](https://docs.logz.io/api/#operation/getEndpointById)
 
 Logz.io integrates with:
-* [Slack](https://docs.logz.io/api/#operation/updateSlack)
-* [PagerDuty](https://docs.logz.io/api/#operation/updatePagerDuty)
-* [BigPanda](https://docs.logz.io/api/#operation/updateBigPanda)
-* [Datadog](https://docs.logz.io/api/#operation/updateDataDog)
-* [VictorOps](https://docs.logz.io/api/#operation/updateVictorops)
-* [Custom integration](https://docs.logz.io/api/#operation/updateCustom)
+* [Slack](https://docs.logz.io/api#operation/createSlack)
+* [PagerDuty](https://docs.logz.io/api/#operation/createPagerDuty)
+* [BigPanda](https://docs.logz.io/api/#operation/createBigPanda)
+* [Datadog](https://docs.logz.io/api/#operation/createDataDog)
+* [VictorOps](https://docs.logz.io/api/#operation/createVictorops)
+* [Custom integration](https://docs.logz.io/api/#operation/createCustom)
 * [OpsGenie](https://docs.logz.io/api/#operation/createOpsGenie).
 * [ServiceNow](https://docs.logz.io/api/#operation/createServiceNow).
 * [Microsoft Teams](https://docs.logz.io/api/#operation/createMicrosoftTeams).

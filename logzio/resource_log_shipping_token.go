@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/log_shipping_tokens"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"reflect"
 	"strconv"
 	"strings"
@@ -112,7 +113,7 @@ func resourceLogShippingTokenCreate(d *schema.ResourceData, m interface{}) error
 
 // Gets log shipping token by id
 func resourceLogShippingTokenRead(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -128,7 +129,7 @@ func resourceLogShippingTokenRead(d *schema.ResourceData, m interface{}) error {
 
 // Updates log shipping token by id
 func resourceLogShippingTokenUpdate(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -163,7 +164,7 @@ func resourceLogShippingTokenUpdate(d *schema.ResourceData, m interface{}) error
 
 // Deletes log shipping token by id
 func resourceLogShippingTokenDelete(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package logzio
+package utils
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 
 // This function receives a string, tries to parse the string, and returns the string as
 // the first type it managed to parse
-func parseFromStringToType(value string) interface{} {
+func ParseFromStringToType(value string) interface{} {
 	// will try to parse in this order: json, float, int, bool, string
 	var returnObject map[string]interface{}
 	err := json.Unmarshal([]byte(value), &returnObject)
@@ -36,7 +36,7 @@ func parseFromStringToType(value string) interface{} {
 }
 
 // This function receives an object and returns it as a string
-func parseObjectToString(value interface{}) string {
+func ParseObjectToString(value interface{}) string {
 	switch value.(type) {
 	case map[string]interface{}:
 		byteArray, _ := json.Marshal(value)
@@ -57,7 +57,7 @@ func parseObjectToString(value interface{}) string {
 	}
 }
 
-func parseStringToMapList(value string) []map[string]interface{} {
+func ParseStringToMapList(value string) []map[string]interface{} {
 	var returnObject []map[string]interface{}
 	err := json.Unmarshal([]byte(value), &returnObject)
 	if err != nil {

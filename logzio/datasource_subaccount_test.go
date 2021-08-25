@@ -3,6 +3,7 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"regexp"
 	"strconv"
@@ -16,7 +17,7 @@ const (
 func TestAccDataSourceSubaccount(t *testing.T) {
 	resourceName := "logzio_subaccount.subaccount_datasource"
 	dataSourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
-	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
+	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_datasource_create"
 
@@ -52,7 +53,7 @@ func TestAccDataSourceSubaccount(t *testing.T) {
 func TestAccDataSourceSubaccountByAccountName(t *testing.T) {
 	resourceName := "logzio_subaccount.subaccount_datasource"
 	dataSourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
-	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
+	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_datasource_account_name"
 

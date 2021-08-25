@@ -2,6 +2,7 @@ package logzio
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"regexp"
 	"testing"
 )
@@ -13,7 +14,7 @@ func TestAccDataSourceEndpoint(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExpectNonEmptyPlan:        true,
-				Config:                    ReadFixtureFromFile("valid_slack_endpoint_datasource.tf"),
+				Config:                    utils.ReadFixtureFromFile("valid_slack_endpoint_datasource.tf"),
 				PreventPostDestroyRefresh: true,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.logzio_endpoint.by_title", "title", "valid_slack_endpoint_datasource"),

@@ -3,6 +3,7 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"reflect"
 	"strconv"
 	"strings"
@@ -56,7 +57,7 @@ func resourceEndpoint() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateEndpointType,
+				ValidateFunc: utils.ValidateEndpointType,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					new = strings.ToLower(new)
 					newUnderScore := strings.Replace(new, "_", "", 1)
@@ -88,7 +89,7 @@ func resourceEndpoint() *schema.Resource {
 						endpointUrl: {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validateUrl,
+							ValidateFunc: utils.ValidateUrl,
 						},
 					},
 				},
@@ -103,12 +104,12 @@ func resourceEndpoint() *schema.Resource {
 						endpointUrl: {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validateUrl,
+							ValidateFunc: utils.ValidateUrl,
 						},
 						endpointMethod: {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validateHttpMethod,
+							ValidateFunc: utils.ValidateHttpMethod,
 						},
 						endpointHeaders: {
 							Type:     schema.TypeMap,
@@ -277,7 +278,7 @@ func resourceEndpointCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return nil
 	}
@@ -292,7 +293,7 @@ func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceEndpointUpdate(d *schema.ResourceData, m interface{}) error {
-	id, _ := idFromResourceData(d)
+	id, _ := utils.IdFromResourceData(d)
 	updateEndpoint := getCreateOrUpdateEndpointFromSchema(d)
 	_, err := endpointClient(m).UpdateEndpoint(id, updateEndpoint)
 	if err != nil {
@@ -314,7 +315,7 @@ func resourceEndpointUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceEndpointDelete(d *schema.ResourceData, m interface{}) error {
-	endpointId, _ := idFromResourceData(d)
+	endpointId, _ := utils.IdFromResourceData(d)
 
 	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		err := endpointClient(m).DeleteEndpoint(endpointId)
@@ -344,8 +345,8 @@ func getCreateOrUpdateEndpointFromSchema(d *schema.ResourceData) endpoints.Creat
 		for k, v := range opts[endpointHeaders].(map[string]interface{}) {
 			headerMap[k] = v.(string)
 		}
-		createEndpoint.Headers = parseObjectToString(headerMap)
-		createEndpoint.BodyTemplate = parseFromStringToType(opts[endpointBodyTemplate].(string))
+		createEndpoint.Headers = utils.ParseObjectToString(headerMap)
+		createEndpoint.BodyTemplate = utils.ParseFromStringToType(opts[endpointBodyTemplate].(string))
 	case endpoints.EndpointTypePagerDuty:
 		createEndpoint.ServiceKey = opts[endpointServiceKey].(string)
 	case endpoints.EndpointTypeBigPanda:
@@ -409,8 +410,8 @@ func setEndpoint(d *schema.ResourceData, endpoint *endpoints.Endpoint) {
 		set[0] = map[string]interface{}{
 			endpointUrl:          endpoint.Url,
 			endpointMethod:       endpoint.Method,
-			endpointHeaders:      parseFromStringToType(endpoint.Headers),
-			endpointBodyTemplate: parseObjectToString(endpoint.BodyTemplate),
+			endpointHeaders:      utils.ParseFromStringToType(endpoint.Headers),
+			endpointBodyTemplate: utils.ParseObjectToString(endpoint.BodyTemplate),
 		}
 	case endpoints.EndpointTypePagerDuty:
 		set[0] = map[string]interface{}{

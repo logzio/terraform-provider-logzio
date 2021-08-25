@@ -1,7 +1,10 @@
-package logzio
+package utils
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"io/ioutil"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -22,6 +25,18 @@ func findStringInArray(v string, values []string) bool {
 	return false
 }
 
-func idFromResourceData(d *schema.ResourceData) (int64, error) {
+func IdFromResourceData(d *schema.ResourceData) (int64, error) {
 	return strconv.ParseInt(d.Id(), BASE_10, BITSIZE_64)
+}
+
+func ReadFixtureFromFile(fileName string) string {
+	content, err := ioutil.ReadFile("testdata/fixtures/" + fileName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return fmt.Sprintf("%s", content)
+}
+
+func ReadResourceFromFile(resourceName string, fileName string) string {
+	return fmt.Sprintf(ReadFixtureFromFile(fileName), resourceName)
 }

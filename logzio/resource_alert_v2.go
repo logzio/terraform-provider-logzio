@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"log"
 	"reflect"
 	"strconv"
@@ -120,7 +121,7 @@ func resourceAlertV2() *schema.Resource {
 			alertV2OutputType: {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validateOutputType,
+				ValidateFunc: utils.ValidateOutputType,
 			},
 			alertV2SubComponents: {
 				Type:     schema.TypeList,
@@ -170,7 +171,7 @@ func resourceAlertV2() *schema.Resource {
 						alertV2Operation: {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validateOperationV2,
+							ValidateFunc: utils.ValidateOperationV2,
 						},
 						alertV2SeverityThresholdTiers: {
 							Type:     schema.TypeList,
@@ -204,7 +205,7 @@ func resourceAlertV2() *schema.Resource {
 									alertV2ColumnSort: {
 										Type:         schema.TypeString,
 										Optional:     true,
-										ValidateFunc: validateSortTypes,
+										ValidateFunc: utils.ValidateSortTypes,
 									},
 								},
 							},
@@ -277,7 +278,7 @@ func resourceAlertV2Create(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	alertId := strconv.FormatInt(a.AlertId, BASE_10)
+	alertId := strconv.FormatInt(a.AlertId, utils.BASE_10)
 	d.SetId(alertId)
 
 	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
@@ -296,7 +297,7 @@ func resourceAlertV2Create(d *schema.ResourceData, m interface{}) error {
  * reads an alert (v2) from logzio
  */
 func resourceAlertV2Read(d *schema.ResourceData, m interface{}) error {
-	alertId, _ := idFromResourceData(d)
+	alertId, _ := utils.IdFromResourceData(d)
 	client := alertV2Client(m)
 
 	alert, err := client.GetAlert(alertId)
@@ -314,7 +315,7 @@ func resourceAlertV2Read(d *schema.ResourceData, m interface{}) error {
  * updates an existing alert in logzio, returns an error if it doesn't exist
  */
 func resourceAlertV2Update(d *schema.ResourceData, m interface{}) error {
-	alertId, _ := idFromResourceData(d)
+	alertId, _ := utils.IdFromResourceData(d)
 	updateAlert := createCreateAlertType(d)
 
 	jsonBytes, err := json.Marshal(updateAlert)
@@ -352,7 +353,7 @@ deletes an existing alert in logzio, returns an error if it doesn't exist
 */
 func resourceAlertV2Delete(d *schema.ResourceData, m interface{}) error {
 	client := alertClient(m)
-	alertId, _ := idFromResourceData(d)
+	alertId, _ := utils.IdFromResourceData(d)
 	err := client.DeleteAlert(alertId)
 	return err
 }
@@ -379,8 +380,8 @@ func getSubComponentMapping(sc []alerts_v2.SubAlert) []map[string]interface{} {
 
 		mapping := map[string]interface{}{
 			alertV2QueryString:              subComponent.QueryDefinition.Query,
-			alertV2FilterMust:               parseObjectToString(subComponent.QueryDefinition.Filters.Bool.Must),
-			alertV2FilterMustNot:            parseObjectToString(subComponent.QueryDefinition.Filters.Bool.MustNot),
+			alertV2FilterMust:               utils.ParseObjectToString(subComponent.QueryDefinition.Filters.Bool.Must),
+			alertV2FilterMustNot:            utils.ParseObjectToString(subComponent.QueryDefinition.Filters.Bool.MustNot),
 			alertV2GroupBy:                  subComponent.QueryDefinition.GroupBy,
 			alertV2AggregationField:         subComponent.QueryDefinition.Aggregation.FieldToAggregateOn,
 			alertV2AggregationType:          subComponent.QueryDefinition.Aggregation.AggregationType,
@@ -440,12 +441,12 @@ func getSubComponents(subComponentsFromConfig []interface{}) []alerts_v2.SubAler
 		subAlertElement.Trigger.Operator = element[alertV2Operation].(string)
 
 		if _, ok := element[alertV2FilterMust]; ok {
-			mustToAppend := parseStringToMapList(element[alertV2FilterMust].(string))
+			mustToAppend := utils.ParseStringToMapList(element[alertV2FilterMust].(string))
 			subAlertElement.QueryDefinition.Filters.Bool.Must = mustToAppend
 		}
 
 		if _, ok := element[alertV2FilterMustNot]; ok {
-			mustNotToAppend := parseStringToMapList(element[alertV2FilterMustNot].(string))
+			mustNotToAppend := utils.ParseStringToMapList(element[alertV2FilterMustNot].(string))
 			subAlertElement.QueryDefinition.Filters.Bool.MustNot = mustNotToAppend
 		}
 
