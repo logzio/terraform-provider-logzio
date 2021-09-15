@@ -229,3 +229,11 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
     - Moved the examples into an examples directory
 
 </details>
+
+### Import sub-accounts as resources 
+
+You can import multiple sub-accounts as follows:
+
+```
+terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
+```
