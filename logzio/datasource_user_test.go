@@ -2,6 +2,7 @@ package logzio
 
 import (
 	"fmt"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"strconv"
 	"testing"
@@ -13,7 +14,7 @@ func TestAccDataSourceUser(t *testing.T) {
 
 	username := "test_datasource_user@tfacctest.com"
 	fullname := "test test"
-	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
+	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	terraformPlan := testAccCheckLogzioUserDatasourceConfig(username, fullname, accountId)
 
 	resource.Test(t, resource.TestCase{

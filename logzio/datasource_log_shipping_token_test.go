@@ -2,6 +2,7 @@ package logzio
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"testing"
 )
 
@@ -14,7 +15,7 @@ func TestAccDataSourceLogShippingToken(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExpectNonEmptyPlan: true,
-				Config:             ReadFixtureFromFile("create_log_shipping_token_datasource.tf"),
+				Config:             utils.ReadFixtureFromFile("create_log_shipping_token_datasource.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", "my_token"),
 				),

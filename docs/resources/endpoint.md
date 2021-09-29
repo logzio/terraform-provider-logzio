@@ -11,7 +11,7 @@ Provides a Logz.io notification endpoint or custom webhook resource. This can be
 resource "logzio_endpoint" "my_endpoint" {
   title = "my_endpoint"
   description = "hello"
-  endpoint_type = "Slack"
+  endpoint_type = "slack"
   slack {
     url = "https://this.is.com/some/url"
   }
@@ -21,17 +21,17 @@ resource "logzio_endpoint" "my_endpoint" {
 
 ## Argument Reference
 
-* `endpoint_type` - (Required) Specifies the endpoint resource type: `custom`, `slack`, `pagerduty`, `bigpanda`, `datadog`, `victorops`. Use the appropriate parameters for your selected endpoint type.
+* `endpoint_type` - (Required) Specifies the endpoint resource type: `custom`, `slack`, `pagerduty`, `bigpanda`, `datadog`, `victorops`, `opsgenie`, `servicenow`, `microsoftteams`. Use the appropriate parameters for your selected endpoint type.
 * `title` - (Required) Name of the endpoint.
 * `description` - (Required) Detailed description of the endpoint.
 * `slack` - (Optional) Relevant when `endpoint_type` is `slack`. Manages a webhook to a specific Slack channel.
 	  * `url` - Slack webhook URL to a specific Slack channel.
-* `pager_duty` - (Optional) Relevant when `endpoint_type` is `pagerduty`. Manages a webhook to PagerDuty.
+* `pagerduty` - (Optional) Relevant when `endpoint_type` is `pagerduty`. Manages a webhook to PagerDuty.
 	* `service_key` - API key generated from PagerDuty for the purpose of the integration.
-* `big_panda` - (Optional) Relevant when `endpoint_type` is `bigpanda`. Manages a webhook to BigPanda.
+* `bigpanda` - (Optional) Relevant when `endpoint_type` is `bigpanda`. Manages a webhook to BigPanda.
 	  * `api_token` - API authentication token from BigPanda.
   	* `app_key` - Application key from BigPanda.
-* `data_dog` - (Optional) Relevant when `endpoint_type` is `datadog`. Manages a webhook to Datadog.
+* `datadog` - (Optional) Relevant when `endpoint_type` is `datadog`. Manages a webhook to Datadog.
   	* `api_key` - API key from Datadog.
 * `victorops` - (Optional) Relevant when `endpoint_type` is `victorops`. Manages a webhook to VictorOps.
   * `routing_key` - Alert routing key from VictorOps.
@@ -41,8 +41,15 @@ resource "logzio_endpoint" "my_endpoint" {
     * `url` - Specifies the URL destination.
     * `method` - Selects the HTTP request method.
     * `headers` - Header parameters for the request. Sent as comma-separated key-value pairs.
-    * `body_template` - JSON object that serves as the template for the message body.
-
+    * `body_template` - string of JSON object that serves as the template for the message body.
+* `opsgenie` - (Optional) Relevant when `endpoint_type` is `opsgenie`. Manages a webhook to OpsGenie.
+    * `api_key` - API key from OpsGenie, see https://docs.opsgenie.com/docs/logz-io-integration.
+* `servicenow` - (Optional) Relevant when `endpoint_type` is `servicenow`. Manages a webhook to ServiceNow.
+    * `username` - ServiceNow user name.
+    * `password` - ServiceNow password.
+    * `url` - Provide your instance URL to connect to your existing ServiceNow instance, i.e. https://xxxxxxxxx.service-now.com/.
+* `microsoftteams` - (Optional) Relevant when `endpoint_type` is `microsoftteams`. Manages a webhook to Microsoft Teams.
+    * `url` - Your Microsoft Teams webhook URL, see https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook.
 
 ## Attribute Reference
 
@@ -58,6 +65,9 @@ Logz.io integrates with:
 * [Datadog](https://docs.logz.io/api/#operation/createDataDog)
 * [VictorOps](https://docs.logz.io/api/#operation/createVictorops)
 * [Custom integration](https://docs.logz.io/api/#operation/createCustom)
+* [OpsGenie](https://docs.logz.io/api/#operation/createOpsGenie).
+* [ServiceNow](https://docs.logz.io/api/#operation/createServiceNow).
+* [Microsoft Teams](https://docs.logz.io/api/#operation/createMicrosoftTeams).
 
 Other endpoints:
 * [Get all endpoints](https://docs.logz.io/api/#operation/getAllEndpoints)

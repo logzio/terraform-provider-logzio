@@ -178,9 +178,33 @@ Want to do it yourself? We are more than happy to accept external contributions 
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
 
 ### Changelog 
+- v1.5
+    - Update client version(v1.8).
+    - `sub_account`:
+        - **Breaking changes:**
+            - Deprecated attribute `utilization_settings`. Use `frequency_minutes` and `utilization_enabled` instead. 
+        - Added attributes `flexible` and `reserved_daily_gb`.
+        - Refactor tests.
+        - Refactor code to use Terraform's retry.
+    - `endpoint`:
+        - **Breaking changes:**
+            - Types naming.
+        - New endpoints for OpsGenie, ServiceNow and Microsoft Teams.
+        - Fix bug for `body_template` for `custom` type ([#70](https://github.com/logzio/terraform-provider-logzio/issues/70)).
+        - Refactor tests.
+        - Refactor code to use Terraform's retry.
+    - `alerts_v2`:
+        - Fix bug for `filter_must`,`filter_must_not` ([#82](https://github.com/logzio/terraform-provider-logzio/issues/82))
+        - Refactor tests.
+        - Refactor code to use Terraform's retry.
+    - `drop_filter`:
+        - Improve tests.
 - v1.4
     - Update client version(v1.7).
     - Support [Drop Filter](https://docs.logz.io/api/#tag/Drop-filters) resource.
+<details>
+  <summary markdown="span"> Expand to check old versions </summary>
+  
 - v1.3
     - Update client version(v1.6).
     - Support Log Shipping Token resource.
@@ -227,7 +251,7 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
 - 1.1.2 
     - Moved some of the source code around to comply with TF provider layout convention
     - Moved the examples into an examples directory
-
+  
 </details>
 
 ### Import sub-accounts as resources 

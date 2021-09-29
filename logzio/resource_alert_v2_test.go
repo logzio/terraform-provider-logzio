@@ -3,7 +3,6 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/logzio/logzio_terraform_client/alerts_v2"
 	"io/ioutil"
 	"log"
 	"testing"
@@ -31,6 +30,7 @@ func TestAccLogzioAlertV2_CreateAlert(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.severity", "HIGH"),
 					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.threshold", "10"),
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "false"),
+					resource.TestCheckResourceAttrSet(resourceName, "sub_components.0.filter_must"),
 				),
 			},
 			{
@@ -58,12 +58,15 @@ func TestAccLogzioAlertV2_UpdateAlert(t *testing.T) {
 				),
 			},
 			{
-				Config: resourceTestAlertV2("test_update_alert_v2", alertsV2ResourceUpdateAlert),
+				Config: resourceTestAlertV2(alertName, alertsV2ResourceUpdateAlert),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "updated_alert"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.value_aggregation_type", alerts_v2.AggregationTypeSum),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.value_aggregation_field", "some_field"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.severity", "LOW"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.threshold", "10"),
+					resource.TestCheckResourceAttr(resourceName, "is_enabled", "false"),
+					resource.TestCheckResourceAttrSet(resourceName, "sub_components.0.filter_must"),
 				),
 			},
 		},

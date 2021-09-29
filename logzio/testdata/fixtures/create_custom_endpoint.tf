@@ -1,17 +1,17 @@
 resource "logzio_endpoint" "%s" {
   title = "my_custom_title"
-  endpoint_type = "Custom"
+  endpoint_type = "custom"
   description = "this_is_my_description"
   custom {
-    url = "https://www.test.com"
+    url = "https://jsonplaceholder.typicode.com/todos/1"
     method = "POST"
     headers = {
       this = "is"
       a = "header"
     }
-    body_template = {
-      this = "is"
-      my = "template"
-    }
+    body_template = jsonencode({
+      this: "is"
+      my: "template"
+    })
   }
 }

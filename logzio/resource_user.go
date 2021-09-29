@@ -2,6 +2,7 @@ package logzio
 
 import (
 	"fmt"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -82,14 +83,14 @@ func resourceUserCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	userId := strconv.FormatInt(u.Id, BASE_10)
+	userId := strconv.FormatInt(u.Id, utils.BASE_10)
 	d.SetId(userId)
 
 	return nil
 }
 
 func resourceUserRead(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -116,12 +117,12 @@ func resourceUserRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceUserUpdate(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return err
 	}
 
-	accountId, err := strconv.ParseInt(d.Get(userAccountId).(string), BASE_10, BITSIZE_64)
+	accountId, err := strconv.ParseInt(d.Get(userAccountId).(string), utils.BASE_10, utils.BITSIZE_64)
 	if err != nil {
 		return err
 	}
@@ -144,7 +145,7 @@ func resourceUserUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceUserDelete(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return err
 	}

@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/drop_filters"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"log"
 	"strings"
 	"time"
@@ -180,7 +181,7 @@ func getFieldConditionsMapping(conditions []drop_filters.FieldConditionObject) [
 	for _, condition := range conditions {
 		mapping := map[string]interface{}{
 			dropFilterFieldName: condition.FieldName,
-			dropFilterValue:     parseObjectToString(condition.Value),
+			dropFilterValue:     utils.ParseObjectToString(condition.Value),
 		}
 
 		conditionsMapping = append(conditionsMapping, mapping)
@@ -205,7 +206,7 @@ func getFieldConditionsList(conditionsFromSchemas []interface{}) []drop_filters.
 	for _, element := range conditionsFromSchemas {
 		condition := element.(map[string]interface{})
 		conditionToAppend.FieldName = condition[dropFilterFieldName].(string)
-		conditionToAppend.Value = parseFromStringToType(condition[dropFilterValue].(string))
+		conditionToAppend.Value = utils.ParseFromStringToType(condition[dropFilterValue].(string))
 		fieldConditions = append(fieldConditions, conditionToAppend)
 	}
 

@@ -1,34 +1,41 @@
 package logzio
 
 import (
+	"fmt"
 	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/logzio/logzio_terraform_client/sub_accounts"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/logzio/logzio_terraform_client/sub_accounts"
 )
 
 const (
-	subAccountId                     string = "account_id"
-	subAccountEmail                  string = "email"
-	subAccountName                   string = "account_name"
-	subAccountToken                  string = "account_token"
-	subAccountMaxDailyGB             string = "max_daily_gb"
-	subAccountRetentionDays          string = "retention_days"
-	subAccountSearchable             string = "searchable"
-	subAccountAccessible             string = "accessible"
-	subAccountDocSizeSetting         string = "doc_size_setting"
-	subAccountSharingObjectsAccounts string = "sharing_objects_accounts"
-	subAccountUtilizationSettings    string = "utilization_settings"
+	subAccountId                                    string = "account_id"
+	subAccountEmail                                 string = "email"
+	subAccountName                                  string = "account_name"
+	subAccountToken                                 string = "account_token"
+	subAccountFlexible                              string = "flexible"
+	subAccountReservedDailyGb                       string = "reserved_daily_gb"
+	subAccountMaxDailyGB                            string = "max_daily_gb"
+	subAccountRetentionDays                         string = "retention_days"
+	subAccountSearchable                            string = "searchable"
+	subAccountAccessible                            string = "accessible"
+	subAccountDocSizeSetting                        string = "doc_size_setting"
+	subAccountSharingObjectsAccounts                string = "sharing_objects_accounts"
+	subAccountUtilizationSettings                   string = "utilization_settings"
+	subAccountUtilizationSettingsFrequencyMinutes   string = "frequency_minutes"
+	subAccountUtilizationSettingsUtilizationEnabled string = "utilization_enabled"
 
 	delayGetSubAccount = 2 * time.Second
 )
 
 /**
- * the endpoint resource schema, what terraform uses to parse and read the template
+* the endpoint resource schema, what terraform uses to parse and read the template
  */
 func resourceSubAccount() *schema.Resource {
 	return &schema.Resource{
@@ -57,6 +64,14 @@ func resourceSubAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			subAccountFlexible: {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			subAccountReservedDailyGb: {
+				Type:     schema.TypeFloat,
+				Optional: true,
+			},
 			subAccountMaxDailyGB: {
 				Type:     schema.TypeFloat,
 				Optional: true,
@@ -79,15 +94,33 @@ func resourceSubAccount() *schema.Resource {
 					Type: schema.TypeInt,
 				},
 				Optional: true,
+				Computed: true,
 			},
 			subAccountDocSizeSetting: {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			subAccountUtilizationSettingsFrequencyMinutes: {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			subAccountUtilizationSettingsUtilizationEnabled: {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
 			subAccountUtilizationSettings: {
 				Type:     schema.TypeMap,
 				Optional: true,
+				Deprecated: fmt.Sprintf(
+					"this attribute is deprecated, please use attributes %s and %s instead",
+					subAccountUtilizationSettingsFrequencyMinutes,
+					subAccountUtilizationSettingsUtilizationEnabled),
 			},
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(5 * time.Second),
+			Update: schema.DefaultTimeout(5 * time.Second),
+			Delete: schema.DefaultTimeout(5 * time.Second),
 		},
 	}
 }
@@ -99,74 +132,35 @@ func subAccountClient(m interface{}) *sub_accounts.SubAccountClient {
 }
 
 func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
-	sharingAccounts := d.Get(subAccountSharingObjectsAccounts).([]interface{})
-
-	// Allows users to insert empty array of sharingObjectAccounts, but avoiding `nil`
-	sharingObjectAccounts := make([]int32, 0)
-	for _, accountId := range sharingAccounts {
-		sharingObjectAccounts = append(sharingObjectAccounts, int32(accountId.(int)))
-	}
-
-	var maxDailyGB float32 = 0
-	if _, ok := d.GetOk(subAccountMaxDailyGB); ok {
-		maxDailyGB = float32(d.Get(subAccountMaxDailyGB).(float64))
-	}
-
-	searchable := d.Get(subAccountSearchable).(bool)
-	accessible := d.Get(subAccountAccessible).(bool)
-
-	docSizeSetting := false
-	if _, ok := d.GetOk(subAccountDocSizeSetting); ok {
-		docSizeSetting = d.Get(subAccountDocSizeSetting).(bool)
-	}
-
-	var utilizationSettings map[string]interface{} = nil
-	if _, ok := d.GetOk(subAccountUtilizationSettings); ok {
-		utilizationSettings = d.Get(subAccountUtilizationSettings).(map[string]interface{})
-	}
-
-	subAccount := sub_accounts.SubAccountCreate{
-		AccountName:           d.Get(subAccountName).(string),
-		Email:                 d.Get(subAccountEmail).(string),
-		RetentionDays:         int32(d.Get(subAccountRetentionDays).(int)),
-		SharingObjectAccounts: sharingObjectAccounts,
-		MaxDailyGB:            maxDailyGB,
-		Searchable:            searchable,
-		Accessible:            accessible,
-		DocSizeSetting:        docSizeSetting,
-		UtilizationSettings:   utilizationSettings,
-	}
-
-	u, err := subAccountClient(m).CreateSubAccount(subAccount)
+	createSubAccount := getCreateSubAccountFromSchema(d)
+	subAccount, err := subAccountClient(m).CreateSubAccount(createSubAccount)
 	if err != nil {
 		return err
 	}
-	subAccountIdValue := strconv.FormatInt(u.Id, BASE_10)
-	d.SetId(subAccountIdValue)
 
-	d.Set(subAccountToken, u.Token)
-	d.Set(subAccountId, u.AccountId)
+	d.SetId(strconv.FormatInt(int64(subAccount.AccountId), 10))
+	d.Set(subAccountToken, subAccount.AccountToken)
+	d.Set(subAccountId, subAccount.AccountId)
 
-	return retry.Do(
-		func() error {
-			return resourceSubAccountRead(d, m)
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				if err != nil {
-					match, _ := regexp.MatchString("^404.*errorCode", err.Error())
-					if match {
-						return true
-					}
-				}
-				return false
-			}),
-		retry.Delay(delayGetSubAccount),
-	)
+	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		err = resourceSubAccountRead(d, m)
+		if err != nil {
+			if strings.Contains(err.Error(), "failed with missing sub account") {
+				return resource.RetryableError(err)
+			}
+
+			if strings.Contains(err.Error(), "failed with status code 500") {
+				return resource.RetryableError(err)
+			}
+		}
+
+		return resource.NonRetryableError(err)
+	})
+
 }
 
 func resourceSubAccountRead(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+	id, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -177,14 +171,89 @@ func resourceSubAccountRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	setSubAccount(d, subAccount)
-
 	// Sub accounts created before v1.2.4 had no account_id, account_token attributes.
 	// These lines add those attributes to already existing resources on Read
+	err = setTokenAndId(d, m, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func resourceSubAccountUpdate(d *schema.ResourceData, m interface{}) error {
+	id, err := utils.IdFromResourceData(d)
+	if err != nil {
+		return err
+	}
+
+	updateSubAccount := getCreateSubAccountFromSchema(d)
+	err = subAccountClient(m).UpdateSubAccount(id, updateSubAccount)
+	if err != nil {
+		return err
+	}
+
+	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
+		err = resourceSubAccountRead(d, m)
+		if err != nil {
+			if strings.Contains(err.Error(), "failed with status code 500") {
+				return resource.RetryableError(err)
+			}
+
+			subAccountFromSchema := getCreateSubAccountFromSchema(d)
+			if strings.Contains(err.Error(), "failed with missing sub account") &&
+				!reflect.DeepEqual(subAccountFromSchema, updateSubAccount) {
+				return resource.RetryableError(fmt.Errorf("sub account is not updated yet: %s", err.Error()))
+			}
+		}
+
+		return resource.NonRetryableError(err)
+	})
+}
+
+func resourceSubAccountDelete(d *schema.ResourceData, m interface{}) error {
+	id, err := utils.IdFromResourceData(d)
+	if err != nil {
+		return err
+	}
+
+	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
+		err = subAccountClient(m).DeleteSubAccount(id)
+		if err != nil {
+			return resource.RetryableError(err)
+		}
+
+		return resource.NonRetryableError(err)
+	})
+}
+
+func setSubAccount(d *schema.ResourceData, subAccount *sub_accounts.SubAccount) {
+	d.Set(subAccountId, subAccount.AccountId)
+	d.Set(subAccountName, subAccount.AccountName)
+	d.Set(subAccountFlexible, subAccount.Flexible)
+	d.Set(subAccountReservedDailyGb, subAccount.ReservedDailyGB)
+	d.Set(subAccountMaxDailyGB, subAccount.MaxDailyGB)
+	d.Set(subAccountRetentionDays, subAccount.RetentionDays)
+	d.Set(subAccountSearchable, subAccount.Searchable)
+	d.Set(subAccountAccessible, subAccount.Accessible)
+	d.Set(subAccountDocSizeSetting, subAccount.DocSizeSetting)
+	d.Set(subAccountUtilizationSettingsFrequencyMinutes, subAccount.UtilizationSettings.FrequencyMinutes)
+	d.Set(subAccountUtilizationSettingsUtilizationEnabled, subAccount.UtilizationSettings.UtilizationEnabled)
+
+	sharingObjectAccounts := make([]int32, 0)
+	for _, account := range subAccount.SharingObjectsAccounts {
+		sharingObjectAccounts = append(sharingObjectAccounts, account.AccountId)
+	}
+
+	d.Set(subAccountSharingObjectsAccounts, sharingObjectAccounts)
+}
+
+func setTokenAndId(d *schema.ResourceData, m interface{}, id int64) error {
 	accountToken, okToken := d.GetOk(subAccountToken)
 	accountId, okId := d.GetOk(subAccountId)
 
-	if !okToken && !okId && accountId.(int) == 0 && len(accountToken.(string)) == 0 {
-		err = insertAccountTokenAndId(d, m, id)
+	if !okToken || !okId || accountId.(int) == 0 || len(accountToken.(string)) == 0 {
+		err := insertAccountTokenAndId(d, m, id)
 		if err != nil {
 			return err
 		}
@@ -193,63 +262,41 @@ func resourceSubAccountRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceSubAccountUpdate(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
-	if err != nil {
-		return err
+func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOrUpdateSubAccount {
+	sharingAccounts := d.Get(subAccountSharingObjectsAccounts).([]interface{})
+	// Allows users to insert empty array of sharingObjectAccounts, but avoiding `nil`
+	sharingObjectAccounts := make([]int32, 0)
+	for _, accountId := range sharingAccounts {
+		sharingObjectAccounts = append(sharingObjectAccounts, int32(accountId.(int)))
 	}
 
-	subAccount := createSubAccountObject(d, id)
-
-	err = subAccountClient(m).UpdateSubAccount(id, subAccount)
-	if err != nil {
-		return err
-	}
-
-	return retry.Do(
-		func() error {
-			return resourceSubAccountRead(d, m)
+	createSubAccount := sub_accounts.CreateOrUpdateSubAccount{
+		Email:                  d.Get(subAccountEmail).(string),
+		AccountName:            d.Get(subAccountName).(string),
+		Flexible:               strconv.FormatBool(d.Get(subAccountFlexible).(bool)),
+		ReservedDailyGB:        float32(d.Get(subAccountReservedDailyGb).(float64)),
+		MaxDailyGB:             float32(d.Get(subAccountMaxDailyGB).(float64)),
+		RetentionDays:          int32(d.Get(subAccountRetentionDays).(int)),
+		Searchable:             strconv.FormatBool(d.Get(subAccountSearchable).(bool)),
+		Accessible:             strconv.FormatBool(d.Get(subAccountAccessible).(bool)),
+		SharingObjectsAccounts: sharingObjectAccounts,
+		DocSizeSetting:         strconv.FormatBool(d.Get(subAccountDocSizeSetting).(bool)),
+		UtilizationSettings: sub_accounts.AccountUtilizationSettingsCreateOrUpdate{
+			FrequencyMinutes:   int32(d.Get(subAccountUtilizationSettingsFrequencyMinutes).(int)),
+			UtilizationEnabled: strconv.FormatBool(d.Get(subAccountUtilizationSettingsUtilizationEnabled).(bool)),
 		},
-		retry.RetryIf(
-			func(err error) bool {
-				if err != nil {
-					updated := createSubAccountObject(d, id)
-					if !reflect.DeepEqual(subAccount, updated) {
-						return true
-					}
-				}
-				return false
-			}),
-		retry.Delay(delayGetSubAccount),
-	)
+	}
+
+	return createSubAccount
 }
 
-func resourceSubAccountDelete(d *schema.ResourceData, m interface{}) error {
-	id, err := idFromResourceData(d)
+func getDetailedSubAccount(m interface{}, id int64) (*sub_accounts.DetailedSubAccount, error) {
+	subAccount, err := subAccountClient(m).GetDetailedSubAccount(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = subAccountClient(m).DeleteSubAccount(id)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func createSubAccountObject(d *schema.ResourceData, id int64) sub_accounts.SubAccount {
-	return sub_accounts.SubAccount{
-		Id:                    id,
-		AccountName:           d.Get(subAccountName).(string),
-		RetentionDays:         int32(d.Get(subAccountRetentionDays).(int)),
-		SharingObjectAccounts: d.Get(subAccountSharingObjectsAccounts).([]interface{}),
-		MaxDailyGB:            float32(d.Get(subAccountMaxDailyGB).(float64)),
-		Searchable:            d.Get(subAccountSearchable).(bool),
-		Accessible:            d.Get(subAccountAccessible).(bool),
-		DocSizeSetting:        d.Get(subAccountDocSizeSetting).(bool),
-		UtilizationSettings:   d.Get(subAccountUtilizationSettings).(map[string]interface{}),
-	}
+	return subAccount, nil
 }
 
 func insertAccountTokenAndId(d *schema.ResourceData, m interface{}, id int64) error {
@@ -277,13 +324,4 @@ func insertAccountTokenAndId(d *schema.ResourceData, m interface{}, id int64) er
 			}),
 		retry.Delay(delayGetSubAccount),
 	)
-}
-
-func getDetailedSubAccount(m interface{}, id int64) (*sub_accounts.SubAccountDetailed, error) {
-	subAccount, err := subAccountClient(m).GetDetailedSubAccount(id)
-	if err != nil {
-		return nil, err
-	}
-
-	return subAccount, nil
 }

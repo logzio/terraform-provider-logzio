@@ -1,9 +1,11 @@
-package logzio
+package utils
 
 import (
 	"fmt"
 	"github.com/logzio/logzio_terraform_client/alerts"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
+	"github.com/logzio/logzio_terraform_client/endpoints"
+	"regexp"
 )
 
 func contains(slice []string, s string) bool {
@@ -16,7 +18,7 @@ func contains(slice []string, s string) bool {
 	return false
 }
 
-func validateOperation(v interface{}, k string) (ws []string, errors []error) {
+func ValidateOperation(v interface{}, k string) (ws []string, errors []error) {
 
 	value := v.(string)
 
@@ -46,7 +48,7 @@ func validateOperation(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
-func validateOperationV2(v interface{}, k string) (ws []string, errors []error) {
+func ValidateOperationV2(v interface{}, k string) (ws []string, errors []error) {
 
 	value := v.(string)
 
@@ -112,7 +114,7 @@ func validateSeverityTypes(v interface{}, k string) (ws []string, errors []error
 	return
 }
 
-func validateOutputType(v interface{}, k string) (ws []string, errors []error) {
+func ValidateOutputType(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
 	validOutputTypes := []string{
@@ -126,7 +128,7 @@ func validateOutputType(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
-func validateSortTypes(v interface{}, k string) (ws []string, errors []error) {
+func ValidateSortTypes(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
 	validTypes := []string{
@@ -136,6 +138,47 @@ func validateSortTypes(v interface{}, k string) (ws []string, errors []error) {
 
 	if !contains(validTypes, value) {
 		errors = append(errors, fmt.Errorf("sort type %q must be one of %s", k, validTypes))
+	}
+
+	return
+}
+
+func ValidateUrl(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	b, err := regexp.Match(VALIDATE_URL_REGEX, []byte(value))
+
+	if !b || err != nil {
+		errors = append(errors, err)
+	}
+
+	return
+}
+
+func ValidateHttpMethod(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if !findStringInArray(value, []string{"GET", "POST", "PUT", "DELETE"}) {
+		errors = append(errors, fmt.Errorf("invalid HTTP method specified"))
+	}
+
+	return
+}
+
+func ValidateEndpointType(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	validTypes := []string{
+		string(endpoints.EndpointTypeSlack),
+		string(endpoints.EndpointTypeCustom),
+		string(endpoints.EndpointTypePagerDuty),
+		string(endpoints.EndpointTypeBigPanda),
+		string(endpoints.EndpointTypeDataDog),
+		string(endpoints.EndpointTypeVictorOps),
+		string(endpoints.EndpointTypeServiceNow),
+		string(endpoints.EndpointTypeOpsGenie),
+		string(endpoints.EndpointTypeMicrosoftTeams)}
+
+	if !contains(validTypes, value) {
+		errors = append(errors, fmt.Errorf("value for endpoint type is unknown"))
 	}
 
 	return

@@ -1,5 +1,5 @@
 variable "api_token" {
-  type = "string"
+  type = string
   description = "your logzio API token"
 }
 
@@ -7,32 +7,100 @@ provider "logzio" {
   api_token = var.api_token
 }
 
-resource "logzio_endpoint" "my_endpoint" {
-  title = "my_endpoint"
+resource "logzio_endpoint" "slack_endpoint" {
+  title = "slack_endpoint"
   description = "hello"
-  endpoint_type = "Slack"
+  endpoint_type = "slack"
   slack {
-    url = "https://this.is.com/some/url"
+    url = "https://jsonplaceholder.typicode.com/todos/1"
   }
 }
 
-resource "logzio_alert" "my_alert" {
-  title = "my_other_title"
-  query_string = "loglevel:ERROR"
-  operation = "GREATER_THAN"
-  notification_emails = []
-  search_timeframe_minutes = 5
-  value_aggregation_type = "NONE"
-  alert_notification_endpoints = [logzio_endpoint.my_endpoint.id]
-  suppress_notifications_minutes = 5
-  is_enabled = false
-  severity_threshold_tiers {
-      severity = "HIGH"
-      threshold = 100
+resource "logzio_endpoint" "custom_endpoint" {
+  title = "custom_endpoint"
+  endpoint_type = "custom"
+  description = "hello"
+  custom {
+    url = "https://jsonplaceholder.typicode.com/todos/1"
+    method = "POST"
+    headers = {
+      this = "is"
+      a = "header"
     }
-  severity_threshold_tiers {
-    severity = "LOW"
-    threshold = 20
+    body_template = jsonencode({
+      this: "is"
+      my: "template"
+      nested: {
+        also: "working"
+      }
+    })
   }
-  tags = ["some", "words"]
+}
+
+resource "logzio_endpoint" "pagerduty_endpoint" {
+  title = "pagerduty_endpoint"
+  endpoint_type = "pagerduty"
+  description = "hello"
+  pagerduty {
+    service_key = "my_service_key"
+  }
+}
+
+resource "logzio_endpoint" "bigpanda_endpoint" {
+  title = "bigpanda_endpoint"
+  endpoint_type = "bigpanda"
+  description = "hello"
+  bigpanda {
+    api_token = "my_api_token"
+    app_key = "my_app_key"
+  }
+}
+
+resource "logzio_endpoint" "datadog_endpoint" {
+  title = "datadog_endpoint"
+  endpoint_type = "datadog"
+  description = "hello"
+  datadog {
+    api_key = "my_api_key"
+  }
+}
+
+resource "logzio_endpoint" "victorops_endpoint" {
+  title = "victorops_endpoint"
+  endpoint_type = "victorops"
+  description = "hello"
+  victorops {
+    routing_key = "my_routing_key"
+    message_type = "my_message_type"
+    service_api_key = "my_service_api_key"
+  }
+}
+
+resource "logzio_endpoint" "opsgenie_endpoint" {
+  title = "opsgenie_endpoint"
+  endpoint_type = "opsgenie"
+  description = "hello"
+  opsgenie {
+    api_key = "my_api_key"
+  }
+}
+
+resource "logzio_endpoint" "servicenow_endpoint" {
+  title = "servicenow_endpoint"
+  endpoint_type = "servicenow"
+  description = "hello"
+  servicenow {
+    username = "my_username"
+    password = "my_password"
+    url = "https://jsonplaceholder.typicode.com/todos/1"
+  }
+}
+
+resource "logzio_endpoint" "microsoftteams_endpoint" {
+  title = "microsoftteams_endpoint"
+  endpoint_type = "microsoftteams"
+  description = "hello"
+  microsoftteams {
+    url = "https://jsonplaceholder.typicode.com/todos/1"
+  }
 }
