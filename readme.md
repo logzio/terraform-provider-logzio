@@ -177,6 +177,14 @@ Found a bug or want to suggest a feature? [Open an issue](https://github.com/log
 Want to do it yourself? We are more than happy to accept external contributions from the community.
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
 
+### Import sub-accounts as resources 
+
+You can import multiple sub-accounts as follows:
+
+```
+terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
+```
+
 ### Changelog 
 - v1.5
     - Update client version(v1.8).
@@ -213,7 +221,7 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
     - Fix `sub account` to return attributes `account_token` & `account_id`.
 
 <details>
-  <summary markdown="span">Exapnd to check old versions </summary>
+  <summary markdown="span">Expand to check old versions </summary>
 
 - v1.2.3
     - Fix bug for `custom endpoint` empty headers.
@@ -254,10 +262,3 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
   
 </details>
 
-### Import sub-accounts as resources 
-
-You can import multiple sub-accounts as follows:
-
-```
-terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
-```
