@@ -190,7 +190,8 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
 
 - v1.6
   - Update client version (v1.9).
-  - Support archive logs resource.
+  - Support [archive logs resource](https://docs.logz.io/api/#tag/Archive-logs).
+  - Support [restore logs resource](https://docs.logz.io/api/#tag/Restore-logs).
 - v1.5
     - Update client version(v1.8).
     - `sub_account`:
