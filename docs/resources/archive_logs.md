@@ -2,7 +2,7 @@
 
 Provides a Logz.io archive logs resource. This can be used to create and manage Logz.io archive logs settings.
 
-* Learn more about log shipping tokens in the [Logz.io Docs](https://docs.logz.io/api/#tag/Archive-logs)
+* Learn more about archive logs in the [Logz.io Docs](https://docs.logz.io/api/#tag/Archive-logs)
 
 ## Example Usage
 

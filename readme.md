@@ -20,6 +20,7 @@ The following Logz.io API endpoints are supported by this provider:
 * [Log shipping token](https://docs.logz.io/api/#tag/Manage-log-shipping-tokens)
 * [Drop filters](https://docs.logz.io/api/#tag/Drop-filters)
 * [Archive logs](https://docs.logz.io/api/#tag/Archive-logs)
+* [Restore logs](https://docs.logz.io/api/#tag/Restore-logs)
 
 #### Working with Terraform
 
@@ -188,11 +189,11 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
 
 ### Changelog
 
-- v1.6
+- **v1.6**
   - Update client version (v1.9).
   - Support [archive logs resource](https://docs.logz.io/api/#tag/Archive-logs).
   - Support [restore logs resource](https://docs.logz.io/api/#tag/Restore-logs).
-- v1.5
+- **v1.5**
     - Update client version(v1.8).
     - `sub_account`:
         - **Breaking changes:**
