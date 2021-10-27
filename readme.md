@@ -19,6 +19,8 @@ The following Logz.io API endpoints are supported by this provider:
 * [Alerts(v2)](https://docs.logz.io/api/#tag/Alerts)
 * [Log shipping token](https://docs.logz.io/api/#tag/Manage-log-shipping-tokens)
 * [Drop filters](https://docs.logz.io/api/#tag/Drop-filters)
+* [Archive logs](https://docs.logz.io/api/#tag/Archive-logs)
+* [Restore logs](https://docs.logz.io/api/#tag/Restore-logs)
 
 #### Working with Terraform
 
@@ -185,8 +187,13 @@ You can import multiple sub-accounts as follows:
 terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
 ```
 
-### Changelog 
-- v1.5
+### Changelog
+
+- **v1.6**
+  - Update client version (v1.9).
+  - Support [archive logs resource](https://docs.logz.io/api/#tag/Archive-logs).
+  - Support [restore logs resource](https://docs.logz.io/api/#tag/Restore-logs).
+- **v1.5**
     - Update client version(v1.8).
     - `sub_account`:
         - **Breaking changes:**
@@ -207,12 +214,12 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
         - Refactor code to use Terraform's retry.
     - `drop_filter`:
         - Improve tests.
+<details>
+  <summary markdown="span"> Expand to check old versions </summary>
+
 - v1.4
     - Update client version(v1.7).
     - Support [Drop Filter](https://docs.logz.io/api/#tag/Drop-filters) resource.
-<details>
-  <summary markdown="span"> Expand to check old versions </summary>
-  
 - v1.3
     - Update client version(v1.6).
     - Support Log Shipping Token resource.

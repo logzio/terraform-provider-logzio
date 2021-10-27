@@ -87,17 +87,7 @@ func TestAccDataSourceSubaccountByAccountName(t *testing.T) {
 }
 
 func TestAccDataSourceSubaccountNotExists(t *testing.T) {
-	//resourceName := "logzio_subaccount.subaccount_datasource"
-	//accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), BASE_10, BITSIZE_64)
-	//email := os.Getenv(envLogzioEmail)
-	//accountName := "some_account_to_add_ds"
-
 	resource.Test(t, resource.TestCase{
-		//PreCheck: func() {
-		//	testAccPreCheckApiToken(t)
-		//	testAccPreCheckEmail(t)
-		//	testAccPreCheckAccountId(t)
-		//},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

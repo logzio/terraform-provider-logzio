@@ -17,10 +17,22 @@ const (
 	resourceSubAccountType       = "logzio_subaccount"
 	resourceLogShippingTokenType = "logzio_log_shipping_token"
 	resourceDropFilterType       = "logzio_drop_filter"
+	resourceArchiveLogsType      = "logzio_archive_logs"
+	resourceRestoreLogsType      = "logzio_restore_logs"
 	envLogzioApiToken            = "LOGZIO_API_TOKEN"
 	envLogzioRegion              = "LOGZIO_REGION"
 	envLogzioBaseURL             = "LOGZIO_BASE_URL"
 	envLogzioAccountId           = "LOGZIO_ACCOUNT_ID"
+	envLogzioS3Path              = "S3_PATH"
+	envLogzioAwsAccessKey        = "AWS_ACCESS_KEY"
+	envLogzioAwsSecretKey        = "AWS_SECRET_KEY"
+	envLogzioAwsArn              = "AWS_ARN"
+	envLogzioAzureAccountName    = "AZURE_ACCOUNT_NAME"
+	envLogzioAzureClientId       = "AZURE_CLIENT_ID"
+	envLogzioAzureClientSecret   = "AZURE_CLIENT_SECRET"
+	envLogzioAzureContainerName  = "AZURE_CONTAINER_NAME"
+	envLogzioAzureTenantId       = "AZURE_TENANT_ID"
+	envLogzioAzurePath           = "BLOB_PATH"
 
 	baseUrl = "https://api%s.logz.io"
 )
@@ -51,6 +63,8 @@ func Provider() terraform.ResourceProvider {
 			resourceAlertV2Type:          dataSourceAlertV2(),
 			resourceLogShippingTokenType: dataSourceLogShippingToken(),
 			resourceDropFilterType:       dataSourceDropFilter(),
+			resourceArchiveLogsType:      dataSourceArchiveLogs(),
+			resourceRestoreLogsType:      dataSourceRestoreLogs(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			resourceAlertType:            resourceAlert(),
@@ -60,6 +74,8 @@ func Provider() terraform.ResourceProvider {
 			resourceAlertV2Type:          resourceAlertV2(),
 			resourceLogShippingTokenType: resourceLogShippingToken(),
 			resourceDropFilterType:       resourceDropFilter(),
+			resourceArchiveLogsType:      resourceArchiveLogs(),
+			resourceRestoreLogsType:      resourceRestoreLogs(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/logzio/logzio_terraform_client/alerts"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
+	"github.com/logzio/logzio_terraform_client/archive_logs"
 	"github.com/logzio/logzio_terraform_client/endpoints"
 	"regexp"
 )
@@ -179,6 +180,34 @@ func ValidateEndpointType(v interface{}, k string) (ws []string, errors []error)
 
 	if !contains(validTypes, value) {
 		errors = append(errors, fmt.Errorf("value for endpoint type is unknown"))
+	}
+
+	return
+}
+
+func ValidateArchiveLogsStorageType(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	validStorageTypes := []string{
+		archive_logs.StorageTypeS3,
+		archive_logs.StorageTypeBlob,
+	}
+
+	if !contains(validStorageTypes, value) {
+		errors = append(errors, fmt.Errorf("value for storage type is unknown. valid types are: %s", validStorageTypes))
+	}
+
+	return
+}
+
+func ValidateArchiveLogsAwsCredentialsType(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	validStorageTypes := []string{
+		archive_logs.CredentialsTypeKeys,
+		archive_logs.CredentialsTypeIam,
+	}
+
+	if !contains(validStorageTypes, value) {
+		errors = append(errors, fmt.Errorf("value for credentials type is unknown. valid types are: %s", validStorageTypes))
 	}
 
 	return
