@@ -188,11 +188,15 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
 ```
 
 ### Changelog
-
+- **v1.6.1**
+    - Update client version (v1.9.1) - bug fix for not found messages.
 - **v1.6**
   - Update client version (v1.9).
   - Support [archive logs resource](https://docs.logz.io/api/#tag/Archive-logs).
   - Support [restore logs resource](https://docs.logz.io/api/#tag/Restore-logs).
+
+<details>
+  <summary markdown="span"> Expand to check old versions </summary>
 - **v1.5**
     - Update client version(v1.8).
     - `sub_account`:
@@ -214,9 +218,6 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
         - Refactor code to use Terraform's retry.
     - `drop_filter`:
         - Improve tests.
-<details>
-  <summary markdown="span"> Expand to check old versions </summary>
-
 - v1.4
     - Update client version(v1.7).
     - Support [Drop Filter](https://docs.logz.io/api/#tag/Drop-filters) resource.
@@ -226,10 +227,6 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
 - v1.2.4
     - Update client version(v1.5.3).
     - Fix `sub account` to return attributes `account_token` & `account_id`.
-
-<details>
-  <summary markdown="span">Expand to check old versions </summary>
-
 - v1.2.3
     - Fix bug for `custom endpoint` empty headers.
     - Allow empty sharing accounts array in `sub account`.
