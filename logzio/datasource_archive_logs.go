@@ -131,7 +131,7 @@ func dataSourceArchiveLogsRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func getArchive(archiveId int64, retries int, m interface{}) (*archive_logs.ArchiveLogs, error) {
-	archive, err := getArchiveFromId(archiveId, m)
+	archive, err := archiveLogsClient(m).RetrieveArchiveLogsSetting(int32(archiveId))
 	if err != nil && retries > 0 {
 		time.Sleep(time.Second * 2)
 		archive, err = getArchive(archiveId, retries-1, m)
