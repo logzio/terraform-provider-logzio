@@ -7,17 +7,16 @@ import (
 	"github.com/logzio/logzio_terraform_client/authentication_groups"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"math/rand"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
 )
 
 const (
-	authGroupsId = "manage_groups_id"
-	authGroupsManageGroups = "manage_groups"
-	authGroupGroup = "group"
-	authGroupUserRole = "user_role"
+	authGroupsId        = "manage_groups_id"
+	authGroupsAuthGroup = "authentication_group"
+	authGroupGroup      = "group"
+	authGroupUserRole   = "user_role"
 )
 
 func resourceAuthenticationGroups() *schema.Resource {
@@ -26,28 +25,27 @@ func resourceAuthenticationGroups() *schema.Resource {
 		Read:   resourceAuthenticationGroupsRead,
 		Update: resourceAuthenticationGroupsUpdate,
 		Delete: resourceAuthenticationGroupDelete,
-		// TODO: implement my own import function, since the API does not return an id for group.
-		//Importer: &schema.ResourceImporter{
-		//	State: schema.ImportStatePassthrough,
-		//},
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 			authGroupsId: {
-				Type: schema.TypeInt,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			authGroupsManageGroups: {
-				Type: schema.TypeSet,
+			authGroupsAuthGroup: {
+				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						authGroupGroup: {
-							Type: schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
 							ValidateFunc: utils.ValidateGroupName,
 						},
 						authGroupUserRole: {
-							Type: schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
 							ValidateFunc: utils.ValidateUserRole,
 						},
 					},
@@ -70,7 +68,7 @@ func authenticationGroupsClient(m interface{}) *authentication_groups.Authentica
 
 func resourceAuthenticationGroupsCreate(d *schema.ResourceData, m interface{}) error {
 	createGroups := getAuthenticationGroupsFromSchema(d)
-	groups, err := authenticationGroupsClient(m).PostAuthenticationGroups(createGroups)
+	_, err := authenticationGroupsClient(m).PostAuthenticationGroups(createGroups)
 	if err != nil {
 		return err
 	}
@@ -116,14 +114,16 @@ func resourceAuthenticationGroupsUpdate(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("can't delete by sending an empty set. you need to destroy the resource in order to delete all groups")
 	}
 
+	_, err := authenticationGroupsClient(m).PostAuthenticationGroups(updateAuthGroup)
+	if err != nil {
+		return err
+	}
+
 	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
 		err := resourceAuthenticationGroupsRead(d, m)
-		if err != nil {
-			groupsFromSchema := getAuthenticationGroupsFromSchema(d)
-			if strings.Contains(err.Error(), "failed with missing authentication groups") &&
-				!reflect.DeepEqual(updateAuthGroup, groupsFromSchema) {
-				return resource.RetryableError(fmt.Errorf("authentication groups not updated yet: %s", err.Error()))
-			}
+		groupsFromSchema := getAuthenticationGroupsFromSchema(d)
+		if !isSameAuthGroups(updateAuthGroup, groupsFromSchema) {
+			return resource.RetryableError(fmt.Errorf("authentication groups not updated yet"))
 		}
 
 		return resource.NonRetryableError(err)
@@ -144,7 +144,7 @@ func resourceAuthenticationGroupDelete(d *schema.ResourceData, m interface{}) er
 func getAuthenticationGroupsFromSchema(d *schema.ResourceData) []authentication_groups.AuthenticationGroup {
 	var groups []authentication_groups.AuthenticationGroup
 	var groupToAdd authentication_groups.AuthenticationGroup
-	groupsFromSchema := d.Get(authGroupsManageGroups).(*schema.Set).List()
+	groupsFromSchema := d.Get(authGroupsAuthGroup).(*schema.Set).List()
 
 	for _, group := range groupsFromSchema {
 		groupToAdd.Group = group.(map[string]interface{})[authGroupGroup].(string)
@@ -160,13 +160,37 @@ func setAuthenticationGroups(id int64, groups []authentication_groups.Authentica
 	d.Set(authGroupsId, id)
 
 	for _, group := range groups {
-		groupMap := map[string]interface{} {
-			authGroupGroup: group.Group,
+		groupMap := map[string]interface{}{
+			authGroupGroup:    group.Group,
 			authGroupUserRole: group.UserRole,
 		}
 
 		groupsToSchema = append(groupsToSchema, groupMap)
 	}
 
-	d.Set(authGroupsManageGroups, groupsToSchema)
+	d.Set(authGroupsAuthGroup, groupsToSchema)
+}
+
+func isSameAuthGroups(authGroups1, authGroups2 []authentication_groups.AuthenticationGroup) bool {
+	if len(authGroups1) != len(authGroups2) {
+		return false
+	}
+
+	diff := make(map[string]int, len(authGroups1))
+	for _, group1 := range authGroups1 {
+		diff[group1.Group+group1.UserRole]++
+	}
+
+	for _, group2 := range authGroups2 {
+		if _, ok := diff[group2.Group+group2.UserRole]; !ok {
+			return false
+		}
+
+		diff[group2.Group+group2.UserRole] -= 1
+		if diff[group2.Group+group2.UserRole] == 0 {
+			delete(diff, group2.Group+group2.UserRole)
+		}
+	}
+
+	return len(diff) == 0
 }
