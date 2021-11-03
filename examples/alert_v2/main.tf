@@ -8,7 +8,7 @@ provider "logzio" {
 }
 
 resource "logzio_alert_v2" "my_alert" {
-  title = "hello"
+  title = "kakakaka"
   description = "this is a description"
   tags = [
     "some",
@@ -27,6 +27,10 @@ resource "logzio_alert_v2" "my_alert" {
     severity_threshold_tiers {
       severity = "HIGH"
       threshold = 10
+    }
+    severity_threshold_tiers {
+      severity = "LOW"
+      threshold = 2
     }
     filter_must = jsonencode([
       {

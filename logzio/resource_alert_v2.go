@@ -174,7 +174,7 @@ func resourceAlertV2() *schema.Resource {
 							ValidateFunc: utils.ValidateOperationV2,
 						},
 						alertV2SeverityThresholdTiers: {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -362,7 +362,8 @@ func getSubComponentMapping(sc []alerts_v2.SubAlert) []map[string]interface{} {
 	var subComponentsMapping []map[string]interface{}
 	for _, subComponent := range sc {
 		var columns []map[string]string
-		var severityThreshold []map[string]interface{}
+		//var severityThreshold []map[string]interface{}
+		var severityThreshold []interface{}
 		for _, column := range subComponent.Output.Columns {
 			columnMapping := map[string]string{
 				alertV2ColumnsFieldName: column.FieldName,
@@ -488,7 +489,7 @@ func getSubComponents(subComponentsFromConfig []interface{}) []alerts_v2.SubAler
 			subAlertElement.Output.Columns = columnsCreateAlert
 		}
 
-		tiers := element[alertV2SeverityThresholdTiers].([]interface{})
+		tiers := element[alertV2SeverityThresholdTiers].(*schema.Set).List()
 
 		subAlertElement.Trigger.SeverityThresholdTiers = make(map[string]float32)
 		for _, t := range tiers {
