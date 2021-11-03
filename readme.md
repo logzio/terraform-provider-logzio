@@ -21,6 +21,7 @@ The following Logz.io API endpoints are supported by this provider:
 * [Drop filters](https://docs.logz.io/api/#tag/Drop-filters)
 * [Archive logs](https://docs.logz.io/api/#tag/Archive-logs)
 * [Restore logs](https://docs.logz.io/api/#tag/Restore-logs)
+* [Authentication groups](https://docs.logz.io/api/#tag/Authentication-groups)
 
 #### Working with Terraform
 
@@ -188,15 +189,20 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
 ```
 
 ### Changelog
+
+- **v1.7.0**
+  - Update client version (v1.10).
+  - Support [authentication groups resource](https://docs.logz.io/api/#tag/Authentication-groups).
+  - `alerts_v2`: fix noisy diff for `severity_threshold_tiers`.
 - **v1.6.1**
     - Update client version (v1.9.1) - bug fix for not found messages.
+
+<details>
+  <summary markdown="span"> Expand to check old versions </summary>
 - **v1.6**
   - Update client version (v1.9).
   - Support [archive logs resource](https://docs.logz.io/api/#tag/Archive-logs).
   - Support [restore logs resource](https://docs.logz.io/api/#tag/Restore-logs).
-
-<details>
-  <summary markdown="span"> Expand to check old versions </summary>
 - **v1.5**
     - Update client version(v1.8).
     - `sub_account`:
