@@ -8,7 +8,7 @@ provider "logzio" {
 }
 
 resource "logzio_alert_v2" "my_alert" {
-  title = "kakakaka"
+  title = "hello"
   description = "this is a description"
   tags = [
     "some",
