@@ -29,6 +29,7 @@ func resourceAuthenticationGroups() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
+			// Id created by TF to keep with conventions, because the Logz.io auth groups API doesn't create one.
 			authGroupsId: {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -36,11 +37,12 @@ func resourceAuthenticationGroups() *schema.Resource {
 			authGroupsAuthGroup: {
 				Type:     schema.TypeSet,
 				Required: true,
+				MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						authGroupGroup: {
 							Type:         schema.TypeString,
-							Optional:     true,
+							Required:     true,
 							ValidateFunc: utils.ValidateGroupName,
 						},
 						authGroupUserRole: {
