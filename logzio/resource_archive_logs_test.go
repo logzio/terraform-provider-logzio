@@ -7,6 +7,7 @@ import (
 	"os"
 	"regexp"
 	"testing"
+	"time"
 )
 
 const (
@@ -20,6 +21,7 @@ func TestAccLogzioArchiveLogs_SetupArchiveS3Keys(t *testing.T) {
 	secretKey := os.Getenv(envLogzioAwsSecretKey)
 	resourceName := "setup_test_s3_keys"
 	fullResourceName := "logzio_archive_logs." + resourceName
+	defer func() { time.Sleep(3 * time.Second) }()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
@@ -57,6 +59,7 @@ func TestAccLogzioArchiveLogs_SetupArchiveS3Iam(t *testing.T) {
 	arn := os.Getenv(envLogzioAwsArn)
 	resourceName := "setup_test_s3_iam"
 	fullResourceName := "logzio_archive_logs." + resourceName
+	defer func() { time.Sleep(3 * time.Second) }()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
@@ -98,6 +101,7 @@ func TestAccLogzioArchiveLogs_SetupArchiveBlob(t *testing.T) {
 
 	resourceName := "setup_test_blob"
 	fullResourceName := "logzio_archive_logs." + resourceName
+	defer func() { time.Sleep(3 * time.Second) }()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
@@ -176,6 +180,7 @@ func TestAccLogzioArchiveLogs_UpdateArchive(t *testing.T) {
 	fullResourceName := "logzio_archive_logs." + resourceName
 	newAccessKey := os.Getenv(envLogzioAwsAccessKeyUpdate)
 	newSecretKey := os.Getenv(envLogzioAwsSecretKeyUpdate)
+	defer func() { time.Sleep(3 * time.Second) }()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
@@ -200,6 +205,9 @@ func TestAccLogzioArchiveLogs_UpdateArchive(t *testing.T) {
 				),
 			},
 			{
+				PreConfig: func() {
+					time.Sleep(2 * time.Second)
+				},
 				Config: getConfigTestArchiveS3Keys(resourceName, path, newAccessKey, newSecretKey),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(fullResourceName, archiveLogsStorageType, archive_logs.StorageTypeS3),

@@ -28,6 +28,10 @@ resource "logzio_alert_v2" "my_alert" {
       severity = "HIGH"
       threshold = 10
     }
+    severity_threshold_tiers {
+      severity = "LOW"
+      threshold = 2
+    }
     filter_must = jsonencode([
       {
         match_phrase: {

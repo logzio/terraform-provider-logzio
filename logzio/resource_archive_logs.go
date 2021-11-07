@@ -185,8 +185,7 @@ func resourceArchiveLogsRead(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	archive, err := getArchiveFromId(id, m)
-
+	archive, err := archiveLogsClient(m).RetrieveArchiveLogsSetting(int32(id))
 	setArchive(d, archive)
 	return nil
 }
@@ -293,16 +292,6 @@ func getBlobStorageSettingsFromSchema(settings map[string]interface{}) *archive_
 	return &blobSettings
 }
 
-func findArchiveByIdFromArchivesList(id int32, archives []archive_logs.ArchiveLogs) (*archive_logs.ArchiveLogs, error) {
-	for _, archive := range archives {
-		if archive.Id == id {
-			return &archive, nil
-		}
-	}
-
-	return nil, fmt.Errorf("archive id not found in archives list")
-}
-
 func setArchive(d *schema.ResourceData, archive *archive_logs.ArchiveLogs) {
 	d.Set(archiveLogsIdField, archive.Id)
 	d.Set(archiveLogsStorageType, archive.Settings.StorageType)
@@ -353,14 +342,4 @@ func setBlobSettings(d *schema.ResourceData, blobSettings archive_logs.BlobSetti
 	}
 
 	d.Set(archiveLogsAzureBlobStorageSettings, []interface{}{settings})
-}
-
-func getArchiveFromId(id int64, m interface{}) (*archive_logs.ArchiveLogs, error) {
-	// Todo: currently GET archive api is not available, so we use list instead. When available, change to retrieve.
-	archives, err := archiveLogsClient(m).ListArchiveLog()
-	if err != nil {
-		return nil, err
-	}
-
-	return findArchiveByIdFromArchivesList(int32(id), archives)
 }

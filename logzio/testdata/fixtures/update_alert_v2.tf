@@ -16,8 +16,12 @@ resource "logzio_alert_v2" "%s" {
     operation = "EQUALS"
     value_aggregation_type = "COUNT"
     severity_threshold_tiers {
-      severity = "LOW"
+      severity = "HIGH"
       threshold = 10
+    }
+    severity_threshold_tiers {
+      severity = "LOW"
+      threshold = 2
     }
     filter_must = jsonencode([
       {

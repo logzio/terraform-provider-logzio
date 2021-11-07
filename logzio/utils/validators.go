@@ -5,6 +5,7 @@ import (
 	"github.com/logzio/logzio_terraform_client/alerts"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
 	"github.com/logzio/logzio_terraform_client/archive_logs"
+	"github.com/logzio/logzio_terraform_client/authentication_groups"
 	"github.com/logzio/logzio_terraform_client/endpoints"
 	"regexp"
 )
@@ -208,6 +209,31 @@ func ValidateArchiveLogsAwsCredentialsType(v interface{}, k string) (ws []string
 
 	if !contains(validStorageTypes, value) {
 		errors = append(errors, fmt.Errorf("value for credentials type is unknown. valid types are: %s", validStorageTypes))
+	}
+
+	return
+}
+
+func ValidateUserRole(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	validUserRoles := []string{
+		authentication_groups.AuthGroupsUserRoleRegular,
+		authentication_groups.AuthGroupsUserRoleReadonly,
+		authentication_groups.AuthGroupsUserRoleAdmin,
+	}
+
+	if !contains(validUserRoles, value) {
+		errors = append(errors, fmt.Errorf("value for user role is unknown"))
+	}
+
+	return
+}
+
+func ValidateGroupName(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if len(value) == 0 {
+		errors = append(errors, fmt.Errorf("group name must be set"))
 	}
 
 	return
