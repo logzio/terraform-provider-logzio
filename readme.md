@@ -199,6 +199,7 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
+  
 - **v1.6**
   - Update client version (v1.9).
   - Support [archive logs resource](https://docs.logz.io/api/#tag/Archive-logs).
