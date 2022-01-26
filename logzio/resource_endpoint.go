@@ -341,7 +341,8 @@ func getCreateOrUpdateEndpointFromSchema(d *schema.ResourceData) endpoints.Creat
 	case endpoints.EndpointTypeCustom:
 		createEndpoint.Url = opts[endpointUrl].(string)
 		createEndpoint.Method = opts[endpointMethod].(string)
-		createEndpoint.Headers = opts[endpointHeaders].(string)
+		createEndpoint.Headers = new(string)
+		*createEndpoint.Headers = opts[endpointHeaders].(string)
 		createEndpoint.BodyTemplate = utils.ParseFromStringToType(opts[endpointBodyTemplate].(string))
 	case endpoints.EndpointTypePagerDuty:
 		createEndpoint.ServiceKey = opts[endpointServiceKey].(string)
