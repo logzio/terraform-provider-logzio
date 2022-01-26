@@ -5,10 +5,7 @@ resource "logzio_endpoint" "%s" {
   custom {
     url = "https://jsonplaceholder.typicode.com/todos/1"
     method = "POST"
-    headers = {
-      this = "is"
-      a = "header"
-    }
+    headers = "this=is,a=header"
     body_template = jsonencode({
       this: "is"
       my: "template"
