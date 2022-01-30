@@ -6,5 +6,6 @@ resource "logzio_endpoint" "%s" {
     url = "https://jsonplaceholder.typicode.com/todos/2"
     method = "PUT"
     body_template = jsonencode({})
+    headers = ""
   }
 }

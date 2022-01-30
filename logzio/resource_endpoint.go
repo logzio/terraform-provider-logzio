@@ -112,7 +112,7 @@ func resourceEndpoint() *schema.Resource {
 							ValidateFunc: utils.ValidateHttpMethod,
 						},
 						endpointHeaders: {
-							Type:     schema.TypeMap,
+							Type:     schema.TypeString,
 							Optional: true,
 						},
 						endpointBodyTemplate: {
@@ -341,11 +341,8 @@ func getCreateOrUpdateEndpointFromSchema(d *schema.ResourceData) endpoints.Creat
 	case endpoints.EndpointTypeCustom:
 		createEndpoint.Url = opts[endpointUrl].(string)
 		createEndpoint.Method = opts[endpointMethod].(string)
-		headerMap := make(map[string]string)
-		for k, v := range opts[endpointHeaders].(map[string]interface{}) {
-			headerMap[k] = v.(string)
-		}
-		createEndpoint.Headers = utils.ParseObjectToString(headerMap)
+		createEndpoint.Headers = new(string)
+		*createEndpoint.Headers = opts[endpointHeaders].(string)
 		createEndpoint.BodyTemplate = utils.ParseFromStringToType(opts[endpointBodyTemplate].(string))
 	case endpoints.EndpointTypePagerDuty:
 		createEndpoint.ServiceKey = opts[endpointServiceKey].(string)
@@ -410,7 +407,7 @@ func setEndpoint(d *schema.ResourceData, endpoint *endpoints.Endpoint) {
 		set[0] = map[string]interface{}{
 			endpointUrl:          endpoint.Url,
 			endpointMethod:       endpoint.Method,
-			endpointHeaders:      utils.ParseFromStringToType(endpoint.Headers),
+			endpointHeaders:      endpoint.Headers,
 			endpointBodyTemplate: utils.ParseObjectToString(endpoint.BodyTemplate),
 		}
 	case endpoints.EndpointTypePagerDuty:

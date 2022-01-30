@@ -40,7 +40,7 @@ resource "logzio_endpoint" "my_endpoint" {
 * `custom` - (Optional) Relevant when `endpoint_type` is `custom`. Manages a custom webhook for your integration of choice.
     * `url` - Specifies the URL destination.
     * `method` - Selects the HTTP request method.
-    * `headers` - Header parameters for the request. Sent as comma-separated key-value pairs.
+    * `headers` - Header parameters for the request. String, sent as comma-separated key-value pairs.
     * `body_template` - string of JSON object that serves as the template for the message body.
 * `opsgenie` - (Optional) Relevant when `endpoint_type` is `opsgenie`. Manages a webhook to OpsGenie.
     * `api_key` - API key from OpsGenie, see https://docs.opsgenie.com/docs/logz-io-integration.

@@ -23,6 +23,10 @@ func dataSourceEndpoint() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			endpointDescription: {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }

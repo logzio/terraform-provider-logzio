@@ -129,7 +129,7 @@ func TestAccLogzioEndpoint_CustomCreateEndpointNoHeaders(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "my_custom_title_no_headers"),
-					resource.TestCheckNoResourceAttr(resourceName, "custom.2885600711.headers"),
+					resource.TestCheckResourceAttr(resourceName, "custom.2688962798.headers", ""),
 				),
 			},
 			{
@@ -162,7 +162,7 @@ func TestAccLogzioEndpoint_CustomCreateEndpointEmptyBodyTemplate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "my_custom_title_empty_body_template"),
-					resource.TestCheckResourceAttr(resourceName, "custom.3152454932.body_template", "{}"),
+					resource.TestCheckResourceAttr(resourceName, "custom.1831890258.body_template", "{}"),
 				),
 			},
 			{
@@ -212,8 +212,8 @@ func TestAccLogzioEndpoint_CustomUpdateEndpoint(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "my_custom_title"),
-					resource.TestCheckResourceAttr(resourceName, "custom.1180081054.url", testsUrl),
-					resource.TestCheckResourceAttr(resourceName, "custom.1180081054.method", http.MethodPost),
+					resource.TestCheckResourceAttr(resourceName, "custom.552452041.url", testsUrl),
+					resource.TestCheckResourceAttr(resourceName, "custom.552452041.method", http.MethodPost),
 				),
 			},
 			{
@@ -221,10 +221,10 @@ func TestAccLogzioEndpoint_CustomUpdateEndpoint(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "updated_custom_endpoint"),
-					resource.TestCheckResourceAttr(resourceName, "custom.3222268320.url", testsUrlUpdate),
-					resource.TestCheckResourceAttr(resourceName, "custom.3222268320.method", http.MethodPut),
-					resource.TestCheckNoResourceAttr(resourceName, "custom.3222268320.headers"),
-					resource.TestCheckResourceAttr(resourceName, "custom.3222268320.body_template", "{}"),
+					resource.TestCheckResourceAttr(resourceName, "custom.1435031376.url", testsUrlUpdate),
+					resource.TestCheckResourceAttr(resourceName, "custom.1435031376.method", http.MethodPut),
+					resource.TestCheckResourceAttr(resourceName, "custom.1435031376.headers", ""),
+					resource.TestCheckResourceAttr(resourceName, "custom.1435031376.body_template", "{}"),
 				),
 			},
 		},
