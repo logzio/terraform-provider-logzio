@@ -190,16 +190,20 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
 
 ### Changelog
 
+- **v1.8.0**
+    - **Breaking change**: **custom endpoint** - refactor Headers - now a string of comma-seperated key-value pairs.
+    - Update client version (v1.10.1) - bug fix for empty Header field.
+    - Add to custom endpoint datasource Description field.
 - **v1.7.0**
   - Update client version (v1.10).
   - Support [authentication groups resource](https://docs.logz.io/api/#tag/Authentication-groups).
   - `alerts_v2`: fix noisy diff for `severity_threshold_tiers`.
-- **v1.6.1**
-    - Update client version (v1.9.1) - bug fix for not found messages.
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
-  
+
+- **v1.6.1**
+    - Update client version (v1.9.1) - bug fix for not found messages.
 - **v1.6**
   - Update client version (v1.9).
   - Support [archive logs resource](https://docs.logz.io/api/#tag/Archive-logs).
