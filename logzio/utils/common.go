@@ -40,3 +40,14 @@ func ReadFixtureFromFile(fileName string) string {
 func ReadResourceFromFile(resourceName string, fileName string) string {
 	return fmt.Sprintf(ReadFixtureFromFile(fileName), resourceName)
 }
+
+func GetTags(d *schema.ResourceData, key string) []string {
+	var tags []string
+	if tagsFromSchema, ok := d.GetOk(key); ok {
+		for _, tag := range tagsFromSchema.([]interface{}) {
+			tags = append(tags, tag.(string))
+		}
+	}
+
+	return tags
+}
