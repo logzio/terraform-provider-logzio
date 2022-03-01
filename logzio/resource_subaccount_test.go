@@ -3,6 +3,7 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"regexp"
 	"testing"
@@ -13,6 +14,7 @@ func TestAccLogzioSubaccount_CreateSubaccount(t *testing.T) {
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_create_subaccount"
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, accountId)
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -44,6 +46,7 @@ func TestAccLogzioSubaccount_CreateSubaccountEmptySharingObject(t *testing.T) {
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_empty_sharing_object"
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, "")
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -74,6 +77,7 @@ func TestAccLogzioSubaccount_CreateSubaccountNoEmail(t *testing.T) {
 	email := ""
 	accountName := "test_no_email"
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, "")
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -93,6 +97,7 @@ func TestAccLogzioSubaccount_CreateSubaccountInvalidEmail(t *testing.T) {
 	email := "some@invalid.mail"
 	accountName := "test_invalid_email"
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, "")
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -114,6 +119,7 @@ func TestAccLogzioSubaccount_CreateSubaccountNoName(t *testing.T) {
 	email := os.Getenv(envLogzioEmail)
 	accountName := ""
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, accountId)
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -139,6 +145,7 @@ func TestAccLogzioSubaccount_UpdateSubaccount(t *testing.T) {
 	resourceName := "logzio_subaccount.test_subaccount"
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, accountId)
 	terraformPlanUpdate := testAccCheckLogzioSubaccountConfig(email, accountNameUpdate, accountId)
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

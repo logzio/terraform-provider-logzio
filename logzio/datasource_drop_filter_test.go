@@ -3,6 +3,7 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"testing"
 )
 
@@ -22,6 +23,8 @@ func TestAccDataSourceDropFilter(t *testing.T) {
   }
 }
 `)
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,

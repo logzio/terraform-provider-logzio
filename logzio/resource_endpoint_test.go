@@ -20,6 +20,8 @@ const (
 
 func TestAccLogzioEndpoint_SlackCreateEndpoint(t *testing.T) {
 	resourceName := "logzio_endpoint.valid_slack_endpoint"
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -44,6 +46,8 @@ func TestAccLogzioEndpoint_SlackCreateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_SlackCreateInvalidEndpoint(t *testing.T) {
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -59,6 +63,7 @@ func TestAccLogzioEndpoint_SlackCreateInvalidEndpoint(t *testing.T) {
 func TestAccLogzioEndpoint_SlackUpdateEndpoint(t *testing.T) {
 	endpointName := "test_create_slack_endpoint"
 	resourceName := "logzio_endpoint." + endpointName
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
@@ -86,6 +91,8 @@ func TestAccLogzioEndpoint_SlackUpdateEndpoint(t *testing.T) {
 
 func TestAccLogzioEndpoint_CustomCreateEndpoint(t *testing.T) {
 	resourceName := "logzio_endpoint.custom"
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -120,6 +127,8 @@ func TestAccLogzioEndpoint_CustomCreateEndpointNoHeaders(t *testing.T) {
  }
 }`
 	resourceName := "logzio_endpoint.custom"
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -153,6 +162,8 @@ func TestAccLogzioEndpoint_CustomCreateEndpointEmptyBodyTemplate(t *testing.T) {
  }
 }`
 	resourceName := "logzio_endpoint.custom"
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -188,6 +199,8 @@ func TestAccLogzioEndpoint_CustomCreateEndpointInvalidMethod(t *testing.T) {
     })
  }
 }`
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -203,6 +216,8 @@ func TestAccLogzioEndpoint_CustomCreateEndpointInvalidMethod(t *testing.T) {
 func TestAccLogzioEndpoint_CustomUpdateEndpoint(t *testing.T) {
 	endpointName := "test_update_custom_endpoint"
 	resourceName := "logzio_endpoint." + endpointName
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -233,6 +248,8 @@ func TestAccLogzioEndpoint_CustomUpdateEndpoint(t *testing.T) {
 
 func TestAccLogzioEndpoint_PagerDutyCreateEndpoint(t *testing.T) {
 	resourceName := "logzio_endpoint.pagerduty"
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -254,6 +271,8 @@ func TestAccLogzioEndpoint_PagerDutyCreateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_PagerDutyCreateEndpointEmptyServiceKey(t *testing.T) {
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -268,6 +287,8 @@ func TestAccLogzioEndpoint_PagerDutyCreateEndpointEmptyServiceKey(t *testing.T) 
 
 func TestAccLogzioEndpoint_PagerDutyUpdateEndpoint(t *testing.T) {
 	resourceName := "logzio_endpoint.pagerduty"
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -292,6 +313,8 @@ func TestAccLogzioEndpoint_PagerDutyUpdateEndpoint(t *testing.T) {
 
 func TestAccLogzioEndpoint_BigPandaCreateEndpoint(t *testing.T) {
 	resourceName := "logzio_endpoint.bigpanda"
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -314,6 +337,8 @@ func TestAccLogzioEndpoint_BigPandaCreateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_BigPandaCreateEndpointEmptyApiToken(t *testing.T) {
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -327,6 +352,8 @@ func TestAccLogzioEndpoint_BigPandaCreateEndpointEmptyApiToken(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_BigPandaCreateEndpointEmptyAppKey(t *testing.T) {
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,

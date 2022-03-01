@@ -3,6 +3,7 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"io/ioutil"
 	"log"
 	"regexp"
@@ -23,6 +24,7 @@ const (
 func TestAccLogzioDropFilter_CreateDropFilter(t *testing.T) {
 	filterName := "test_create_drop_filter"
 	resourceName := "logzio_drop_filter." + filterName
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
@@ -48,6 +50,7 @@ func TestAccLogzioDropFilter_CreateDropFilter(t *testing.T) {
 func TestAccLogzioDropFilter_CreateDropEmptyLogType(t *testing.T) {
 	filterName := "test_create_drop_filter_empty_log_type"
 	resourceName := "logzio_drop_filter." + filterName
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
@@ -72,6 +75,7 @@ func TestAccLogzioDropFilter_CreateDropEmptyLogType(t *testing.T) {
 func TestAccLogzioDropFilter_UpdateDropFilter(t *testing.T) {
 	filterName := "test_update_drop_filter"
 	resourceName := "logzio_drop_filter." + filterName
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
@@ -100,6 +104,7 @@ func TestAccLogzioDropFilter_UpdateDropFilter(t *testing.T) {
 func TestAccLogzioDropFilter_UpdateDropFilterChangeLogType(t *testing.T) {
 	filterName := "test_update_drop_filter_change_log_type"
 	resourceName := "logzio_drop_filter." + filterName
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
@@ -126,6 +131,7 @@ func TestAccLogzioDropFilter_UpdateDropFilterChangeLogType(t *testing.T) {
 func TestAccLogzioDropFilter_UpdateDropFilterRemoveLogType(t *testing.T) {
 	filterName := "test_update_drop_filter_remove_log_type"
 	resourceName := "logzio_drop_filter." + filterName
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
@@ -151,6 +157,7 @@ func TestAccLogzioDropFilter_UpdateDropFilterRemoveLogType(t *testing.T) {
 
 func TestAccLogzioDropFilter_CreateDropFilterNoFieldConditions(t *testing.T) {
 	filterName := "test_create_drop_filter_no_field_conditions"
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
@@ -166,6 +173,7 @@ func TestAccLogzioDropFilter_CreateDropFilterNoFieldConditions(t *testing.T) {
 
 func TestAccLogzioDropFilter_CreateDropFilterNoFieldName(t *testing.T) {
 	filterName := "test_create_drop_filter_no_field_conditions"
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
@@ -181,6 +189,7 @@ func TestAccLogzioDropFilter_CreateDropFilterNoFieldName(t *testing.T) {
 
 func TestAccLogzioDropFilter_CreateDropFilterNoValue(t *testing.T) {
 	filterName := "test_create_drop_filter_no_field_conditions"
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },

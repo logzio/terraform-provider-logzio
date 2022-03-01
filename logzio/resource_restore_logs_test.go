@@ -3,6 +3,7 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"regexp"
 	"testing"
@@ -15,6 +16,8 @@ func TestAccLogzioRestoreLogs_InitiateRestore(t *testing.T) {
 	archiveName := "archive_for_restore_initiate"
 	restoreName := "tf_test_restore_initiate"
 	fullRestoreName := "logzio_restore_logs." + restoreName
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -55,6 +58,8 @@ func TestAccLogzioRestoreLogs_InitiateRestore(t *testing.T) {
 
 func TestAccLogzioRestoreLogs_InitiateRestoreEmptyStartTime(t *testing.T) {
 	restoreName := "tf_test_empty_start_time"
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
@@ -69,6 +74,8 @@ func TestAccLogzioRestoreLogs_InitiateRestoreEmptyStartTime(t *testing.T) {
 
 func TestAccLogzioRestoreLogs_InitiateRestoreEmptyEndTime(t *testing.T) {
 	restoreName := "tf_test_empty_start_time"
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,
