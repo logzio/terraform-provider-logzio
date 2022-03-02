@@ -8,6 +8,8 @@ import (
 )
 
 func TestAccDataSourceEndpoint(t *testing.T) {
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
 		Providers: testAccProviders,

@@ -13,6 +13,7 @@ func TestAccDataSourceArchiveLogs(t *testing.T) {
 	resourceName := "data.logzio_archive_logs.my_archive_datasource"
 	path := os.Getenv(envLogzioS3Path)
 	arn := os.Getenv(envLogzioAwsArn)
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },

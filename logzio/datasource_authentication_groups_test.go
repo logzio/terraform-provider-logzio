@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/logzio/logzio_terraform_client/authentication_groups"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"testing"
 )
 
@@ -17,6 +18,7 @@ func TestAccDataSourceAuthenticationGroups(t *testing.T) {
 		authentication_groups.AuthGroupsUserRoleRegular,
 		authentication_groups.AuthGroupsUserRoleReadonly,
 	}
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
@@ -34,7 +36,6 @@ func TestAccDataSourceAuthenticationGroups(t *testing.T) {
 				Config: getAuthGroupsConfig(resourceName, userRolesInConfigCreate) +
 					getDatasourceConfig(datasourceName),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttrSet(fullName, authGroupsAuthGroup),
 					resource.TestCheckResourceAttr(fullName, authGroupsAuthGroup+".#", "3"),
 				),
 			},

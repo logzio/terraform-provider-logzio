@@ -3,6 +3,7 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"io/ioutil"
 	"log"
 	"testing"
@@ -11,6 +12,7 @@ import (
 func TestAccLogzioAlert_CreateAlert(t *testing.T) {
 	alertName := "test_create_alert"
 	resourceName := "logzio_alert." + alertName
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },

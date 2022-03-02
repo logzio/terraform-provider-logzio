@@ -3,6 +3,7 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"testing"
 )
@@ -14,6 +15,7 @@ func TestAccDataSourceRestoreLogs(t *testing.T) {
 	fullDataSourceName := "data.logzio_restore_logs." + restoreDataSourceName
 	path := os.Getenv(envLogzioS3Path)
 	arn := os.Getenv(envLogzioAwsArn)
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },

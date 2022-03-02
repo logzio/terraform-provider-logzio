@@ -1,6 +1,6 @@
 module github.com/logzio/logzio_terraform_provider
 
-go 1.15
+go 1.16
 
 require (
 	github.com/avast/retry-go v3.0.0+incompatible

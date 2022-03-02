@@ -10,10 +10,10 @@ import (
 )
 
 func TestAccLogzioUser_CreateUser(t *testing.T) {
-
 	username := "test_resource_user@tfacctest.com"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	terraformPlan := testAccCheckLogzioUserConfig(username, "test test", accountId)
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },

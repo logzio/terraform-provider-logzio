@@ -7,6 +7,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -39,4 +40,8 @@ func ReadFixtureFromFile(fileName string) string {
 
 func ReadResourceFromFile(resourceName string, fileName string) string {
 	return fmt.Sprintf(ReadFixtureFromFile(fileName), resourceName)
+}
+
+func SleepAfterTest() {
+	time.Sleep(3 * time.Second)
 }

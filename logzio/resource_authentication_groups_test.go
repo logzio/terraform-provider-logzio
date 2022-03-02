@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/logzio/logzio_terraform_client/authentication_groups"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"regexp"
 	"testing"
 )
@@ -24,6 +25,7 @@ func TestAccLogzioAuthenticationGroups_AuthenticationGroups(t *testing.T) {
 		authentication_groups.AuthGroupsUserRoleRegular,
 		authentication_groups.AuthGroupsUserRoleRegular,
 	}
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },

@@ -8,6 +8,7 @@ import (
 
 func TestAccDataSourceLogzIoAlertV2(t *testing.T) {
 	resourceName := "data.logzio_alert_v2.alert_v2_datasource_by_id"
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckApiToken(t) },
