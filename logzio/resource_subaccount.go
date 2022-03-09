@@ -133,7 +133,27 @@ func subAccountClient(m interface{}) *sub_accounts.SubAccountClient {
 
 func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 	createSubAccount := getCreateSubAccountFromSchema(d)
-	subAccount, err := subAccountClient(m).CreateSubAccount(createSubAccount)
+	var subAccount *sub_accounts.SubAccountCreateResponse
+	var err error
+	err = retry.Do(
+		func() error {
+			subAccount, err = subAccountClient(m).CreateSubAccount(createSubAccount)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					if strings.Contains(err.Error(), "status code 429") {
+						return true
+					}
+				}
+				return false
+			}),
+	)
 	if err != nil {
 		return err
 	}
@@ -188,7 +208,26 @@ func resourceSubAccountUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	updateSubAccount := getCreateSubAccountFromSchema(d)
-	err = subAccountClient(m).UpdateSubAccount(id, updateSubAccount)
+	err = retry.Do(
+		func() error {
+			err = subAccountClient(m).UpdateSubAccount(id, updateSubAccount)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					if strings.Contains(err.Error(), "status code 429") {
+						return true
+					}
+				}
+				return false
+			}),
+	)
+
 	if err != nil {
 		return err
 	}
