@@ -189,17 +189,21 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
 ```
 
 ### Changelog
-
+- **v1.8.2**
+    - Update client version(v1.10.2).
+    - Bug fixes:
+      - **alerts_v2**: fix bug for columns requiring sort field.
+      - **sub_accounts**: add backoff for creating and updating sub accounts.
 - **v1.8.1**
     - Upgrade provider's Go version from 1.15 to 1.16 in code and in release workflow.
     - Improve tests - add sleep after each test.
+
+<details>
+  <summary markdown="span"> Expand to check old versions </summary>
 - **v1.8.0**
     - **Breaking change**: **custom endpoint** - refactor Headers - now a string of comma-seperated key-value pairs.
     - Update client version (v1.10.1) - bug fix for empty Header field.
     - Add to custom endpoint datasource Description field.
-
-<details>
-  <summary markdown="span"> Expand to check old versions </summary>
 - **v1.7.0**
   - Update client version (v1.10).
   - Support [authentication groups resource](https://docs.logz.io/api/#tag/Authentication-groups).

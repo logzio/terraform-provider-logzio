@@ -330,8 +330,7 @@ func resourceAlertV2Update(d *schema.ResourceData, m interface{}) error {
 	_, err = client.UpdateAlert(alertId, updateAlert)
 
 	if err != nil {
-		fieldErr := err.(alerts_v2.FieldError)
-		if fieldErr.Field == "valueAggregationTypeComposite" {
+		if strings.Contains(err.Error(), "valueAggregationTypeComposite") {
 			return fmt.Errorf("if valueAggregationType is set to None, valueAggregationField and groupByAggregationFields must not be set")
 		}
 		return err
