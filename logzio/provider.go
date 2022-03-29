@@ -20,6 +20,7 @@ const (
 	resourceArchiveLogsType          = "logzio_archive_logs"
 	resourceRestoreLogsType          = "logzio_restore_logs"
 	resourceAuthenticationGroupsType = "logzio_authentication_groups"
+	resourceDashboardType            = "logzio_dashboard"
 	envLogzioApiToken                = "LOGZIO_API_TOKEN"
 	envLogzioRegion                  = "LOGZIO_REGION"
 	envLogzioBaseURL                 = "LOGZIO_BASE_URL"
@@ -57,6 +58,7 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
+			resourceDashboardType:            dataSourceDashboard(),
 			resourceAlertType:                dataSourceAlert(),
 			resourceEndpointType:             dataSourceEndpoint(),
 			resourceUserType:                 dataSourceUser(),
@@ -69,6 +71,7 @@ func Provider() terraform.ResourceProvider {
 			resourceAuthenticationGroupsType: dataSourceAuthenticationGroups(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
+			resourceDashboardType:            resourceDashboard(),
 			resourceAlertType:                resourceAlert(),
 			resourceEndpointType:             resourceEndpoint(),
 			resourceUserType:                 resourceUser(),
