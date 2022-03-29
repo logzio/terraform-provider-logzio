@@ -2,6 +2,7 @@ package logzio
 
 import (
 	"encoding/json"
+  "strings"
 	//"fmt"
 	//	"strconv"
 	//
@@ -90,6 +91,10 @@ func resourceDashboardRead(d *schema.ResourceData, m interface{}) error {
 
 	result, err := client.Get(d.Id())
 	if err != nil {
+    if strings.Contains(err.Error(), "Dashboard not found") {
+      d.SetId("")
+      return nil
+    }
 		return err
 	}
 
@@ -127,8 +132,8 @@ func resourceDashboardCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	dashboardObject.Id = 0
 
+  dashboardObject.Id = 0
 	jsonPayload := &grafana_objects.CreateUpdatePayload{
 		FolderId:  d.Get(dashboardFolderId).(int),
 		FolderUid: d.Get(dashboardFolderUid).(string),
@@ -136,6 +141,7 @@ func resourceDashboardCreate(d *schema.ResourceData, m interface{}) error {
 		Overwrite: true,
 		Dashboard: dashboardObject,
 	}
+  
 
 	result, err := client.CreateUpdate(*jsonPayload)
 	if err != nil {
