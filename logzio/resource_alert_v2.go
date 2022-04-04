@@ -85,7 +85,7 @@ func resourceAlertV2() *schema.Resource {
 				Optional: true,
 			},
 			alertV2Tags: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -98,6 +98,7 @@ func resourceAlertV2() *schema.Resource {
 			alertV2IsEnabled: {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  true,
 			},
 			alertV2NotificationEmails: {
 				Type:     schema.TypeList,
@@ -529,7 +530,7 @@ func getVariousFields(d *schema.ResourceData) map[string]interface{} {
 func getTags(d *schema.ResourceData) []string {
 	var tags []string
 	if alertTags, ok := d.GetOk(alertTags); ok {
-		for _, tag := range alertTags.([]interface{}) {
+		for _, tag := range alertTags.(*schema.Set).List() {
 			tags = append(tags, tag.(string))
 		}
 	}
