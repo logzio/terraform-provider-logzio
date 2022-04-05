@@ -309,12 +309,20 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 		sharingObjectAccounts = append(sharingObjectAccounts, int32(accountId.(int)))
 	}
 
+	flexible := d.Get(subAccountFlexible).(bool)
+	maxDailyGbVal := float32(d.Get(subAccountMaxDailyGB).(float64))
+	var maxDailyGb *float32
+	if !flexible || (flexible && maxDailyGbVal > 0) {
+		maxDailyGb = new(float32)
+		*maxDailyGb = maxDailyGbVal
+	}
+
 	createSubAccount := sub_accounts.CreateOrUpdateSubAccount{
 		Email:                  d.Get(subAccountEmail).(string),
 		AccountName:            d.Get(subAccountName).(string),
 		Flexible:               strconv.FormatBool(d.Get(subAccountFlexible).(bool)),
 		ReservedDailyGB:        float32(d.Get(subAccountReservedDailyGb).(float64)),
-		MaxDailyGB:             float32(d.Get(subAccountMaxDailyGB).(float64)),
+		MaxDailyGB:             maxDailyGb,
 		RetentionDays:          int32(d.Get(subAccountRetentionDays).(int)),
 		Searchable:             strconv.FormatBool(d.Get(subAccountSearchable).(bool)),
 		Accessible:             strconv.FormatBool(d.Get(subAccountAccessible).(bool)),

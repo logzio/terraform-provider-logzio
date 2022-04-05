@@ -132,6 +132,9 @@ func ValidateOutputType(v interface{}, k string) (ws []string, errors []error) {
 
 func ValidateSortTypes(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
+	if len(value) == 0 {
+		return
+	}
 
 	validTypes := []string{
 		alerts_v2.SortAsc,
