@@ -20,6 +20,7 @@ const (
 	resourceArchiveLogsType          = "logzio_archive_logs"
 	resourceRestoreLogsType          = "logzio_restore_logs"
 	resourceAuthenticationGroupsType = "logzio_authentication_groups"
+	resourceKibanaObjectType         = "logzio_kibana_object"
 	envLogzioApiToken                = "LOGZIO_API_TOKEN"
 	envLogzioRegion                  = "LOGZIO_REGION"
 	envLogzioBaseURL                 = "LOGZIO_BASE_URL"
@@ -79,6 +80,7 @@ func Provider() terraform.ResourceProvider {
 			resourceArchiveLogsType:          resourceArchiveLogs(),
 			resourceRestoreLogsType:          resourceRestoreLogs(),
 			resourceAuthenticationGroupsType: resourceAuthenticationGroups(),
+			resourceKibanaObjectType:         resourceKibanaObject(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
