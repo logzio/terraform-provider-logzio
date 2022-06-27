@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/logzio/logzio_terraform_client/kibana_objects"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -35,14 +36,15 @@ func resourceKibanaObject() *schema.Resource {
 				Required: true,
 			},
 			kibanaObjectDataField: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				DiffSuppressFunc: dataDiff,
 			},
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(10 * time.Second),
+			Create: schema.DefaultTimeout(20 * time.Second),
 			Read:   schema.DefaultTimeout(5 * time.Second),
-			Update: schema.DefaultTimeout(5 * time.Second),
+			Update: schema.DefaultTimeout(60 * time.Second),
 			Delete: schema.DefaultTimeout(5 * time.Second),
 		},
 	}
@@ -66,7 +68,7 @@ func resourceKibanaObjectCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if len(importRes.Created) == 0 {
-		return fmt.Errorf("error while trying to create. Got: %+v", importRes)
+		return fmt.Errorf("error while trying to create. Got: %+v", *importRes)
 	}
 
 	d.SetId(kbObjId)
@@ -86,8 +88,13 @@ func resourceKibanaObjectCreate(d *schema.ResourceData, m interface{}) error {
 // resourceKibanaObjectRead wraps the export API
 func resourceKibanaObjectRead(d *schema.ResourceData, m interface{}) error {
 	kbObjId, err := getIdFromSchema(d)
+
 	if err != nil {
 		return err
+	}
+
+	if len(kbObjId) == 0 {
+		return nil
 	}
 
 	objType, err := getObjectTypeFromData(d)
@@ -105,8 +112,14 @@ func resourceKibanaObjectRead(d *schema.ResourceData, m interface{}) error {
 			for _, res := range exportRes.Hits {
 				if id, ok := res.(map[string]interface{})["_source"].(map[string]interface{})["id"].(string); ok {
 					if id == kbObjId {
-						err = setKibanaObject(d, res.(map[string]interface{}), exportRes.KibanaVersion)
-						return err
+						res.(map[string]interface{})["_index"] = "logzioCustomerIndex*"
+						resStr, _ := json.Marshal(res)
+						if compareData(d.Get(kibanaObjectDataField).(string), string(resStr)) {
+							err = setKibanaObject(d, res.(map[string]interface{}), exportRes.KibanaVersion)
+							return err
+						}
+
+						return fmt.Errorf("object is not updated yet")
 					}
 				}
 			}
@@ -116,7 +129,8 @@ func resourceKibanaObjectRead(d *schema.ResourceData, m interface{}) error {
 		retry.RetryIf(
 			func(err error) bool {
 				if err != nil {
-					if strings.Contains(err.Error(), "could not find kibana object with id") {
+					if strings.Contains(err.Error(), "could not find kibana object with id") ||
+						strings.Contains(err.Error(), "object is not updated yet") {
 						return true
 					}
 				}
@@ -134,6 +148,7 @@ func resourceKibanaObjectUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
+	importReq.Override = new(bool)
 	*importReq.Override = true
 
 	importRes, err := kibanaObjectClient(m).ImportKibanaObject(importReq)
@@ -142,7 +157,7 @@ func resourceKibanaObjectUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if len(importRes.Updated) == 0 {
-		return fmt.Errorf("error while trying to update. Got: %+v", importRes)
+		return fmt.Errorf("error while trying to update. Got: %+v", *importRes)
 	}
 
 	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
@@ -235,4 +250,33 @@ func createImportRequestFromSchema(d *schema.ResourceData) (kibana_objects.Kiban
 	importRequest.Hits = []map[string]interface{}{dataJson}
 
 	return importRequest, nil
+}
+
+func dataDiff(k, old, new string, d *schema.ResourceData) bool {
+	return compareData(old, new)
+}
+
+func compareData(old, new string) bool {
+	var oldDataObj, newDataObj map[string]interface{}
+	err := json.Unmarshal([]byte(old), &oldDataObj)
+	if err != nil {
+		fmt.Printf("error while trying to check diff: %s", err.Error())
+		return false
+	}
+
+	err = json.Unmarshal([]byte(new), &newDataObj)
+	if err != nil {
+		fmt.Printf("error while trying to check diff: %s", err.Error())
+		return false
+	}
+
+	// Fields that we want to ignore their difference
+	oldDataObj["_score"] = 0
+	newDataObj["_score"] = 0
+
+	oldDataObj["_source"].(map[string]interface{})["updated_at"] = 0
+	newDataObj["_source"].(map[string]interface{})["updated_at"] = 0
+
+	res := reflect.DeepEqual(oldDataObj, newDataObj)
+	return res
 }
