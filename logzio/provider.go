@@ -68,6 +68,7 @@ func Provider() terraform.ResourceProvider {
 			resourceArchiveLogsType:          dataSourceArchiveLogs(),
 			resourceRestoreLogsType:          dataSourceRestoreLogs(),
 			resourceAuthenticationGroupsType: dataSourceAuthenticationGroups(),
+			resourceKibanaObjectType:         dataSourceKibanaObject(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			resourceAlertType:                resourceAlert(),
