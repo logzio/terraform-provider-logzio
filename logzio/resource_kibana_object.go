@@ -42,8 +42,8 @@ func resourceKibanaObject() *schema.Resource {
 			},
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(20 * time.Second),
-			Read:   schema.DefaultTimeout(5 * time.Second),
+			Create: schema.DefaultTimeout(60 * time.Second),
+			Read:   schema.DefaultTimeout(60 * time.Second),
 			Update: schema.DefaultTimeout(60 * time.Second),
 			Delete: schema.DefaultTimeout(5 * time.Second),
 		},
@@ -68,7 +68,7 @@ func resourceKibanaObjectCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if len(importRes.Created) == 0 {
-		return fmt.Errorf("error while trying to create. Got: %+v", *importRes)
+		return fmt.Errorf("error while trying to create. Got: %+v\n", *importRes)
 	}
 
 	d.SetId(kbObjId)
@@ -110,7 +110,7 @@ func resourceKibanaObjectRead(d *schema.ResourceData, m interface{}) error {
 			}
 
 			for _, res := range exportRes.Hits {
-				if id, ok := res.(map[string]interface{})["_source"].(map[string]interface{})["id"].(string); ok {
+				if id, ok := res.(map[string]interface{})["_id"].(string); ok {
 					if id == kbObjId {
 						res.(map[string]interface{})["_index"] = "logzioCustomerIndex*"
 						resStr, _ := json.Marshal(res)
@@ -119,12 +119,12 @@ func resourceKibanaObjectRead(d *schema.ResourceData, m interface{}) error {
 							return err
 						}
 
-						return fmt.Errorf("object is not updated yet")
+						return fmt.Errorf("object is not updated yet\n")
 					}
 				}
 			}
 
-			return fmt.Errorf("could not find kibana object with id %s", kbObjId)
+			return fmt.Errorf("could not find kibana object with id %s\n", kbObjId)
 		},
 		retry.RetryIf(
 			func(err error) bool {
@@ -199,20 +199,11 @@ func getIdFromSchema(d *schema.ResourceData) (string, error) {
 		return "", err
 	}
 
-	if id, ok := dataObj["_source"].(map[string]interface{})["id"].(string); ok {
+	if id, ok := dataObj["_id"].(string); ok {
 		return id, nil
 	}
 
-	objType, err := getObjectTypeFromData(d)
-	if err != nil {
-		return "", err
-	}
-
-	if id, ok := dataObj["_source"].(map[string]interface{})[objType.String()].(map[string]interface{})["id"].(string); ok {
-		return id, nil
-	}
-
-	return "", fmt.Errorf("could not find id within the data field provided")
+	return "", fmt.Errorf("could not find id within the data field provided\n")
 }
 
 func getObjectTypeFromData(d *schema.ResourceData) (kibana_objects.ExportType, error) {
@@ -235,7 +226,7 @@ func getObjectTypeFromData(d *schema.ResourceData) (kibana_objects.ExportType, e
 		}
 	}
 
-	return "", fmt.Errorf("could not find valid type within the data field provided")
+	return "", fmt.Errorf("could not find valid type within the data field provided\n")
 }
 
 func createImportRequestFromSchema(d *schema.ResourceData) (kibana_objects.KibanaObjectImportRequest, error) {
@@ -260,20 +251,21 @@ func compareData(old, new string) bool {
 	var oldDataObj, newDataObj map[string]interface{}
 	err := json.Unmarshal([]byte(old), &oldDataObj)
 	if err != nil {
-		fmt.Printf("error while trying to check diff: %s", err.Error())
+		if len(old) > 0 {
+			fmt.Printf("error while trying to check diff: %s\n", err.Error())
+		}
 		return false
 	}
 
 	err = json.Unmarshal([]byte(new), &newDataObj)
 	if err != nil {
-		fmt.Printf("error while trying to check diff: %s", err.Error())
+		fmt.Printf("error while trying to check diff: %s\n", err.Error())
 		return false
 	}
 
 	// Fields that we want to ignore their difference
 	oldDataObj["_score"] = 0
 	newDataObj["_score"] = 0
-
 	oldDataObj["_source"].(map[string]interface{})["updated_at"] = 0
 	newDataObj["_source"].(map[string]interface{})["updated_at"] = 0
 
