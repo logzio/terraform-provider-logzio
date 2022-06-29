@@ -1,0 +1,37 @@
+{
+  "_index": "logzioCustomerIndex*",
+  "_type": "_doc",
+  "_id": "search:tf-provider-test-search",
+  "_score": 1.290984,
+  "_source": {
+    "search": {
+      "hits": 0,
+      "columns": [
+        "message"
+      ],
+      "description": "",
+      "sort": [
+        "@timestamp",
+        "desc"
+      ],
+      "id": "tf-provider-test-search",
+      "title": "i am a search object",
+      "version": 1,
+      "_updatedAt": 1561454443631,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"highlight\":{\"pre_tags\":[\"@kibana-highlighted-field@\"],\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"fragment_size\":2147483647},\"filter\":[],\"query\":{\"query\":\"type: tf-provider-test\",\"language\":\"lucene\"},\"source\":{\"excludes\":[]},\"highlightAll\":true,\"version\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      },
+      "panelsJSON": "[]"
+    },
+    "type": "search",
+    "updated_at": 1561454443631,
+    "references": [
+      {
+        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "type": "index-pattern",
+        "id": "logzioCustomerIndex*"
+      }
+    ],
+    "id": "tf-provider-test-search"
+  }
+}
