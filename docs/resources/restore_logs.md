@@ -2,7 +2,7 @@
 
 Provides a Logz.io restore logs resource. This can be used to create and manage Logz.io restore logs operations.
 
-* Learn more about log shipping tokens in the [Logz.io Docs](https://docs.logz.io/api/#tag/Restore-logs)
+* Learn more about restore in the [Logz.io Docs](https://docs.logz.io/api/#tag/Restore-logs)
 
 **Note:** In order to initiate a restore operation you must have an archive linked to your Logz.io account.
 ## Example Usage

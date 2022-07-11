@@ -1,0 +1,29 @@
+{
+  "_index": "logzioCustomerIndex*",
+  "_type": "_doc",
+  "_id": "visualization:tf-provider-test-visualization",
+  "_score": 0.7396672,
+  "_source": {
+    "visualization": {
+      "description": "",
+      "id": "tf-provider-test-visualization",
+      "title": "tf provider test create visualization",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"filter\":[]}"
+      },
+      "panelsJSON": "[]",
+      "visState": "{\"type\":\"tile_map\",\"params\":{\"mapType\":\"Scaled Circle Markers\",\"isDesaturated\":false,\"heatMaxZoom\":16,\"heatMinOpacity\":0.1,\"heatRadius\":25,\"heatBlur\":15,\"heatNormalizeData\":true,\"addTooltip\":true},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"geohash_grid\",\"schema\":\"segment\",\"params\":{\"field\":\"geoip.location\",\"autoPrecision\":true,\"precision\":2}}],\"listeners\":{}}",
+      "savedSearchRefName": "search_test_0"
+    },
+    "type": "visualization",
+    "references": [
+      {
+        "name": "search_test_0",
+        "type": "search",
+        "id": "search_test_0"
+      }
+    ],
+    "id": "tf-provider-test-visualization"
+  }
+}
