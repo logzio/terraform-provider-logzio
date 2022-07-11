@@ -22,6 +22,7 @@ The following Logz.io API endpoints are supported by this provider:
 * [Archive logs](https://docs.logz.io/api/#tag/Archive-logs)
 * [Restore logs](https://docs.logz.io/api/#tag/Restore-logs)
 * [Authentication groups](https://docs.logz.io/api/#tag/Authentication-groups)
+* [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
 
 #### Working with Terraform
 
@@ -189,6 +190,10 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
 ```
 
 ### Changelog
+
+- **v1.9.0**
+    - Update client version(v1.11.0).
+    - Support [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
 - **v1.8.3**
     - Update client version(v1.10.3).
     - Bug fixes:
@@ -196,14 +201,15 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
           - Fix noisy diff for tags.
           - Field `is_enabled` defaults to `true`.
         - **sub_accounts**: allow creating flexible account without `max_daily_gb`.
+
+
+<details>
+  <summary markdown="span"> Expand to check old versions </summary>
 - **v1.8.2**
     - Update client version(v1.10.2).
     - Bug fixes:
       - **alerts_v2**: fix bug for columns requiring sort field.
       - **sub_accounts**: add backoff for creating and updating sub accounts.
-
-<details>
-  <summary markdown="span"> Expand to check old versions </summary>
 - **v1.8.1**
     - Upgrade provider's Go version from 1.15 to 1.16 in code and in release workflow.
     - Improve tests - add sleep after each test.
