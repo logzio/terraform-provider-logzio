@@ -190,10 +190,14 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
 ```
 
 ### Changelog
-
+- **v1.9.1**
+    - *Bug fix*: plugin won't crash when import for `archive_logs` fails.
 - **v1.9.0**
     - Update client version(v1.11.0).
     - Support [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
+
+<details>
+  <summary markdown="span"> Expand to check old versions </summary>
 - **v1.8.3**
     - Update client version(v1.10.3).
     - Bug fixes:
@@ -201,10 +205,6 @@ terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
           - Fix noisy diff for tags.
           - Field `is_enabled` defaults to `true`.
         - **sub_accounts**: allow creating flexible account without `max_daily_gb`.
-
-
-<details>
-  <summary markdown="span"> Expand to check old versions </summary>
 - **v1.8.2**
     - Update client version(v1.10.2).
     - Bug fixes:
