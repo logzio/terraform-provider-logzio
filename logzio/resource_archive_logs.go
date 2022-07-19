@@ -186,6 +186,9 @@ func resourceArchiveLogsRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	archive, err := archiveLogsClient(m).RetrieveArchiveLogsSetting(int32(id))
+	if err != nil {
+		return err
+	}
 	setArchive(d, archive)
 	return nil
 }
