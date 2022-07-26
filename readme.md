@@ -186,7 +186,7 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
 You can import multiple sub-accounts as follows:
 
 ```
-terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
+terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 ```
 
 ### Changelog
