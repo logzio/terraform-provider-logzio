@@ -54,6 +54,14 @@ resource "logzio_subaccount" "my_subaccount" {
 
 **Note:** The above attributes displayed only from v1.2.4. If you're using an earlier version, please upgrade and use `terraform apply -refersh` to add those attributes to your existing resources.
 
+### Import sub-accounts as resources 
+
+You can import multiple sub-accounts as follows:
+
+```
+terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
+```
+
 ## Endpoints used
 * [Create](https://docs.logz.io/api/#operation/createTimeBasedAccount).
 * [Get](https://docs.logz.io/api/#operation/get).
