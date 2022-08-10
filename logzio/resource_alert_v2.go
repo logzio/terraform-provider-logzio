@@ -101,14 +101,14 @@ func resourceAlertV2() *schema.Resource {
 				Default:  true,
 			},
 			alertV2NotificationEmails: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			alertV2NotificationEndpoints: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
@@ -543,7 +543,9 @@ func createCreateAlertType(d *schema.ResourceData) alerts_v2.CreateAlertType {
 	tags := getTags(d)
 	subComponentsFromConfig := d.Get(alertV2SubComponents).([]interface{})
 	subComponents := getSubComponents(subComponentsFromConfig)
-	recipients := getRecipients(d.Get(alertV2NotificationEmails).([]interface{}), d.Get(alertV2NotificationEndpoints).([]interface{}))
+	emails := d.Get(alertV2NotificationEmails).(*schema.Set).List()
+	endpoints := d.Get(alertV2NotificationEndpoints).(*schema.Set).List()
+	recipients := getRecipients(emails, endpoints)
 
 	alertOutput := alerts_v2.AlertOutput{
 		Recipients:                   *recipients,

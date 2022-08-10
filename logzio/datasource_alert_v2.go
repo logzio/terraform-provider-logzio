@@ -24,7 +24,7 @@ func dataSourceAlertV2() *schema.Resource {
 				Computed: true,
 			},
 			alertV2Tags: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -39,14 +39,14 @@ func dataSourceAlertV2() *schema.Resource {
 				Computed: true,
 			},
 			alertV2NotificationEmails: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			alertV2NotificationEndpoints: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
