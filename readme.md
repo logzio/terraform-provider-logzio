@@ -191,14 +191,20 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 
 ### Changelog
 
+- **v1.10.0**
+  - **Breaking Changes**:
+    - Upgrading `terraform-plugin-sdk` to `v2.20.0`:
+      - **Terraform 0.11** and lower will not be supported.
+      - To read more about migrating to v2 of the `terraform-plugin-sdk` see [this article](https://www.terraform.io/plugin/sdkv2/guides/v2-upgrade-guide).
+    - Removal of the `logzio_alert` resource. Use `logzio_alert_v2` instead.
 - **v1.9.2**
     - *Bug fix*: Fix diff for resource `alert_v2` in fields `alert_notification_endpoints`, `notification_emails` ([#116](https://github.com/logzio/terraform-provider-logzio/issues/116)).
-- **v1.9.1**
-    - *Bug fix*: plugin won't crash when import for `archive_logs` fails.
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
 
+- **v1.9.1**
+    - *Bug fix*: plugin won't crash when import for `archive_logs` fails.
 - **v1.9.0**
     - Update client version(v1.11.0).
     - Support [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
