@@ -10,14 +10,20 @@ import (
 var (
 	testAccExpectedAlertChannelName string
 	testAccExpectedApplicationName  string
-	testAccProviders                map[string]*schema.Provider
-	testAccProvider                 *schema.Provider
+	testAccProviderFactories        = map[string]func() (*schema.Provider, error){
+		"kubernetes": func() (*schema.Provider, error) {
+			return Provider(), nil
+		},
+	}
+	testAccProvider *schema.Provider
 )
 
 func init() {
 	testAccProvider = Provider()
-	testAccProviders = map[string]*schema.Provider{
-		"logzio": testAccProvider,
+	testAccProviderFactories = map[string]func() (*schema.Provider, error){
+		"logzio": func() (*schema.Provider, error) {
+			return Provider(), nil
+		},
 	}
 }
 
