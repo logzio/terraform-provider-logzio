@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -282,6 +283,7 @@ func resourceAlertV2Read(ctx context.Context, d *schema.ResourceData, m interfac
 	var err error
 	alertId, _ := utils.IdFromResourceData(d)
 	client := alertV2Client(m)
+
 	readErr := retry.Do(
 		func() error {
 			alert, err = client.GetAlert(alertId)
@@ -340,7 +342,37 @@ func resourceAlertV2Update(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	return resourceAlertV2Read(ctx, d, m)
+	var diagRet diag.Diagnostics
+	readErr := retry.Do(
+		func() error {
+			diagRet = resourceAlertV2Read(ctx, d, m)
+			if diagRet.HasError() {
+				return fmt.Errorf("received error from read alert v2")
+			}
+
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					return true
+				} else {
+					// Check if the update shows on read
+					// if not updated yet - retry
+					createAlert := createCreateAlertType(d)
+					return !reflect.DeepEqual(createAlert, updateAlert)
+				}
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if readErr != nil {
+		tflog.Error(ctx, "could not update schema")
+		return diag.FromErr(readErr)
+	}
+
+	return nil
 }
 
 // resourceAlertV2Delete deletes an existing alert in logzio, returns an error if it doesn't exist
