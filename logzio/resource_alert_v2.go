@@ -377,11 +377,25 @@ func resourceAlertV2Update(ctx context.Context, d *schema.ResourceData, m interf
 
 // resourceAlertV2Delete deletes an existing alert in logzio, returns an error if it doesn't exist
 func resourceAlertV2Delete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := alertV2Client(m)
-	alertId, _ := utils.IdFromResourceData(d)
-	err := client.DeleteAlert(alertId)
+	alertId, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	deleteErr := retry.Do(
+		func() error {
+			return alertV2Client(m).DeleteAlert(alertId)
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				return err != nil
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if deleteErr != nil {
+		return diag.FromErr(deleteErr)
 	}
 
 	d.SetId("")

@@ -257,9 +257,20 @@ func resourceArchiveLogsDelete(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	err = archiveLogsClient(m).DeleteArchiveLogs(int32(archiveId))
-	if err != nil {
-		return diag.FromErr(err)
+	deleteErr := retry.Do(
+		func() error {
+			return archiveLogsClient(m).DeleteArchiveLogs(int32(archiveId))
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				return err != nil
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if deleteErr != nil {
+		return diag.FromErr(deleteErr)
 	}
 
 	d.SetId("")
