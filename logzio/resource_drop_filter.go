@@ -1,14 +1,15 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/drop_filters"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
-	"log"
 	"strings"
-	"time"
 )
 
 const (
@@ -29,12 +30,12 @@ func dropFilterClient(m interface{}) *drop_filters.DropFiltersClient {
 
 func resourceDropFilter() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDropFilterCreate,
-		Read:   resourceDropFilterRead,
-		Update: resourceDropFilterUpdate,
-		Delete: resourceDropFilterDelete,
+		CreateContext: resourceDropFilterCreate,
+		ReadContext:   resourceDropFilterRead,
+		UpdateContext: resourceDropFilterUpdate,
+		DeleteContext: resourceDropFilterDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			dropFilterIdField: {
@@ -72,59 +73,70 @@ func resourceDropFilter() *schema.Resource {
 				},
 			},
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Second),
-			Update: schema.DefaultTimeout(5 * time.Second),
-			Delete: schema.DefaultTimeout(5 * time.Second),
-		},
 	}
 }
 
-// Creates a new drop filter in logzio
-func resourceDropFilterCreate(d *schema.ResourceData, m interface{}) error {
+// resourceDropFilterCreate creates a new drop filter in logzio
+func resourceDropFilterCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	createDropFilter := createCreatDropFilterFromSchema(d)
-	active, isSet := d.GetOkExists(dropFilterActive)
-	if isSet {
-		log.Printf("active attribute is set to %t, note that this field is ignored for creation. A drop filter will always be active after creation.\n", active)
+	active, exists := d.GetOk(dropFilterActive)
+	if exists {
+		tflog.Info(ctx, fmt.Sprintf("active attribute is set to %t, note that this field is ignored for creation. A drop filter will always be active after creation.\n", active))
 	}
 	dropFilter, err := dropFilterClient(m).CreateDropFilter(createDropFilter)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(dropFilter.Id)
 
-	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		err = resourceDropFilterRead(d, m)
-		if err != nil {
-			if strings.Contains(err.Error(), "could not find drop filter with id") {
-				return resource.RetryableError(err)
-			}
-		}
-
-		return resource.NonRetryableError(err)
-	})
+	return resourceDropFilterRead(ctx, d, m)
 }
 
-// Gets drop filter by id
-func resourceDropFilterRead(d *schema.ResourceData, m interface{}) error {
-	dropFilters, err := dropFilterClient(m).RetrieveDropFilters()
-	if err != nil {
-		return err
-	}
+// resourceDropFilterRead gets drop filter by id
+func resourceDropFilterRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var err error
+	var dropFilters []drop_filters.DropFilter
+	var dropFilter *drop_filters.DropFilter
+	readErr := retry.Do(
+		func() error {
+			dropFilters, err = dropFilterClient(m).RetrieveDropFilters()
+			if err != nil {
+				return err
+			}
 
-	dropFilter := findDropFilterById(d.Id(), dropFilters)
-	if dropFilter == nil {
-		return fmt.Errorf("could not find drop filter with id: %s", d.Id())
+			dropFilter = findDropFilterById(d.Id(), dropFilters)
+			if dropFilter == nil {
+				return fmt.Errorf("could not find drop filter with id: %s", d.Id())
+			}
 
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					if strings.Contains(err.Error(), "could not find drop filter with id") {
+						return true
+					}
+				}
+				return false
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if readErr != nil {
+		// If we were not able to find the resource - delete from state
+		d.SetId("")
+		return diag.FromErr(err)
 	}
 
 	setDropFilter(d, dropFilter)
 	return nil
 }
 
-// Updates drop field by id - activate or deactivate
-func resourceDropFilterUpdate(d *schema.ResourceData, m interface{}) error {
+// resourceDropFilterUpdate updates drop field by id - activate or deactivate
+func resourceDropFilterUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	activate := d.Get(dropFilterActive).(bool)
 	var err error
 	if activate {
@@ -134,36 +146,62 @@ func resourceDropFilterUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-		err = resourceDropFilterRead(d, m)
-		if err != nil {
-			if strings.Contains(err.Error(), "could not find drop filter with id") {
-				return resource.RetryableError(err)
+	var diagRet diag.Diagnostics
+	readErr := retry.Do(
+		func() error {
+			diagRet = resourceDropFilterRead(ctx, d, m)
+			if diagRet.HasError() {
+				return fmt.Errorf("received error from read drop filter")
 			}
-		}
 
-		dropFilterFromSchema := createDropFilterFromSchema(d)
-		if activate != dropFilterFromSchema.Active {
-			return resource.RetryableError(fmt.Errorf("drop filter %s was not updated yet", d.Id()))
-		}
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					return true
+				} else {
+					// Check if the update shows on read
+					// if not updated yet - retry
+					dropFilterFromSchema := createDropFilterFromSchema(d)
+					return activate != dropFilterFromSchema.Active
+				}
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
 
-		return resource.NonRetryableError(err)
-	})
+	if readErr != nil {
+		tflog.Error(ctx, "could not update schema")
+		return diagRet
+	}
+
+	return nil
 }
 
-// Deletes drop filter by id
-func resourceDropFilterDelete(d *schema.ResourceData, m interface{}) error {
-	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		err := dropFilterClient(m).DeleteDropFilter(d.Id())
-		if err != nil {
-			return resource.RetryableError(err)
-		}
+// resourceDropFilterDelete deletes drop filter by id
+func resourceDropFilterDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	deleteErr := retry.Do(
+		func() error {
+			return dropFilterClient(m).DeleteDropFilter(d.Id())
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				return err != nil
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
 
-		return resource.NonRetryableError(err)
-	})
+	if deleteErr != nil {
+		return diag.FromErr(deleteErr)
+	}
+
+	d.SetId("")
+	return nil
 }
 
 func setDropFilter(d *schema.ResourceData, dropFilter *drop_filters.DropFilter) {
