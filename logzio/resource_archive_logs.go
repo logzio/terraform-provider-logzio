@@ -1,15 +1,17 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/archive_logs"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"reflect"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const (
@@ -43,12 +45,12 @@ func archiveLogsClient(m interface{}) *archive_logs.ArchiveLogsClient {
 
 func resourceArchiveLogs() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceArchiveLogsCreate,
-		Read:   resourceArchiveLogsRead,
-		Update: resourceArchiveLogsUpdate,
-		Delete: resourceArchiveLogsDelete,
+		CreateContext: resourceArchiveLogsCreate,
+		ReadContext:   resourceArchiveLogsRead,
+		UpdateContext: resourceArchiveLogsUpdate,
+		DeleteContext: resourceArchiveLogsDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			archiveLogsIdField: {
@@ -150,89 +152,118 @@ func resourceArchiveLogs() *schema.Resource {
 				},
 			},
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Second),
-			Update: schema.DefaultTimeout(5 * time.Second),
-			Delete: schema.DefaultTimeout(5 * time.Second),
-		},
 	}
 }
 
-func resourceArchiveLogsCreate(d *schema.ResourceData, m interface{}) error {
+func resourceArchiveLogsCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	createArchive := getCreateOrUpdateArchiveFromSchema(d)
 	archive, err := archiveLogsClient(m).SetupArchive(createArchive)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.FormatInt(int64(archive.Id), 10))
 
-	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		err = resourceArchiveLogsRead(d, m)
-		if err != nil {
-			if strings.Contains(err.Error(), "failed with missing archive") {
-				return resource.RetryableError(err)
-			}
-		}
-
-		return resource.NonRetryableError(err)
-	})
+	return resourceArchiveLogsRead(ctx, d, m)
 }
 
-func resourceArchiveLogsRead(d *schema.ResourceData, m interface{}) error {
+func resourceArchiveLogsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id, err := utils.IdFromResourceData(d)
 	if err != nil {
-		return nil
+		return diag.FromErr(err)
 	}
 
-	archive, err := archiveLogsClient(m).RetrieveArchiveLogsSetting(int32(id))
-	if err != nil {
-		return err
+	var archive *archive_logs.ArchiveLogs
+	readErr := retry.Do(
+		func() error {
+			archive, err = archiveLogsClient(m).RetrieveArchiveLogsSetting(int32(id))
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					if strings.Contains(err.Error(), "failed with missing archive") {
+						return true
+					}
+				}
+				return false
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if readErr != nil {
+		// If we were not able to find the resource - delete from state
+		d.SetId("")
+		return diag.FromErr(err)
 	}
+
 	setArchive(d, archive)
 	return nil
 }
 
-func resourceArchiveLogsUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceArchiveLogsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id, err := utils.IdFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	updateArchive := getCreateOrUpdateArchiveFromSchema(d)
 	_, err = archiveLogsClient(m).UpdateArchiveLogs(int32(id), updateArchive)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-		err = resourceArchiveLogsRead(d, m)
-		if err != nil {
-			archiveFromSchema := getCreateOrUpdateArchiveFromSchema(d)
-			if strings.Contains(err.Error(), "failed with missing archive") &&
-				!reflect.DeepEqual(updateArchive, archiveFromSchema) {
-				return resource.RetryableError(fmt.Errorf("archive is not updated yet: %s", err.Error()))
+	var diagRet diag.Diagnostics
+	readErr := retry.Do(
+		func() error {
+			diagRet = resourceArchiveLogsRead(ctx, d, m)
+			if diagRet.HasError() {
+				return fmt.Errorf("received error from read archive")
 			}
-		}
 
-		return resource.NonRetryableError(err)
-	})
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					return true
+				} else {
+					// Check if the update shows on read
+					// if not updated yet - retry
+					archiveFromSchema := getCreateOrUpdateArchiveFromSchema(d)
+					return !reflect.DeepEqual(updateArchive, archiveFromSchema)
+				}
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if readErr != nil {
+		tflog.Error(ctx, "could not update schema")
+		return diagRet
+	}
+
+	return nil
 }
 
-func resourceArchiveLogsDelete(d *schema.ResourceData, m interface{}) error {
+func resourceArchiveLogsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	archiveId, err := utils.IdFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		err := archiveLogsClient(m).DeleteArchiveLogs(int32(archiveId))
-		if err != nil {
-			return resource.RetryableError(err)
-		}
+	err = archiveLogsClient(m).DeleteArchiveLogs(int32(archiveId))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-		return resource.NonRetryableError(err)
-	})
+	d.SetId("")
+	return nil
 }
 
 func getCreateOrUpdateArchiveFromSchema(d *schema.ResourceData) archive_logs.CreateOrUpdateArchiving {

@@ -2,7 +2,7 @@ package logzio
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/logzio/logzio_terraform_client/archive_logs"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
@@ -25,8 +25,8 @@ func TestAccLogzioArchiveLogs_SetupArchiveS3Keys(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: getConfigTestArchiveS3Keys(resourceName, path, accessKey, secretKey),
@@ -63,8 +63,8 @@ func TestAccLogzioArchiveLogs_SetupArchiveS3Iam(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: getConfigTestArchiveS3Iam(resourceName, path, arn),
@@ -105,8 +105,8 @@ func TestAccLogzioArchiveLogs_SetupArchiveBlob(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: getConfigTestArchiveBlob(resourceName, tenantId, clientId, clientSecret, accountName, containerName),
@@ -145,8 +145,8 @@ func TestAccLogzioArchiveLogs_SetupArchiveEmptyStorageType(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      getConfigTestArchiveEmptyStorageType(resourceName, path, accessKey, secretKey),
@@ -164,8 +164,8 @@ func TestAccLogzioArchiveLogs_SetupArchiveEmptyS3CredentialsType(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      getConfigTestArchiveEmptyCredentialsType(resourceName, path, accessKey, secretKey),
@@ -186,8 +186,8 @@ func TestAccLogzioArchiveLogs_UpdateArchive(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: getConfigTestArchiveS3Keys(resourceName, path, accessKey, secretKey),

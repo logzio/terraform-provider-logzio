@@ -369,7 +369,7 @@ func resourceAlertV2Update(ctx context.Context, d *schema.ResourceData, m interf
 
 	if readErr != nil {
 		tflog.Error(ctx, "could not update schema")
-		return diag.FromErr(readErr)
+		return diagRet
 	}
 
 	return nil
