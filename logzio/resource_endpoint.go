@@ -6,14 +6,12 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/logzio/logzio_terraform_client/endpoints"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"reflect"
 	"strconv"
 	"strings"
-	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/logzio/logzio_terraform_client/endpoints"
 )
 
 const (
@@ -243,11 +241,6 @@ func resourceEndpoint() *schema.Resource {
 					},
 				},
 			},
-		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Second),
-			Update: schema.DefaultTimeout(5 * time.Second),
-			Delete: schema.DefaultTimeout(5 * time.Second),
 		},
 	}
 }
