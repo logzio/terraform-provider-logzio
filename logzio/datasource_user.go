@@ -18,7 +18,7 @@ func dataSourceUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			userFullname: {
+			userFullName: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -53,7 +53,7 @@ func dataSourceUserRead(d *schema.ResourceData, m interface{}) error {
 		}
 		d.SetId(fmt.Sprintf("%d", user.Id))
 		d.Set(userUsername, user.Username)
-		d.Set(userFullname, user.Fullname)
+		d.Set(userFullName, user.Fullname)
 		d.Set(userAccountId, user.AccountId)
 
 		var roles []interface{}
@@ -77,7 +77,7 @@ func dataSourceUserRead(d *schema.ResourceData, m interface{}) error {
 			if user.Username == username {
 				d.SetId(fmt.Sprintf("%d", user.Id))
 				d.Set(userUsername, user.Username)
-				d.Set(userFullname, user.Fullname)
+				d.Set(userFullName, user.Fullname)
 				d.Set(userAccountId, user.AccountId)
 
 				var roles []interface{}
