@@ -2,7 +2,7 @@ package logzio
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"regexp"
@@ -22,7 +22,7 @@ func TestAccLogzioSubaccount_CreateSubaccount(t *testing.T) {
 			testAccPreCheckAccountId(t)
 			testAccPreCheckEmail(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -53,7 +53,7 @@ func TestAccLogzioSubaccount_CreateSubaccountEmptySharingObject(t *testing.T) {
 			testAccPreCheckApiToken(t)
 			testAccPreCheckEmail(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -83,7 +83,7 @@ func TestAccLogzioSubaccount_CreateSubaccountNoEmail(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheckApiToken(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      terraformPlan,
@@ -104,7 +104,7 @@ func TestAccLogzioSubaccount_CreateSubaccountInvalidEmail(t *testing.T) {
 			testAccPreCheckApiToken(t)
 			testAccPreCheckEmail(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      terraformPlan,
@@ -127,7 +127,7 @@ func TestAccLogzioSubaccount_CreateSubaccountNoName(t *testing.T) {
 			testAccPreCheckAccountId(t)
 			testAccPreCheckEmail(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      terraformPlan,
@@ -153,7 +153,7 @@ func TestAccLogzioSubaccount_UpdateSubaccount(t *testing.T) {
 			testAccPreCheckAccountId(t)
 			testAccPreCheckEmail(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
