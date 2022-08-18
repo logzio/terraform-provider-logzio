@@ -1,13 +1,14 @@
 package logzio
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/restore_logs"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const (
@@ -33,11 +34,11 @@ func restoreLogsClient(m interface{}) *restore_logs.RestoreClient {
 
 func resourceRestoreLogs() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceRestoreLogsCreate,
-		Read:   resourceRestoreLogsRead,
-		Delete: resourceRestoreLogsDelete,
+		CreateContext: resourceRestoreLogsCreate,
+		ReadContext:   resourceRestoreLogsRead,
+		DeleteContext: resourceRestoreLogsDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			restoreLogsId: {
@@ -88,63 +89,84 @@ func resourceRestoreLogs() *schema.Resource {
 				Computed: true,
 			},
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Second),
-			Update: schema.DefaultTimeout(5 * time.Second),
-			Delete: schema.DefaultTimeout(5 * time.Second),
-		},
 	}
 }
 
-func resourceRestoreLogsCreate(d *schema.ResourceData, m interface{}) error {
+func resourceRestoreLogsCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	initiateRestore := getCreateRestoreFromSchema(d)
 	restore, err := restoreLogsClient(m).InitiateRestoreOperation(initiateRestore)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.FormatInt(int64(restore.Id), 10))
-	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		err = resourceRestoreLogsRead(d, m)
-		if err != nil {
-			if strings.Contains(err.Error(), "failed with missing restore") {
-				return resource.RetryableError(err)
-			}
-		}
-
-		return resource.NonRetryableError(err)
-	})
+	return resourceRestoreLogsRead(ctx, d, m)
 }
 
-func resourceRestoreLogsRead(d *schema.ResourceData, m interface{}) error {
+func resourceRestoreLogsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id, err := utils.IdFromResourceData(d)
 	if err != nil {
-		return nil
+		return diag.FromErr(err)
 	}
 
-	restore, err := restoreLogsClient(m).GetRestoreOperation(int32(id))
-	if err != nil {
-		return err
+	var restore *restore_logs.RestoreOperation
+	readErr := retry.Do(
+		func() error {
+			restore, err = restoreLogsClient(m).GetRestoreOperation(int32(id))
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					if strings.Contains(err.Error(), "failed with missing restore") {
+						return true
+					}
+				}
+				return false
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if readErr != nil {
+		// If we were not able to find the resource - delete from state
+		d.SetId("")
+		return diag.FromErr(err)
 	}
 
 	setRestore(d, restore)
 	return nil
 }
 
-func resourceRestoreLogsDelete(d *schema.ResourceData, m interface{}) error {
+func resourceRestoreLogsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id, err := utils.IdFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		_, err = restoreLogsClient(m).DeleteRestoreOperation(int32(id))
-		if err != nil {
-			return resource.RetryableError(err)
-		}
+	deleteErr := retry.Do(
+		func() error {
+			_, err = restoreLogsClient(m).DeleteRestoreOperation(int32(id))
+			return err
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				return err != nil
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
 
-		return resource.NonRetryableError(err)
-	})
+	if deleteErr != nil {
+		return diag.FromErr(deleteErr)
+	}
+
+	d.SetId("")
+	return nil
 }
 
 func getCreateRestoreFromSchema(d *schema.ResourceData) restore_logs.InitiateRestore {
