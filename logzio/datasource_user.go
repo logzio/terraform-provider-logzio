@@ -1,14 +1,16 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/users"
 )
 
 func dataSourceUser() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceUserRead,
+		ReadContext: dataSourceUserRead,
 		Schema: map[string]*schema.Schema{
 			userId: {
 				Type:     schema.TypeInt,
@@ -26,12 +28,9 @@ func dataSourceUser() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			userRoles: {
-				Type:     schema.TypeList,
+			userRole: {
+				Type:     schema.TypeString,
 				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeInt,
-				},
 			},
 			userActive: {
 				Type:     schema.TypeBool,
@@ -41,27 +40,21 @@ func dataSourceUser() *schema.Resource {
 	}
 }
 
-func dataSourceUserRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var client *users.UsersClient
 	client, _ = users.New(m.(Config).apiToken, m.(Config).baseUrl)
 
-	userId, ok := d.GetOk(userId)
+	id, ok := d.GetOk(userId)
 	if ok {
-		user, err := client.GetUser(userId.(int64))
+		user, err := client.GetUser(int32(id.(int64)))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		d.SetId(fmt.Sprintf("%d", user.Id))
-		d.Set(userUsername, user.Username)
-		d.Set(userFullName, user.Fullname)
+		d.Set(userUsername, user.UserName)
+		d.Set(userFullName, user.FullName)
 		d.Set(userAccountId, user.AccountId)
-
-		var roles []interface{}
-		for _, v := range user.Roles {
-			roles = append(roles, int(v))
-		}
-
-		d.Set(userRoles, roles)
+		d.Set(userRole, user.Role)
 		d.Set(userActive, user.Active)
 		return nil
 	}
@@ -70,27 +63,21 @@ func dataSourceUserRead(d *schema.ResourceData, m interface{}) error {
 	if ok {
 		list, err := client.ListUsers()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		for i := 0; i < len(list); i++ {
 			user := list[i]
-			if user.Username == username {
+			if user.UserName == username {
 				d.SetId(fmt.Sprintf("%d", user.Id))
-				d.Set(userUsername, user.Username)
-				d.Set(userFullName, user.Fullname)
+				d.Set(userUsername, user.UserName)
+				d.Set(userFullName, user.UserName)
 				d.Set(userAccountId, user.AccountId)
-
-				var roles []interface{}
-				for _, v := range user.Roles {
-					roles = append(roles, int(v))
-				}
-
-				d.Set(userRoles, roles)
+				d.Set(userRole, user.Role)
 				d.Set(userActive, user.Active)
 				return nil
 			}
 		}
 	}
 
-	return fmt.Errorf("couldn't find user with specified attributes")
+	return diag.Errorf("couldn't find user with specified attributes")
 }
