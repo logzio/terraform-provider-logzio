@@ -1,8 +1,10 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/archive_logs"
 	"time"
 )
@@ -13,7 +15,7 @@ const (
 
 func dataSourceArchiveLogs() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceArchiveLogsRead,
+		ReadContext: dataSourceArchiveLogsRead,
 		Schema: map[string]*schema.Schema{
 			archiveLogsIdField: {
 				Type:     schema.TypeInt,
@@ -113,13 +115,13 @@ func dataSourceArchiveLogs() *schema.Resource {
 	}
 }
 
-func dataSourceArchiveLogsRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceArchiveLogsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	archiveId, ok := d.GetOk(archiveLogsIdField)
 
 	if ok {
 		archive, err := getArchive(int64(archiveId.(int)), archiveDatasourceRetries, m)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		d.SetId(fmt.Sprintf("%d", archive.Id))
@@ -127,7 +129,7 @@ func dataSourceArchiveLogsRead(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	return fmt.Errorf("couldn't find archive with specified id")
+	return diag.Errorf("couldn't find archive with specified id")
 }
 
 func getArchive(archiveId int64, retries int, m interface{}) (*archive_logs.ArchiveLogs, error) {
