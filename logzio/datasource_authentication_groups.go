@@ -1,7 +1,9 @@
 package logzio
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/authentication_groups"
 	"math/rand"
 	"strconv"
@@ -14,7 +16,7 @@ const (
 
 func dataSourceAuthenticationGroups() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAuthenticationGroupsRead,
+		ReadContext: dataSourceAuthenticationGroupsRead,
 		Schema: map[string]*schema.Schema{
 			authGroupsAuthGroup: {
 				Type:     schema.TypeList,
@@ -36,10 +38,10 @@ func dataSourceAuthenticationGroups() *schema.Resource {
 	}
 }
 
-func dataSourceAuthenticationGroupsRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceAuthenticationGroupsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	groups, err := getAuthGroups(authGroupsDatasourceRetries, m)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if len(groups) > 0 {
