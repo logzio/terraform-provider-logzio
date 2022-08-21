@@ -200,7 +200,6 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
     - `logzio_user`:
       - Update resource `logzio_user` to match current API and repo code conventions
       - Removal of `roles` field. Use field `role` instead.
-      - Rename field `fullname` to `full_name`.
 - **v1.9.2**
     - *Bug fix*: Fix diff for resource `alert_v2` in fields `alert_notification_endpoints`, `notification_emails` ([#116](https://github.com/logzio/terraform-provider-logzio/issues/116)).
 

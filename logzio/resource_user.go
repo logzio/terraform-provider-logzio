@@ -2,11 +2,14 @@ package logzio
 
 import (
 	"context"
+	"fmt"
 	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/users"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -14,7 +17,7 @@ import (
 const (
 	userId        string = "id"
 	userUsername  string = "username"
-	userFullName  string = "full_name"
+	userFullName  string = "fullname"
 	userAccountId string = "account_id"
 	userRole      string = "role"
 	userActive    string = "active"
@@ -123,27 +126,63 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 	}
 
 	updateUser := getCreateOrUpdateUserFromSchema(d)
+	currUser, err := usersClient(m).GetUser(int32(id))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	//accountId, err := strconv.ParseInt(d.Get(userAccountId).(string), utils.BASE_10, utils.BITSIZE_64)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//user := users.User{
-	//	Id:        id,
-	//	AccountId: accountId,
-	//	Username:  d.Get(userUsername).(string),
-	//	Fullname:  d.Get(userFullName).(string),
-	//	Roles:     d.Get(userRoles).([]int32),
-	//	Active:    d.Get(userActive).(bool),
-	//}
-	//
-	//_, err = usersClient(m).UpdateUser(user)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//return nil
+	// check if we need to activate or deactivate user
+	activeFromSchema := d.Get(userActive).(bool)
+	if activeFromSchema != currUser.Active {
+		tflog.Debug(ctx, fmt.Sprintf("detected activation change, from %t to %t", currUser.Active, activeFromSchema))
+		err = changeUserActivation(int32(id), activeFromSchema, m)
+		if err != nil {
+			tflog.Error(ctx, "error occurred while trying to change user activation. If other changes were planned, they will not be applied")
+			return diag.FromErr(err)
+		}
+	}
+
+	// check if there are more updates to be applied
+	if updateUser.UserName != currUser.UserName ||
+		updateUser.FullName != currUser.FullName ||
+		updateUser.Role != currUser.Role ||
+		updateUser.AccountId != currUser.AccountId {
+		_, err = usersClient(m).UpdateUser(int32(id), updateUser)
+
+		var diagRet diag.Diagnostics
+		readErr := retry.Do(
+			func() error {
+				diagRet = resourceArchiveLogsRead(ctx, d, m)
+				if diagRet.HasError() {
+					return fmt.Errorf("received error from read user")
+				}
+
+				return nil
+			},
+			retry.RetryIf(
+				func(err error) bool {
+					if err != nil {
+						return true
+					} else {
+						// Check if the update shows on read
+						// if not updated yet - retry
+						userAfterUpdate := getCreateOrUpdateUserFromSchema(d)
+						return !reflect.DeepEqual(userAfterUpdate, updateUser)
+					}
+				}),
+			retry.DelayType(retry.BackOffDelay),
+			retry.Attempts(15),
+		)
+
+		if readErr != nil {
+			tflog.Error(ctx, "could not update schema")
+			return diagRet
+		}
+
+		return nil
+	}
+
+	return nil
 }
 
 func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -187,4 +226,15 @@ func setUser(d *schema.ResourceData, user *users.User) {
 	d.Set(userAccountId, user.AccountId)
 	d.Set(userRole, user.Role)
 	d.Set(userActive, user.Active)
+}
+
+func changeUserActivation(id int32, activate bool, m interface{}) error {
+	var err error
+	if activate {
+		err = usersClient(m).UnSuspendUser(id)
+	} else {
+		err = usersClient(m).SuspendUser(id)
+	}
+
+	return err
 }
