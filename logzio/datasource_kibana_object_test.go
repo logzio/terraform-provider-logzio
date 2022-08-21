@@ -1,7 +1,7 @@
 package logzio
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"regexp"
 	"testing"
@@ -11,8 +11,8 @@ func TestAccDataSourceKibanaObject(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				ExpectNonEmptyPlan:        true,
