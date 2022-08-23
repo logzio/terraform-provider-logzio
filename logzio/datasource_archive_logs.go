@@ -33,83 +33,53 @@ func dataSourceArchiveLogs() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			archiveLogsAmazonS3StorageSettings: {
-				Type:     schema.TypeList,
+			archiveLogsS3CredentialsType: {
+				Type:     schema.TypeString,
 				Computed: true,
-				MinItems: 1,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						archiveLogsS3CredentialsType: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsS3Path: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsS3SecretCredentials: {
-							Type:     schema.TypeList,
-							Computed: true,
-							MinItems: 1,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									archiveLogsS3AccessKey: {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									archiveLogsS3SecretKey: {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						archiveLogsS3IamCredentialsArn: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsS3ExternalId: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
 			},
-			archiveLogsAzureBlobStorageSettings: {
-				Type:     schema.TypeList,
+			archiveLogsS3Path: {
+				Type:     schema.TypeString,
 				Computed: true,
-				MinItems: 1,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						archiveLogsBlobTenantId: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsBlobClientId: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsBlobClientSecret: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsBlobAccountName: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsBlobContainerName: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsBlobPath: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
+			},
+			archiveLogsS3AccessKey: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			archiveLogsS3SecretKey: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			archiveLogsS3IamCredentialsArn: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			//archiveLogsS3ExternalId: {
+			//	Type:     schema.TypeString,
+			//	Computed: true,
+			//},
+			archiveLogsBlobTenantId: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			archiveLogsBlobClientId: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			archiveLogsBlobClientSecret: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			archiveLogsBlobAccountName: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			archiveLogsBlobContainerName: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			archiveLogsBlobPath: {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}

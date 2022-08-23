@@ -82,7 +82,6 @@ func dataSourceAlertV2() *schema.Resource {
 						alertV2GroupBy: {
 							Type:     schema.TypeList,
 							Computed: true,
-							MaxItems: groupByMaxItems,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
