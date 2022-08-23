@@ -15,25 +15,22 @@ import (
 )
 
 const (
-	archiveLogsIdField                  = "archive_id"
-	archiveLogsStorageType              = "storage_type"
-	archiveLogsEnabled                  = "enabled"
-	archiveLogsCompressed               = "compressed"
-	archiveLogsAmazonS3StorageSettings  = "amazon_s3_storage_settings"
-	archiveLogsS3CredentialsType        = "credentials_type"
-	archiveLogsS3Path                   = "s3_path"
-	archiveLogsS3SecretCredentials      = "s3_secret_credentials"
-	archiveLogsS3AccessKey              = "access_key"
-	archiveLogsS3SecretKey              = "secret_key"
-	archiveLogsS3IamCredentialsArn      = "s3_iam_credentials_arn"
-	archiveLogsS3ExternalId             = "s3_external_id"
-	archiveLogsAzureBlobStorageSettings = "azure_blob_storage_settings"
-	archiveLogsBlobTenantId             = "tenant_id"
-	archiveLogsBlobClientId             = "client_id"
-	archiveLogsBlobClientSecret         = "client_secret"
-	archiveLogsBlobAccountName          = "account_name"
-	archiveLogsBlobContainerName        = "container_name"
-	archiveLogsBlobPath                 = "blob_path"
+	archiveLogsIdField             = "archive_id"
+	archiveLogsStorageType         = "storage_type"
+	archiveLogsEnabled             = "enabled"
+	archiveLogsCompressed          = "compressed"
+	archiveLogsS3CredentialsType   = "credentials_type"
+	archiveLogsS3Path              = "s3_path"
+	archiveLogsS3AccessKey         = "aws_access_key"
+	archiveLogsS3SecretKey         = "aws_secret_key"
+	archiveLogsS3IamCredentialsArn = "s3_iam_credentials_arn"
+	//archiveLogsS3ExternalId        = "s3_external_id"
+	archiveLogsBlobTenantId      = "tenant_id"
+	archiveLogsBlobClientId      = "client_id"
+	archiveLogsBlobClientSecret  = "client_secret"
+	archiveLogsBlobAccountName   = "account_name"
+	archiveLogsBlobContainerName = "container_name"
+	archiveLogsBlobPath          = "blob_path"
 )
 
 // archiveLogsClient returns the archive logs client with the api token from the provider
@@ -72,84 +69,68 @@ func resourceArchiveLogs() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
-			archiveLogsAmazonS3StorageSettings: {
-				Type:     schema.TypeList,
-				Optional: true,
-				MinItems: 1,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						archiveLogsS3CredentialsType: {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: utils.ValidateArchiveLogsAwsCredentialsType,
-						},
-						archiveLogsS3Path: {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						archiveLogsS3SecretCredentials: {
-							Type:     schema.TypeList,
-							Optional: true,
-							MinItems: 1,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									archiveLogsS3AccessKey: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									archiveLogsS3SecretKey: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-								},
-							},
-						},
-						archiveLogsS3IamCredentialsArn: {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						archiveLogsS3ExternalId: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
+			archiveLogsS3CredentialsType: {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: utils.ValidateArchiveLogsAwsCredentialsType,
+				Sensitive:    true,
 			},
-			archiveLogsAzureBlobStorageSettings: {
-				Type:     schema.TypeList,
-				Optional: true,
-				MinItems: 1,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						archiveLogsBlobTenantId: {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						archiveLogsBlobClientId: {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						archiveLogsBlobClientSecret: {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						archiveLogsBlobAccountName: {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						archiveLogsBlobContainerName: {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						archiveLogsBlobPath: {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
-				},
+			archiveLogsS3Path: {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			archiveLogsS3AccessKey: {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			archiveLogsS3SecretKey: {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			archiveLogsS3IamCredentialsArn: {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			//archiveLogsS3ExternalId: {
+			//	Type:       schema.TypeString,
+			//	Computed:   true,
+			//	Optional:   true,
+			//	Sensitive:  true,
+			//	Deprecated: "This field is deprecated and will not store any data in it. It will be removed from further version",
+			//},
+			archiveLogsBlobTenantId: {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			archiveLogsBlobClientId: {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			archiveLogsBlobClientSecret: {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			archiveLogsBlobAccountName: {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			archiveLogsBlobContainerName: {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			archiveLogsBlobPath: {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 			},
 		},
 	}
@@ -163,6 +144,10 @@ func resourceArchiveLogsCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	d.SetId(strconv.FormatInt(int64(archive.Id), 10))
+	if createArchive.StorageType == archive_logs.StorageTypeS3 &&
+		createArchive.AmazonS3StorageSettings.CredentialsType == archive_logs.CredentialsTypeKeys {
+		setAwsSecretKey(d, createArchive.AmazonS3StorageSettings.S3SecretCredentials.SecretKey)
+	}
 
 	return resourceArchiveLogsRead(ctx, d, m)
 }
@@ -248,6 +233,11 @@ func resourceArchiveLogsUpdate(ctx context.Context, d *schema.ResourceData, m in
 		return diagRet
 	}
 
+	if updateArchive.StorageType == archive_logs.StorageTypeS3 &&
+		updateArchive.AmazonS3StorageSettings.CredentialsType == archive_logs.CredentialsTypeKeys {
+		setAwsSecretKey(d, updateArchive.AmazonS3StorageSettings.S3SecretCredentials.SecretKey)
+	}
+
 	return nil
 }
 
@@ -287,11 +277,9 @@ func getCreateOrUpdateArchiveFromSchema(d *schema.ResourceData) archive_logs.Cre
 	*createArchive.Compressed = d.Get(archiveLogsCompressed).(bool)
 	switch createArchive.StorageType {
 	case archive_logs.StorageTypeS3:
-		settings := d.Get(archiveLogsAmazonS3StorageSettings).([]interface{})
-		createArchive.AmazonS3StorageSettings = getS3StorageSettingsFromSchema(settings[0].(map[string]interface{}))
+		createArchive.AmazonS3StorageSettings = getS3StorageSettingsFromSchema(d)
 	case archive_logs.StorageTypeBlob:
-		settings := d.Get(archiveLogsAzureBlobStorageSettings).([]interface{})
-		createArchive.AzureBlobStorageSettings = getBlobStorageSettingsFromSchema(settings[0].(map[string]interface{}))
+		createArchive.AzureBlobStorageSettings = getBlobStorageSettingsFromSchema(d)
 	default:
 		panic("unknown storage type")
 	}
@@ -299,21 +287,18 @@ func getCreateOrUpdateArchiveFromSchema(d *schema.ResourceData) archive_logs.Cre
 	return createArchive
 }
 
-func getS3StorageSettingsFromSchema(settings map[string]interface{}) *archive_logs.S3StorageSettings {
+func getS3StorageSettingsFromSchema(d *schema.ResourceData) *archive_logs.S3StorageSettings {
 	var s3Settings archive_logs.S3StorageSettings
-	s3Settings.Path = settings[archiveLogsS3Path].(string)
-	s3Settings.CredentialsType = settings[archiveLogsS3CredentialsType].(string)
+	s3Settings.Path = d.Get(archiveLogsS3Path).(string)
+	s3Settings.CredentialsType = d.Get(archiveLogsS3CredentialsType).(string)
 	switch s3Settings.CredentialsType {
 	case archive_logs.CredentialsTypeKeys:
-		keysSettings := settings[archiveLogsS3SecretCredentials].([]interface{})[0].(map[string]interface{})
-		keys := archive_logs.S3SecretCredentialsObject{
-			AccessKey: keysSettings[archiveLogsS3AccessKey].(string),
-			SecretKey: keysSettings[archiveLogsS3SecretKey].(string),
-		}
-		s3Settings.S3SecretCredentials = &keys
+		s3Settings.S3SecretCredentials = new(archive_logs.S3SecretCredentialsObject)
+		s3Settings.S3SecretCredentials.AccessKey = d.Get(archiveLogsS3AccessKey).(string)
+		s3Settings.S3SecretCredentials.SecretKey = d.Get(archiveLogsS3SecretKey).(string)
 	case archive_logs.CredentialsTypeIam:
-		iam := archive_logs.S3IamCredentials{Arn: settings[archiveLogsS3IamCredentialsArn].(string)}
-		s3Settings.S3IamCredentials = &iam
+		s3Settings.S3IamCredentials = new(archive_logs.S3IamCredentials)
+		s3Settings.S3IamCredentials.Arn = d.Get(archiveLogsS3IamCredentialsArn).(string)
 	default:
 		panic("unknown s3 credentials type")
 	}
@@ -321,16 +306,16 @@ func getS3StorageSettingsFromSchema(settings map[string]interface{}) *archive_lo
 	return &s3Settings
 }
 
-func getBlobStorageSettingsFromSchema(settings map[string]interface{}) *archive_logs.BlobSettings {
+func getBlobStorageSettingsFromSchema(d *schema.ResourceData) *archive_logs.BlobSettings {
 	var blobSettings archive_logs.BlobSettings
 
-	blobSettings.TenantId = settings[archiveLogsBlobTenantId].(string)
-	blobSettings.ClientId = settings[archiveLogsBlobClientId].(string)
-	blobSettings.ClientSecret = settings[archiveLogsBlobClientSecret].(string)
-	blobSettings.AccountName = settings[archiveLogsBlobAccountName].(string)
-	blobSettings.ContainerName = settings[archiveLogsBlobContainerName].(string)
+	blobSettings.TenantId = d.Get(archiveLogsBlobTenantId).(string)
+	blobSettings.ClientId = d.Get(archiveLogsBlobClientId).(string)
+	blobSettings.ClientSecret = d.Get(archiveLogsBlobClientSecret).(string)
+	blobSettings.AccountName = d.Get(archiveLogsBlobAccountName).(string)
+	blobSettings.ContainerName = d.Get(archiveLogsBlobContainerName).(string)
 
-	if path, ok := settings[archiveLogsBlobPath]; ok {
+	if path, ok := d.GetOk(archiveLogsBlobPath); ok {
 		blobSettings.Path = path.(string)
 	}
 
@@ -353,38 +338,32 @@ func setArchive(d *schema.ResourceData, archive *archive_logs.ArchiveLogs) {
 }
 
 func setS3Settings(d *schema.ResourceData, s3Settings archive_logs.S3StorageSettings) {
-	settingsMap := make(map[string]interface{}, 0)
-	settingsMap[archiveLogsS3CredentialsType] = s3Settings.CredentialsType
-	settingsMap[archiveLogsS3Path] = s3Settings.Path
+	d.Set(archiveLogsS3CredentialsType, s3Settings.CredentialsType)
+	d.Set(archiveLogsS3Path, s3Settings.Path)
 	switch s3Settings.CredentialsType {
 	case archive_logs.CredentialsTypeKeys:
-		keys := map[string]interface{}{
-			archiveLogsS3AccessKey: s3Settings.S3SecretCredentials.AccessKey,
-			archiveLogsS3SecretKey: s3Settings.S3SecretCredentials.SecretKey,
-		}
-		settingsMap[archiveLogsS3SecretCredentials] = []interface{}{keys}
+		d.Set(archiveLogsS3AccessKey, s3Settings.S3SecretCredentials.AccessKey)
+		//d.Set(archiveLogsS3SecretKey, s3Settings.S3SecretCredentials.SecretKey)
 	case archive_logs.CredentialsTypeIam:
-		settingsMap[archiveLogsS3IamCredentialsArn] = s3Settings.S3IamCredentials.Arn
-		settingsMap[archiveLogsS3ExternalId] = s3Settings.S3IamCredentials.ExternalId
+		d.Set(archiveLogsS3IamCredentialsArn, s3Settings.S3IamCredentials.Arn)
+		//d.Set(archiveLogsS3ExternalId, s3Settings.S3IamCredentials.ExternalId)
 	default:
 		panic("unknown s3 credentials type while setting archive")
 	}
-
-	d.Set(archiveLogsAmazonS3StorageSettings, []interface{}{settingsMap})
 }
 
 func setBlobSettings(d *schema.ResourceData, blobSettings archive_logs.BlobSettings) {
-	settings := map[string]interface{}{
-		archiveLogsBlobTenantId:      blobSettings.TenantId,
-		archiveLogsBlobClientId:      blobSettings.ClientId,
-		archiveLogsBlobClientSecret:  blobSettings.ClientSecret,
-		archiveLogsBlobAccountName:   blobSettings.AccountName,
-		archiveLogsBlobContainerName: blobSettings.ContainerName,
-	}
+	d.Set(archiveLogsBlobTenantId, blobSettings.TenantId)
+	d.Set(archiveLogsBlobClientId, blobSettings.ClientId)
+	d.Set(archiveLogsBlobClientSecret, blobSettings.ClientSecret)
+	d.Set(archiveLogsBlobAccountName, blobSettings.AccountName)
+	d.Set(archiveLogsBlobContainerName, blobSettings.ContainerName)
 
 	if len(blobSettings.Path) > 0 {
-		settings[archiveLogsBlobPath] = blobSettings.Path
+		d.Set(archiveLogsBlobPath, blobSettings.Path)
 	}
+}
 
-	d.Set(archiveLogsAzureBlobStorageSettings, []interface{}{settings})
+func setAwsSecretKey(d *schema.ResourceData, secretKey string) {
+	d.Set(archiveLogsS3SecretKey, secretKey)
 }
