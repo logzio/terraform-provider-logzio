@@ -153,6 +153,10 @@ func ValidateUrl(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	b, err := regexp.Match(VALIDATE_URL_REGEX, []byte(value))
 
+	if !b && err == nil {
+		err = fmt.Errorf("Bad URL provided")
+	}
+
 	if !b || err != nil {
 		errors = append(errors, err)
 	}
