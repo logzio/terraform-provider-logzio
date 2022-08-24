@@ -108,9 +108,10 @@ func TestAccLogzioArchiveLogs_SetupArchiveBlob(t *testing.T) {
 					resource.TestCheckResourceAttrSet(fullResourceName, archiveLogsBlobContainerName),
 				)},
 			{
-				ResourceName:      fullResourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            fullResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{archiveLogsBlobClientSecret},
 			},
 		},
 	})
@@ -181,7 +182,7 @@ func TestAccLogzioArchiveLogs_UpdateArchive(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					time.Sleep(2 * time.Second)
+					time.Sleep(3 * time.Second)
 				},
 				Config: getConfigTestArchiveS3Keys(resourceName, path, newAccessKey, newSecretKey),
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -237,14 +238,10 @@ func getConfigTestArchiveEmptyStorageType(name string, path string, accessKey st
 	return fmt.Sprintf(`resource "logzio_archive_logs" "%s" {
  storage_type = ""
  enabled = false
- amazon_s3_storage_settings {
-   credentials_type = "KEYS"
-   s3_path = "%s"
-   s3_secret_credentials {
-		access_key = "%s"
-		secret_key = "%s"
-	}
- }
+ credentials_type = "KEYS"
+ s3_path = "%s"
+ aws_access_key = "%s"
+ aws_secret_key = "%s"
 }
 `, name, path, accessKey, secretKey)
 }
@@ -253,14 +250,10 @@ func getConfigTestArchiveEmptyCredentialsType(name string, path string, accessKe
 	return fmt.Sprintf(`resource "logzio_archive_logs" "%s" {
  storage_type = "S3"
  enabled = false
- amazon_s3_storage_settings {
-   credentials_type = ""
-   s3_path = "%s"
-   s3_secret_credentials {
-		access_key = "%s"
-		secret_key = "%s"
-	}
- }
+ credentials_type = ""
+ s3_path = "%s"
+ aws_access_key = "%s"
+ aws_secret_key = "%s"
 }
 `, name, path, accessKey, secretKey)
 }
