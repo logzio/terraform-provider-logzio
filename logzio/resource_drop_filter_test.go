@@ -165,7 +165,7 @@ func TestAccLogzioDropFilter_CreateDropFilterNoFieldConditions(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilterNoFieldConditions),
-				ExpectError: regexp.MustCompile("required field is not set"),
+				ExpectError: regexp.MustCompile("At least 1 \"field_conditions\" blocks are required"),
 			},
 		},
 	})
