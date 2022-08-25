@@ -14,6 +14,7 @@ import (
 const (
 	restoreLogsId               = "restore_operation_id"
 	restoreLogsAccountName      = "account_name"
+	restoreLogsUsername         = "username"
 	restoreLogsStartTime        = "start_time"
 	restoreLogsEndTime          = "end_time"
 	restoreLogsAccountId        = "account_id"
@@ -46,6 +47,11 @@ func resourceRestoreLogs() *schema.Resource {
 				Computed: true,
 			},
 			restoreLogsAccountName: {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			restoreLogsUsername: {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -100,6 +106,7 @@ func resourceRestoreLogsCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	d.SetId(strconv.FormatInt(int64(restore.Id), 10))
+	d.Set(restoreLogsUsername, initiateRestore.UserName)
 	return resourceRestoreLogsRead(ctx, d, m)
 }
 
@@ -172,6 +179,7 @@ func resourceRestoreLogsDelete(ctx context.Context, d *schema.ResourceData, m in
 func getCreateRestoreFromSchema(d *schema.ResourceData) restore_logs.InitiateRestore {
 	return restore_logs.InitiateRestore{
 		AccountName: d.Get(restoreLogsAccountName).(string),
+		UserName:    d.Get(restoreLogsUsername).(string),
 		StartTime:   int64(d.Get(restoreLogsStartTime).(int)),
 		EndTime:     int64(d.Get(restoreLogsEndTime).(int)),
 	}
