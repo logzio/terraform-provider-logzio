@@ -208,6 +208,7 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
     - `logzio_subaccount`:
       - Removal of field `utilization_settings`.
   - Upgrade to Go 1.18.
+  - Upgrade to logzio_client_terraform 1.12.0.
 - **v1.9.2**
     - *Bug fix*: Fix diff for resource `alert_v2` in fields `alert_notification_endpoints`, `notification_emails` ([#116](https://github.com/logzio/terraform-provider-logzio/issues/116)).
 

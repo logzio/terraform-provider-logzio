@@ -6,7 +6,7 @@ require (
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/hashicorp/terraform-plugin-log v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.21.0
-	github.com/logzio/logzio_terraform_client v1.11.0
+	github.com/logzio/logzio_terraform_client v1.12.0
 	github.com/stretchr/testify v1.7.2
 )
 
