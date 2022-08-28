@@ -192,6 +192,11 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 ### Changelog
 
 - **v1.10.0**:
+  - **Breaking Changes**:
+    - Upgrading `terraform-plugin-sdk` to `v2.21.0`:
+        - **Terraform 0.11** and lower will not be supported.
+        - To read more about migrating to v2 of the `terraform-plugin-sdk` see [this article](https://www.terraform.io/plugin/sdkv2/guides/v2-upgrade-guide).
+    - Removal of the `logzio_alert` resource. Use `logzio_alert_v2` instead.
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
