@@ -53,12 +53,14 @@ func resourceSubAccount() *schema.Resource {
 				Computed: true,
 			},
 			subAccountToken: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			subAccountEmail: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:      schema.TypeString,
+				Required:  true,
+				Sensitive: true,
 			},
 			subAccountName: {
 				Type:     schema.TypeString,
@@ -107,14 +109,6 @@ func resourceSubAccount() *schema.Resource {
 			subAccountUtilizationSettingsUtilizationEnabled: {
 				Type:     schema.TypeBool,
 				Optional: true,
-			},
-			subAccountUtilizationSettings: {
-				Type:     schema.TypeMap,
-				Optional: true,
-				Deprecated: fmt.Sprintf(
-					"this attribute is deprecated, please use attributes %s and %s instead",
-					subAccountUtilizationSettingsFrequencyMinutes,
-					subAccountUtilizationSettingsUtilizationEnabled),
 			},
 		},
 	}

@@ -203,6 +203,10 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
     - `logzio_archive_logs`:
       - Removal of `s3_secret_credentials`. Use `aws_access_key` and `aws_secret_key` instead. See documentation for current configuration structure.
       - Refactor code to match current API.
+    - `logzio_restore_logs`:
+      - Add `username` field, to match current API.
+    - `logzio_subaccount`:
+      - Removal of field `utilization_settings`.
   - Upgrade to Go 1.18.
 - **v1.9.2**
     - *Bug fix*: Fix diff for resource `alert_v2` in fields `alert_notification_endpoints`, `notification_emails` ([#116](https://github.com/logzio/terraform-provider-logzio/issues/116)).
