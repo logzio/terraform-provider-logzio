@@ -163,7 +163,7 @@ func dataSourceAlertV2() *schema.Resource {
 				},
 			},
 			alertV2CreatedAt: {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			alertV2CreatedBy: {
@@ -171,7 +171,7 @@ func dataSourceAlertV2() *schema.Resource {
 				Computed: true,
 			},
 			alertV2UpdatedAt: {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			alertV2UpdatedBy: {

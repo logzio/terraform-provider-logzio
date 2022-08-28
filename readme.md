@@ -207,6 +207,7 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
       - Add `username` field, to match current API.
     - `logzio_subaccount`:
       - Removal of field `utilization_settings`.
+    - Delete resource from state on unsuccessful read operation.
   - Upgrade to Go 1.18.
   - Upgrade to logzio_client_terraform 1.12.0.
 - **v1.9.2**
