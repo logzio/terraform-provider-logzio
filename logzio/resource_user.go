@@ -215,7 +215,7 @@ func getCreateOrUpdateUserFromSchema(d *schema.ResourceData) users.CreateUpdateU
 	return users.CreateUpdateUser{
 		UserName:  d.Get(userUsername).(string),
 		FullName:  d.Get(userFullName).(string),
-		AccountId: int32(d.Get(userAccountId).(int64)),
+		AccountId: int32(d.Get(userAccountId).(int)),
 		Role:      d.Get(userRole).(string),
 	}
 }
