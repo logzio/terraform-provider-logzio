@@ -20,13 +20,34 @@ func TestAccDataSourceArchiveLogs(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				ExpectNonEmptyPlan: true,
-				Config: fmt.Sprintf(utils.ReadFixtureFromFile("create_archive_logs_datasource.tf"),
-					path, arn),
+				Config:  getConfigResourceArchiveLogs(path, arn),
+				Destroy: false,
+			},
+			{
+				Config: getConfigResourceArchiveLogs(path, arn) + getConfigDatasourceArchiveLogs(),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, archiveLogsStorageType, archive_logs.StorageTypeS3),
 				),
 			},
 		},
 	})
+}
+
+func getConfigResourceArchiveLogs(path, arn string) string {
+	return fmt.Sprintf(`resource "logzio_archive_logs" "test_to_datasource" {
+  storage_type = "S3"
+  compressed = false
+  credentials_type = "IAM"
+  s3_path = "%s"
+  s3_iam_credentials_arn = "%s"
+}
+`, path, arn)
+}
+
+func getConfigDatasourceArchiveLogs() string {
+	return `data "logzio_archive_logs" "my_archive_datasource" {
+  archive_id = "${logzio_archive_logs.test_to_datasource.id}"
+  depends_on = ["logzio_archive_logs.test_to_datasource"]
+}
+`
 }

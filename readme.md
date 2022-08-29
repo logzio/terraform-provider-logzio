@@ -203,6 +203,7 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
     - `logzio_archive_logs`:
       - Removal of `s3_secret_credentials`. Use `aws_access_key` and `aws_secret_key` instead. See documentation for current configuration structure.
       - Refactor code to match current API.
+      - datasource - removal of secret fields. See documentation for current available fields.
     - `logzio_restore_logs`:
       - Add `username` field, to match current API.
     - `logzio_subaccount`:
