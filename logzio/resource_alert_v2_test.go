@@ -2,7 +2,7 @@ package logzio
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"io/ioutil"
 	"log"
@@ -20,8 +20,8 @@ func TestAccLogzioAlertV2_CreateAlert(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: resourceTestAlertV2(alertName, alertsV2ResourceCreateAlert),
@@ -29,10 +29,10 @@ func TestAccLogzioAlertV2_CreateAlert(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "title", "hello"),
 					resource.TestCheckResourceAttr(resourceName, "sub_components.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.2401098826.severity", "LOW"),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.869563786.severity", "HIGH"),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.2401098826.threshold", "2"),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.869563786.threshold", "10"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.1.severity", "LOW"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.severity", "HIGH"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.1.threshold", "2"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.threshold", "10"),
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "false"),
 					resource.TestCheckResourceAttrSet(resourceName, "sub_components.0.filter_must"),
 				),
@@ -53,8 +53,8 @@ func TestAccLogzioAlertV2_UpdateAlert(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: resourceTestAlertV2(alertName, alertsV2ResourceCreateAlert),
@@ -68,10 +68,10 @@ func TestAccLogzioAlertV2_UpdateAlert(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "title", "updated_alert"),
 					resource.TestCheckResourceAttr(resourceName, "sub_components.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.2401098826.severity", "LOW"),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.869563786.severity", "HIGH"),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.2401098826.threshold", "2"),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.869563786.threshold", "10"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.1.severity", "LOW"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.severity", "HIGH"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.1.threshold", "2"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.threshold", "10"),
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "false"),
 					resource.TestCheckResourceAttrSet(resourceName, "sub_components.0.filter_must"),
 				),

@@ -2,13 +2,15 @@ package logzio
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
-	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -56,9 +58,7 @@ const (
 	delayGetAlertV2 = 1 * time.Second
 )
 
-/**
- * returns the alert v2 client with the api token from the provider
- */
+// alertV2Client returns the alert v2 client with the api token from the provider
 func alertV2Client(m interface{}) *alerts_v2.AlertsV2Client {
 	var client *alerts_v2.AlertsV2Client
 	client, _ = alerts_v2.New(m.(Config).apiToken, m.(Config).baseUrl)
@@ -67,12 +67,12 @@ func alertV2Client(m interface{}) *alerts_v2.AlertsV2Client {
 
 func resourceAlertV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAlertV2Create,
-		Read:   resourceAlertV2Read,
-		Update: resourceAlertV2Update,
-		Delete: resourceAlertV2Delete,
+		CreateContext: resourceAlertV2Create,
+		ReadContext:   resourceAlertV2Read,
+		UpdateContext: resourceAlertV2Update,
+		DeleteContext: resourceAlertV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -246,23 +246,15 @@ func resourceAlertV2() *schema.Resource {
 				Computed: true,
 			},
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Second),
-			Update: schema.DefaultTimeout(7 * time.Second),
-		},
 	}
 }
 
-/**
- * creates a new alert (v2) in logzio
- */
-func resourceAlertV2Create(d *schema.ResourceData, m interface{}) error {
+// resourceAlertV2Create creates a new alert (v2) in logzio
+func resourceAlertV2Create(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	createAlert := createCreateAlertType(d)
 
 	jsonBytes, err := json.Marshal(createAlert)
-	jsonStr, _ := printFormatted(jsonBytes)
-	log.Printf("%s::%s", "resourceAlertCreate", jsonStr)
-
+	tflog.Debug(ctx, fmt.Sprintf("%s::%s", "resourceAlertCreate", string(jsonBytes)))
 	client := alertV2Client(m)
 	a, err := client.CreateAlert(createAlert)
 
@@ -270,40 +262,54 @@ func resourceAlertV2Create(d *schema.ResourceData, m interface{}) error {
 		switch typedError := err.(type) {
 		case alerts_v2.FieldError:
 			if typedError.Field == "valueAggregationTypeComposite" {
-				return fmt.Errorf("if valueAggregationType is set to None, valueAggregationField and groupByAggregationFields must not be set")
+				return diag.Errorf("if valueAggregationType is set to None, valueAggregationField and groupByAggregationFields must not be set")
 			}
 		default:
-			return fmt.Errorf("resourceAlertCreate failed: %v", typedError)
+			return diag.Errorf("resourceAlertCreate failed: %v", typedError)
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	alertId := strconv.FormatInt(a.AlertId, utils.BASE_10)
 	d.SetId(alertId)
 
-	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		err = resourceAlertV2Read(d, m)
-		if err != nil {
-			if strings.Contains(err.Error(), "missing alert") {
-				return resource.RetryableError(err)
-			}
-		}
-
-		return resource.NonRetryableError(err)
-	})
+	return resourceAlertV2Read(ctx, d, m)
 }
 
-/**
- * reads an alert (v2) from logzio
- */
-func resourceAlertV2Read(d *schema.ResourceData, m interface{}) error {
+// resourceAlertV2Read reads an alert (v2) from logzio
+func resourceAlertV2Read(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var alert *alerts_v2.AlertType
+	var err error
 	alertId, _ := utils.IdFromResourceData(d)
 	client := alertV2Client(m)
 
-	alert, err := client.GetAlert(alertId)
-	if err != nil {
-		return err
+	readErr := retry.Do(
+		func() error {
+			alert, err = client.GetAlert(alertId)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					if strings.Contains(err.Error(), "missing alert") {
+						return true
+					}
+				}
+				return false
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if readErr != nil {
+		// If we were not able to find the resource - delete from state
+		d.SetId("")
+		return diag.FromErr(readErr)
 	}
 
 	setValuesAlertV2(d, alert)
@@ -312,57 +318,94 @@ func resourceAlertV2Read(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-/**
- * updates an existing alert in logzio, returns an error if it doesn't exist
- */
-func resourceAlertV2Update(d *schema.ResourceData, m interface{}) error {
+// resourceAlertV2Update updates an existing alert in logzio, returns an error if it doesn't exist
+func resourceAlertV2Update(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	alertId, _ := utils.IdFromResourceData(d)
 	updateAlert := createCreateAlertType(d)
 
 	jsonBytes, err := json.Marshal(updateAlert)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	jsonStr, _ := printFormatted(jsonBytes)
-	log.Printf("%s::%s", "resourceAlertCreate", jsonStr)
+	tflog.Debug(ctx, fmt.Sprintf("%s::%s", "resourceAlertCreate", jsonStr))
 
 	client := alertV2Client(m)
 	_, err = client.UpdateAlert(alertId, updateAlert)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "valueAggregationTypeComposite") {
-			return fmt.Errorf("if valueAggregationType is set to None, valueAggregationField and groupByAggregationFields must not be set")
+			return diag.Errorf("if valueAggregationType is set to None, valueAggregationField and groupByAggregationFields must not be set")
 		}
-		return err
+
+		return diag.FromErr(err)
 	}
 
-	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-		err = resourceAlertV2Read(d, m)
-		createAlert := createCreateAlertType(d)
-		if !reflect.DeepEqual(createAlert, updateAlert) {
-			return resource.RetryableError(err)
-		}
+	var diagRet diag.Diagnostics
+	readErr := retry.Do(
+		func() error {
+			diagRet = resourceAlertV2Read(ctx, d, m)
+			if diagRet.HasError() {
+				return fmt.Errorf("received error from read alert v2")
+			}
 
-		return resource.NonRetryableError(err)
-	})
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					return true
+				} else {
+					// Check if the update shows on read
+					// if not updated yet - retry
+					createAlert := createCreateAlertType(d)
+					return !reflect.DeepEqual(createAlert, updateAlert)
+				}
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if readErr != nil {
+		tflog.Error(ctx, "could not update schema")
+		return diagRet
+	}
+
+	return nil
 }
 
-/**
-deletes an existing alert in logzio, returns an error if it doesn't exist
-*/
-func resourceAlertV2Delete(d *schema.ResourceData, m interface{}) error {
-	client := alertClient(m)
-	alertId, _ := utils.IdFromResourceData(d)
-	err := client.DeleteAlert(alertId)
-	return err
+// resourceAlertV2Delete deletes an existing alert in logzio, returns an error if it doesn't exist
+func resourceAlertV2Delete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	alertId, err := utils.IdFromResourceData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	deleteErr := retry.Do(
+		func() error {
+			return alertV2Client(m).DeleteAlert(alertId)
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				return err != nil
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if deleteErr != nil {
+		return diag.FromErr(deleteErr)
+	}
+
+	d.SetId("")
+	return nil
 }
 
 func getSubComponentMapping(sc []alerts_v2.SubAlert) []map[string]interface{} {
 	var subComponentsMapping []map[string]interface{}
 	for _, subComponent := range sc {
 		var columns []map[string]string
-		//var severityThreshold []map[string]interface{}
 		var severityThreshold []interface{}
 		for _, column := range subComponent.Output.Columns {
 			columnMapping := map[string]string{
@@ -529,7 +572,7 @@ func getVariousFields(d *schema.ResourceData) map[string]interface{} {
 
 func getTags(d *schema.ResourceData) []string {
 	var tags []string
-	if alertTags, ok := d.GetOk(alertTags); ok {
+	if alertTags, ok := d.GetOk(alertV2Tags); ok {
 		for _, tag := range alertTags.(*schema.Set).List() {
 			tags = append(tags, tag.(string))
 		}
