@@ -197,6 +197,9 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
         - **Terraform 0.11** and lower will not be supported.
         - To read more about migrating to v2 of the `terraform-plugin-sdk` see [this article](https://www.terraform.io/plugin/sdkv2/guides/v2-upgrade-guide).
     - Removal of the `logzio_alert` resource. Use `logzio_alert_v2` instead.
+    - `logzio_archive_logs`:
+      - Removal of `s3_secret_credentials`. Use `aws_access_key` and `aws_secret_key` instead. See documentation for current configuration structure.
+      - Refactor code to match current API.
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
