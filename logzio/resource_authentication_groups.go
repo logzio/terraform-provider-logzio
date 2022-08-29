@@ -1,9 +1,12 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/authentication_groups"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"math/rand"
@@ -21,12 +24,12 @@ const (
 
 func resourceAuthenticationGroups() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAuthenticationGroupsCreate,
-		Read:   resourceAuthenticationGroupsRead,
-		Update: resourceAuthenticationGroupsUpdate,
-		Delete: resourceAuthenticationGroupDelete,
+		CreateContext: resourceAuthenticationGroupsCreate,
+		ReadContext:   resourceAuthenticationGroupsRead,
+		UpdateContext: resourceAuthenticationGroupsUpdate,
+		DeleteContext: resourceAuthenticationGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			// Id created by TF to keep with conventions, because the Logz.io auth groups API doesn't create one.
@@ -54,11 +57,6 @@ func resourceAuthenticationGroups() *schema.Resource {
 				},
 			},
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Second),
-			Update: schema.DefaultTimeout(5 * time.Second),
-			Delete: schema.DefaultTimeout(5 * time.Second),
-		},
 	}
 }
 
@@ -68,11 +66,11 @@ func authenticationGroupsClient(m interface{}) *authentication_groups.Authentica
 	return client
 }
 
-func resourceAuthenticationGroupsCreate(d *schema.ResourceData, m interface{}) error {
+func resourceAuthenticationGroupsCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	createGroups := getAuthenticationGroupsFromSchema(d)
 	_, err := authenticationGroupsClient(m).PostAuthenticationGroups(createGroups)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Logz.io authentication groups API doesn't return id, we need to create a random id for TF.
@@ -80,67 +78,115 @@ func resourceAuthenticationGroupsCreate(d *schema.ResourceData, m interface{}) e
 	id := rand.Int()
 	d.SetId(strconv.FormatInt(int64(id), 10))
 
-	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		err = resourceAuthenticationGroupsRead(d, m)
-		if err != nil {
-			if strings.Contains(err.Error(), "failed with missing authentication groups") {
-				return resource.RetryableError(err)
-			}
-		}
-
-		return resource.NonRetryableError(err)
-	})
+	return resourceAuthenticationGroupsRead(ctx, d, m)
 }
 
-func resourceAuthenticationGroupsRead(d *schema.ResourceData, m interface{}) error {
+func resourceAuthenticationGroupsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id, err := utils.IdFromResourceData(d)
 	if err != nil {
-		return nil
+		return diag.FromErr(err)
 	}
 
-	groups, err := authenticationGroupsClient(m).GetAuthenticationGroups()
-	if err != nil {
-		return nil
+	var groups []authentication_groups.AuthenticationGroup
+	readErr := retry.Do(
+		func() error {
+			groups, err = authenticationGroupsClient(m).GetAuthenticationGroups()
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					if strings.Contains(err.Error(), "failed with missing authentication groups") {
+						return true
+					}
+				}
+				return false
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if readErr != nil {
+		// If we were not able to find the resource - delete from state
+		d.SetId("")
+		return diag.FromErr(err)
 	}
 
 	setAuthenticationGroups(id, groups, d)
 	return nil
 }
 
-func resourceAuthenticationGroupsUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceAuthenticationGroupsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	updateAuthGroup := getAuthenticationGroupsFromSchema(d)
 
 	// Prevent deleting auth group by sending empty set.
 	// Makes the user use a destroy action instead, to keep with the TF conventions
 	if len(updateAuthGroup) == 0 {
-		return fmt.Errorf("can't delete by sending an empty set. you need to destroy the resource in order to delete all groups")
+		return diag.Errorf("can't delete by sending an empty set. you need to destroy the resource in order to delete all groups")
 	}
 
 	_, err := authenticationGroupsClient(m).PostAuthenticationGroups(updateAuthGroup)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-		err := resourceAuthenticationGroupsRead(d, m)
-		groupsFromSchema := getAuthenticationGroupsFromSchema(d)
-		if !isSameAuthGroups(updateAuthGroup, groupsFromSchema) {
-			return resource.RetryableError(fmt.Errorf("authentication groups not updated yet"))
-		}
+	var diagRet diag.Diagnostics
+	readErr := retry.Do(
+		func() error {
+			diagRet = resourceAuthenticationGroupsRead(ctx, d, m)
+			if diagRet.HasError() {
+				return fmt.Errorf("received error from read authentication groups")
+			}
 
-		return resource.NonRetryableError(err)
-	})
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					return true
+				} else {
+					// Check if the update shows on read
+					// if not updated yet - retry
+					groupsFromSchema := getAuthenticationGroupsFromSchema(d)
+					return !isSameAuthGroups(updateAuthGroup, groupsFromSchema)
+				}
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if readErr != nil {
+		tflog.Error(ctx, "could not update schema")
+		return diagRet
+	}
+
+	return nil
 }
 
-func resourceAuthenticationGroupDelete(d *schema.ResourceData, m interface{}) error {
-	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		_, err := authenticationGroupsClient(m).PostAuthenticationGroups([]authentication_groups.AuthenticationGroup{})
-		if err != nil {
-			return resource.RetryableError(err)
-		}
+func resourceAuthenticationGroupDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	deleteErr := retry.Do(
+		func() error {
+			_, err := authenticationGroupsClient(m).PostAuthenticationGroups([]authentication_groups.AuthenticationGroup{})
+			return err
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				return err != nil
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
 
-		return resource.NonRetryableError(err)
-	})
+	if deleteErr != nil {
+		return diag.FromErr(deleteErr)
+	}
+
+	d.SetId("")
+	return nil
 }
 
 func getAuthenticationGroupsFromSchema(d *schema.ResourceData) []authentication_groups.AuthenticationGroup {
