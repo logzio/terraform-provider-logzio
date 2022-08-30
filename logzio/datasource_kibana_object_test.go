@@ -15,7 +15,6 @@ func TestAccDataSourceKibanaObject(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				ExpectNonEmptyPlan:        true,
 				Config:                    utils.ReadFixtureFromFile("kibana_object_datasource.tf"),
 				PreventPostDestroyRefresh: true,
 				Check: resource.ComposeAggregateTestCheckFunc(
