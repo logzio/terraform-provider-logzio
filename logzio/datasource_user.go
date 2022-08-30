@@ -70,7 +70,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, m interface
 			if user.UserName == username {
 				d.SetId(fmt.Sprintf("%d", user.Id))
 				d.Set(userUsername, user.UserName)
-				d.Set(userFullName, user.UserName)
+				d.Set(userFullName, user.FullName)
 				d.Set(userAccountId, user.AccountId)
 				d.Set(userRole, user.Role)
 				d.Set(userActive, user.Active)

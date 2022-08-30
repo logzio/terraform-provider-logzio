@@ -11,7 +11,6 @@ import (
 )
 
 func TestAccDataSourceUser(t *testing.T) {
-
 	username := "test_datasource_user@tfacctest.com"
 	fullname := "test test"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
@@ -25,7 +24,6 @@ func TestAccDataSourceUser(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				ExpectNonEmptyPlan:        true,
 				Config:                    terraformPlan,
 				PreventPostDestroyRefresh: true,
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -39,12 +37,12 @@ func TestAccDataSourceUser(t *testing.T) {
 }
 
 func testAccCheckLogzioUserDatasourceConfig(username string, fullname string, accountId int64) string {
-	return fmt.Sprintf(`
+	str := fmt.Sprintf(`
 resource "logzio_user" "test_user" {
   username = "%s"
   fullname = "%s"
   account_id = %d
-  roles = [2]
+  role = "USER_ROLE_READONLY"
 }
 
 data "logzio_user" "by_username" {
@@ -56,4 +54,6 @@ output "test" {
   value = "${data.logzio_user.by_username.fullname}"
 }
 `, username, fullname, accountId, username)
+
+	return str
 }
