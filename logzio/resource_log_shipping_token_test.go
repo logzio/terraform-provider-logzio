@@ -2,7 +2,7 @@ package logzio
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"io/ioutil"
 	"log"
@@ -21,8 +21,8 @@ func TestAccLogzioLogShippingToken_CreateLogShippingToken(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: resourceTestLogShippingToken(tokenName, logShippingTokenResourceCreateToken),
@@ -46,8 +46,8 @@ func TestAccLogzioLogShippingToken_UpdateLogShippingToken(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: resourceTestLogShippingToken(tokenName, logShippingTokenResourceCreateToken),
@@ -77,8 +77,8 @@ func TestAccLogzioLogShippingToken_CreateLogShippingTokenEmptyName(t *testing.T)
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestLogShippingToken(tokenName, "create_log_shipping_token_invalid_name"),
@@ -94,8 +94,8 @@ func TestAccLogzioLogShippingToken_UpdateLogShippingTokenEmptyName(t *testing.T)
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: resourceTestLogShippingToken(tokenName, logShippingTokenResourceCreateToken),
