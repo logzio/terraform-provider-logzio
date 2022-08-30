@@ -49,7 +49,7 @@ func dataSourceAuthenticationGroupsRead(ctx context.Context, d *schema.ResourceD
 		rand.Seed(time.Now().UnixNano())
 		id := rand.Int()
 		d.SetId(strconv.FormatInt(int64(id), 10))
-		setAuthenticationGroupsDatasource(id, groups, d)
+		setAuthenticationGroupsDatasource(groups, d)
 	}
 
 	return nil
@@ -65,12 +65,8 @@ func getAuthGroups(retries int, m interface{}) ([]authentication_groups.Authenti
 	return groups, err
 }
 
-func setAuthenticationGroupsDatasource(id int, groups []authentication_groups.AuthenticationGroup, d *schema.ResourceData) {
+func setAuthenticationGroupsDatasource(groups []authentication_groups.AuthenticationGroup, d *schema.ResourceData) {
 	var groupsToSchema []map[string]interface{}
-
-	if id != 0 {
-		d.Set(authGroupsId, id)
-	}
 
 	for _, group := range groups {
 		groupMap := map[string]interface{}{
