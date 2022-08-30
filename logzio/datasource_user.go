@@ -65,8 +65,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, m interface
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		for i := 0; i < len(list); i++ {
-			user := list[i]
+		for _, user := range list {
 			if user.UserName == username {
 				d.SetId(fmt.Sprintf("%d", user.Id))
 				d.Set(userUsername, user.UserName)
