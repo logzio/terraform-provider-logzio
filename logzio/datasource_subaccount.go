@@ -52,6 +52,10 @@ func dataSourceSubAccount() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			subAccountAccessible: {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			subAccountDocSizeSetting: {
 				Type:     schema.TypeBool,
 				Optional: true,
