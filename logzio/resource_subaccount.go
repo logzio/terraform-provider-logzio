@@ -29,7 +29,6 @@ const (
 	subAccountAccessible                            string = "accessible"
 	subAccountDocSizeSetting                        string = "doc_size_setting"
 	subAccountSharingObjectsAccounts                string = "sharing_objects_accounts"
-	subAccountUtilizationSettings                   string = "utilization_settings"
 	subAccountUtilizationSettingsFrequencyMinutes   string = "frequency_minutes"
 	subAccountUtilizationSettingsUtilizationEnabled string = "utilization_enabled"
 
