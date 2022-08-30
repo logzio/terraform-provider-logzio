@@ -15,7 +15,6 @@ func TestAccDataSourceEndpoint(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				ExpectNonEmptyPlan:        true,
 				Config:                    utils.ReadFixtureFromFile("valid_slack_endpoint_datasource.tf"),
 				PreventPostDestroyRefresh: true,
 				Check: resource.ComposeAggregateTestCheckFunc(
