@@ -26,8 +26,7 @@ func TestAccDataSourceRestoreLogs(t *testing.T) {
 				Destroy: false,
 			},
 			{
-				ExpectNonEmptyPlan: true,
-				Config:             getConfigTestArchiveS3Iam(archiveName, path, arn) + getConfigTestRestore(restoreName) + getConfigTestRestoreDatasource(restoreName, restoreDataSourceName),
+				Config: getConfigTestArchiveS3Iam(archiveName, path, arn) + getConfigTestRestore(restoreName) + getConfigTestRestoreDatasource(restoreName, restoreDataSourceName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet(fullDataSourceName, restoreLogsAccountName),
 					resource.TestCheckResourceAttrSet(fullDataSourceName, restoreLogsStartTime),
