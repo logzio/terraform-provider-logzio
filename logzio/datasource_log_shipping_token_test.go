@@ -15,8 +15,7 @@ func TestAccDataSourceLogShippingToken(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				ExpectNonEmptyPlan: true,
-				Config:             utils.ReadFixtureFromFile("create_log_shipping_token_datasource.tf"),
+				Config: utils.ReadFixtureFromFile("create_log_shipping_token_datasource.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", "my_token"),
 				),
