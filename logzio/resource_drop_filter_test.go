@@ -2,7 +2,7 @@ package logzio
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"io/ioutil"
 	"log"
@@ -27,8 +27,8 @@ func TestAccLogzioDropFilter_CreateDropFilter(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilter),
@@ -53,8 +53,8 @@ func TestAccLogzioDropFilter_CreateDropEmptyLogType(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilterEmptyLogType),
@@ -78,8 +78,8 @@ func TestAccLogzioDropFilter_UpdateDropFilter(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilter),
@@ -107,8 +107,8 @@ func TestAccLogzioDropFilter_UpdateDropFilterChangeLogType(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilter),
@@ -134,8 +134,8 @@ func TestAccLogzioDropFilter_UpdateDropFilterRemoveLogType(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilter),
@@ -160,12 +160,12 @@ func TestAccLogzioDropFilter_CreateDropFilterNoFieldConditions(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilterNoFieldConditions),
-				ExpectError: regexp.MustCompile("required field is not set"),
+				ExpectError: regexp.MustCompile("At least 1 \"field_conditions\" blocks are required"),
 			},
 		},
 	})
@@ -176,8 +176,8 @@ func TestAccLogzioDropFilter_CreateDropFilterNoFieldName(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilterNoFieldName),
@@ -192,8 +192,8 @@ func TestAccLogzioDropFilter_CreateDropFilterNoValue(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilterNoValue),
