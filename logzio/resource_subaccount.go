@@ -1,10 +1,12 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
 	"github.com/avast/retry-go"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/sub_accounts"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"reflect"
@@ -34,17 +36,15 @@ const (
 	delayGetSubAccount = 2 * time.Second
 )
 
-/**
-* the endpoint resource schema, what terraform uses to parse and read the template
- */
+// The endpoint resource schema, what terraform uses to parse and read the template
 func resourceSubAccount() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSubAccountCreate,
-		Read:   resourceSubAccountRead,
-		Update: resourceSubAccountUpdate,
-		Delete: resourceSubAccountDelete,
+		CreateContext: resourceSubAccountCreate,
+		ReadContext:   resourceSubAccountRead,
+		UpdateContext: resourceSubAccountUpdate,
+		DeleteContext: resourceSubAccountDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -53,12 +53,14 @@ func resourceSubAccount() *schema.Resource {
 				Computed: true,
 			},
 			subAccountToken: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			subAccountEmail: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:      schema.TypeString,
+				Required:  true,
+				Sensitive: true,
 			},
 			subAccountName: {
 				Type:     schema.TypeString,
@@ -108,19 +110,6 @@ func resourceSubAccount() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			subAccountUtilizationSettings: {
-				Type:     schema.TypeMap,
-				Optional: true,
-				Deprecated: fmt.Sprintf(
-					"this attribute is deprecated, please use attributes %s and %s instead",
-					subAccountUtilizationSettingsFrequencyMinutes,
-					subAccountUtilizationSettingsUtilizationEnabled),
-			},
-		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Second),
-			Update: schema.DefaultTimeout(5 * time.Second),
-			Delete: schema.DefaultTimeout(5 * time.Second),
 		},
 	}
 }
@@ -131,7 +120,7 @@ func subAccountClient(m interface{}) *sub_accounts.SubAccountClient {
 	return client
 }
 
-func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
+func resourceSubAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	createSubAccount := getCreateSubAccountFromSchema(d)
 	var subAccount *sub_accounts.SubAccountCreateResponse
 	var err error
@@ -155,39 +144,49 @@ func resourceSubAccountCreate(d *schema.ResourceData, m interface{}) error {
 			}),
 	)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.FormatInt(int64(subAccount.AccountId), 10))
 	d.Set(subAccountToken, subAccount.AccountToken)
 	d.Set(subAccountId, subAccount.AccountId)
-
-	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		err = resourceSubAccountRead(d, m)
-		if err != nil {
-			if strings.Contains(err.Error(), "failed with missing sub account") {
-				return resource.RetryableError(err)
-			}
-
-			if strings.Contains(err.Error(), "failed with status code 500") {
-				return resource.RetryableError(err)
-			}
-		}
-
-		return resource.NonRetryableError(err)
-	})
-
+	return resourceSubAccountRead(ctx, d, m)
 }
 
-func resourceSubAccountRead(d *schema.ResourceData, m interface{}) error {
+func resourceSubAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id, err := utils.IdFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	subAccount, err := subAccountClient(m).GetSubAccount(id)
-	if err != nil {
-		return err
+	var subAccount *sub_accounts.SubAccount
+	readErr := retry.Do(
+		func() error {
+			subAccount, err = subAccountClient(m).GetSubAccount(id)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					if strings.Contains(err.Error(), "failed with missing sub account") ||
+						strings.Contains(err.Error(), "failed with status code 500") {
+						return true
+					}
+				}
+				return false
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if readErr != nil {
+		// If we were not able to find the resource - delete from state
+		d.SetId("")
+		return diag.FromErr(err)
 	}
 
 	setSubAccount(d, subAccount)
@@ -195,16 +194,16 @@ func resourceSubAccountRead(d *schema.ResourceData, m interface{}) error {
 	// These lines add those attributes to already existing resources on Read
 	err = setTokenAndId(d, m, id)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceSubAccountUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceSubAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id, err := utils.IdFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	updateSubAccount := getCreateSubAccountFromSchema(d)
@@ -229,41 +228,66 @@ func resourceSubAccountUpdate(d *schema.ResourceData, m interface{}) error {
 	)
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-		err = resourceSubAccountRead(d, m)
-		if err != nil {
-			if strings.Contains(err.Error(), "failed with status code 500") {
-				return resource.RetryableError(err)
+	var diagRet diag.Diagnostics
+	readErr := retry.Do(
+		func() error {
+			diagRet = resourceSubAccountRead(ctx, d, m)
+			if diagRet.HasError() {
+				return fmt.Errorf("received error from read subaccount")
 			}
 
-			subAccountFromSchema := getCreateSubAccountFromSchema(d)
-			if strings.Contains(err.Error(), "failed with missing sub account") &&
-				!reflect.DeepEqual(subAccountFromSchema, updateSubAccount) {
-				return resource.RetryableError(fmt.Errorf("sub account is not updated yet: %s", err.Error()))
-			}
-		}
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					return true
+				} else {
+					// Check if the update shows on read
+					// if not updated yet - retry
+					subAccountFromSchema := getCreateSubAccountFromSchema(d)
+					return !reflect.DeepEqual(subAccountFromSchema, updateSubAccount)
+				}
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
 
-		return resource.NonRetryableError(err)
-	})
+	if readErr != nil {
+		tflog.Error(ctx, "could not update schema")
+		return diagRet
+	}
+
+	return nil
 }
 
-func resourceSubAccountDelete(d *schema.ResourceData, m interface{}) error {
+func resourceSubAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id, err := utils.IdFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		err = subAccountClient(m).DeleteSubAccount(id)
-		if err != nil {
-			return resource.RetryableError(err)
-		}
+	deleteErr := retry.Do(
+		func() error {
+			return subAccountClient(m).DeleteSubAccount(id)
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				return err != nil
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
 
-		return resource.NonRetryableError(err)
-	})
+	if deleteErr != nil {
+		return diag.FromErr(deleteErr)
+	}
+
+	d.SetId("")
+	return nil
 }
 
 func setSubAccount(d *schema.ResourceData, subAccount *sub_accounts.SubAccount) {
