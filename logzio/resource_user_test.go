@@ -2,7 +2,7 @@ package logzio
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"strconv"
@@ -16,8 +16,8 @@ func TestAccLogzioUser_CreateUser(t *testing.T) {
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -42,7 +42,7 @@ resource "logzio_user" "test_user" {
   username = "%s"
   fullname = "%s"
   account_id = %d
-  roles = [2]
+  role = "USER_ROLE_READONLY"
 }
 `, username, fullname, accountId)
 }

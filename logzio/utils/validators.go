@@ -7,6 +7,7 @@ import (
 	"github.com/logzio/logzio_terraform_client/archive_logs"
 	"github.com/logzio/logzio_terraform_client/authentication_groups"
 	"github.com/logzio/logzio_terraform_client/endpoints"
+	"github.com/logzio/logzio_terraform_client/users"
 	"regexp"
 )
 
@@ -152,6 +153,10 @@ func ValidateUrl(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	b, err := regexp.Match(VALIDATE_URL_REGEX, []byte(value))
 
+	if !b && err == nil {
+		err = fmt.Errorf("Bad URL provided")
+	}
+
 	if !b || err != nil {
 		errors = append(errors, err)
 	}
@@ -239,5 +244,20 @@ func ValidateGroupName(v interface{}, k string) (ws []string, errors []error) {
 		errors = append(errors, fmt.Errorf("group name must be set"))
 	}
 
+	return
+}
+
+func ValidateUserRoleUser(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	validUserRole := []string{
+		users.UserRoleAccountAdmin,
+		users.UserRoleRegular,
+		users.UserRoleReadOnly,
+	}
+
+	if !contains(validUserRole, value) {
+		errors = append(errors, fmt.Errorf("user role %q must be one of %s", k, validUserRole))
+	}
 	return
 }
