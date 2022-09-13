@@ -105,6 +105,7 @@ resource "logzio_endpoint" "my_endpoint" {
 }
 
 resource "logzio_alert_v2" "my_alert" {
+  depends_on = [logzio_endpoint.my_endpoint]
   title = "hello_there"
   search_timeframe_minutes = 5
   is_enabled = false
