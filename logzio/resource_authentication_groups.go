@@ -34,7 +34,7 @@ func resourceAuthenticationGroups() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Id created by TF to keep with conventions, because the Logz.io auth groups API doesn't create one.
 			authGroupsId: {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			authGroupsAuthGroup: {
@@ -82,10 +82,8 @@ func resourceAuthenticationGroupsCreate(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceAuthenticationGroupsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id, err := utils.IdFromResourceData(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	var err error
+	id := d.Id()
 
 	var groups []authentication_groups.AuthenticationGroup
 	readErr := retry.Do(
@@ -203,7 +201,7 @@ func getAuthenticationGroupsFromSchema(d *schema.ResourceData) []authentication_
 	return groups
 }
 
-func setAuthenticationGroups(id int64, groups []authentication_groups.AuthenticationGroup, d *schema.ResourceData) {
+func setAuthenticationGroups(id string, groups []authentication_groups.AuthenticationGroup, d *schema.ResourceData) {
 	var groupsToSchema []interface{}
 	d.Set(authGroupsId, id)
 
