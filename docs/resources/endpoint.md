@@ -55,6 +55,13 @@ resource "logzio_endpoint" "my_endpoint" {
 
 * `id` - ID of the notification endpoint.
 
+### Import endpoint as resource
+
+You can import endpoint as follows:
+
+```
+terraform import logzio_endpoint.my_endpoint <ENDPOINT-ID>
+```
 
 ## Endpoints used
 
