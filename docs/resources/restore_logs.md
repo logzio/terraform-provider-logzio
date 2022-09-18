@@ -17,8 +17,9 @@ provider "logzio" {
   api_token = var.api_token
 }
 
-resource "logzio_restore_logs" "my_restore" { 
+resource "logzio_restore_logs" "my_restore" {
   account_name = "test_restore"
+  username = "my@username.com"
   start_time = 1635134987
   end_time = 1635145789
 }
@@ -27,6 +28,7 @@ resource "logzio_restore_logs" "my_restore" {
 ## Argument Reference
 
 * `account_name` - (String) Name of the restored account.
+* `username` - (String) Owner of the restored account. Effectively, the user's email address.
 * `start_time` - (Integer) UNIX timestamp in milliseconds specifying the earliest logs to be restored.
 * `end_time` - (Integer) UNIX timestamp in milliseconds specifying the latest logs to be restored.
 
