@@ -12,7 +12,9 @@ import (
 func TestAccLogzioUser_CreateUser(t *testing.T) {
 	username := "test_resource_user@tfacctest.com"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
-	terraformPlan := testAccCheckLogzioUserConfig(username, "test test", accountId)
+	fullName := "test test"
+	fullNameUpdate := "test test update"
+	resourceName := "logzio_user.test_user"
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
@@ -20,14 +22,23 @@ func TestAccLogzioUser_CreateUser(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: terraformPlan,
+				Config: testAccCheckLogzioUserConfig(username, fullName, accountId),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"logzio_user.test_user", "username", username),
+						resourceName, userUsername, username),
+					resource.TestCheckResourceAttr(resourceName, userFullName, fullName),
 				),
 			},
 			{
-				Config:            terraformPlan,
+				Config: testAccCheckLogzioUserConfig(username, fullNameUpdate, accountId),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						resourceName, userUsername, username),
+					resource.TestCheckResourceAttr(resourceName, userFullName, fullNameUpdate),
+				),
+			},
+			{
+				Config:            testAccCheckLogzioUserConfig(username, fullName, accountId),
 				ResourceName:      "logzio_user.test_user",
 				ImportState:       true,
 				ImportStateVerify: true,

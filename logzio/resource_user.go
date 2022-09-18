@@ -152,7 +152,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 		var diagRet diag.Diagnostics
 		readErr := retry.Do(
 			func() error {
-				diagRet = resourceArchiveLogsRead(ctx, d, m)
+				diagRet = resourceUserRead(ctx, d, m)
 				if diagRet.HasError() {
 					return fmt.Errorf("received error from read user")
 				}
