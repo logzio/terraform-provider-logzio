@@ -25,8 +25,8 @@ provider "logzio" {
 resource "logzio_user" "my_user" {
   username = "test.user@this.test"
   fullname = "test user"
-  roles = [ 2 ]
-  account_id = var.account_id
+  role = "USER_ROLE_READONLY"
+  account_id = 1234
 }
 ```
 
@@ -34,7 +34,7 @@ resource "logzio_user" "my_user" {
 
 * `fullname` - (Required) First and last name of the user.
 * `username` - (Required) Username credential.
-* `roles` - (Required) For User access, `2`. For Admin access, `3`.
+* `role` - (Required) String. User role. Can be `USER_ROLE_READONLY`, `USER_ROLE_REGULAR` or `USER_ROLE_ACCOUNT_ADMIN`.
 * `active` - (Required) If `true`, the user is active, if `false`, the user is suspended.
 * `account_id` - (Required) Logz.io account ID.
 

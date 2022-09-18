@@ -3,10 +3,6 @@ variable "api_token" {
   description = "your logzio API token"
 }
 
-variable "account_id" {
-  description = "the account id you want to use to create your user in"
-}
-
 provider "logzio" {
   api_token = var.api_token
 }
@@ -14,6 +10,6 @@ provider "logzio" {
 resource "logzio_user" "my_user" {
   username = "test.user@this.test"
   fullname = "test user"
-  roles = [ 2 ]
-  account_id = var.account_id
+  role = "USER_ROLE_READONLY"
+  account_id = 1234
 }
