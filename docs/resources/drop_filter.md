@@ -47,3 +47,11 @@ resource "logzio_drop_filter" "test_filter" {
 
 ##  Attribute Reference
 * `drop_filter_id` - (String) Drop filter ID in the Logz.io database.
+
+### Import drop filter as resource
+
+You can import drop filters as follows:
+
+```
+terraform import logzio_drop_filter.my_filter <DROP-FILTER-ID>
+```
