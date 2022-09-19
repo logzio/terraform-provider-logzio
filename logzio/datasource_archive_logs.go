@@ -1,8 +1,10 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/archive_logs"
 	"time"
 )
@@ -13,7 +15,7 @@ const (
 
 func dataSourceArchiveLogs() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceArchiveLogsRead,
+		ReadContext: dataSourceArchiveLogsRead,
 		Schema: map[string]*schema.Schema{
 			archiveLogsIdField: {
 				Type:     schema.TypeInt,
@@ -31,95 +33,62 @@ func dataSourceArchiveLogs() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			archiveLogsAmazonS3StorageSettings: {
-				Type:     schema.TypeList,
-				Computed: true,
-				MinItems: 1,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						archiveLogsS3CredentialsType: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsS3Path: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsS3SecretCredentials: {
-							Type:     schema.TypeList,
-							Computed: true,
-							MinItems: 1,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									archiveLogsS3AccessKey: {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									archiveLogsS3SecretKey: {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						archiveLogsS3IamCredentialsArn: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsS3ExternalId: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
+			archiveLogsS3CredentialsType: {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
-			archiveLogsAzureBlobStorageSettings: {
-				Type:     schema.TypeList,
-				Computed: true,
-				MinItems: 1,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						archiveLogsBlobTenantId: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsBlobClientId: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsBlobClientSecret: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsBlobAccountName: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsBlobContainerName: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						archiveLogsBlobPath: {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
+			archiveLogsS3Path: {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
+			archiveLogsS3AccessKey: {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
+			archiveLogsS3IamCredentialsArn: {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
+			archiveLogsBlobTenantId: {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
+			archiveLogsBlobClientId: {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
+			archiveLogsBlobAccountName: {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
+			archiveLogsBlobContainerName: {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
+			archiveLogsBlobPath: {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 		},
 	}
 }
 
-func dataSourceArchiveLogsRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceArchiveLogsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	archiveId, ok := d.GetOk(archiveLogsIdField)
 
 	if ok {
 		archive, err := getArchive(int64(archiveId.(int)), archiveDatasourceRetries, m)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		d.SetId(fmt.Sprintf("%d", archive.Id))
@@ -127,7 +96,7 @@ func dataSourceArchiveLogsRead(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	return fmt.Errorf("couldn't find archive with specified id")
+	return diag.Errorf("couldn't find archive with specified id")
 }
 
 func getArchive(archiveId int64, retries int, m interface{}) (*archive_logs.ArchiveLogs, error) {
