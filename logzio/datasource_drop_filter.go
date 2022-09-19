@@ -1,15 +1,16 @@
 package logzio
 
 import (
-	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/drop_filters"
 	"reflect"
 )
 
 func dataSourceDropFilter() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDropFilterRead,
+		ReadContext: dataSourceDropFilterRead,
 		Schema: map[string]*schema.Schema{
 			dropFilterIdField: {
 				Type:     schema.TypeString,
@@ -48,12 +49,12 @@ func dataSourceDropFilter() *schema.Resource {
 	}
 }
 
-func dataSourceDropFilterRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceDropFilterRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, _ := drop_filters.New(m.(Config).apiToken, m.(Config).baseUrl)
 	dropFilterId, ok := d.GetOk(dropFilterIdField)
 	dropFilters, err := client.RetrieveDropFilters()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if ok {
@@ -75,7 +76,7 @@ func dataSourceDropFilterRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	return fmt.Errorf("couldn't find drop filter with specified attributes")
+	return diag.Errorf("couldn't find drop filter with specified attributes")
 }
 
 func isSameDropFilter(dropFilterToSearch drop_filters.DropFilter, dropFilter drop_filters.DropFilter) bool {
