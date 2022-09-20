@@ -1,9 +1,11 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/sub_accounts"
 	"strconv"
 	"strings"
@@ -12,7 +14,7 @@ import (
 
 func dataSourceSubAccount() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceSubaccountReadWrapper,
+		ReadContext: dataSourceSubaccountReadWrapper,
 		Schema: map[string]*schema.Schema{
 			subAccountId: {
 				Type:     schema.TypeInt,
@@ -50,6 +52,10 @@ func dataSourceSubAccount() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			subAccountAccessible: {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			subAccountDocSizeSetting: {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -76,17 +82,36 @@ func dataSourceSubAccount() *schema.Resource {
 	}
 }
 
-func dataSourceSubaccountReadWrapper(d *schema.ResourceData, m interface{}) error {
-	return resource.Retry(d.Timeout(schema.TimeoutRead), func() *resource.RetryError {
-		err := dataSourceSubaccountRead(d, m)
-		if err != nil {
-			if strings.Contains(err.Error(), "failed with missing sub account") {
-				return resource.RetryableError(err)
+func dataSourceSubaccountReadWrapper(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var err error
+	readErr := retry.Do(
+		func() error {
+			err = dataSourceSubaccountRead(d, m)
+			if err != nil {
+				return err
 			}
-		}
 
-		return resource.NonRetryableError(err)
-	})
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					if strings.Contains(err.Error(), "failed with missing sub account") ||
+						strings.Contains(err.Error(), "failed with status code 500") {
+						return true
+					}
+				}
+				return false
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if readErr != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
 func dataSourceSubaccountRead(d *schema.ResourceData, m interface{}) error {
