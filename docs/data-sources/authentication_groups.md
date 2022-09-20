@@ -1,4 +1,4 @@
-# Authentication Groups Resource
+# Authentication Groups Datasource
 
 Provides a Logz.io authentication groups resource.
 
