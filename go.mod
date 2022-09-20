@@ -8,3 +8,5 @@ require (
 	github.com/logzio/logzio_terraform_client v1.12.0
 	github.com/stretchr/testify v1.7.0
 )
+
+require gopkg.in/yaml.v2 v2.4.0 // indirect
