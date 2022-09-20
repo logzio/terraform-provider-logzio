@@ -1,6 +1,6 @@
-# Restore Logs Resource
+# Restore Logs Datasource
 
-Provides a Logz.io restore logs resource. This can be used to create and manage Logz.io restore logs operations.
+Use this data source to access information about existing Logz.io restore operations.
 
 * Learn more about restore logs in the [Logz.io Docs](https://docs.logz.io/api/#tag/Restore-logs)
 
