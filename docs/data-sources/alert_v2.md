@@ -1,4 +1,4 @@
-# Alert V2 Resource
+# Alert V2 Datasource
 
 Provides a Logz.io log monitoring alert resource. This can be used to create and manage Logz.io log monitoring alerts.
 
