@@ -1,4 +1,4 @@
-# Drop Filter Resource
+# Drop Filter Datasource
 
 Provides a Logz.io drop filter resource. This can be used to create and manage Logz.io drop filters.
 
