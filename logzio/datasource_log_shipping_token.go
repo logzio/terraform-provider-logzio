@@ -1,17 +1,19 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/log_shipping_tokens"
 	"strconv"
 )
 
 func dataSourceLogShippingToken() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceLogShippingTokenRead,
+		ReadContext: dataSourceLogShippingTokenRead,
 		Schema: map[string]*schema.Schema{
-			logShippingTokenId: {
+			logShippingTokenTokenId: {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
@@ -47,19 +49,19 @@ func dataSourceLogShippingToken() *schema.Resource {
 	}
 }
 
-func dataSourceLogShippingTokenRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceLogShippingTokenRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, _ := log_shipping_tokens.New(m.(Config).apiToken, m.(Config).baseUrl)
-	tokenIdString, ok := d.GetOk(logShippingTokenId)
+	tokenIdString, ok := d.GetOk(logShippingTokenTokenId)
 
 	if ok {
 		id, err := strconv.Atoi(tokenIdString.(string))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		token, err := client.GetLogShippingToken(int32(id))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		d.SetId(fmt.Sprintf("%d", id))
@@ -69,14 +71,14 @@ func dataSourceLogShippingTokenRead(d *schema.ResourceData, m interface{}) error
 	}
 
 	// If for some reason we couldn't find the token by id,
-	// looking for the token by it's name
+	// looking for the token by its name
 	tokenName, ok := d.GetOk(logShippingTokenName)
 	if ok {
 		enabledValues := []bool{true, false}
 		for _, v := range enabledValues {
 			token, err := findLogShippingTokenByName(tokenName.(string), v, client)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 
 			if token != nil {
@@ -85,10 +87,9 @@ func dataSourceLogShippingTokenRead(d *schema.ResourceData, m interface{}) error
 				return nil
 			}
 		}
-
 	}
 
-	return fmt.Errorf("couldn't find log shipping token with specified attributes")
+	return diag.Errorf("couldn't find log shipping token with specified attributes")
 }
 
 func findLogShippingTokenByName(name string, enabled bool, client *log_shipping_tokens.LogShippingTokensClient) (*log_shipping_tokens.LogShippingToken, error) {
