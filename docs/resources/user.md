@@ -2,7 +2,7 @@
 
 Provides a Logz.io user resource. This can be used to create and manage Logz.io users.
 
-* Learn more about available [APIs for managing Logz.io users](https://docs.logz.io/api/#tag/Manage-users)
+* Learn more about available [APIs for managing Logz.io users](https://docs.logz.io/api/#tag/Manage-users).
 
 ## Example Usage
 
