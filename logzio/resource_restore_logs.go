@@ -3,6 +3,7 @@ package logzio
 import (
 	"context"
 	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/restore_logs"
@@ -24,6 +25,8 @@ const (
 	restoreLogsStartedAt        = "started_at"
 	restoreLogsFinishedAt       = "finished_at"
 	restoreLogsExpiresAt        = "expires_at"
+
+	restoreLogsRetryAttempts = 8
 )
 
 // restoreLogsClient returns the restore logs client with the api token from the provider
@@ -136,13 +139,14 @@ func resourceRestoreLogsRead(ctx context.Context, d *schema.ResourceData, m inte
 				return false
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(restoreLogsRetryAttempts),
 	)
 
 	if readErr != nil {
 		// If we were not able to find the resource - delete from state
 		d.SetId("")
-		return diag.FromErr(err)
+		tflog.Error(ctx, readErr.Error())
+		return diag.Diagnostics{}
 	}
 
 	setRestore(d, restore)

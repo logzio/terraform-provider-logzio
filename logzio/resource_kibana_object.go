@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/kibana_objects"
@@ -15,6 +16,8 @@ import (
 const (
 	kibanaObjectKibanaVersionField = "kibana_version"
 	kibanaObjectDataField          = "data"
+
+	kibanaObjectRetryAttempts = 8
 )
 
 // kibanaObjectClient returns the kibana object client with the api token from the provider
@@ -120,10 +123,15 @@ func resourceKibanaObjectRead(ctx context.Context, d *schema.ResourceData, m int
 				}
 				return false
 			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(kibanaObjectRetryAttempts),
 	)
 
 	if err != nil {
-		return diag.FromErr(err)
+		// If we were not able to find the resource - delete from state
+		d.SetId("")
+		tflog.Error(ctx, err.Error())
+		return diag.Diagnostics{}
 	}
 
 	return nil

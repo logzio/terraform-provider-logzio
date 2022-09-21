@@ -14,7 +14,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const (
@@ -55,7 +54,7 @@ const (
 
 	groupByMaxItems int = 3
 
-	delayGetAlertV2 = 1 * time.Second
+	alertRetryAttempts = 8
 )
 
 // alertV2Client returns the alert v2 client with the api token from the provider
@@ -303,13 +302,14 @@ func resourceAlertV2Read(ctx context.Context, d *schema.ResourceData, m interfac
 				return false
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(alertRetryAttempts),
 	)
 
 	if readErr != nil {
 		// If we were not able to find the resource - delete from state
 		d.SetId("")
-		return diag.FromErr(readErr)
+		tflog.Error(ctx, readErr.Error())
+		return diag.Diagnostics{}
 	}
 
 	setValuesAlertV2(d, alert)
@@ -364,7 +364,7 @@ func resourceAlertV2Update(ctx context.Context, d *schema.ResourceData, m interf
 				}
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(alertRetryAttempts),
 	)
 
 	if readErr != nil {

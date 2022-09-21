@@ -30,6 +30,8 @@ const (
 	archiveLogsBlobAccountName     = "account_name"
 	archiveLogsBlobContainerName   = "container_name"
 	archiveLogsBlobPath            = "blob_path"
+
+	archiveRetryAttempts = 8
 )
 
 // archiveLogsClient returns the archive logs client with the api token from the provider
@@ -174,13 +176,14 @@ func resourceArchiveLogsRead(ctx context.Context, d *schema.ResourceData, m inte
 				return false
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(archiveRetryAttempts),
 	)
 
 	if readErr != nil {
 		// If we were not able to find the resource - delete from state
 		d.SetId("")
-		return diag.FromErr(err)
+		tflog.Error(ctx, readErr.Error())
+		return diag.Diagnostics{}
 	}
 
 	setArchive(d, archive)
@@ -221,7 +224,7 @@ func resourceArchiveLogsUpdate(ctx context.Context, d *schema.ResourceData, m in
 				}
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(archiveRetryAttempts),
 	)
 
 	if readErr != nil {

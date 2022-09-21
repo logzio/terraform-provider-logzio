@@ -20,6 +20,8 @@ const (
 	authGroupsAuthGroup = "authentication_group"
 	authGroupGroup      = "group"
 	authGroupUserRole   = "user_role"
+
+	authGroupRetryAttempts = 8
 )
 
 func resourceAuthenticationGroups() *schema.Resource {
@@ -105,13 +107,14 @@ func resourceAuthenticationGroupsRead(ctx context.Context, d *schema.ResourceDat
 				return false
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(authGroupRetryAttempts),
 	)
 
 	if readErr != nil {
 		// If we were not able to find the resource - delete from state
 		d.SetId("")
-		return diag.FromErr(err)
+		tflog.Error(ctx, readErr.Error())
+		return diag.Diagnostics{}
 	}
 
 	setAuthenticationGroups(id, groups, d)
@@ -154,7 +157,7 @@ func resourceAuthenticationGroupsUpdate(ctx context.Context, d *schema.ResourceD
 				}
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(authGroupRetryAttempts),
 	)
 
 	if readErr != nil {

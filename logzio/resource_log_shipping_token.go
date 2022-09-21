@@ -24,6 +24,8 @@ const (
 	logShippingTokenCreatedAt = "created_at"
 	logShippingTokenCreatedBy = "created_by"
 	logShippingTokenTokenId   = "token_id"
+
+	logShippingTokenRetryAttempts = 8
 )
 
 func resourceLogShippingToken() *schema.Resource {
@@ -124,13 +126,14 @@ func resourceLogShippingTokenRead(ctx context.Context, d *schema.ResourceData, m
 				return false
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(logShippingTokenRetryAttempts),
 	)
 
 	if readErr != nil {
 		// If we were not able to find the resource - delete from state
 		d.SetId("")
-		return diag.FromErr(err)
+		tflog.Error(ctx, readErr.Error())
+		return diag.Diagnostics{}
 	}
 
 	setLogShippingToken(d, token)
@@ -180,7 +183,7 @@ func resourceLogShippingTokenUpdate(ctx context.Context, d *schema.ResourceData,
 				}
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(logShippingTokenRetryAttempts),
 	)
 
 	if readErr != nil {

@@ -35,6 +35,8 @@ const (
 	endpointPassword      string = "password"
 
 	endpointTypeMicrosoftTeamsFromApi = "microsoft teams"
+
+	endpointRetryAttempts = 8
 )
 
 /**
@@ -289,13 +291,14 @@ func resourceEndpointRead(ctx context.Context, d *schema.ResourceData, m interfa
 				return false
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(endpointRetryAttempts),
 	)
 
 	if readErr != nil {
 		// If we were not able to find the resource - delete from state
 		d.SetId("")
-		return diag.FromErr(err)
+		tflog.Error(ctx, readErr.Error())
+		return diag.Diagnostics{}
 	}
 
 	setEndpoint(d, endpoint)
@@ -332,7 +335,7 @@ func resourceEndpointUpdate(ctx context.Context, d *schema.ResourceData, m inter
 				}
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(endpointRetryAttempts),
 	)
 
 	if readErr != nil {

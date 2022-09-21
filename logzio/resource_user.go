@@ -21,6 +21,8 @@ const (
 	userAccountId string = "account_id"
 	userRole      string = "role"
 	userActive    string = "active"
+
+	userRetryAttempts = 8
 )
 
 /**
@@ -106,13 +108,14 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 				return false
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(userRetryAttempts),
 	)
 
 	if readErr != nil {
 		// If we were not able to find the resource - delete from state
 		d.SetId("")
-		return diag.FromErr(err)
+		tflog.Error(ctx, readErr.Error())
+		return diag.Diagnostics{}
 	}
 
 	setUser(d, user)
@@ -171,7 +174,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 					}
 				}),
 			retry.DelayType(retry.BackOffDelay),
-			retry.Attempts(15),
+			retry.Attempts(userRetryAttempts),
 		)
 
 		if readErr != nil {

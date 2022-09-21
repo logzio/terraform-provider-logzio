@@ -19,6 +19,8 @@ const (
 	dropFilterFieldConditions = "field_conditions"
 	dropFilterFieldName       = "field_name"
 	dropFilterValue           = "value"
+
+	dropFilterRetryAttempts = 8
 )
 
 // Returns the drop filters client with the api token from the provider
@@ -122,13 +124,14 @@ func resourceDropFilterRead(ctx context.Context, d *schema.ResourceData, m inter
 				return false
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(dropFilterRetryAttempts),
 	)
 
 	if readErr != nil {
 		// If we were not able to find the resource - delete from state
 		d.SetId("")
-		return diag.FromErr(err)
+		tflog.Error(ctx, readErr.Error())
+		return diag.Diagnostics{}
 	}
 
 	setDropFilter(d, dropFilter)
@@ -171,7 +174,7 @@ func resourceDropFilterUpdate(ctx context.Context, d *schema.ResourceData, m int
 				}
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(dropFilterRetryAttempts),
 	)
 
 	if readErr != nil {

@@ -32,7 +32,8 @@ const (
 	subAccountUtilizationSettingsFrequencyMinutes   string = "frequency_minutes"
 	subAccountUtilizationSettingsUtilizationEnabled string = "utilization_enabled"
 
-	delayGetSubAccount = 2 * time.Second
+	delayGetSubAccount      = 2 * time.Second
+	subAccountRetryAttempts = 8
 )
 
 // The endpoint resource schema, what terraform uses to parse and read the template
@@ -179,13 +180,14 @@ func resourceSubAccountRead(ctx context.Context, d *schema.ResourceData, m inter
 				return false
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(subAccountRetryAttempts),
 	)
 
 	if readErr != nil {
 		// If we were not able to find the resource - delete from state
 		d.SetId("")
-		return diag.FromErr(err)
+		tflog.Error(ctx, readErr.Error())
+		return diag.Diagnostics{}
 	}
 
 	setSubAccount(d, subAccount)
@@ -252,7 +254,7 @@ func resourceSubAccountUpdate(ctx context.Context, d *schema.ResourceData, m int
 				}
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(subAccountRetryAttempts),
 	)
 
 	if readErr != nil {
