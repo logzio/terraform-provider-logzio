@@ -2,7 +2,7 @@
 
 Use this data source to access information about existing Logz.io restore operations.
 
-* Learn more about restore logs in the [Logz.io Docs](https://docs.logz.io/api/#tag/Restore-logs)
+* Learn more about restore logs in the [Logz.io Docs](https://docs.logz.io/api/#tag/Restore-logs).
 
 ## Argument Reference
 
