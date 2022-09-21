@@ -1,4 +1,4 @@
-# Archive Logs datasource
+# Archive Logs Datasource
 
 Provides a Logz.io archive logs resource. This can be used to create and manage Logz.io archive logs settings.
 
