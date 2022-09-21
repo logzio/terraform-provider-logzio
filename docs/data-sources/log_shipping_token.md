@@ -2,7 +2,7 @@
 
 Use this data source to access information about existing Logz.io log shipping tokens.
 
-* Learn more about log shipping tokens in the [Logz.io Docs](https://docs.logz.io/api/#tag/Manage-log-shipping-tokens)
+* Learn more about log shipping tokens in the [Logz.io Docs](https://docs.logz.io/api/#tag/Manage-log-shipping-tokens).
 
 ## Argument Reference
 
