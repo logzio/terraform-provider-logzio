@@ -178,6 +178,7 @@ Before you run the script, update the arguments to match your details.
 See our [examples](https://github.com/logzio/logzio_terraform_provider/tree/master/examples) for some complete working examples. 
 
 ### Contribute
+
 Found a bug or want to suggest a feature? [Open an issue](https://github.com/logzio/logzio_terraform_provider/issues/new) about it.
 Want to do it yourself? We are more than happy to accept external contributions from the community.
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
