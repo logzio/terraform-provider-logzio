@@ -2,7 +2,7 @@
 
 Provides a Logz.io kibana object datasource.
 
-* Learn more about kibana objects in the [Logz.io Docs](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
+* Learn more about kibana objects in the [Logz.io Docs](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects).
 
 ## Example Usage
 
