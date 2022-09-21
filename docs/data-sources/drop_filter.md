@@ -1,6 +1,6 @@
-# Drop Filter Resource
+# Drop Filter Datasource
 
-Provides a Logz.io drop filter resource. This can be used to create and manage Logz.io drop filters.
+Provides a Logz.io drop filter datasource. This can be used to create and manage Logz.io drop filters.
 
 * Learn more about drop filters in the [Logz.io Docs](https://docs.logz.io/api/#tag/Drop-filters).
 
