@@ -5,9 +5,11 @@ Provides a Logz.io archive logs resource. This can be used to create and manage 
 * Learn more about archive logs in the [Logz.io Docs](https://docs.logz.io/api/#tag/Archive-logs)
 
 ## Argument Reference
+
 * `archive_id` - (String) Archive ID in the Logz.io database.
 
 ## Attribute Reference
+
 * `storage_type` - (String) Specifies the storage provider.
 * `enabled` - (Boolean) If `true`, archiving is currently enabled.
 * `compressed` - (Boolean) If `true`, logs are compressed before they are archived.
