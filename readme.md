@@ -192,15 +192,27 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 
 ### Changelog
 
-- **v1.10.0**:
-  - **Breaking Changes**:
-    - Upgrading `terraform-plugin-sdk` to `v2.21.0`:
-        - **Terraform 0.11** and lower will not be supported.
-        - To read more about migrating to v2 of the `terraform-plugin-sdk` see [this article](https://www.terraform.io/plugin/sdkv2/guides/v2-upgrade-guide).
-    - Removal of the `logzio_alert` resource. Use `logzio_alert_v2` instead.
-    - `logzio_archive_logs`:
-      - Removal of `s3_secret_credentials`. Use `aws_access_key` and `aws_secret_key` instead. See documentation for current configuration structure.
-      - Refactor code to match current API.
+- **v1.10.0**
+    - **Breaking Changes**:
+        - Upgrading `terraform-plugin-sdk` to `v2.21.0`:
+            - **Terraform 0.11** and lower will not be supported.
+            - To read more about migrating to v2 of the `terraform-plugin-sdk` see [this article](https://www.terraform.io/plugin/sdkv2/guides/v2-upgrade-guide).
+        - Removal of the `logzio_alert` resource. Use `logzio_alert_v2` instead.
+        - `logzio_user`:
+            - Update resource `logzio_user` to match current API and repo code conventions
+            - Removal of `roles` field. Use field `role` instead.
+        - `logzio_archive_logs`:
+            - Removal of `s3_secret_credentials`. Use `aws_access_key` and `aws_secret_key` instead. See documentation for current configuration structure.
+            - Removal of `archiveLogsAzureBlobStorageSettings`, `archiveLogsAmazonS3StorageSettings`. Fields under these attributes are not nested anymore. See docs & examples for reference.
+            - Refactor code to match current API.
+            - datasource - removal of secret fields. See documentation for current available fields.
+        - `logzio_restore_logs`:
+            - Add `username` field, to match current API.
+        - `logzio_subaccount`:
+            - Removal of field `utilization_settings`.
+        - Delete resource from state on unsuccessful read operation.
+    - Upgrade to Go 1.18.
+    - Upgrade to logzio_client_terraform 1.12.0.
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
