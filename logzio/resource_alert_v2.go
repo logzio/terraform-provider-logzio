@@ -303,7 +303,7 @@ func resourceAlertV2Read(ctx context.Context, d *schema.ResourceData, m interfac
 				return false
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(3),
 	)
 
 	if readErr != nil {
