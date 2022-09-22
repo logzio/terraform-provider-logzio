@@ -58,24 +58,24 @@ resource "logzio_archive_logs" "my_blob_archive" {
 
 #### Required if `storage_type` is `S3`:
 
-* `credentials_type` - (String) Specifies which credentials will be used for authentication.
+* `aws_credentials_type` - (String) Specifies which credentials will be used for authentication.
 The options are either `KEYS` or `IAM`. Authentication with S3 Secret Credentials is supported for backward compatibility. IAM roles are strongly recommended.
-* `s3_path` - (String) Specify a path to the **root** of the S3 bucket. (Currently, archiving to a sub-bucket is supported, but not restoring from one.) **Unique buckets** - It is important to archive each account/sub-account to a separate S3 bucket.
-* `s3_iam_credentials_arn` - (String) Applicable when `credentials_type` is `IAM`. Amazon Resource Name (ARN) to uniquely identify the S3 bucket.
-* `aws_access_key` - (String) Applicable when `credentials_type` is `KEYS`.
-* `aws_secret_key` - (String) Applicable when `credentials_type` is `KEYS`.
+* `aws_s3_path` - (String) Specify a path to the **root** of the S3 bucket. (Currently, archiving to a sub-bucket is supported, but not restoring from one.) **Unique buckets** - It is important to archive each account/sub-account to a separate S3 bucket.
+* `aws_s3_iam_credentials_arn` - (String) Applicable when `aws_credentials_type` is `IAM`. Amazon Resource Name (ARN) to uniquely identify the S3 bucket.
+* `aws_access_key` - (String) Applicable when `aws_credentials_type` is `KEYS`.
+* `aws_secret_key` - (String) Applicable when `aws_credentials_type` is `KEYS`.
 
 ##### Required if `storage_type` is `BLOB`:
 
-* `tenant_id` - (String) Azure Directory (tenant) ID. The Tenant ID of the AD app. Go to **Azure Active Directory > App registrations** and select the app to see it.
-* `client_id` - (String) Azure application (client) ID. The Client ID of the AD app, found under the App Overview page. Go to **Azure Active Directory > App registrations** and select the app to see it.
-* `client_secret` - (String) Azure client secret. Password of the Client secret, found in the app's **Certificates & secrets** page. Go to **Azure Active Directory > App registrations** and select the app. Then select **Certificates & secrets** to see it.
-* `account_name` - (String) Azure Storage account name. Name of the storage account that holds the container where the logs will be archived.
-* `container_name` - (String) Name of the container in the Storage account. This is where the logs will be archived.
+* `azure_tenant_id` - (String) Azure Directory (tenant) ID. The Tenant ID of the AD app. Go to **Azure Active Directory > App registrations** and select the app to see it.
+* `azure_client_id` - (String) Azure application (client) ID. The Client ID of the AD app, found under the App Overview page. Go to **Azure Active Directory > App registrations** and select the app to see it.
+* `azure_client_secret` - (String) Azure client secret. Password of the Client secret, found in the app's **Certificates & secrets** page. Go to **Azure Active Directory > App registrations** and select the app. Then select **Certificates & secrets** to see it.
+* `azure_account_name` - (String) Azure Storage account name. Name of the storage account that holds the container where the logs will be archived.
+* `azure_container_name` - (String) Name of the container in the Storage account. This is where the logs will be archived.
 
-##### Optional:
+##### Optional if `storage_type` is `BLOB`:
 
-* `path` - (String) Optional virtual sub-folder specifiying a path within the container. Logs will be archived under the path “{container-name}/{virtual sub-folder}”. Avoid leading and trailing slashes (/). For example, the prefix “region1” is good, but “/region1/” is not.
+* `azure_blob_path` - (String) Optional virtual sub-folder specifiying a path within the container. Logs will be archived under the path “{container-name}/{virtual sub-folder}”. Avoid leading and trailing slashes (/). For example, the prefix “region1” is good, but “/region1/” is not.
 
 ##  Attribute Reference
 

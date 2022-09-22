@@ -68,7 +68,6 @@ func TestAccLogzioArchiveLogs_SetupArchiveS3Iam(t *testing.T) {
 					resource.TestCheckResourceAttrSet(fullResourceName, archiveLogsS3CredentialsType),
 					resource.TestCheckResourceAttrSet(fullResourceName, archiveLogsS3Path),
 					resource.TestCheckResourceAttrSet(fullResourceName, archiveLogsS3IamCredentialsArn),
-					//resource.TestCheckResourceAttrSet(fullResourceName, archiveLogsS3ExternalId),
 				),
 			},
 			{
@@ -202,8 +201,8 @@ func getConfigTestArchiveS3Keys(name string, path string, accessKey string, secr
 	return fmt.Sprintf(`resource "logzio_archive_logs" "%s" {
  storage_type = "S3"
  enabled = false
- credentials_type = "KEYS"
- s3_path = "%s"
+ aws_credentials_type = "KEYS"
+ aws_s3_path = "%s"
  aws_access_key = "%s"
  aws_secret_key = "%s"
 }
@@ -214,9 +213,9 @@ func getConfigTestArchiveS3Iam(name string, path string, arn string) string {
 	return fmt.Sprintf(`resource "logzio_archive_logs" "%s" {
  storage_type = "S3"
  compressed = false
- credentials_type = "IAM"
- s3_path = "%s"
- s3_iam_credentials_arn = "%s"
+ aws_credentials_type = "IAM"
+ aws_s3_path = "%s"
+ aws_s3_iam_credentials_arn = "%s"
 }
 `, name, path, arn)
 }
@@ -225,11 +224,11 @@ func getConfigTestArchiveBlob(name string, tenantId string, clientId string,
 	clientSecret string, accountName string, containerName string) string {
 	return fmt.Sprintf(`resource "logzio_archive_logs" "%s" {
  storage_type = "BLOB"
- tenant_id = "%s"
- client_id = "%s"
- client_secret = "%s"
- account_name = "%s"
- container_name = "%s" 
+ azure_tenant_id = "%s"
+ azure_client_id = "%s"
+ azure_client_secret = "%s"
+ azure_account_name = "%s"
+ azure_container_name = "%s" 
 }
 `, name, tenantId, clientId, clientSecret, accountName, containerName)
 }
@@ -238,8 +237,8 @@ func getConfigTestArchiveEmptyStorageType(name string, path string, accessKey st
 	return fmt.Sprintf(`resource "logzio_archive_logs" "%s" {
  storage_type = ""
  enabled = false
- credentials_type = "KEYS"
- s3_path = "%s"
+ aws_credentials_type = "KEYS"
+ aws_s3_path = "%s"
  aws_access_key = "%s"
  aws_secret_key = "%s"
 }
@@ -250,8 +249,8 @@ func getConfigTestArchiveEmptyCredentialsType(name string, path string, accessKe
 	return fmt.Sprintf(`resource "logzio_archive_logs" "%s" {
  storage_type = "S3"
  enabled = false
- credentials_type = ""
- s3_path = "%s"
+ aws_credentials_type = ""
+ aws_s3_path = "%s"
  aws_access_key = "%s"
  aws_secret_key = "%s"
 }

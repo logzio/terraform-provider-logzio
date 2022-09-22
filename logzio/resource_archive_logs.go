@@ -19,17 +19,19 @@ const (
 	archiveLogsStorageType         = "storage_type"
 	archiveLogsEnabled             = "enabled"
 	archiveLogsCompressed          = "compressed"
-	archiveLogsS3CredentialsType   = "credentials_type"
-	archiveLogsS3Path              = "s3_path"
+	archiveLogsS3CredentialsType   = "aws_credentials_type"
+	archiveLogsS3Path              = "aws_s3_path"
 	archiveLogsS3AccessKey         = "aws_access_key"
 	archiveLogsS3SecretKey         = "aws_secret_key"
-	archiveLogsS3IamCredentialsArn = "s3_iam_credentials_arn"
-	archiveLogsBlobTenantId        = "tenant_id"
-	archiveLogsBlobClientId        = "client_id"
-	archiveLogsBlobClientSecret    = "client_secret"
-	archiveLogsBlobAccountName     = "account_name"
-	archiveLogsBlobContainerName   = "container_name"
-	archiveLogsBlobPath            = "blob_path"
+	archiveLogsS3IamCredentialsArn = "aws_s3_iam_credentials_arn"
+	archiveLogsBlobTenantId        = "azure_tenant_id"
+	archiveLogsBlobClientId        = "azure_client_id"
+	archiveLogsBlobClientSecret    = "azure_client_secret"
+	archiveLogsBlobAccountName     = "azure_account_name"
+	archiveLogsBlobContainerName   = "azure_container_name"
+	archiveLogsBlobPath            = "azure_blob_path"
+
+	archiveRetryAttempts = 8
 )
 
 // archiveLogsClient returns the archive logs client with the api token from the provider
@@ -174,13 +176,14 @@ func resourceArchiveLogsRead(ctx context.Context, d *schema.ResourceData, m inte
 				return false
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(archiveRetryAttempts),
 	)
 
 	if readErr != nil {
 		// If we were not able to find the resource - delete from state
 		d.SetId("")
-		return diag.FromErr(err)
+		tflog.Error(ctx, readErr.Error())
+		return diag.Diagnostics{}
 	}
 
 	setArchive(d, archive)
@@ -221,7 +224,7 @@ func resourceArchiveLogsUpdate(ctx context.Context, d *schema.ResourceData, m in
 				}
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(archiveRetryAttempts),
 	)
 
 	if readErr != nil {
