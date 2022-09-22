@@ -37,9 +37,9 @@ func getConfigResourceArchiveLogs(path, arn string) string {
 	return fmt.Sprintf(`resource "logzio_archive_logs" "test_to_datasource" {
   storage_type = "S3"
   compressed = false
-  credentials_type = "IAM"
-  s3_path = "%s"
-  s3_iam_credentials_arn = "%s"
+  aws_credentials_type = "IAM"
+  aws_s3_path = "%s"
+  aws_s3_iam_credentials_arn = "%s"
 }
 `, path, arn)
 }
