@@ -1,8 +1,8 @@
-# Kibana Object Provider
+# Kibana Object Datasource
 
-Provides a Logz.io kibana object resource. This can be used to export and import kibana objects.
+Provides a Logz.io kibana object datasource.
 
-* Learn more about kibana objects in the [Logz.io Docs](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
+* Learn more about kibana objects in the [Logz.io Docs](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects).
 
 ## Example Usage
 

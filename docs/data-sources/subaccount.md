@@ -1,29 +1,16 @@
-# Subaccount Resource
+# Subaccount Datasource
 
 Use this data source to access information about existing Logz.io Log Monitoring Subaccounts.
 
-* Learn more about accounts in the [Logz.io Docs](https://docs.logz.io/user-guide/accounts/manage-the-main-account-and-sub-accounts.html)
-* Learn more about available [APIs for managing Logz.io subaccounts](https://docs.logz.io/api/#tag/Manage-sub-accounts)
-
-## Example Usage
-
-```hcl
-resource "logzio_subaccount" "my_subaccount" {
-  email = "user@logz.io"
-  account_name = "test"
-  retention_days = 2
-  sharing_objects_accounts = [
-    12345
-  ]
-  frequency_minutes = 3
-  utilization_enabled = true
-}
-```
+* Learn more about accounts in the [Logz.io Docs](https://docs.logz.io/user-guide/accounts/manage-the-main-account-and-sub-accounts.html).
+* Learn more about available [APIs for managing Logz.io subaccounts](https://docs.logz.io/api/#tag/Manage-sub-accounts).
 
 ## Argument Reference
 
 * `account_id` - ID of the subaccount.
+
 ##  Attribute Reference
+
 * `email` - (String) Email address of an existing admin user on the main account which will also become the admin of the subaccount being created.
 * `account_name` - (String) Name of the subaccount.
 * `max_daily_gb` - (Float) Maximum daily log volume that the subaccount can index, in GB.
@@ -36,8 +23,3 @@ resource "logzio_subaccount" "my_subaccount" {
 * `frequency_minutes` - (Int) Determines the sampling rate in minutes of the utilization.
 * `flexible` - (Boolean) Defaults to false. Whether the sub account that created is flexible or not. Can be set to flexible only if the main account is flexible.
 * `reserved_daily_gb` - (Float) The maximum volume of data that an account can index per calendar day. Depends on `flexible`. For further info see [the docs](https://docs.logz.io/api/#operation/createTimeBasedAccount).
-## Endpoints used
-
-* [Create subaccount](https://docs.logz.io/api/#operation/createTimeBasedAccount)
-* [Get all subaccounts](https://docs.logz.io/api/#operation/getAll)
-* [Get all subaccounts - detailed](https://docs.logz.io/api/#operation/getAllDetailedTimeBasedAccount)
