@@ -205,6 +205,7 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
         - `logzio_archive_logs`:
             - Removal of `s3_secret_credentials`. Use `aws_access_key` and `aws_secret_key` instead. See documentation for current configuration structure.
             - Removal of `archiveLogsAzureBlobStorageSettings`, `archiveLogsAmazonS3StorageSettings`. Fields under these attributes are not nested anymore. See docs & examples for reference.
+            - Renaming fields.
             - Refactor code to match current API.
             - datasource - removal of secret fields. See documentation for current available fields.
         - `logzio_restore_logs`:
