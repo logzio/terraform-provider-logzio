@@ -105,6 +105,7 @@ resource "logzio_endpoint" "my_endpoint" {
 }
 
 resource "logzio_alert_v2" "my_alert" {
+  depends_on = [logzio_endpoint.my_endpoint]
   title = "hello_there"
   search_timeframe_minutes = 5
   is_enabled = false
@@ -177,6 +178,7 @@ Before you run the script, update the arguments to match your details.
 See our [examples](https://github.com/logzio/logzio_terraform_provider/tree/master/examples) for some complete working examples. 
 
 ### Contribute
+
 Found a bug or want to suggest a feature? [Open an issue](https://github.com/logzio/logzio_terraform_provider/issues/new) about it.
 Want to do it yourself? We are more than happy to accept external contributions from the community.
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
@@ -191,14 +193,36 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 
 ### Changelog
 
-- **v1.9.2**
-    - *Bug fix*: Fix diff for resource `alert_v2` in fields `alert_notification_endpoints`, `notification_emails` ([#116](https://github.com/logzio/terraform-provider-logzio/issues/116)).
-- **v1.9.1**
-    - *Bug fix*: plugin won't crash when import for `archive_logs` fails.
+- **v1.10.0**
+    - **Breaking Changes**:
+        - Upgrading `terraform-plugin-sdk` to `v2.21.0`:
+            - **Terraform 0.11** and lower will not be supported.
+            - To read more about migrating to v2 of the `terraform-plugin-sdk` see [this article](https://www.terraform.io/plugin/sdkv2/guides/v2-upgrade-guide).
+        - Removal of the `logzio_alert` resource. Use `logzio_alert_v2` instead.
+        - `logzio_user`:
+            - Update resource `logzio_user` to match current API and repo code conventions
+            - Removal of `roles` field. Use field `role` instead.
+        - `logzio_archive_logs`:
+            - Removal of `s3_secret_credentials`. Use `aws_access_key` and `aws_secret_key` instead. See documentation for current configuration structure.
+            - Removal of `archiveLogsAzureBlobStorageSettings`, `archiveLogsAmazonS3StorageSettings`. Fields under these attributes are not nested anymore. See docs & examples for reference.
+            - Renaming fields.
+            - Refactor code to match current API.
+            - datasource - removal of secret fields. See documentation for current available fields.
+        - `logzio_restore_logs`:
+            - Add `username` field, to match current API.
+        - `logzio_subaccount`:
+            - Removal of field `utilization_settings`.
+        - Delete resource from state on unsuccessful read operation.
+    - Upgrade to Go 1.18.
+    - Upgrade to logzio_client_terraform 1.12.0.
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
 
+- **v1.9.2**
+    - *Bug fix*: Fix diff for resource `alert_v2` in fields `alert_notification_endpoints`, `notification_emails` ([#116](https://github.com/logzio/terraform-provider-logzio/issues/116)).
+- **v1.9.1**
+    - *Bug fix*: plugin won't crash when import for `archive_logs` fails.
 - **v1.9.0**
     - Update client version(v1.11.0).
     - Support [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)

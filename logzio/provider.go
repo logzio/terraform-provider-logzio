@@ -1,9 +1,10 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -39,7 +40,7 @@ const (
 	baseUrl = "https://api%s.logz.io"
 )
 
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			providerApiToken: {
@@ -58,7 +59,6 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			resourceAlertType:                dataSourceAlert(),
 			resourceEndpointType:             dataSourceEndpoint(),
 			resourceUserType:                 dataSourceUser(),
 			resourceSubAccountType:           dataSourceSubAccount(),
@@ -71,7 +71,6 @@ func Provider() terraform.ResourceProvider {
 			resourceKibanaObjectType:         dataSourceKibanaObject(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			resourceAlertType:                resourceAlert(),
 			resourceEndpointType:             resourceEndpoint(),
 			resourceUserType:                 resourceUser(),
 			resourceSubAccountType:           resourceSubAccount(),
@@ -83,7 +82,7 @@ func Provider() terraform.ResourceProvider {
 			resourceAuthenticationGroupsType: resourceAuthenticationGroups(),
 			resourceKibanaObjectType:         resourceKibanaObject(),
 		},
-		ConfigureFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigureWrapper,
 	}
 }
 
@@ -93,10 +92,10 @@ func init() {
 	descriptions = map[string]string{providerApiToken: "Your API token", providerRegion: "Your logz.io region"}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func providerConfigure(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	apiToken, ok := d.GetOk(providerApiToken)
 	if !ok {
-		return nil, fmt.Errorf("can't find the %s, either set it in the provider or set the %s env var", providerApiToken, envLogzioApiToken)
+		return nil, diag.Errorf("can't find the %s, either set it in the provider or set the %s env var", providerApiToken, envLogzioApiToken)
 	}
 	region := d.Get(providerRegion).(string)
 	regionCode := ""
@@ -109,5 +108,9 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		apiToken: apiToken.(string),
 		baseUrl:  apiUrl,
 	}
-	return config, nil
+	return config, diag.Diagnostics{}
+}
+
+func providerConfigureWrapper(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	return providerConfigure(d)
 }

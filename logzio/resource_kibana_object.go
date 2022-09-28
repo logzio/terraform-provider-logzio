@@ -1,23 +1,26 @@
 package logzio
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/avast/retry-go"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/kibana_objects"
 	"reflect"
 	"strings"
-	"time"
 )
 
 const (
 	kibanaObjectKibanaVersionField = "kibana_version"
 	kibanaObjectDataField          = "data"
+
+	kibanaObjectRetryAttempts = 8
 )
 
-// Returns the kibana object client with the api token from the provider
+// kibanaObjectClient returns the kibana object client with the api token from the provider
 func kibanaObjectClient(m interface{}) *kibana_objects.KibanaObjectsClient {
 	var client *kibana_objects.KibanaObjectsClient
 	client, _ = kibana_objects.New(m.(Config).apiToken, m.(Config).baseUrl)
@@ -26,10 +29,10 @@ func kibanaObjectClient(m interface{}) *kibana_objects.KibanaObjectsClient {
 
 func resourceKibanaObject() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKibanaObjectCreate,
-		Read:   resourceKibanaObjectRead,
-		Update: resourceKibanaObjectUpdate,
-		Delete: resourceKibanaObjectDelete,
+		CreateContext: resourceKibanaObjectCreate,
+		ReadContext:   resourceKibanaObjectRead,
+		UpdateContext: resourceKibanaObjectUpdate,
+		DeleteContext: resourceKibanaObjectDelete,
 		Schema: map[string]*schema.Schema{
 			kibanaObjectKibanaVersionField: {
 				Type:     schema.TypeString,
@@ -41,56 +44,40 @@ func resourceKibanaObject() *schema.Resource {
 				DiffSuppressFunc: dataDiff,
 			},
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(60 * time.Second),
-			Read:   schema.DefaultTimeout(60 * time.Second),
-			Update: schema.DefaultTimeout(60 * time.Second),
-			Delete: schema.DefaultTimeout(5 * time.Second),
-		},
 	}
 }
 
 // resourceKibanaObjectCreate wraps up the import API
-func resourceKibanaObjectCreate(d *schema.ResourceData, m interface{}) error {
+func resourceKibanaObjectCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	importReq, err := createImportRequestFromSchema(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	kbObjId, err := getIdFromSchema(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	importRes, err := kibanaObjectClient(m).ImportKibanaObject(importReq)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if len(importRes.Created) == 0 {
-		return fmt.Errorf("error while trying to create. Got: %+v\n", *importRes)
+		return diag.Errorf("error while trying to create. Got: %+v\n", *importRes)
 	}
 
 	d.SetId(kbObjId)
-
-	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		err = resourceKibanaObjectRead(d, m)
-		if err != nil {
-			if strings.Contains(err.Error(), "could not find kibana object with id") {
-				return resource.RetryableError(err)
-			}
-		}
-
-		return resource.NonRetryableError(err)
-	})
+	return resourceKibanaObjectRead(ctx, d, m)
 }
 
 // resourceKibanaObjectRead wraps the export API
-func resourceKibanaObjectRead(d *schema.ResourceData, m interface{}) error {
+func resourceKibanaObjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	kbObjId, err := getIdFromSchema(d)
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if len(kbObjId) == 0 {
@@ -99,7 +86,7 @@ func resourceKibanaObjectRead(d *schema.ResourceData, m interface{}) error {
 
 	objType, err := getObjectTypeFromData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	err = retry.Do(
@@ -136,16 +123,25 @@ func resourceKibanaObjectRead(d *schema.ResourceData, m interface{}) error {
 				}
 				return false
 			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(kibanaObjectRetryAttempts),
 	)
 
-	return err
+	if err != nil {
+		// If we were not able to find the resource - delete from state
+		d.SetId("")
+		tflog.Error(ctx, err.Error())
+		return diag.Diagnostics{}
+	}
+
+	return nil
 }
 
 // resourceKibanaObjectUpdate wraps up the import API with override field set
-func resourceKibanaObjectUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceKibanaObjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	importReq, err := createImportRequestFromSchema(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	importReq.Override = new(bool)
@@ -153,27 +149,18 @@ func resourceKibanaObjectUpdate(d *schema.ResourceData, m interface{}) error {
 
 	importRes, err := kibanaObjectClient(m).ImportKibanaObject(importReq)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if len(importRes.Updated) == 0 {
-		return fmt.Errorf("error while trying to update. Got: %+v", *importRes)
+		return diag.Errorf("error while trying to update. Got: %+v", *importRes)
 	}
 
-	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-		err = resourceKibanaObjectRead(d, m)
-		if err != nil {
-			if strings.Contains(err.Error(), "could not find kibana object with id") {
-				return resource.RetryableError(err)
-			}
-		}
-
-		return resource.NonRetryableError(err)
-	})
+	return resourceKibanaObjectRead(ctx, d, m)
 }
 
 // resourceKibanaObjectDelete just remove object from state, user has to delete manually from the app
-func resourceKibanaObjectDelete(d *schema.ResourceData, m interface{}) error {
+func resourceKibanaObjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	d.SetId("")
 
 	fmt.Printf("[INFO] Delete object in not supported - just removing from state")

@@ -20,10 +20,6 @@ builds:
     ignore:
       - goos: darwin
         goarch: '386'
-      - goos: windows
-        goarch: arm64
-        # The ignore windows/arm64 section can be removed once we'll upgrade the go version to 1.17
-        # For more info: https://github.com/goreleaser/goreleaser/pull/3157
     binary: '{{ .ProjectName }}_v{{ .Version }}'
 archives:
   - format: zip

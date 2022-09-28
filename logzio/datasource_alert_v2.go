@@ -1,15 +1,17 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
 	"time"
 )
 
 func dataSourceAlertV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlertV2Read,
+		ReadContext: dataSourceAlertV2Read,
 		Schema: map[string]*schema.Schema{
 			alertV2Id: {
 				Type:     schema.TypeInt,
@@ -80,7 +82,6 @@ func dataSourceAlertV2() *schema.Resource {
 						alertV2GroupBy: {
 							Type:     schema.TypeList,
 							Computed: true,
-							MaxItems: groupByMaxItems,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -162,7 +163,7 @@ func dataSourceAlertV2() *schema.Resource {
 				},
 			},
 			alertV2CreatedAt: {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			alertV2CreatedBy: {
@@ -170,7 +171,7 @@ func dataSourceAlertV2() *schema.Resource {
 				Computed: true,
 			},
 			alertV2UpdatedAt: {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			alertV2UpdatedBy: {
@@ -190,15 +191,15 @@ func getAlertV2(client *alerts_v2.AlertsV2Client, alertId int64, retries int) (*
 	return alert, err
 }
 
-func dataSourceAlertV2Read(d *schema.ResourceData, m interface{}) error {
+func dataSourceAlertV2Read(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, _ := alerts_v2.New(m.(Config).apiToken, m.(Config).baseUrl)
-	alertIdString, ok := d.GetOk(alertId)
+	alertIdString, ok := d.GetOk(alertV2Id)
 
 	if ok {
 		id := int64(alertIdString.(int))
 		alert, err := getAlertV2(client, id, 3)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		d.SetId(fmt.Sprintf("%d", id))
@@ -208,11 +209,11 @@ func dataSourceAlertV2Read(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	alertTitle, ok := d.GetOk(alert_title)
+	alertTitle, ok := d.GetOk(alertV2Title)
 	if ok {
 		list, err := client.ListAlerts()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		for i := 0; i < len(list); i++ {
 			alert := list[i]
@@ -225,5 +226,5 @@ func dataSourceAlertV2Read(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	return fmt.Errorf("couldn't find alert with specified attributes")
+	return diag.Errorf("couldn't find alert with specified attributes")
 }

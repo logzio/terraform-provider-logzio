@@ -1,21 +1,28 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
-	"github.com/logzio/logzio_terraform_provider/logzio/utils"
-	"strconv"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/users"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
+	"reflect"
+	"strconv"
+	"strings"
 )
 
 const (
 	userId        string = "id"
 	userUsername  string = "username"
-	userFullname  string = "fullname"
+	userFullName  string = "fullname"
 	userAccountId string = "account_id"
-	userRoles     string = "roles"
+	userRole      string = "role"
 	userActive    string = "active"
+
+	userRetryAttempts = 8
 )
 
 /**
@@ -23,12 +30,12 @@ const (
  */
 func resourceUser() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceUserCreate,
-		Read:   resourceUserRead,
-		Update: resourceUserUpdate,
-		Delete: resourceUserDelete,
+		CreateContext: resourceUserCreate,
+		ReadContext:   resourceUserRead,
+		UpdateContext: resourceUserUpdate,
+		DeleteContext: resourceUserDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -36,7 +43,7 @@ func resourceUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			userFullname: {
+			userFullName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -44,12 +51,10 @@ func resourceUser() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			userRoles: {
-				Type:     schema.TypeList,
-				Required: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeInt,
-				},
+			userRole: {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: utils.ValidateUserRoleUser,
 			},
 			userActive: {
 				Type:     schema.TypeBool,
@@ -66,94 +71,173 @@ func usersClient(m interface{}) *users.UsersClient {
 	return client
 }
 
-func resourceUserCreate(d *schema.ResourceData, m interface{}) error {
-	var roles []int32
-	for _, v := range d.Get(userRoles).([]interface{}) {
-		roles = append(roles, int32(v.(int)))
-	}
-
-	user := users.User{
-		AccountId: int64(d.Get(userAccountId).(int)),
-		Username:  d.Get(userUsername).(string),
-		Fullname:  d.Get(userFullname).(string),
-		Roles:     roles,
-	}
-
-	u, err := usersClient(m).CreateUser(user)
+func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	createUser := getCreateOrUpdateUserFromSchema(d)
+	user, err := usersClient(m).CreateUser(createUser)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
-	userId := strconv.FormatInt(u.Id, utils.BASE_10)
-	d.SetId(userId)
+
+	d.SetId(strconv.FormatInt(int64(user.Id), 10))
+	return resourceUserRead(ctx, d, m)
+}
+
+func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	id, err := utils.IdFromResourceData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	var user *users.User
+	readErr := retry.Do(
+		func() error {
+			user, err = usersClient(m).GetUser(int32(id))
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				if err != nil {
+					if strings.Contains(err.Error(), "failed with missing user") {
+						return true
+					}
+				}
+				return false
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(userRetryAttempts),
+	)
+
+	if readErr != nil {
+		// If we were not able to find the resource - delete from state
+		d.SetId("")
+		tflog.Error(ctx, readErr.Error())
+		return diag.Diagnostics{}
+	}
+
+	setUser(d, user)
+	return nil
+}
+
+func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	id, err := utils.IdFromResourceData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	updateUser := getCreateOrUpdateUserFromSchema(d)
+	currUser, err := usersClient(m).GetUser(int32(id))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	// check if we need to activate or deactivate user
+	activeFromSchema := d.Get(userActive).(bool)
+	if activeFromSchema != currUser.Active {
+		tflog.Debug(ctx, fmt.Sprintf("detected activation change, from %t to %t", currUser.Active, activeFromSchema))
+		err = changeUserActivation(int32(id), activeFromSchema, m)
+		if err != nil {
+			tflog.Error(ctx, "error occurred while trying to change user activation. If other changes were planned, they will not be applied")
+			return diag.FromErr(err)
+		}
+	}
+
+	// check if there are more updates to be applied
+	if updateUser.UserName != currUser.UserName ||
+		updateUser.FullName != currUser.FullName ||
+		updateUser.Role != currUser.Role ||
+		updateUser.AccountId != currUser.AccountId {
+		_, err = usersClient(m).UpdateUser(int32(id), updateUser)
+
+		var diagRet diag.Diagnostics
+		readErr := retry.Do(
+			func() error {
+				diagRet = resourceUserRead(ctx, d, m)
+				if diagRet.HasError() {
+					return fmt.Errorf("received error from read user")
+				}
+
+				return nil
+			},
+			retry.RetryIf(
+				func(err error) bool {
+					if err != nil {
+						return true
+					} else {
+						// Check if the update shows on read
+						// if not updated yet - retry
+						userAfterUpdate := getCreateOrUpdateUserFromSchema(d)
+						return !reflect.DeepEqual(userAfterUpdate, updateUser)
+					}
+				}),
+			retry.DelayType(retry.BackOffDelay),
+			retry.Attempts(userRetryAttempts),
+		)
+
+		if readErr != nil {
+			tflog.Error(ctx, "could not update schema")
+			return diagRet
+		}
+
+		return nil
+	}
 
 	return nil
 }
 
-func resourceUserRead(d *schema.ResourceData, m interface{}) error {
+func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id, err := utils.IdFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	user, err := usersClient(m).GetUser(id)
-	if err != nil {
-		return err
+	deleteErr := retry.Do(
+		func() error {
+			return usersClient(m).DeleteUser(int32(id))
+		},
+		retry.RetryIf(
+			func(err error) bool {
+				return err != nil
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(15),
+	)
+
+	if deleteErr != nil {
+		return diag.FromErr(deleteErr)
 	}
 
-	d.SetId(fmt.Sprintf("%d", user.Id))
+	d.SetId("")
+	return nil
+}
+
+func getCreateOrUpdateUserFromSchema(d *schema.ResourceData) users.CreateUpdateUser {
+	return users.CreateUpdateUser{
+		UserName:  d.Get(userUsername).(string),
+		FullName:  d.Get(userFullName).(string),
+		AccountId: int32(d.Get(userAccountId).(int)),
+		Role:      d.Get(userRole).(string),
+	}
+}
+
+func setUser(d *schema.ResourceData, user *users.User) {
+	d.Set(userUsername, user.UserName)
+	d.Set(userFullName, user.FullName)
 	d.Set(userAccountId, user.AccountId)
-	d.Set(userUsername, user.Username)
-	d.Set(userFullname, user.Fullname)
-
-	var roles []interface{}
-	for _, v := range user.Roles {
-		roles = append(roles, int(v))
-	}
-
-	d.Set(userRoles, roles)
+	d.Set(userRole, user.Role)
 	d.Set(userActive, user.Active)
-
-	return nil
 }
 
-func resourceUserUpdate(d *schema.ResourceData, m interface{}) error {
-	id, err := utils.IdFromResourceData(d)
-	if err != nil {
-		return err
+func changeUserActivation(id int32, activate bool, m interface{}) error {
+	var err error
+	if activate {
+		err = usersClient(m).UnSuspendUser(id)
+	} else {
+		err = usersClient(m).SuspendUser(id)
 	}
 
-	accountId, err := strconv.ParseInt(d.Get(userAccountId).(string), utils.BASE_10, utils.BITSIZE_64)
-	if err != nil {
-		return err
-	}
-
-	user := users.User{
-		Id:        id,
-		AccountId: accountId,
-		Username:  d.Get(userUsername).(string),
-		Fullname:  d.Get(userFullname).(string),
-		Roles:     d.Get(userRoles).([]int32),
-		Active:    d.Get(userActive).(bool),
-	}
-
-	_, err = usersClient(m).UpdateUser(user)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func resourceUserDelete(d *schema.ResourceData, m interface{}) error {
-	id, err := utils.IdFromResourceData(d)
-	if err != nil {
-		return err
-	}
-
-	err = usersClient(m).DeleteUser(id)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
