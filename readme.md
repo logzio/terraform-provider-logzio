@@ -193,6 +193,9 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 
 ### Changelog
 
+- **v1.10.1**:
+  - Upgrade to logzio_client_terraform 1.13.0.
+  - Bug fix for **subaccount** - field `reserved_daily_gb` can be 0.
 - **v1.10.0**
     - **Breaking Changes**:
         - Upgrading `terraform-plugin-sdk` to `v2.21.0`:
