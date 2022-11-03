@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/drop_filters"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
-	"strings"
 )
 
 const (
@@ -97,40 +96,16 @@ func resourceDropFilterCreate(ctx context.Context, d *schema.ResourceData, m int
 
 // resourceDropFilterRead gets drop filter by id
 func resourceDropFilterRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var err error
-	var dropFilters []drop_filters.DropFilter
-	var dropFilter *drop_filters.DropFilter
-	readErr := retry.Do(
-		func() error {
-			dropFilters, err = dropFilterClient(m).RetrieveDropFilters()
-			if err != nil {
-				return err
-			}
+	dropFilters, err := dropFilterClient(m).RetrieveDropFilters()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-			dropFilter = findDropFilterById(d.Id(), dropFilters)
-			if dropFilter == nil {
-				return fmt.Errorf("could not find drop filter with id: %s", d.Id())
-			}
-
-			return nil
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				if err != nil {
-					if strings.Contains(err.Error(), "could not find drop filter with id") {
-						return true
-					}
-				}
-				return false
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(dropFilterRetryAttempts),
-	)
-
-	if readErr != nil {
+	dropFilter := findDropFilterById(d.Id(), dropFilters)
+	if dropFilter == nil {
 		// If we were not able to find the resource - delete from state
+		tflog.Error(ctx, fmt.Sprintf("could not find drop filter with id: %s", d.Id()))
 		d.SetId("")
-		tflog.Error(ctx, readErr.Error())
 		return diag.Diagnostics{}
 	}
 
@@ -163,9 +138,10 @@ func resourceDropFilterUpdate(ctx context.Context, d *schema.ResourceData, m int
 			return nil
 		},
 		retry.RetryIf(
+			// Retry ONLY if the resource was not updated yet
 			func(err error) bool {
 				if err != nil {
-					return true
+					return false
 				} else {
 					// Check if the update shows on read
 					// if not updated yet - retry
@@ -187,20 +163,10 @@ func resourceDropFilterUpdate(ctx context.Context, d *schema.ResourceData, m int
 
 // resourceDropFilterDelete deletes drop filter by id
 func resourceDropFilterDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	deleteErr := retry.Do(
-		func() error {
-			return dropFilterClient(m).DeleteDropFilter(d.Id())
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				return err != nil
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
-	)
+	err := dropFilterClient(m).DeleteDropFilter(d.Id())
 
-	if deleteErr != nil {
-		return diag.FromErr(deleteErr)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")
