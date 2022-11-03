@@ -158,10 +158,10 @@ func resourceArchiveLogsRead(ctx context.Context, d *schema.ResourceData, m inte
 	archive, err := archiveLogsClient(m).RetrieveArchiveLogsSetting(int32(id))
 
 	if err != nil {
+		tflog.Error(ctx, err.Error())
 		if strings.Contains(err.Error(), "missing archive") {
 			// If we were not able to find the resource - delete from state
 			d.SetId("")
-			tflog.Error(ctx, err.Error())
 			return diag.Diagnostics{}
 		} else {
 			return diag.FromErr(err)
