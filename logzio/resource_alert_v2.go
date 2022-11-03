@@ -364,20 +364,10 @@ func resourceAlertV2Delete(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	deleteErr := retry.Do(
-		func() error {
-			return alertV2Client(m).DeleteAlert(alertId)
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				return err != nil
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
-	)
+	err = alertV2Client(m).DeleteAlert(alertId)
 
-	if deleteErr != nil {
-		return diag.FromErr(deleteErr)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")
