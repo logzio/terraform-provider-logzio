@@ -122,27 +122,7 @@ func subAccountClient(m interface{}) *sub_accounts.SubAccountClient {
 
 func resourceSubAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	createSubAccount := getCreateSubAccountFromSchema(d)
-	var subAccount *sub_accounts.SubAccountCreateResponse
-	var err error
-	err = retry.Do(
-		func() error {
-			subAccount, err = subAccountClient(m).CreateSubAccount(createSubAccount)
-			if err != nil {
-				return err
-			}
-
-			return nil
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				if err != nil {
-					if strings.Contains(err.Error(), "status code 429") {
-						return true
-					}
-				}
-				return false
-			}),
-	)
+	subAccount, err := subAccountClient(m).CreateSubAccount(createSubAccount)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -158,36 +138,17 @@ func resourceSubAccountRead(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	subAccount, err := subAccountClient(m).GetSubAccount(id)
+	if err != nil {
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing sub account") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
+		}
 
-	var subAccount *sub_accounts.SubAccount
-	readErr := retry.Do(
-		func() error {
-			subAccount, err = subAccountClient(m).GetSubAccount(id)
-			if err != nil {
-				return err
-			}
-
-			return nil
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				if err != nil {
-					if strings.Contains(err.Error(), "failed with missing sub account") ||
-						strings.Contains(err.Error(), "failed with status code 500") {
-						return true
-					}
-				}
-				return false
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(subAccountRetryAttempts),
-	)
-
-	if readErr != nil {
-		// If we were not able to find the resource - delete from state
-		d.SetId("")
-		tflog.Error(ctx, readErr.Error())
-		return diag.Diagnostics{}
 	}
 
 	setSubAccount(d, subAccount)
@@ -208,26 +169,7 @@ func resourceSubAccountUpdate(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	updateSubAccount := getCreateSubAccountFromSchema(d)
-	err = retry.Do(
-		func() error {
-			err = subAccountClient(m).UpdateSubAccount(id, updateSubAccount)
-			if err != nil {
-				return err
-			}
-
-			return nil
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				if err != nil {
-					if strings.Contains(err.Error(), "status code 429") {
-						return true
-					}
-				}
-				return false
-			}),
-	)
-
+	err = subAccountClient(m).UpdateSubAccount(id, updateSubAccount)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -243,9 +185,10 @@ func resourceSubAccountUpdate(ctx context.Context, d *schema.ResourceData, m int
 			return nil
 		},
 		retry.RetryIf(
+			// Retry ONLY if the resource was not updated yet
 			func(err error) bool {
 				if err != nil {
-					return true
+					return false
 				} else {
 					// Check if the update shows on read
 					// if not updated yet - retry
@@ -271,20 +214,10 @@ func resourceSubAccountDelete(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	deleteErr := retry.Do(
-		func() error {
-			return subAccountClient(m).DeleteSubAccount(id)
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				return err != nil
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
-	)
+	err = subAccountClient(m).DeleteSubAccount(id)
 
-	if deleteErr != nil {
-		return diag.FromErr(deleteErr)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")
