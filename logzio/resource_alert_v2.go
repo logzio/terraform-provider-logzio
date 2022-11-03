@@ -283,10 +283,14 @@ func resourceAlertV2Read(ctx context.Context, d *schema.ResourceData, m interfac
 	alert, err := client.GetAlert(alertId)
 
 	if err != nil {
-		// If we were not able to find the resource - delete from state
-		d.SetId("")
 		tflog.Error(ctx, err.Error())
-		return diag.Diagnostics{}
+		if strings.Contains(err.Error(), "missing alert") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
+		}
 	}
 
 	setValuesAlertV2(d, alert)
