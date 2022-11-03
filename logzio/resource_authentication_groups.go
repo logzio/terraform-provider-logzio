@@ -88,7 +88,7 @@ func resourceAuthenticationGroupsRead(ctx context.Context, d *schema.ResourceDat
 	groups, err := authenticationGroupsClient(m).GetAuthenticationGroups()
 	if err != nil {
 		tflog.Error(ctx, err.Error())
-		if strings.Contains(err.Error(), "failed with missing authentication groups") {
+		if strings.Contains(err.Error(), "missing authentication groups") {
 			// If we were not able to find the resource - delete from state
 			d.SetId("")
 			return diag.Diagnostics{}
