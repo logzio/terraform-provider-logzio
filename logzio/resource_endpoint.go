@@ -270,35 +270,17 @@ func resourceEndpointRead(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	endpoint, err := endpointClient(m).GetEndpoint(id)
 
-	var endpoint *endpoints.Endpoint
-	readErr := retry.Do(
-		func() error {
-			endpoint, err = endpointClient(m).GetEndpoint(id)
-			if err != nil {
-				return err
-			}
-
-			return nil
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				if err != nil {
-					if strings.Contains(err.Error(), "failed with missing endpoint") {
-						return true
-					}
-				}
-				return false
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(endpointRetryAttempts),
-	)
-
-	if readErr != nil {
-		// If we were not able to find the resource - delete from state
-		d.SetId("")
-		tflog.Error(ctx, readErr.Error())
-		return diag.Diagnostics{}
+	if err != nil {
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing endpoint") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
+		}
 	}
 
 	setEndpoint(d, endpoint)
@@ -324,9 +306,10 @@ func resourceEndpointUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			return nil
 		},
 		retry.RetryIf(
+			// Retry ONLY if the resource was not updated yet
 			func(err error) bool {
 				if err != nil {
-					return true
+					return false
 				} else {
 					// Check if the update shows on read
 					// if not updated yet - retry
@@ -352,20 +335,9 @@ func resourceEndpointDelete(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	deleteErr := retry.Do(
-		func() error {
-			return endpointClient(m).DeleteEndpoint(id)
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				return err != nil
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
-	)
-
-	if deleteErr != nil {
-		return diag.FromErr(deleteErr)
+	err = endpointClient(m).DeleteEndpoint(id)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")
