@@ -193,9 +193,17 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 
 ### Changelog
 
+- **v1.10.2**:
+    - Upgrade to logzio_client_terraform 1.13.1.
+    - Remove retries resources, as the new client handles it. Retries on update that validate update are still active.
 - **v1.10.1**:
   - Upgrade to logzio_client_terraform 1.13.0.
   - Bug fix for **subaccount** - field `reserved_daily_gb` can be 0.
+
+
+<details>
+  <summary markdown="span"> Expand to check old versions </summary>
+
 - **v1.10.0**
     - **Breaking Changes**:
         - Upgrading `terraform-plugin-sdk` to `v2.21.0`:
@@ -218,10 +226,6 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
         - Delete resource from state on unsuccessful read operation.
     - Upgrade to Go 1.18.
     - Upgrade to logzio_client_terraform 1.12.0.
-
-<details>
-  <summary markdown="span"> Expand to check old versions </summary>
-
 - **v1.9.2**
     - *Bug fix*: Fix diff for resource `alert_v2` in fields `alert_notification_endpoints`, `notification_emails` ([#116](https://github.com/logzio/terraform-provider-logzio/issues/116)).
 - **v1.9.1**

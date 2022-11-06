@@ -278,38 +278,19 @@ func resourceAlertV2Create(ctx context.Context, d *schema.ResourceData, m interf
 
 // resourceAlertV2Read reads an alert (v2) from logzio
 func resourceAlertV2Read(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var alert *alerts_v2.AlertType
-	var err error
 	alertId, _ := utils.IdFromResourceData(d)
 	client := alertV2Client(m)
+	alert, err := client.GetAlert(alertId)
 
-	readErr := retry.Do(
-		func() error {
-			alert, err = client.GetAlert(alertId)
-			if err != nil {
-				return err
-			}
-
-			return nil
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				if err != nil {
-					if strings.Contains(err.Error(), "missing alert") {
-						return true
-					}
-				}
-				return false
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(alertRetryAttempts),
-	)
-
-	if readErr != nil {
-		// If we were not able to find the resource - delete from state
-		d.SetId("")
-		tflog.Error(ctx, readErr.Error())
-		return diag.Diagnostics{}
+	if err != nil {
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing alert") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
+		}
 	}
 
 	setValuesAlertV2(d, alert)
@@ -353,9 +334,10 @@ func resourceAlertV2Update(ctx context.Context, d *schema.ResourceData, m interf
 			return nil
 		},
 		retry.RetryIf(
+			// Retry ONLY if the resource was not updated yet
 			func(err error) bool {
 				if err != nil {
-					return true
+					return false
 				} else {
 					// Check if the update shows on read
 					// if not updated yet - retry
@@ -382,20 +364,10 @@ func resourceAlertV2Delete(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	deleteErr := retry.Do(
-		func() error {
-			return alertV2Client(m).DeleteAlert(alertId)
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				return err != nil
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
-	)
+	err = alertV2Client(m).DeleteAlert(alertId)
 
-	if deleteErr != nil {
-		return diag.FromErr(deleteErr)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")

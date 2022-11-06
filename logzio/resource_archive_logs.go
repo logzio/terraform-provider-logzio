@@ -155,35 +155,18 @@ func resourceArchiveLogsRead(ctx context.Context, d *schema.ResourceData, m inte
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	archive, err := archiveLogsClient(m).RetrieveArchiveLogsSetting(int32(id))
 
-	var archive *archive_logs.ArchiveLogs
-	readErr := retry.Do(
-		func() error {
-			archive, err = archiveLogsClient(m).RetrieveArchiveLogsSetting(int32(id))
-			if err != nil {
-				return err
-			}
+	if err != nil {
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing archive") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
+		}
 
-			return nil
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				if err != nil {
-					if strings.Contains(err.Error(), "failed with missing archive") {
-						return true
-					}
-				}
-				return false
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(archiveRetryAttempts),
-	)
-
-	if readErr != nil {
-		// If we were not able to find the resource - delete from state
-		d.SetId("")
-		tflog.Error(ctx, readErr.Error())
-		return diag.Diagnostics{}
 	}
 
 	setArchive(d, archive)
@@ -213,9 +196,10 @@ func resourceArchiveLogsUpdate(ctx context.Context, d *schema.ResourceData, m in
 			return nil
 		},
 		retry.RetryIf(
+			// Retry ONLY if the resource was not updated yet
 			func(err error) bool {
 				if err != nil {
-					return true
+					return false
 				} else {
 					// Check if the update shows on read
 					// if not updated yet - retry
@@ -250,20 +234,10 @@ func resourceArchiveLogsDelete(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	deleteErr := retry.Do(
-		func() error {
-			return archiveLogsClient(m).DeleteArchiveLogs(int32(archiveId))
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				return err != nil
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
-	)
+	err = archiveLogsClient(m).DeleteArchiveLogs(int32(archiveId))
 
-	if deleteErr != nil {
-		return diag.FromErr(deleteErr)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")

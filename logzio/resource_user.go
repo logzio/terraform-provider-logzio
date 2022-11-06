@@ -87,35 +87,17 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	user, err := usersClient(m).GetUser(int32(id))
+	if err != nil {
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing user") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
+		}
 
-	var user *users.User
-	readErr := retry.Do(
-		func() error {
-			user, err = usersClient(m).GetUser(int32(id))
-			if err != nil {
-				return err
-			}
-
-			return nil
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				if err != nil {
-					if strings.Contains(err.Error(), "failed with missing user") {
-						return true
-					}
-				}
-				return false
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(userRetryAttempts),
-	)
-
-	if readErr != nil {
-		// If we were not able to find the resource - delete from state
-		d.SetId("")
-		tflog.Error(ctx, readErr.Error())
-		return diag.Diagnostics{}
 	}
 
 	setUser(d, user)
@@ -163,9 +145,10 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 				return nil
 			},
 			retry.RetryIf(
+				// Retry ONLY if the resource was not updated yet
 				func(err error) bool {
 					if err != nil {
-						return true
+						return false
 					} else {
 						// Check if the update shows on read
 						// if not updated yet - retry
@@ -194,20 +177,10 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	deleteErr := retry.Do(
-		func() error {
-			return usersClient(m).DeleteUser(int32(id))
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				return err != nil
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
-	)
+	err = usersClient(m).DeleteUser(int32(id))
 
-	if deleteErr != nil {
-		return diag.FromErr(deleteErr)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")

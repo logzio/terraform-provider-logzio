@@ -84,37 +84,18 @@ func resourceAuthenticationGroupsCreate(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceAuthenticationGroupsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var err error
 	id := d.Id()
+	groups, err := authenticationGroupsClient(m).GetAuthenticationGroups()
+	if err != nil {
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing authentication groups") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
+		}
 
-	var groups []authentication_groups.AuthenticationGroup
-	readErr := retry.Do(
-		func() error {
-			groups, err = authenticationGroupsClient(m).GetAuthenticationGroups()
-			if err != nil {
-				return err
-			}
-
-			return nil
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				if err != nil {
-					if strings.Contains(err.Error(), "failed with missing authentication groups") {
-						return true
-					}
-				}
-				return false
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(authGroupRetryAttempts),
-	)
-
-	if readErr != nil {
-		// If we were not able to find the resource - delete from state
-		d.SetId("")
-		tflog.Error(ctx, readErr.Error())
-		return diag.Diagnostics{}
 	}
 
 	setAuthenticationGroups(id, groups, d)
@@ -146,9 +127,10 @@ func resourceAuthenticationGroupsUpdate(ctx context.Context, d *schema.ResourceD
 			return nil
 		},
 		retry.RetryIf(
+			// Retry ONLY if the resource was not updated yet
 			func(err error) bool {
 				if err != nil {
-					return true
+					return false
 				} else {
 					// Check if the update shows on read
 					// if not updated yet - retry
@@ -169,21 +151,10 @@ func resourceAuthenticationGroupsUpdate(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceAuthenticationGroupDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	deleteErr := retry.Do(
-		func() error {
-			_, err := authenticationGroupsClient(m).PostAuthenticationGroups([]authentication_groups.AuthenticationGroup{})
-			return err
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				return err != nil
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
-	)
+	_, err := authenticationGroupsClient(m).PostAuthenticationGroups([]authentication_groups.AuthenticationGroup{})
 
-	if deleteErr != nil {
-		return diag.FromErr(deleteErr)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")

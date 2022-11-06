@@ -2,7 +2,6 @@ package logzio
 
 import (
 	"context"
-	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -119,34 +118,17 @@ func resourceRestoreLogsRead(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	var restore *restore_logs.RestoreOperation
-	readErr := retry.Do(
-		func() error {
-			restore, err = restoreLogsClient(m).GetRestoreOperation(int32(id))
-			if err != nil {
-				return err
-			}
+	restore, err := restoreLogsClient(m).GetRestoreOperation(int32(id))
+	if err != nil {
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing restore") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
+		}
 
-			return nil
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				if err != nil {
-					if strings.Contains(err.Error(), "failed with missing restore") {
-						return true
-					}
-				}
-				return false
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(restoreLogsRetryAttempts),
-	)
-
-	if readErr != nil {
-		// If we were not able to find the resource - delete from state
-		d.SetId("")
-		tflog.Error(ctx, readErr.Error())
-		return diag.Diagnostics{}
 	}
 
 	setRestore(d, restore)
@@ -158,22 +140,10 @@ func resourceRestoreLogsDelete(ctx context.Context, d *schema.ResourceData, m in
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	_, err = restoreLogsClient(m).DeleteRestoreOperation(int32(id))
 
-	deleteErr := retry.Do(
-		func() error {
-			_, err = restoreLogsClient(m).DeleteRestoreOperation(int32(id))
-			return err
-		},
-		retry.RetryIf(
-			func(err error) bool {
-				return err != nil
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
-	)
-
-	if deleteErr != nil {
-		return diag.FromErr(deleteErr)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")
