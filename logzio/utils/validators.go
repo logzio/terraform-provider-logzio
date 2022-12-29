@@ -2,6 +2,8 @@ package utils
 
 import (
 	"fmt"
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/logzio/logzio_terraform_client/alerts"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
 	"github.com/logzio/logzio_terraform_client/archive_logs"
@@ -260,4 +262,15 @@ func ValidateUserRoleUser(v interface{}, k string) (ws []string, errors []error)
 		errors = append(errors, fmt.Errorf("user role %q must be one of %s", k, validUserRole))
 	}
 	return
+}
+
+func ValidateScheduleTimezone(v interface{}, path cty.Path) diag.Diagnostics {
+	timezone := v.(string)
+	timezones := GetAlertV2ScheduleTimezones()
+	if !contains(timezones, timezone) {
+		return diag.Errorf("Timezone %s is not in allowed timezones list")
+	}
+
+	var diags diag.Diagnostics
+	return diags
 }

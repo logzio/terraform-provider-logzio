@@ -46,6 +46,8 @@ const (
 	alertV2SubComponents               string = "sub_components"
 	alertV2CorrelationOperator         string = "correlation_operator"
 	alertV2Joins                       string = "joins"
+	alertV2ScheduleCronExpression      string = "schedule_cron_expression"
+	alertV2ScheduleTimezone            string = "schedule_timezone"
 
 	alertV2CreatedAt string = "created_at"
 	alertV2CreatedBy string = "created_by"
@@ -243,6 +245,16 @@ func resourceAlertV2() *schema.Resource {
 			alertV2UpdatedBy: {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			alertV2ScheduleCronExpression: {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			alertV2ScheduleTimezone: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "UTC",
+				ValidateDiagFunc: utils.ValidateScheduleTimezone,
 			},
 		},
 	}
@@ -573,6 +585,8 @@ func createCreateAlertType(d *schema.ResourceData) alerts_v2.CreateAlertType {
 		Joins:                mappedFlatComponents[alertV2Joins].([]map[string]string),
 	}
 
+	schedule := getScheduleFromSchema(d)
+
 	createAlert := alerts_v2.CreateAlertType{
 		Title:                  mappedFlatComponents[alertV2Title].(string),
 		Description:            mappedFlatComponents[alertV2Description].(string),
@@ -582,9 +596,20 @@ func createCreateAlertType(d *schema.ResourceData) alerts_v2.CreateAlertType {
 		Output:                 alertOutput,
 		SubComponents:          subComponents,
 		Correlations:           correlations,
+		Schedule:               schedule,
 	}
 
 	return createAlert
+}
+
+func getScheduleFromSchema(d *schema.ResourceData) alerts_v2.ScheduleObj {
+	cronExpression := d.Get(alertV2ScheduleCronExpression).(string)
+	timezone := d.Get(alertV2ScheduleTimezone).(string)
+
+	return alerts_v2.ScheduleObj{
+		CronExpression: cronExpression,
+		Timezone:       timezone,
+	}
 }
 
 func setValuesAlertV2(d *schema.ResourceData, alert *alerts_v2.AlertType) {
@@ -598,6 +623,8 @@ func setValuesAlertV2(d *schema.ResourceData, alert *alerts_v2.AlertType) {
 	d.Set(alertV2SuppressNotificationMinutes, alert.Output.SuppressNotificationsMinutes)
 	d.Set(alertV2OutputType, alert.Output.Type)
 	d.Set(alertV2Joins, alert.Correlations.Joins)
+	d.Set(alertV2ScheduleCronExpression, alert.Schedule.CronExpression)
+	d.Set(alertV2ScheduleTimezone, alert.Schedule.Timezone)
 
 	correlationString := strings.Join(alert.Correlations.CorrelationOperators, ",")
 	d.Set(alertV2CorrelationOperator, correlationString)

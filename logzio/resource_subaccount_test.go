@@ -183,6 +183,8 @@ resource "logzio_subaccount" "test_subaccount" {
   email = "%s"
   account_name = "%s"
   retention_days = 2
+  frequency_minutes = 3
+  utilization_enabled = "true"
   max_daily_gb = 1
   sharing_objects_accounts = [
     %s
