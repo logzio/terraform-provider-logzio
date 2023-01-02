@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-log v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.1
-	github.com/logzio/logzio_terraform_client v1.13.1
+	github.com/logzio/logzio_terraform_client v1.14.0
 	github.com/stretchr/testify v1.7.2
 )
 
