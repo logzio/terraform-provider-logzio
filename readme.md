@@ -193,17 +193,21 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 
 ### Changelog
 
+- **v1.11.0**:
+  - Upgrade `terraform-plugin-sdk` to `v2.24.1`.
+  - Upgrade `logzio_client_terraform` to `1.14.0`.
+  - `alert_v2` - support alert scheduling.
 - **v1.10.2**:
     - Upgrade to logzio_client_terraform 1.13.1.
     - Remove retries resources, as the new client handles it. Retries on update that validate update are still active.
-- **v1.10.1**:
-  - Upgrade to logzio_client_terraform 1.13.0.
-  - Bug fix for **subaccount** - field `reserved_daily_gb` can be 0.
 
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
 
+- **v1.10.1**:
+    - Upgrade to logzio_client_terraform 1.13.0.
+    - Bug fix for **subaccount** - field `reserved_daily_gb` can be 0.
 - **v1.10.0**
     - **Breaking Changes**:
         - Upgrading `terraform-plugin-sdk` to `v2.21.0`:

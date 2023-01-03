@@ -14,3 +14,5 @@ logzio_terraform_provider
 
 # go
 Gopkg.lock
+
+.DS_Store

@@ -178,6 +178,14 @@ func dataSourceAlertV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			alertV2ScheduleCronExpression: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			alertV2ScheduleTimezone: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }

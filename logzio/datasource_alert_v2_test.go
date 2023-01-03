@@ -28,6 +28,8 @@ func TestAccDataSourceLogzIoAlertV2(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.threshold", "10"),
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "false"),
 					resource.TestCheckResourceAttrSet(resourceName, "sub_components.0.filter_must"),
+					resource.TestCheckResourceAttr(resourceName, alertV2ScheduleCronExpression, "0 0/5 9-17 ? * * *"),
+					resource.TestCheckResourceAttr(resourceName, alertV2ScheduleTimezone, "IET"),
 				),
 			},
 		},
@@ -73,6 +75,8 @@ func getConfigResourceAlertV2() string {
       }
     ])
   }
+  schedule_cron_expression = "0 0/5 9-17 ? * * *"
+  schedule_timezone = "IET"
 }
 `
 }

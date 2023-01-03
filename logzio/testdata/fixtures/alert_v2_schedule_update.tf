@@ -1,14 +1,5 @@
-variable "api_token" {
-  type = string
-  description = "your logzio API token"
-}
-
-provider "logzio" {
-  api_token = var.api_token
-}
-
-resource "logzio_alert_v2" "my_alert" {
-  title = "hello"
+resource "logzio_alert_v2" "%s" {
+  title = "hello schedule"
   description = "this is a description"
   tags = [
     "some",

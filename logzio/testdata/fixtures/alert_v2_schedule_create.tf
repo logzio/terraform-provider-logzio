@@ -1,14 +1,5 @@
-variable "api_token" {
-  type = string
-  description = "your logzio API token"
-}
-
-provider "logzio" {
-  api_token = var.api_token
-}
-
-resource "logzio_alert_v2" "my_alert" {
-  title = "hello"
+resource "logzio_alert_v2" "%s" {
+  title = "hello schedule"
   description = "this is a description"
   tags = [
     "some",
@@ -51,5 +42,5 @@ resource "logzio_alert_v2" "my_alert" {
   }
 
   schedule_cron_expression = "0 0/5 9-17 ? * * *"
-  schedule_timezone = "IET"
+  schedule_timezone = "Europe/London"
 }
