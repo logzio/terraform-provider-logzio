@@ -268,7 +268,7 @@ func ValidateScheduleTimezone(v interface{}, path cty.Path) diag.Diagnostics {
 	timezone := v.(string)
 	timezones := GetAlertV2ScheduleTimezones()
 	if !contains(timezones, timezone) {
-		return diag.Errorf("Timezone %s is not in the allowed timezones list")
+		return diag.Errorf("Timezone %s is not in the allowed timezones list.")
 	}
 
 	var diags diag.Diagnostics
