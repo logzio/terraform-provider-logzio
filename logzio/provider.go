@@ -22,6 +22,7 @@ const (
 	resourceRestoreLogsType          = "logzio_restore_logs"
 	resourceAuthenticationGroupsType = "logzio_authentication_groups"
 	resourceKibanaObjectType         = "logzio_kibana_object"
+	resourceS3FetcherType            = "logzio_s3_fetcher"
 	envLogzioApiToken                = "LOGZIO_API_TOKEN"
 	envLogzioRegion                  = "LOGZIO_REGION"
 	envLogzioBaseURL                 = "LOGZIO_BASE_URL"
@@ -81,6 +82,7 @@ func Provider() *schema.Provider {
 			resourceRestoreLogsType:          resourceRestoreLogs(),
 			resourceAuthenticationGroupsType: resourceAuthenticationGroups(),
 			resourceKibanaObjectType:         resourceKibanaObject(),
+			resourceS3FetcherType:            resourceS3Fetcher(),
 		},
 		ConfigureContextFunc: providerConfigureWrapper,
 	}

@@ -3,12 +3,15 @@ package logzio
 import (
 	"context"
 	"fmt"
+	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/s3_fetcher"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
-	"google.golang.org/appengine/log"
+	"reflect"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -22,14 +25,16 @@ const (
 	s3FetcherAddS3ObjectKeyAsLogField = "add_s3_object_key_as_log_field"
 	s3FetcherRegion                   = "aws_region"
 	s3FetcherLogsType                 = "logs_type"
+
+	s3FetcherRetryAttempts = 8
 )
 
 func resourceS3Fetcher() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceS3FetcherCreate,
 		ReadContext:   resourceS3FetcherRead,
-		//UpdateContext: resourceSubAccountUpdate,
-		//DeleteContext: resourceSubAccountDelete,
+		UpdateContext: resourceS3FetcherUpdate,
+		DeleteContext: resourceS3FetcherDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -61,6 +66,7 @@ func resourceS3Fetcher() *schema.Resource {
 			s3FetcherPrefix: {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			s3FetcherActive: {
 				Type:     schema.TypeBool,
@@ -92,7 +98,7 @@ func s3FetcherClient(m interface{}) *s3_fetcher.S3FetcherClient {
 }
 
 func resourceS3FetcherCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	createFetcher, err := getCreateUpdateFromSchema(ctx, d)
+	createFetcher, err := getCreateUpdateS3FetcherFromSchema(ctx, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -107,9 +113,105 @@ func resourceS3FetcherCreate(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceS3FetcherRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	id, err := utils.IdFromResourceData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	fetcher, err := s3FetcherClient(m).GetS3Fetcher(id)
+	if err != nil {
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing s3 fetcher") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
+		}
+	}
+
+	setS3Fetcher(d, *fetcher)
+	return nil
+
 }
 
-func getCreateUpdateFromSchema(ctx context.Context, d *schema.ResourceData) (s3_fetcher.S3FetcherRequest, error) {
+func resourceS3FetcherUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	id, err := utils.IdFromResourceData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	updateFetcher, err := getCreateUpdateS3FetcherFromSchema(ctx, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = s3FetcherClient(m).UpdateS3Fetcher(id, updateFetcher)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	var diagRet diag.Diagnostics
+	readErr := retry.Do(func() error {
+		diagRet = resourceS3FetcherRead(ctx, d, m)
+		if diagRet.HasError() {
+			return fmt.Errorf("received error from read s3 fetcher")
+		}
+
+		return nil
+	},
+		retry.RetryIf(
+			// Retry ONLY if the resource was not updated yet
+			func(err error) bool {
+				if err != nil {
+					return false
+				} else {
+					// Check if the update shows on read
+					// if not updated yet - retry
+					s3FetcherFromSchema, _ := getCreateUpdateS3FetcherFromSchema(ctx, d)
+					return !reflect.DeepEqual(s3FetcherFromSchema, updateFetcher)
+				}
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(s3FetcherRetryAttempts),
+	)
+
+	if readErr != nil {
+		tflog.Error(ctx, "could not update schema")
+		return diagRet
+	}
+
+	return nil
+}
+
+func resourceS3FetcherDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	id, err := utils.IdFromResourceData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = s3FetcherClient(m).DeleteS3Fetcher(id)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+	return nil
+}
+
+func setS3Fetcher(d *schema.ResourceData, response s3_fetcher.S3FetcherResponse) {
+	d.Set(s3FetcherBucket, response.Bucket)
+	d.Set(s3FetcherActive, response.Active)
+	d.Set(s3FetcherRegion, response.Region)
+	d.Set(s3FetcherLogsType, response.LogsType)
+	d.Set(s3FetcherPrefix, response.Prefix)
+	d.Set(s3FetcherAddS3ObjectKeyAsLogField, response.AddS3ObjectKeyAsLogField)
+	d.Set(s3FetcherAccessKey, response.AccessKey)
+	d.Set(s3FetcherArn, response.Arn)
+}
+
+func getCreateUpdateS3FetcherFromSchema(ctx context.Context, d *schema.ResourceData) (s3_fetcher.S3FetcherRequest, error) {
 	request := s3_fetcher.S3FetcherRequest{
 		Bucket:   d.Get(s3FetcherBucket).(string),
 		Region:   d.Get(s3FetcherRegion).(s3_fetcher.AwsRegion),
@@ -124,14 +226,14 @@ func getCreateUpdateFromSchema(ctx context.Context, d *schema.ResourceData) (s3_
 	}
 
 	if arn != "" {
-		log.Debugf(ctx, "aws authentication with arn detected")
+		tflog.Debug(ctx, "aws authentication with arn detected")
 		request.Arn = arn
 	} else {
 		if (accessKey == "" && secretKey != "") || (accessKey != "" && secretKey == "") {
 			return request, fmt.Errorf("when using keys authentication, both %s and %s must be set", s3FetcherAccessKey, s3FetcherSecretKey)
 		}
 
-		log.Debugf(ctx, "aws authentication with keys detected")
+		tflog.Debug(ctx, "aws authentication with keys detected")
 		request.AccessKey = accessKey
 		request.SecretKey = secretKey
 	}

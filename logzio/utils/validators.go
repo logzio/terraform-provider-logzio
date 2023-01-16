@@ -9,6 +9,7 @@ import (
 	"github.com/logzio/logzio_terraform_client/archive_logs"
 	"github.com/logzio/logzio_terraform_client/authentication_groups"
 	"github.com/logzio/logzio_terraform_client/endpoints"
+	"github.com/logzio/logzio_terraform_client/s3_fetcher"
 	"github.com/logzio/logzio_terraform_client/users"
 	"regexp"
 )
@@ -268,9 +269,33 @@ func ValidateScheduleTimezone(v interface{}, path cty.Path) diag.Diagnostics {
 	timezone := v.(string)
 	timezones := GetAlertV2ScheduleTimezones()
 	if !contains(timezones, timezone) {
-		return diag.Errorf("Timezone %s is not in the allowed timezones list.")
+		return diag.Errorf("Timezone %s is not in the allowed timezones list.", timezone)
 	}
 
 	var diags diag.Diagnostics
 	return diags
+}
+
+func ValidateS3FetcherRegion(v interface{}, path cty.Path) diag.Diagnostics {
+	region := v.(string)
+	regions := s3_fetcher.GetValidRegions()
+	for _, validRegion := range regions {
+		if region == validRegion.String() {
+			return diag.Diagnostics{}
+		}
+	}
+
+	return diag.Errorf("Region %s is not in the allowed aws regions list: %s", region, regions)
+}
+
+func ValidateS3FetcherLogsType(v interface{}, path cty.Path) diag.Diagnostics {
+	logsType := v.(string)
+	validLogsTypes := s3_fetcher.GetValidLogsType()
+	for _, validType := range validLogsTypes {
+		if logsType == validType.String() {
+			return diag.Diagnostics{}
+		}
+	}
+
+	return diag.Errorf("Logs type %s is not in the allowed logs types list: %s", logsType, validLogsTypes)
 }
