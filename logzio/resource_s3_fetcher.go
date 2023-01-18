@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	s3FetcherId                       = "id"
+	s3FetcherId                       = "fetcher_id"
 	s3FetcherAccessKey                = "aws_access_key"
 	s3FetcherSecretKey                = "aws_secret_key"
 	s3FetcherArn                      = "aws_arn"
@@ -38,7 +38,6 @@ func resourceS3Fetcher() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
 		Schema: map[string]*schema.Schema{
 			s3FetcherId: {
 				Type:     schema.TypeInt,
@@ -109,6 +108,7 @@ func resourceS3FetcherCreate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	d.SetId(strconv.FormatInt(fetcher.Id, 10))
+	d.Set(s3FetcherId, fetcher.Id)
 	return resourceS3FetcherRead(ctx, d, m)
 }
 
@@ -212,12 +212,10 @@ func setS3Fetcher(d *schema.ResourceData, response s3_fetcher.S3FetcherResponse)
 }
 
 func getCreateUpdateS3FetcherFromSchema(ctx context.Context, d *schema.ResourceData) (s3_fetcher.S3FetcherRequest, error) {
-	request := s3_fetcher.S3FetcherRequest{
-		Bucket:   d.Get(s3FetcherBucket).(string),
-		Region:   d.Get(s3FetcherRegion).(s3_fetcher.AwsRegion),
-		LogsType: d.Get(s3FetcherLogsType).(s3_fetcher.AwsLogsType),
-	}
-
+	var request s3_fetcher.S3FetcherRequest
+	request.Bucket = d.Get(s3FetcherBucket).(string)
+	request.Region = s3_fetcher.AwsRegion(d.Get(s3FetcherRegion).(string))
+	request.LogsType = s3_fetcher.AwsLogsType(d.Get(s3FetcherLogsType).(string))
 	arn := d.Get(s3FetcherArn).(string)
 	accessKey := d.Get(s3FetcherAccessKey).(string)
 	secretKey := d.Get(s3FetcherSecretKey).(string)
