@@ -23,6 +23,7 @@ The following Logz.io API endpoints are supported by this provider:
 * [Restore logs](https://docs.logz.io/api/#tag/Restore-logs)
 * [Authentication groups](https://docs.logz.io/api/#tag/Authentication-groups)
 * [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
+* [S3 Fetcher](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets)
 
 #### Working with Terraform
 
@@ -193,6 +194,9 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 
 ### Changelog
 
+- **v1.12.0**:
+  - Upgrade `logzio_client_terraform` to `1.15.0`.
+  - Support [S3 Fetcher API](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets).
 - **v1.11.0**:
   - Upgrade `terraform-plugin-sdk` to `v2.24.1`.
   - Upgrade `logzio_client_terraform` to `1.14.0`.
