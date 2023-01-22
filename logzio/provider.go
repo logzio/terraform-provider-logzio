@@ -22,20 +22,10 @@ const (
 	resourceRestoreLogsType          = "logzio_restore_logs"
 	resourceAuthenticationGroupsType = "logzio_authentication_groups"
 	resourceKibanaObjectType         = "logzio_kibana_object"
+	resourceS3FetcherType            = "logzio_s3_fetcher"
 	envLogzioApiToken                = "LOGZIO_API_TOKEN"
 	envLogzioRegion                  = "LOGZIO_REGION"
 	envLogzioBaseURL                 = "LOGZIO_BASE_URL"
-	envLogzioAccountId               = "LOGZIO_ACCOUNT_ID"
-	envLogzioS3Path                  = "S3_PATH"
-	envLogzioAwsAccessKey            = "AWS_ACCESS_KEY"
-	envLogzioAwsSecretKey            = "AWS_SECRET_KEY"
-	envLogzioAwsArn                  = "AWS_ARN"
-	envLogzioAzureAccountName        = "AZURE_ACCOUNT_NAME"
-	envLogzioAzureClientId           = "AZURE_CLIENT_ID"
-	envLogzioAzureClientSecret       = "AZURE_CLIENT_SECRET"
-	envLogzioAzureContainerName      = "AZURE_CONTAINER_NAME"
-	envLogzioAzureTenantId           = "AZURE_TENANT_ID"
-	envLogzioAzurePath               = "BLOB_PATH"
 
 	baseUrl = "https://api%s.logz.io"
 )
@@ -69,6 +59,7 @@ func Provider() *schema.Provider {
 			resourceRestoreLogsType:          dataSourceRestoreLogs(),
 			resourceAuthenticationGroupsType: dataSourceAuthenticationGroups(),
 			resourceKibanaObjectType:         dataSourceKibanaObject(),
+			resourceS3FetcherType:            dataSourceS3Fetcher(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			resourceEndpointType:             resourceEndpoint(),
@@ -81,6 +72,7 @@ func Provider() *schema.Provider {
 			resourceRestoreLogsType:          resourceRestoreLogs(),
 			resourceAuthenticationGroupsType: resourceAuthenticationGroups(),
 			resourceKibanaObjectType:         resourceKibanaObject(),
+			resourceS3FetcherType:            resourceS3Fetcher(),
 		},
 		ConfigureContextFunc: providerConfigureWrapper,
 	}

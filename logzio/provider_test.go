@@ -7,6 +7,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+const (
+	envLogzioAccountId          = "LOGZIO_ACCOUNT_ID"
+	envLogzioS3Path             = "S3_PATH"
+	envLogzioAwsAccessKey       = "AWS_ACCESS_KEY"
+	envLogzioAwsSecretKey       = "AWS_SECRET_KEY"
+	envLogzioAwsArn             = "AWS_ARN"
+	envLogzioAwsArnS3Fetcher    = "AWS_ARN_S3_FETCHER"
+	envLogzioAzureAccountName   = "AZURE_ACCOUNT_NAME"
+	envLogzioAzureClientId      = "AZURE_CLIENT_ID"
+	envLogzioAzureClientSecret  = "AZURE_CLIENT_SECRET"
+	envLogzioAzureContainerName = "AZURE_CONTAINER_NAME"
+	envLogzioAzureTenantId      = "AZURE_TENANT_ID"
+	envLogzioAzurePath          = "BLOB_PATH"
+)
+
 var (
 	testAccExpectedAlertChannelName string
 	testAccExpectedApplicationName  string
