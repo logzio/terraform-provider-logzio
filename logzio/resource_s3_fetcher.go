@@ -224,6 +224,9 @@ func getCreateUpdateS3FetcherFromSchema(ctx context.Context, d *schema.ResourceD
 	}
 
 	if arn != "" {
+		if accessKey != "" && secretKey != "" {
+			return request, fmt.Errorf("cannot use both authentication methods. Choose authenticating either with keys OR arn")
+		}
 		tflog.Debug(ctx, "aws authentication with arn detected")
 		request.Arn = arn
 	} else {

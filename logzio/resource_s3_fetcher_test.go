@@ -276,6 +276,30 @@ resource "logzio_s3_fetcher" "test_fetcher" {
 	})
 }
 
+func TestAccLogzioS3Fetcher_S3FetcherAllAuthMethods(t *testing.T) {
+	defer utils.SleepAfterTest()
+	terraformPlan := fmt.Sprintf(`
+resource "logzio_s3_fetcher" "test_fetcher" {
+  aws_access_key = "%s"
+  aws_secret_key = "%s"
+  aws_arn = "%s"
+  bucket_name = "%s"
+  active = false
+  aws_region = "US_EAST_1"
+  logs_type = "elb"
+}
+`, os.Getenv(envLogzioAwsAccessKey), os.Getenv(envLogzioAwsSecretKey), os.Getenv(envLogzioAwsArnS3Fetcher), bucketName)
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      terraformPlan,
+				ExpectError: regexp.MustCompile("cannot use both authentication methods. Choose authenticating either with keys OR arn"),
+			},
+		},
+	})
+}
+
 func getS3FetcherConfigKeys(active bool) string {
 	return fmt.Sprintf(`
 resource "logzio_s3_fetcher" "test_fetcher" {
