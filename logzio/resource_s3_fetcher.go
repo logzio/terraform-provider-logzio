@@ -108,7 +108,6 @@ func resourceS3FetcherCreate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	d.SetId(strconv.FormatInt(fetcher.Id, 10))
-	d.Set(s3FetcherId, fetcher.Id)
 	return resourceS3FetcherRead(ctx, d, m)
 }
 
@@ -201,6 +200,7 @@ func resourceS3FetcherDelete(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func setS3Fetcher(d *schema.ResourceData, response s3_fetcher.S3FetcherResponse) {
+	d.Set(s3FetcherId, response.Id)
 	d.Set(s3FetcherBucket, response.Bucket)
 	d.Set(s3FetcherActive, response.Active)
 	d.Set(s3FetcherRegion, response.Region)
