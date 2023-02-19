@@ -1,8 +1,10 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/restore_logs"
 	"time"
 )
@@ -13,7 +15,7 @@ const (
 
 func dataSourceRestoreLogs() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceRestoreLogsRead,
+		ReadContext: dataSourceRestoreLogsRead,
 		Schema: map[string]*schema.Schema{
 			restoreLogsId: {
 				Type:     schema.TypeInt,
@@ -66,7 +68,7 @@ func dataSourceRestoreLogs() *schema.Resource {
 	}
 }
 
-func dataSourceRestoreLogsRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceRestoreLogsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, _ := restore_logs.New(m.(Config).apiToken, m.(Config).baseUrl)
 	restoreIdStr, ok := d.GetOk(restoreLogsId)
 
@@ -74,7 +76,7 @@ func dataSourceRestoreLogsRead(d *schema.ResourceData, m interface{}) error {
 		id := int32(restoreIdStr.(int))
 		restore, err := getRestore(client, id, restoreDatasourceRetries)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		d.SetId(fmt.Sprintf("%d", restore.Id))
@@ -82,7 +84,7 @@ func dataSourceRestoreLogsRead(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	return fmt.Errorf("couldn't find restore operation with specified id")
+	return diag.Errorf("couldn't find restore operation with specified id")
 
 }
 

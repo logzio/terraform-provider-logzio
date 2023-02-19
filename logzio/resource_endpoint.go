@@ -1,16 +1,17 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/logzio/logzio_terraform_client/endpoints"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"reflect"
 	"strconv"
 	"strings"
-	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/logzio/logzio_terraform_client/endpoints"
 )
 
 const (
@@ -34,6 +35,8 @@ const (
 	endpointPassword      string = "password"
 
 	endpointTypeMicrosoftTeamsFromApi = "microsoft teams"
+
+	endpointRetryAttempts = 8
 )
 
 /**
@@ -41,12 +44,12 @@ const (
  */
 func resourceEndpoint() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceEndpointCreate,
-		Read:   resourceEndpointRead,
-		Update: resourceEndpointUpdate,
-		Delete: resourceEndpointDelete,
+		CreateContext: resourceEndpointCreate,
+		ReadContext:   resourceEndpointRead,
+		UpdateContext: resourceEndpointUpdate,
+		DeleteContext: resourceEndpointDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			endpointIdField: {
@@ -112,7 +115,7 @@ func resourceEndpoint() *schema.Resource {
 							ValidateFunc: utils.ValidateHttpMethod,
 						},
 						endpointHeaders: {
-							Type:     schema.TypeMap,
+							Type:     schema.TypeString,
 							Optional: true,
 						},
 						endpointBodyTemplate: {
@@ -241,11 +244,6 @@ func resourceEndpoint() *schema.Resource {
 				},
 			},
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Second),
-			Update: schema.DefaultTimeout(5 * time.Second),
-			Delete: schema.DefaultTimeout(5 * time.Second),
-		},
 	}
 }
 
@@ -256,75 +254,94 @@ func endpointClient(m interface{}) *endpoints.EndpointsClient {
 	return client
 }
 
-func resourceEndpointCreate(d *schema.ResourceData, m interface{}) error {
+func resourceEndpointCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	createEndpoint := getCreateOrUpdateEndpointFromSchema(d)
 	endpoint, err := endpointClient(m).CreateEndpoint(createEndpoint)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.FormatInt(int64(endpoint.Id), 10))
-
-	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		err = resourceEndpointRead(d, m)
-		if err != nil {
-			if strings.Contains(err.Error(), "failed with missing endpoint") {
-				return resource.RetryableError(err)
-			}
-		}
-
-		return resource.NonRetryableError(err)
-	})
+	return resourceEndpointRead(ctx, d, m)
 }
 
-func resourceEndpointRead(d *schema.ResourceData, m interface{}) error {
+func resourceEndpointRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id, err := utils.IdFromResourceData(d)
 	if err != nil {
-		return nil
+		return diag.FromErr(err)
 	}
-
 	endpoint, err := endpointClient(m).GetEndpoint(id)
+
 	if err != nil {
-		return err
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing endpoint") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
+		}
 	}
 
 	setEndpoint(d, endpoint)
 	return nil
 }
 
-func resourceEndpointUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceEndpointUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id, _ := utils.IdFromResourceData(d)
 	updateEndpoint := getCreateOrUpdateEndpointFromSchema(d)
 	_, err := endpointClient(m).UpdateEndpoint(id, updateEndpoint)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-		err = resourceEndpointRead(d, m)
-		if err != nil {
-			endpointFromSchema := getCreateOrUpdateEndpointFromSchema(d)
-			if strings.Contains(err.Error(), "failed with missing endpoint") &&
-				!reflect.DeepEqual(updateEndpoint, endpointFromSchema) {
-				return resource.RetryableError(fmt.Errorf("endpoint is not updated yet: %s", err.Error()))
+	var diagRet diag.Diagnostics
+	readErr := retry.Do(
+		func() error {
+			diagRet = resourceEndpointRead(ctx, d, m)
+			if diagRet.HasError() {
+				return fmt.Errorf("received error from read endpoint")
 			}
-		}
 
-		return resource.NonRetryableError(err)
-	})
+			return nil
+		},
+		retry.RetryIf(
+			// Retry ONLY if the resource was not updated yet
+			func(err error) bool {
+				if err != nil {
+					return false
+				} else {
+					// Check if the update shows on read
+					// if not updated yet - retry
+					endpointFromSchema := getCreateOrUpdateEndpointFromSchema(d)
+					return !reflect.DeepEqual(updateEndpoint, endpointFromSchema)
+				}
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(endpointRetryAttempts),
+	)
+
+	if readErr != nil {
+		tflog.Error(ctx, "could not update schema")
+		return diagRet
+	}
+
+	return nil
 }
 
-func resourceEndpointDelete(d *schema.ResourceData, m interface{}) error {
-	endpointId, _ := utils.IdFromResourceData(d)
+func resourceEndpointDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	id, err := utils.IdFromResourceData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		err := endpointClient(m).DeleteEndpoint(endpointId)
-		if err != nil {
-			return resource.RetryableError(err)
-		}
+	err = endpointClient(m).DeleteEndpoint(id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-		return resource.NonRetryableError(err)
-	})
+	d.SetId("")
+	return nil
 }
 
 func getCreateOrUpdateEndpointFromSchema(d *schema.ResourceData) endpoints.CreateOrUpdateEndpoint {
@@ -341,11 +358,8 @@ func getCreateOrUpdateEndpointFromSchema(d *schema.ResourceData) endpoints.Creat
 	case endpoints.EndpointTypeCustom:
 		createEndpoint.Url = opts[endpointUrl].(string)
 		createEndpoint.Method = opts[endpointMethod].(string)
-		headerMap := make(map[string]string)
-		for k, v := range opts[endpointHeaders].(map[string]interface{}) {
-			headerMap[k] = v.(string)
-		}
-		createEndpoint.Headers = utils.ParseObjectToString(headerMap)
+		createEndpoint.Headers = new(string)
+		*createEndpoint.Headers = opts[endpointHeaders].(string)
 		createEndpoint.BodyTemplate = utils.ParseFromStringToType(opts[endpointBodyTemplate].(string))
 	case endpoints.EndpointTypePagerDuty:
 		createEndpoint.ServiceKey = opts[endpointServiceKey].(string)
@@ -374,7 +388,7 @@ func getCreateOrUpdateEndpointFromSchema(d *schema.ResourceData) endpoints.Creat
 }
 
 /*
-* returns the mapping stored in a terraform map value - who knows why this is not "just" a map, but instead a map
+* mappingsFromResourceData returns the mapping stored in terraform map value - who knows why this is not "just" a map, but instead a map
 * wrapped in an array
  */
 func mappingsFromResourceData(d *schema.ResourceData, key string) (map[string]interface{}, error) {
@@ -396,7 +410,7 @@ func setEndpoint(d *schema.ResourceData, endpoint *endpoints.Endpoint) {
 	d.Set(endpointDescription, endpoint.Description)
 	typeLowerCase := strings.ToLower(endpoint.Type)
 	if typeLowerCase == endpointTypeMicrosoftTeamsFromApi {
-		// microsoft teams is the only type that's being returned with space.
+		// Microsoft Teams is the only type that's being returned with space.
 		typeLowerCase = strings.Replace(typeLowerCase, " ", "", 1)
 	}
 	d.Set(endpointType, typeLowerCase)
@@ -410,7 +424,7 @@ func setEndpoint(d *schema.ResourceData, endpoint *endpoints.Endpoint) {
 		set[0] = map[string]interface{}{
 			endpointUrl:          endpoint.Url,
 			endpointMethod:       endpoint.Method,
-			endpointHeaders:      utils.ParseFromStringToType(endpoint.Headers),
+			endpointHeaders:      endpoint.Headers,
 			endpointBodyTemplate: utils.ParseObjectToString(endpoint.BodyTemplate),
 		}
 	case endpoints.EndpointTypePagerDuty:

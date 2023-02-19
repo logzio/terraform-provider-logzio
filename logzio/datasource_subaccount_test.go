@@ -2,7 +2,7 @@ package logzio
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"regexp"
@@ -20,6 +20,7 @@ func TestAccDataSourceSubaccount(t *testing.T) {
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_datasource_create"
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -27,7 +28,7 @@ func TestAccDataSourceSubaccount(t *testing.T) {
 			testAccPreCheckEmail(t)
 			testAccPreCheckAccountId(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSubAccountDataSourceResource(email, accountId, accountName),
@@ -56,6 +57,7 @@ func TestAccDataSourceSubaccountByAccountName(t *testing.T) {
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_datasource_account_name"
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -63,7 +65,7 @@ func TestAccDataSourceSubaccountByAccountName(t *testing.T) {
 			testAccPreCheckEmail(t)
 			testAccPreCheckAccountId(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSubAccountDataSourceResource(email, accountId, accountName),
@@ -87,8 +89,10 @@ func TestAccDataSourceSubaccountByAccountName(t *testing.T) {
 }
 
 func TestAccDataSourceSubaccountNotExists(t *testing.T) {
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckLogzioSubaccountDatasourceConfigNotExist(),

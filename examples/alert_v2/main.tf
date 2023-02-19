@@ -49,4 +49,7 @@ resource "logzio_alert_v2" "my_alert" {
       }
     ])
   }
+
+  schedule_cron_expression = "0 0/5 9-17 ? * * *"
+  schedule_timezone = "IET"
 }

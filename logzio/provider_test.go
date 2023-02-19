@@ -4,32 +4,52 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+const (
+	envLogzioAccountId          = "LOGZIO_ACCOUNT_ID"
+	envLogzioS3Path             = "S3_PATH"
+	envLogzioAwsAccessKey       = "AWS_ACCESS_KEY"
+	envLogzioAwsSecretKey       = "AWS_SECRET_KEY"
+	envLogzioAwsArn             = "AWS_ARN"
+	envLogzioAwsArnS3Fetcher    = "AWS_ARN_S3_FETCHER"
+	envLogzioAzureAccountName   = "AZURE_ACCOUNT_NAME"
+	envLogzioAzureClientId      = "AZURE_CLIENT_ID"
+	envLogzioAzureClientSecret  = "AZURE_CLIENT_SECRET"
+	envLogzioAzureContainerName = "AZURE_CONTAINER_NAME"
+	envLogzioAzureTenantId      = "AZURE_TENANT_ID"
+	envLogzioAzurePath          = "BLOB_PATH"
 )
 
 var (
 	testAccExpectedAlertChannelName string
 	testAccExpectedApplicationName  string
-	testAccProviders                map[string]terraform.ResourceProvider
-	testAccProvider                 *schema.Provider
+	testAccProviderFactories        = map[string]func() (*schema.Provider, error){
+		"kubernetes": func() (*schema.Provider, error) {
+			return Provider(), nil
+		},
+	}
+	testAccProvider *schema.Provider
 )
 
 func init() {
-	testAccProvider = Provider().(*schema.Provider)
-	testAccProviders = map[string]terraform.ResourceProvider{
-		"logzio": testAccProvider,
+	testAccProvider = Provider()
+	testAccProviderFactories = map[string]func() (*schema.Provider, error){
+		"logzio": func() (*schema.Provider, error) {
+			return Provider(), nil
+		},
 	}
 }
 
 func TestProvider(t *testing.T) {
-	if err := Provider().(*schema.Provider).InternalValidate(); err != nil {
+	if err := Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
 func TestProviderImpl(t *testing.T) {
-	var _ terraform.ResourceProvider = Provider()
+	var _ *schema.Provider = Provider()
 }
 
 func testAccPreCheckEnv(t *testing.T, env string) {

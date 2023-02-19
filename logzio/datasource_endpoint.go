@@ -1,15 +1,17 @@
 package logzio
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/endpoints"
 )
 
 func dataSourceEndpoint() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceEndpointRead,
+		ReadContext: dataSourceEndpointRead,
 		Schema: map[string]*schema.Schema{
 			endpointId: {
 				Type:     schema.TypeInt,
@@ -23,21 +25,25 @@ func dataSourceEndpoint() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			endpointDescription: {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
 
-func dataSourceEndpointRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceEndpointRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var client *endpoints.EndpointsClient
 	client, _ = endpoints.New(m.(Config).apiToken, m.(Config).baseUrl)
 
-	endpointId, ok := d.GetOk(endpointId)
+	id, ok := d.GetOk(endpointId)
 	if ok {
-		endpoint, err := client.GetEndpoint(int64(endpointId.(int)))
+		endpoint, err := client.GetEndpoint(int64(id.(int)))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
-		d.SetId(fmt.Sprintf("%d", endpointId))
+		d.SetId(fmt.Sprintf("%d", id))
 		d.Set(endpointTitle, endpoint.Title)
 		d.Set(endpointDescription, endpoint.Description)
 		d.Set(endpointType, endpoint.Type)
@@ -48,7 +54,7 @@ func dataSourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 	if ok {
 		list, err := client.ListEndpoints()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		for _, endpoint := range list {
 			if endpoint.Title == title {
@@ -61,5 +67,5 @@ func dataSourceEndpointRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	return fmt.Errorf("couldn't find endpoint with specified attributes")
+	return diag.Errorf("couldn't find endpoint with specified attributes")
 }

@@ -2,9 +2,10 @@
 
 Provides a Logz.io restore logs resource. This can be used to create and manage Logz.io restore logs operations.
 
-* Learn more about log shipping tokens in the [Logz.io Docs](https://docs.logz.io/api/#tag/Restore-logs)
+* Learn more about restore in the [Logz.io Docs](https://docs.logz.io/api/#tag/Restore-logs)
 
 **Note:** In order to initiate a restore operation you must have an archive linked to your Logz.io account.
+
 ## Example Usage
 
 ```hcl
@@ -17,8 +18,9 @@ provider "logzio" {
   api_token = var.api_token
 }
 
-resource "logzio_restore_logs" "my_restore" { 
+resource "logzio_restore_logs" "my_restore" {
   account_name = "test_restore"
+  username = "my@username.com"
   start_time = 1635134987
   end_time = 1635145789
 }
@@ -27,11 +29,11 @@ resource "logzio_restore_logs" "my_restore" {
 ## Argument Reference
 
 * `account_name` - (String) Name of the restored account.
+* `username` - (String) Owner of the restored account. Effectively, the user's email address.
 * `start_time` - (Integer) UNIX timestamp in milliseconds specifying the earliest logs to be restored.
 * `end_time` - (Integer) UNIX timestamp in milliseconds specifying the latest logs to be restored.
 
-**Note:** Once a restore operation was created, changing any of its arguments will cause the resource to be destroyed
-re-created under a new ID.
+**Note:** Once a restore operation was created, changing any of its arguments will cause the resource to be destroyed re-created under a new ID.
 
 ##  Attribute Reference
 
@@ -45,8 +47,8 @@ re-created under a new ID.
 * `expires_at` - (Integer) UNIX timestamp in milliseconds specifying when the account is due to expire. Restored accounts expire automatically after a number of days, as specified in the account's terms.
 
 ## Importing resource:
-To import a restore operation you'll need to specify the restore's id.
-For example, if you have in your Terraform configuration the following:
+
+To import a restore operation you'll need to specify the restore's id. For example, if you have in your Terraform the following configuration:
 
 ```hcl
 resource "logzio_restore_logs" "imported" {

@@ -2,8 +2,8 @@
 
 Provides a Logz.io notification endpoint or custom webhook resource. This can be used to create and manage Logz.io endpoint integrations.
 
-* Endpoints can be used to send alerts, automate reports, share logs and dashboards, directly from Logz.io. Learn more about endpoint integrations in the [Logz.io Docs](https://docs.logz.io/user-guide/integrations/endpoints.html)
-* Learn more about available [APIs for managing Logz.io endpoints](https://docs.logz.io/api/#tag/Manage-notification-endpoints)
+* Endpoints can be used to send alerts, automate reports, share logs and dashboards, directly from Logz.io. Learn more about endpoint integrations in the [Logz.io Docs](https://docs.logz.io/user-guide/integrations/endpoints.html).
+* Learn more about available [APIs for managing Logz.io endpoints](https://docs.logz.io/api/#tag/Manage-notification-endpoints).
 
 ## Example Usage
 
@@ -40,7 +40,7 @@ resource "logzio_endpoint" "my_endpoint" {
 * `custom` - (Optional) Relevant when `endpoint_type` is `custom`. Manages a custom webhook for your integration of choice.
     * `url` - Specifies the URL destination.
     * `method` - Selects the HTTP request method.
-    * `headers` - Header parameters for the request. Sent as comma-separated key-value pairs.
+    * `headers` - Header parameters for the request. String, sent as comma-separated key-value pairs.
     * `body_template` - string of JSON object that serves as the template for the message body.
 * `opsgenie` - (Optional) Relevant when `endpoint_type` is `opsgenie`. Manages a webhook to OpsGenie.
     * `api_key` - API key from OpsGenie, see https://docs.opsgenie.com/docs/logz-io-integration.
@@ -55,6 +55,13 @@ resource "logzio_endpoint" "my_endpoint" {
 
 * `id` - ID of the notification endpoint.
 
+### Import endpoint as resource
+
+You can import endpoint as follows:
+
+```
+terraform import logzio_endpoint.my_endpoint <ENDPOINT-ID>
+```
 
 ## Endpoints used
 

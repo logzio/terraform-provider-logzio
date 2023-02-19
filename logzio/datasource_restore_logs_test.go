@@ -2,7 +2,8 @@ package logzio
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"testing"
 )
@@ -14,18 +15,18 @@ func TestAccDataSourceRestoreLogs(t *testing.T) {
 	fullDataSourceName := "data.logzio_restore_logs." + restoreDataSourceName
 	path := os.Getenv(envLogzioS3Path)
 	arn := os.Getenv(envLogzioAwsArn)
+	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:  getConfigTestArchiveS3Iam(archiveName, path, arn),
 				Destroy: false,
 			},
 			{
-				ExpectNonEmptyPlan: true,
-				Config:             getConfigTestArchiveS3Iam(archiveName, path, arn) + getConfigTestRestore(restoreName) + getConfigTestRestoreDatasource(restoreName, restoreDataSourceName),
+				Config: getConfigTestArchiveS3Iam(archiveName, path, arn) + getConfigTestRestore(restoreName) + getConfigTestRestoreDatasource(restoreName, restoreDataSourceName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet(fullDataSourceName, restoreLogsAccountName),
 					resource.TestCheckResourceAttrSet(fullDataSourceName, restoreLogsStartTime),

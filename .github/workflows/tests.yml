@@ -7,18 +7,29 @@ env:
   TF_ACC: true
   LOGZIO_EMAIL: ${{ secrets.LOGZIO_EMAIL }}
   LOGZIO_ACCOUNT_ID: ${{ secrets.LOGZIO_ACCOUNT_ID }}
+  S3_PATH: ${{ secrets.S3_PATH }}
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  AZURE_ACCOUNT_NAME: ${{ secrets.AZURE_ACCOUNT_NAME }}
+  AZURE_CONTAINER_NAME: ${{ secrets.AZURE_CONTAINER_NAME }}
+  AWS_ARN: ${{ secrets.AWS_ARN }}
+  AWS_ACCESS_KEY_UPDATE: ${{ secrets.AWS_ACCESS_KEY_UPDATE }}
+  AWS_SECRET_KEY_UPDATE: ${{ secrets.AWS_SECRET_KEY_UPDATE }}
 
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
 
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.15
+        go-version: 1.18
     - name: Test
       run: |
         go clean -testcache

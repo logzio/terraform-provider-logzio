@@ -1,0 +1,42 @@
+{
+  "_index": "logzioCustomerIndex*",
+  "_type": "_doc",
+  "_id": "dashboard:tf-provider-test-dashboard",
+  "_score": 2.5902672,
+  "_source": {
+    "type": "dashboard",
+    "references": [
+      {
+        "name": "panel_0",
+        "type": "visualization",
+        "id": "test_vis_0"
+      },
+      {
+        "name": "panel_1",
+        "type": "visualization",
+        "id": "test_vis_1"
+      },
+      {
+        "name": "panel_2",
+        "type": "visualization",
+        "id": "test_vis_2"
+      }
+    ],
+    "dashboard": {
+      "hits": 0,
+      "description": "",
+      "id": "tf-provider-test-dashboard",
+      "timeRestore": false,
+      "version": 1,
+      "_updatedAt": 1561458145283,
+      "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"w\":20,\"x\":16,\"h\":15,\"y\":0,\"i\":\"1\"},\"version\":\"6.3.2\",\"panelRefName\":\"panel_0\"},{\"panelIndex\":\"2\",\"gridData\":{\"w\":20,\"x\":16,\"h\":15,\"y\":15,\"i\":\"2\"},\"version\":\"6.3.2\",\"panelRefName\":\"panel_1\"},{\"panelIndex\":\"3\",\"gridData\":{\"w\":20,\"x\":16,\"h\":10,\"y\":30,\"i\":\"3\"},\"version\":\"6.3.2\",\"panelRefName\":\"panel_2\"}]",
+      "optionsJSON": "{\"darkTheme\":false,\"useMargins\":false,\"hidePanelTitles\":false}",
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"*\",\"language\":\"lucene\"},\"highlightAll\":true,\"version\":true}"
+      },
+      "title": "tf provider test update dashboard",
+      "_logzioOriginalAppId": 1234
+    },
+    "id": "tf-provider-test-dashboard"
+  }
+}

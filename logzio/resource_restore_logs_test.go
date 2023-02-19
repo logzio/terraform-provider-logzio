@@ -2,7 +2,8 @@ package logzio
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"regexp"
 	"testing"
@@ -15,9 +16,11 @@ func TestAccLogzioRestoreLogs_InitiateRestore(t *testing.T) {
 	archiveName := "archive_for_restore_initiate"
 	restoreName := "tf_test_restore_initiate"
 	fullRestoreName := "logzio_restore_logs." + restoreName
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:  getConfigTestArchiveS3Iam(archiveName, path, arn),
@@ -45,9 +48,10 @@ func TestAccLogzioRestoreLogs_InitiateRestore(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      fullRestoreName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            fullRestoreName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{restoreLogsUsername},
 			},
 		},
 	})
@@ -55,9 +59,11 @@ func TestAccLogzioRestoreLogs_InitiateRestore(t *testing.T) {
 
 func TestAccLogzioRestoreLogs_InitiateRestoreEmptyStartTime(t *testing.T) {
 	restoreName := "tf_test_empty_start_time"
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      getConfigTestRestoreEmptyStartTime(restoreName),
@@ -69,9 +75,11 @@ func TestAccLogzioRestoreLogs_InitiateRestoreEmptyStartTime(t *testing.T) {
 
 func TestAccLogzioRestoreLogs_InitiateRestoreEmptyEndTime(t *testing.T) {
 	restoreName := "tf_test_empty_start_time"
+	defer utils.SleepAfterTest()
+
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckApiToken(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      getConfigTestRestoreEmptyEndTime(restoreName),
@@ -81,49 +89,72 @@ func TestAccLogzioRestoreLogs_InitiateRestoreEmptyEndTime(t *testing.T) {
 	})
 }
 
+func TestAccLogzioRestoreLogs_InitiateRestoreEmptyUsername(t *testing.T) {
+	restoreName := "tf_test_empty_username"
+	defer utils.SleepAfterTest()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      getConfigTestRestoreEmptyUsername(restoreName),
+				ExpectError: regexp.MustCompile("UserName must be set"),
+			},
+		},
+	})
+}
+
 func getConfigTestRestore(name string) string {
 	now := time.Now()
 	accountName := fmt.Sprintf("tf-test-%s", now.Format("2006-01-02,15:04:05"))
 	hourAgo := now.Add(-time.Hour)
+	username := os.Getenv(envLogzioEmail)
 	return fmt.Sprintf(`resource "logzio_restore_logs" "%s" {
  account_name = "%s"
+ username = "%s"
  start_time = %d
  end_time = %d
 }
-`, name, accountName, hourAgo.Unix(), now.Unix())
+`, name, accountName, username, hourAgo.Unix(), now.Unix())
 }
 
 func getConfigTestRestoreEmptyStartTime(name string) string {
 	now := time.Now()
 	accountName := fmt.Sprintf("tf-test-%s", now.Format("2006-01-02,15:04:05"))
+	username := os.Getenv(envLogzioEmail)
 	return fmt.Sprintf(`resource "logzio_restore_logs" "%s" {
  account_name = "%s"
+ username = "%s"
  start_time = 0
  end_time = %d
 }
-`, name, accountName, now.Unix())
+`, name, accountName, username, now.Unix())
 }
 
 func getConfigTestRestoreEmptyEndTime(name string) string {
 	now := time.Now()
 	accountName := fmt.Sprintf("tf-test-%s", now.Format("2006-01-02,15:04:05"))
 	hourAgo := now.Add(-time.Hour)
+	username := os.Getenv(envLogzioEmail)
 	return fmt.Sprintf(`resource "logzio_restore_logs" "%s" {
  account_name = "%s"
+ username = "%s"
  start_time = %d
  end_time = 0
 }
-`, name, accountName, hourAgo.Unix())
+`, name, accountName, username, hourAgo.Unix())
 }
 
-func getConfigTestRestoreNewAccountName(name string) string {
+func getConfigTestRestoreEmptyUsername(name string) string {
 	now := time.Now()
 	accountName := fmt.Sprintf("tf-test-%s", now.Format("2006-01-02,15:04:05"))
 	hourAgo := now.Add(-time.Hour)
 	return fmt.Sprintf(`resource "logzio_restore_logs" "%s" {
  account_name = "%s"
+ username = ""
  start_time = %d
  end_time = %d
 }
-`, name, accountName+"_new", hourAgo.Unix(), now.Unix())
+`, name, accountName, hourAgo.Unix(), now.Unix())
 }

@@ -22,6 +22,8 @@ The following Logz.io API endpoints are supported by this provider:
 * [Archive logs](https://docs.logz.io/api/#tag/Archive-logs)
 * [Restore logs](https://docs.logz.io/api/#tag/Restore-logs)
 * [Authentication groups](https://docs.logz.io/api/#tag/Authentication-groups)
+* [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
+* [S3 Fetcher](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets)
 
 #### Working with Terraform
 
@@ -104,6 +106,7 @@ resource "logzio_endpoint" "my_endpoint" {
 }
 
 resource "logzio_alert_v2" "my_alert" {
+  depends_on = [logzio_endpoint.my_endpoint]
   title = "hello_there"
   search_timeframe_minutes = 5
   is_enabled = false
@@ -176,6 +179,7 @@ Before you run the script, update the arguments to match your details.
 See our [examples](https://github.com/logzio/logzio_terraform_provider/tree/master/examples) for some complete working examples. 
 
 ### Contribute
+
 Found a bug or want to suggest a feature? [Open an issue](https://github.com/logzio/logzio_terraform_provider/issues/new) about it.
 Want to do it yourself? We are more than happy to accept external contributions from the community.
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
@@ -185,21 +189,84 @@ Simply fork the repo, add your changes and [open a PR](https://github.com/logzio
 You can import multiple sub-accounts as follows:
 
 ```
-terraform import logzio_subaccount.logzio_sa_<ACCOUNT-NAME> <ACCOUNT-ID>
+terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 ```
 
 ### Changelog
 
+- **v1.12.0**:
+  - Upgrade `logzio_client_terraform` to `1.15.0`.
+  - Support [S3 Fetcher API](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets).
+- **v1.11.0**:
+  - Upgrade `terraform-plugin-sdk` to `v2.24.1`.
+  - Upgrade `logzio_client_terraform` to `1.14.0`.
+  - `alert_v2` - support alert scheduling.
+
+
+<details>
+  <summary markdown="span"> Expand to check old versions </summary>
+
+- **v1.10.2**:
+    - Upgrade to logzio_client_terraform 1.13.1.
+    - Remove retries resources, as the new client handles it. Retries on update that validate update are still active.
+- **v1.10.1**:
+    - Upgrade to logzio_client_terraform 1.13.0.
+    - Bug fix for **subaccount** - field `reserved_daily_gb` can be 0.
+- **v1.10.0**
+    - **Breaking Changes**:
+        - Upgrading `terraform-plugin-sdk` to `v2.21.0`:
+            - **Terraform 0.11** and lower will not be supported.
+            - To read more about migrating to v2 of the `terraform-plugin-sdk` see [this article](https://www.terraform.io/plugin/sdkv2/guides/v2-upgrade-guide).
+        - Removal of the `logzio_alert` resource. Use `logzio_alert_v2` instead.
+        - `logzio_user`:
+            - Update resource `logzio_user` to match current API and repo code conventions
+            - Removal of `roles` field. Use field `role` instead.
+        - `logzio_archive_logs`:
+            - Removal of `s3_secret_credentials`. Use `aws_access_key` and `aws_secret_key` instead. See documentation for current configuration structure.
+            - Removal of `archiveLogsAzureBlobStorageSettings`, `archiveLogsAmazonS3StorageSettings`. Fields under these attributes are not nested anymore. See docs & examples for reference.
+            - Renaming fields.
+            - Refactor code to match current API.
+            - datasource - removal of secret fields. See documentation for current available fields.
+        - `logzio_restore_logs`:
+            - Add `username` field, to match current API.
+        - `logzio_subaccount`:
+            - Removal of field `utilization_settings`.
+        - Delete resource from state on unsuccessful read operation.
+    - Upgrade to Go 1.18.
+    - Upgrade to logzio_client_terraform 1.12.0.
+- **v1.9.2**
+    - *Bug fix*: Fix diff for resource `alert_v2` in fields `alert_notification_endpoints`, `notification_emails` ([#116](https://github.com/logzio/terraform-provider-logzio/issues/116)).
+- **v1.9.1**
+    - *Bug fix*: plugin won't crash when import for `archive_logs` fails.
+- **v1.9.0**
+    - Update client version(v1.11.0).
+    - Support [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
+- **v1.8.3**
+    - Update client version(v1.10.3).
+    - Bug fixes:
+        - **alerts_v2**:
+          - Fix noisy diff for tags.
+          - Field `is_enabled` defaults to `true`.
+        - **sub_accounts**: allow creating flexible account without `max_daily_gb`.
+- **v1.8.2**
+    - Update client version(v1.10.2).
+    - Bug fixes:
+      - **alerts_v2**: fix bug for columns requiring sort field.
+      - **sub_accounts**: add backoff for creating and updating sub accounts.
+- **v1.8.1**
+    - Upgrade provider's Go version from 1.15 to 1.16 in code and in release workflow.
+    - Improve tests - add sleep after each test.
+- **v1.8.0**
+    - **Breaking change**: **custom endpoint** - refactor Headers - now a string of comma-seperated key-value pairs.
+    - Update client version (v1.10.1) - bug fix for empty Header field.
+    - Add to custom endpoint datasource Description field.
 - **v1.7.0**
   - Update client version (v1.10).
   - Support [authentication groups resource](https://docs.logz.io/api/#tag/Authentication-groups).
   - `alerts_v2`: fix noisy diff for `severity_threshold_tiers`.
+
 - **v1.6.1**
     - Update client version (v1.9.1) - bug fix for not found messages.
-
-<details>
-  <summary markdown="span"> Expand to check old versions </summary>
-  
 - **v1.6**
   - Update client version (v1.9).
   - Support [archive logs resource](https://docs.logz.io/api/#tag/Archive-logs).
