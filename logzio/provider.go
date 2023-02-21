@@ -23,7 +23,7 @@ const (
 	resourceAuthenticationGroupsType = "logzio_authentication_groups"
 	resourceKibanaObjectType         = "logzio_kibana_object"
 	resourceS3FetcherType            = "logzio_s3_fetcher"
-	resourceDashboardType            = "logzio_dashboard"
+	resourceGrafanaDashboardType     = "logzio_grafana_dashboard"
 
 	envLogzioApiToken = "LOGZIO_API_TOKEN"
 	envLogzioRegion   = "LOGZIO_REGION"
@@ -62,7 +62,7 @@ func Provider() *schema.Provider {
 			resourceAuthenticationGroupsType: dataSourceAuthenticationGroups(),
 			resourceKibanaObjectType:         dataSourceKibanaObject(),
 			resourceS3FetcherType:            dataSourceS3Fetcher(),
-			resourceDashboardType:            dataSourceDashboard(),
+			resourceGrafanaDashboardType:     dataSourceDashboard(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			resourceEndpointType:             resourceEndpoint(),
@@ -76,7 +76,7 @@ func Provider() *schema.Provider {
 			resourceAuthenticationGroupsType: resourceAuthenticationGroups(),
 			resourceKibanaObjectType:         resourceKibanaObject(),
 			resourceS3FetcherType:            resourceS3Fetcher(),
-			resourceDashboardType:            resourceDashboard(),
+			resourceGrafanaDashboardType:     resourceGrafanaDashboard(),
 		},
 		ConfigureContextFunc: providerConfigureWrapper,
 	}
