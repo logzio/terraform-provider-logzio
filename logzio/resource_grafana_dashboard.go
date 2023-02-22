@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/logzio/logzio_terraform_client/grafana_objects"
+	"github.com/logzio/logzio_terraform_client/grafana_dashboards"
 	"reflect"
 	"strings"
 )
@@ -16,13 +16,12 @@ import (
 const (
 	grafanaDashboardId        = "dashboard_id"
 	grafanaDashboardUid       = "dashboard_uid"
-	grafanaDashboardStarred   = "starred"
 	grafanaDashboardUrl       = "url"
-	grafanaDashboardFolderId  = "folder_id"
 	grafanaDashboardFolderUid = "folder_uid"
 	grafanaDashboardJson      = "dashboard_json"
 	grafanaDashboardMessage   = "message"
 	grafanaDashboardVersion   = "version"
+	grafanaDashboardOverwrite = "overwrite"
 
 	grafanaDashboardRetryAttempts = 8
 )
@@ -51,14 +50,9 @@ func resourceGrafanaDashboard() *schema.Resource {
 				StateFunc:    handleGrafanaDashboardConfig,
 				ValidateFunc: validateGrafanaDashboardJson,
 			},
-			grafanaDashboardFolderId: {
-				Type:     schema.TypeInt,
-				Required: true,
-				ForceNew: true,
-			},
 			grafanaDashboardFolderUid: {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			grafanaDashboardMessage: {
@@ -81,12 +75,16 @@ func resourceGrafanaDashboard() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			grafanaDashboardOverwrite: {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
 
-func dashboardClient(m interface{}) (*grafana_objects.GrafanaObjectsClient, error) {
-	client, err := grafana_objects.New(m.(Config).apiToken, m.(Config).baseUrl)
+func dashboardClient(m interface{}) (*grafana_dashboards.GrafanaObjectsClient, error) {
+	client, err := grafana_dashboards.New(m.(Config).apiToken, m.(Config).baseUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -104,16 +102,12 @@ func resourceGrafanaDashboardCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	result, err := client.CreateUpdate(req)
+	result, err := client.CreateUpdateGrafanaDashboard(req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(result.Uid)
-	d.Set(grafanaDashboardUrl, result.Url)
-	d.Set(grafanaDashboardVersion, result.Version)
-	d.Set(grafanaDashboardId, result.Id)
-	d.Set(grafanaDashboardUid, result.Uid)
 
 	return resourceGrafanaDashboardRead(ctx, d, m)
 }
@@ -124,7 +118,7 @@ func resourceGrafanaDashboardRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	grafanaDashboard, err := client.Get(d.Id())
+	grafanaDashboard, err := client.GetGrafanaDashboard(d.Id())
 	if err != nil {
 		if err != nil {
 			tflog.Error(ctx, err.Error())
@@ -157,7 +151,7 @@ func resourceGrafanaDashboardUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	_, err = client.CreateUpdate(req)
+	res, err := client.CreateUpdateGrafanaDashboard(req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -192,6 +186,7 @@ func resourceGrafanaDashboardUpdate(ctx context.Context, d *schema.ResourceData,
 		return diagRet
 	}
 
+	d.SetId(res.Uid)
 	return nil
 }
 
@@ -201,7 +196,7 @@ func resourceGrafanaDashboardDelete(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	_, err = client.Delete(d.Id())
+	_, err = client.DeleteGrafanaDashboard(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -210,41 +205,39 @@ func resourceGrafanaDashboardDelete(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func getCreateUpdateGrafanaDashboardFromSchema(d *schema.ResourceData) (grafana_objects.CreateUpdatePayload, error) {
-	var dashboardObject grafana_objects.DashboardObject
-	var payload grafana_objects.CreateUpdatePayload
+func getCreateUpdateGrafanaDashboardFromSchema(d *schema.ResourceData) (grafana_dashboards.CreateUpdatePayload, error) {
+	var dashboardObject map[string]interface{}
+	var payload grafana_dashboards.CreateUpdatePayload
+
+	for _, key := range grafanaDashboardsFieldsToDelete {
+		delete(dashboardObject, key)
+	}
+
 	err := json.Unmarshal([]byte(d.Get(grafanaDashboardJson).(string)), &dashboardObject)
 	if err != nil {
 		return payload, err
 	}
 
-	dashboardObject.Id = 0
-	payload = grafana_objects.CreateUpdatePayload{
-		FolderId:  d.Get(grafanaDashboardFolderId).(int),
+	payload = grafana_dashboards.CreateUpdatePayload{
 		FolderUid: d.Get(grafanaDashboardFolderUid).(string),
 		Message:   d.Get(grafanaDashboardMessage).(string),
-		Overwrite: true,
+		Overwrite: d.Get(grafanaDashboardOverwrite).(bool),
 		Dashboard: dashboardObject,
 	}
 
 	return payload, nil
 }
 
-func setGrafanaDashboard(d *schema.ResourceData, result *grafana_objects.GetResults) error {
-	d.Set(grafanaDashboardStarred, result.Meta.IsStarred)
-	d.Set(grafanaDashboardFolderId, result.Meta.FolderId)
-	d.Set(grafanaDashboardFolderUid, result.Meta.FolderUid)
+func setGrafanaDashboard(d *schema.ResourceData, result *grafana_dashboards.GetResults) error {
+	d.Set(grafanaDashboardUrl, result.Meta["url"].(string))
+	d.Set(grafanaDashboardVersion, int(result.Dashboard["version"].(float64)))
+	d.Set(grafanaDashboardId, int(result.Dashboard["id"].(float64)))
+	d.Set(grafanaDashboardUid, result.Dashboard["uid"].(string))
+	d.Set(grafanaDashboardFolderUid, result.Meta["folderUid"].(string))
 
-	if result.Dashboard.Timepicker.Enable == false {
-		result.Dashboard.Timepicker = &grafana_objects.Timepicker{}
-	}
+	dashboardConfigStr := handleGrafanaDashboardConfig(result.Dashboard)
+	d.Set(grafanaDashboardJson, dashboardConfigStr)
 
-	dashboardObject, err := json.Marshal(result.Dashboard)
-	if err != nil {
-		return err
-	}
-
-	d.Set(grafanaDashboardJson, string(dashboardObject))
 	return nil
 }
 
