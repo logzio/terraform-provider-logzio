@@ -141,6 +141,10 @@ func resourceGrafanaDashboardRead(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceGrafanaDashboardUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	if uidChanged(d) {
+		return diag.Errorf("Updating uid is not allowed")
+	}
+
 	client, err := dashboardClient(m)
 	if err != nil {
 		return diag.FromErr(err)
@@ -151,7 +155,7 @@ func resourceGrafanaDashboardUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	res, err := client.CreateUpdateGrafanaDashboard(req)
+	_, err = client.CreateUpdateGrafanaDashboard(req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -186,7 +190,6 @@ func resourceGrafanaDashboardUpdate(ctx context.Context, d *schema.ResourceData,
 		return diagRet
 	}
 
-	d.SetId(res.Uid)
 	return nil
 }
 
@@ -234,7 +237,6 @@ func setGrafanaDashboard(d *schema.ResourceData, result *grafana_dashboards.GetR
 	d.Set(grafanaDashboardId, int(result.Dashboard["id"].(float64)))
 	d.Set(grafanaDashboardUid, result.Dashboard["uid"].(string))
 	d.Set(grafanaDashboardFolderUid, result.Meta["folderUid"].(string))
-
 	dashboardConfigStr := handleGrafanaDashboardConfig(result.Dashboard)
 	d.Set(grafanaDashboardJson, dashboardConfigStr)
 
@@ -253,8 +255,8 @@ func handleGrafanaDashboardConfig(config interface{}) string {
 		}
 	}
 
-	for _, field := range grafanaDashboardsFieldsToDelete {
-		delete(dashboardJson, field)
+	for _, key := range grafanaDashboardsFieldsToDelete {
+		delete(dashboardJson, key)
 	}
 
 	if panels, ok := dashboardJson["panels"]; ok {
@@ -283,4 +285,16 @@ func validateGrafanaDashboardJson(config interface{}, k string) ([]string, []err
 	}
 
 	return nil, nil
+}
+
+func uidChanged(d *schema.ResourceData) bool {
+	currUid := d.Id()
+	dashboardConfigStr := d.Get(grafanaDashboardJson).(string)
+	var dashboardMap map[string]interface{}
+	_ = json.Unmarshal([]byte(dashboardConfigStr), &dashboardMap)
+	if uid, exists := dashboardMap["uid"]; exists {
+		return currUid != uid.(string)
+	}
+
+	return true
 }
