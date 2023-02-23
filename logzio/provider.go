@@ -62,7 +62,7 @@ func Provider() *schema.Provider {
 			resourceAuthenticationGroupsType: dataSourceAuthenticationGroups(),
 			resourceKibanaObjectType:         dataSourceKibanaObject(),
 			resourceS3FetcherType:            dataSourceS3Fetcher(),
-			resourceGrafanaDashboardType:     dataSourceDashboard(),
+			resourceGrafanaDashboardType:     dataSourceGrafanaDashboard(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			resourceEndpointType:             resourceEndpoint(),

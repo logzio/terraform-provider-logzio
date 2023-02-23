@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	folderIdEnv = "GRAFANA_FOLDER_UID"
+	grafanaFolderIdEnv = "GRAFANA_FOLDER_UID"
 )
 
 func TestAccLogzioGrafanaDashboard_CreateUpdateDashboard(t *testing.T) {
 	defer utils.SleepAfterTest()
-	folderUid := os.Getenv(folderIdEnv)
+	folderUid := os.Getenv(grafanaFolderIdEnv)
 	resourceFullName := "logzio_grafana_dashboard.test_dashboard"
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
@@ -56,7 +56,7 @@ func TestAccLogzioGrafanaDashboard_CreateUpdateDashboard(t *testing.T) {
 
 func TestAccLogzioGrafanaDashboard_CreateUpdateDashboardChangeUid(t *testing.T) {
 	defer utils.SleepAfterTest()
-	folderUid := os.Getenv(folderIdEnv)
+	folderUid := os.Getenv(grafanaFolderIdEnv)
 	resourceFullName := "logzio_grafana_dashboard.test_dashboard"
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
