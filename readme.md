@@ -24,6 +24,7 @@ The following Logz.io API endpoints are supported by this provider:
 * [Authentication groups](https://docs.logz.io/api/#tag/Authentication-groups)
 * [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
 * [S3 Fetcher](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets)
+* [Grafana Dashboards](https://docs.logz.io/api/#operation/createDashboard)
 
 #### Working with Terraform
 
@@ -194,18 +195,22 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 
 ### Changelog
 
+- **v1.13.0**:
+    - Upgrade `logzio_client_terraform` to `1.16.0`.
+    - Support [Grafana Dashboards API](https://docs.logz.io/api/#operation/createDashboard).
 - **v1.12.0**:
   - Upgrade `logzio_client_terraform` to `1.15.0`.
   - Support [S3 Fetcher API](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets).
-- **v1.11.0**:
-  - Upgrade `terraform-plugin-sdk` to `v2.24.1`.
-  - Upgrade `logzio_client_terraform` to `1.14.0`.
-  - `alert_v2` - support alert scheduling.
+
 
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
 
+- **v1.11.0**:
+    - Upgrade `terraform-plugin-sdk` to `v2.24.1`.
+    - Upgrade `logzio_client_terraform` to `1.14.0`.
+    - `alert_v2` - support alert scheduling.
 - **v1.10.2**:
     - Upgrade to logzio_client_terraform 1.13.1.
     - Remove retries resources, as the new client handles it. Retries on update that validate update are still active.
