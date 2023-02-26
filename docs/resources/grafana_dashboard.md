@@ -39,3 +39,11 @@ EOD
 * `dashboard_uid` - (String) The unique identifier (uid) of a dashboard.
 * `url` - (String) Dashboard url.
 * `version` - (Int) Dashboard version.
+
+### Import Logz.io Grafana Dashboard as Terraform resource
+
+You can import existing dashboard as follows:
+
+```
+terraform import logzio_grafana_dashboard.my_dashboard <FETCHER-ID>
+```
