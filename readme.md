@@ -93,7 +93,7 @@ terraform {
 }
 
 provider "logzio" {
-  api_token = "8387abb8-4831-53af-91de-5cd3784d9774"
+  api_token = "my-token"
   region= "au"
 }
 
