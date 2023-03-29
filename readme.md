@@ -195,7 +195,7 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 
 ### Changelog
 
-- **v1.13.0**:
+- **v1.13.1**:
   - **s3 fetcher**:
     - **Bug fix**: `prefix` field now being applied.
 - **v1.13.0**:
