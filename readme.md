@@ -196,17 +196,19 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 ### Changelog
 
 - **v1.13.0**:
+  - **s3 fetcher**:
+    - **Bug fix**: `prefix` field now being applied.
+- **v1.13.0**:
     - Upgrade `logzio_client_terraform` to `1.16.0`.
     - Support [Grafana Dashboards API](https://docs.logz.io/api/#operation/createDashboard).
-- **v1.12.0**:
-  - Upgrade `logzio_client_terraform` to `1.15.0`.
-  - Support [S3 Fetcher API](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets).
-
 
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
 
+- **v1.12.0**:
+    - Upgrade `logzio_client_terraform` to `1.15.0`.
+    - Support [S3 Fetcher API](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets).
 - **v1.11.0**:
     - Upgrade `terraform-plugin-sdk` to `v2.24.1`.
     - Upgrade `logzio_client_terraform` to `1.14.0`.

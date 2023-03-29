@@ -243,6 +243,7 @@ func getCreateUpdateS3FetcherFromSchema(ctx context.Context, d *schema.ResourceD
 	request.Active = &active
 	addS3ObjectKeyAsLogField := d.Get(s3FetcherAddS3ObjectKeyAsLogField).(bool)
 	request.AddS3ObjectKeyAsLogField = &addS3ObjectKeyAsLogField
+	request.Prefix = d.Get(s3FetcherPrefix).(string)
 
 	return request, nil
 }
