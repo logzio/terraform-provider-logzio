@@ -25,6 +25,7 @@ The following Logz.io API endpoints are supported by this provider:
 * [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
 * [S3 Fetcher](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets)
 * [Grafana Dashboards](https://docs.logz.io/api/#operation/createDashboard)
+* [Grafana folders]()
 
 #### Working with Terraform
 
@@ -194,18 +195,20 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 ```
 
 ### Changelog
-
+- **v1.14.0**:
+  - Support [Grafana folders API]().
+  - Upgrade `logzio_client_terraform` to `1.17.0`.
+  - Upgrade `terraform-plugin-sdk` to `2.26.1`. 
 - **v1.13.1**:
   - **s3 fetcher**:
     - **Bug fix**: `prefix` field now being applied.
-- **v1.13.0**:
-    - Upgrade `logzio_client_terraform` to `1.16.0`.
-    - Support [Grafana Dashboards API](https://docs.logz.io/api/#operation/createDashboard).
-
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
 
+- **v1.13.0**:
+    - Upgrade `logzio_client_terraform` to `1.16.0`.
+    - Support [Grafana Dashboards API](https://docs.logz.io/api/#operation/createDashboard).
 - **v1.12.0**:
     - Upgrade `logzio_client_terraform` to `1.15.0`.
     - Support [S3 Fetcher API](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets).
