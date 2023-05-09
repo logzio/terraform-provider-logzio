@@ -34,8 +34,7 @@ func resourceGrafanaFolder() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			grafanaFolderUid: {
 				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			grafanaFolderTitle: {
 				Type:     schema.TypeString,
@@ -78,8 +77,6 @@ func resourceGrafanaFolderCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	d.SetId(result.Uid)
-	d.Set(grafanaFolderUid, result.Uid)
-	d.Set(grafanaFolderId, result.Id)
 	return resourceGrafanaFolderRead(ctx, d, m)
 }
 
@@ -167,6 +164,8 @@ func resourceGrafanaFolderDelete(ctx context.Context, d *schema.ResourceData, m 
 }
 
 func setGrafanaFolder(d *schema.ResourceData, folder *grafana_folders.GrafanaFolder) {
+	d.Set(grafanaFolderUid, folder.Uid)
+	d.Set(grafanaFolderId, folder.Id)
 	d.Set(grafanaFolderTitle, folder.Title)
 	d.Set(grafanaFolderUrl, folder.Url)
 	d.Set(grafanaFolderVersion, folder.Version)
