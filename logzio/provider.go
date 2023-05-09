@@ -64,6 +64,7 @@ func Provider() *schema.Provider {
 			resourceKibanaObjectType:         dataSourceKibanaObject(),
 			resourceS3FetcherType:            dataSourceS3Fetcher(),
 			resourceGrafanaDashboardType:     dataSourceGrafanaDashboard(),
+			resourceGrafanaFolderType:        dataSourceGrafanaFolder(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			resourceEndpointType:             resourceEndpoint(),
