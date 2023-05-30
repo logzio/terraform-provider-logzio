@@ -11,6 +11,8 @@ require (
 	github.com/stretchr/testify v1.7.2
 )
 
+replace github.com/logzio/logzio_terraform_client v1.17.0 => github.com/articice/logzio_terraform_client v0.0.0-20230525135753-6b89709bcc52
+
 require (
 	github.com/agext/levenshtein v1.2.2 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
