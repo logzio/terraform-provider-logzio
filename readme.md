@@ -198,6 +198,8 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 - **v1.13.2**:
   - **alerts v2**:
     - **Bug fix**: Add default value of `JSON` to `output_type` to match API behaviour.
+  - **grafana dashboards**:
+    - **Bug fix**: Handle dashboard configs with id and version fields.
 - **v1.13.1**:
   - **s3 fetcher**:
     - **Bug fix**: `prefix` field now being applied.

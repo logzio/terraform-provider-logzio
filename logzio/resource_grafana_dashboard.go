@@ -212,13 +212,13 @@ func getCreateUpdateGrafanaDashboardFromSchema(d *schema.ResourceData) (grafana_
 	var dashboardObject map[string]interface{}
 	var payload grafana_dashboards.CreateUpdatePayload
 
-	for _, key := range grafanaDashboardsFieldsToDelete {
-		delete(dashboardObject, key)
-	}
-
 	err := json.Unmarshal([]byte(d.Get(grafanaDashboardJson).(string)), &dashboardObject)
 	if err != nil {
 		return payload, err
+	}
+
+	for _, key := range grafanaDashboardsFieldsToDelete {
+		delete(dashboardObject, key)
 	}
 
 	payload = grafana_dashboards.CreateUpdatePayload{
