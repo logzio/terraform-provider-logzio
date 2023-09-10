@@ -352,3 +352,6 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
   
 </details>
 
+### Trademark Disclaimer
+
+Terraform is a trademark of HashiCorp, Inc.
