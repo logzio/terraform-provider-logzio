@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"github.com/logzio/logzio_terraform_client/alerts"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -9,12 +8,12 @@ import (
 
 func TestValidateOperation(t *testing.T) {
 	validOperations := []string{
-		alerts.OperatorGreaterThanOrEquals,
-		alerts.OperatorLessThanOrEquals,
-		alerts.OperatorGreaterThan,
-		alerts.OperatorLessThan,
-		alerts.OperatorEquals,
-		alerts.OperatorNotEquals,
+		alerts_v2.OperatorGreaterThanOrEquals,
+		alerts_v2.OperatorLessThanOrEquals,
+		alerts_v2.OperatorGreaterThan,
+		alerts_v2.OperatorLessThan,
+		alerts_v2.OperatorEquals,
+		alerts_v2.OperatorNotEquals,
 	}
 
 	for _, s := range validOperations {

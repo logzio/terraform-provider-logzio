@@ -16,6 +16,7 @@ const (
 	resourceEndpointType             = "logzio_endpoint"
 	resourceUserType                 = "logzio_user"
 	resourceSubAccountType           = "logzio_subaccount"
+	resourceMetricsAccountType       = "logzio_metrics_account"
 	resourceLogShippingTokenType     = "logzio_log_shipping_token"
 	resourceDropFilterType           = "logzio_drop_filter"
 	resourceArchiveLogsType          = "logzio_archive_logs"
@@ -54,6 +55,7 @@ func Provider() *schema.Provider {
 			resourceEndpointType:             dataSourceEndpoint(),
 			resourceUserType:                 dataSourceUser(),
 			resourceSubAccountType:           dataSourceSubAccount(),
+			resourceMetricsAccountType:       dataSourceMetricsAccount(),
 			resourceAlertV2Type:              dataSourceAlertV2(),
 			resourceLogShippingTokenType:     dataSourceLogShippingToken(),
 			resourceDropFilterType:           dataSourceDropFilter(),
@@ -68,6 +70,7 @@ func Provider() *schema.Provider {
 			resourceEndpointType:             resourceEndpoint(),
 			resourceUserType:                 resourceUser(),
 			resourceSubAccountType:           resourceSubAccount(),
+			resourceMetricsAccountType:       resourceMetricsAccount(),
 			resourceAlertV2Type:              resourceAlertV2(),
 			resourceLogShippingTokenType:     resourceLogShippingToken(),
 			resourceDropFilterType:           resourceDropFilter(),

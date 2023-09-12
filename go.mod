@@ -7,9 +7,11 @@ require (
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-log v0.8.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.25.0
-	github.com/logzio/logzio_terraform_client v1.16.0
+	github.com/logzio/logzio_terraform_client v1.17.0
 	github.com/stretchr/testify v1.7.2
 )
+
+replace github.com/logzio/logzio_terraform_client v1.17.0 => github.com/articice/logzio_terraform_client v0.0.0-20230525135753-6b89709bcc52
 
 require (
 	github.com/agext/levenshtein v1.2.2 // indirect

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/logzio/logzio_terraform_client/alerts"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
 	"github.com/logzio/logzio_terraform_client/archive_logs"
 	"github.com/logzio/logzio_terraform_client/authentication_groups"
@@ -29,12 +28,12 @@ func ValidateOperation(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
 	validOperations := []string{
-		alerts.OperatorGreaterThanOrEquals,
-		alerts.OperatorGreaterThan,
-		alerts.OperatorEquals,
-		alerts.OperatorLessThan,
-		alerts.OperatorLessThanOrEquals,
-		alerts.OperatorNotEquals,
+		alerts_v2.OperatorGreaterThanOrEquals,
+		alerts_v2.OperatorGreaterThan,
+		alerts_v2.OperatorEquals,
+		alerts_v2.OperatorLessThan,
+		alerts_v2.OperatorLessThanOrEquals,
+		alerts_v2.OperatorNotEquals,
 	}
 
 	if len(value) == 0 {
@@ -89,13 +88,13 @@ func validAggregationTypes(v interface{}, k string) (ws []string, errors []error
 	value := v.(string)
 
 	validAggregationTypes := []string{
-		alerts.AggregationTypeUniqueCount,
-		alerts.AggregationTypeAvg,
-		alerts.AggregationTypeMax,
-		alerts.AggregationTypeNone,
-		alerts.AggregationTypeSum,
-		alerts.AggregationTypeCount,
-		alerts.AggregationTypeMin,
+		alerts_v2.AggregationTypeUniqueCount,
+		alerts_v2.AggregationTypeAvg,
+		alerts_v2.AggregationTypeMax,
+		alerts_v2.AggregationTypeNone,
+		alerts_v2.AggregationTypeSum,
+		alerts_v2.AggregationTypeCount,
+		alerts_v2.AggregationTypeMin,
 	}
 
 	if !contains(validAggregationTypes, value) {
@@ -109,9 +108,9 @@ func validateSeverityTypes(v interface{}, k string) (ws []string, errors []error
 	value := v.(string)
 
 	validSeverityTypes := []string{
-		alerts.SeverityHigh,
-		alerts.SeverityMedium,
-		alerts.SeverityHigh,
+		alerts_v2.SeverityHigh,
+		alerts_v2.SeverityMedium,
+		alerts_v2.SeverityHigh,
 	}
 
 	if !contains(validSeverityTypes, value) {
