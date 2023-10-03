@@ -3,6 +3,9 @@ package logzio
 import (
 	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
+	"log"
 	"reflect"
 	"strings"
 )
@@ -73,9 +76,10 @@ func resourceGrafanaAlertRule() *schema.Resource {
 							Required: true,
 						},
 						grafanaAlertRuleDataModel: {
-							Type:     schema.TypeString,
-							Required: true,
-							// TODO - validatefunc, statefunc
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringIsJSON,
+							StateFunc:    handleModelConfig,
 						},
 						grafanaAlertRuleDataRelativeTimeRange: {
 							Type:     schema.TypeList,
@@ -111,9 +115,9 @@ func resourceGrafanaAlertRule() *schema.Resource {
 				Default:  false,
 			},
 			grafanaAlertRuleExecErrState: {
-				Type:     schema.TypeString,
-				Required: true,
-				// TODO - validatefunc
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: utils.ValidateExecErrState,
 			},
 			grafanaAlertRuleFolderUid: {
 				Type:     schema.TypeString,
@@ -128,9 +132,9 @@ func resourceGrafanaAlertRule() *schema.Resource {
 				Computed: true,
 			},
 			grafanaAlertRuleNoDataState: {
-				Type:     schema.TypeString,
-				Required: true,
-				// TODO - validatefunc
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: utils.ValidateExecNoDataState,
 			},
 			grafanaAlertRuleOrgId: {
 				Type:     schema.TypeInt,
@@ -157,17 +161,58 @@ func resourceGrafanaAlertRule() *schema.Resource {
 	}
 }
 
-func suppressDiffJSON(k, oldValue, newValue string, data *schema.ResourceData) bool {
-	var o, n interface{}
-	d := json.NewDecoder(strings.NewReader(oldValue))
-	if err := d.Decode(&o); err != nil {
+func suppressDiffJSON(k, old, new string, d *schema.ResourceData) bool {
+	var oldInterface, newInterface interface{}
+	decoder := json.NewDecoder(strings.NewReader(old))
+	err := decoder.Decode(&oldInterface)
+	if err != nil {
 		return false
 	}
 
-	d = json.NewDecoder(strings.NewReader(newValue))
-	if err := d.Decode(&n); err != nil {
+	decoder = json.NewDecoder(strings.NewReader(new))
+	err = decoder.Decode(&newInterface)
+	if err != nil {
 		return false
 	}
 
-	return reflect.DeepEqual(o, n)
+	return reflect.DeepEqual(oldInterface, newInterface)
+}
+
+func handleModelConfig(model interface{}) string {
+	// Default values reference:
+	// https://github.com/grafana/grafana/blob/main/pkg/services/ngalert/models/alert_query.go#L12-L13
+	const defaultMaxDataPoints float64 = 43200
+	const defaultIntervalMS float64 = 1000
+	const intervalMsField = "intervalMs"
+	const maxDataPointsField = "maxDataPoints"
+	modelJsonStr := model.(string)
+	var modelObj map[string]interface{}
+
+	err := json.Unmarshal([]byte(modelJsonStr), &modelObj)
+	if err != nil {
+		log.Printf("Error while unmarshaling model config %v\n", err)
+		return modelJsonStr
+	}
+
+	iMaxDataPoints, ok := modelObj[maxDataPointsField]
+	if ok {
+		maxDataPoints, ok := iMaxDataPoints.(float64)
+		if ok && maxDataPoints == defaultMaxDataPoints {
+			log.Printf("Found default value for %s (%f), removing from model config", maxDataPointsField, defaultMaxDataPoints)
+			delete(modelObj, maxDataPointsField)
+		}
+	}
+
+	iIntervalMs, ok := modelObj[intervalMsField]
+	if ok {
+		intervalMs, ok := iIntervalMs.(float64)
+		if ok && intervalMs == defaultIntervalMS {
+			log.Printf("Found default value for %s (%f), removing from model config", intervalMsField, defaultIntervalMS)
+			delete(modelObj, intervalMsField)
+		}
+	}
+
+	modelJson, _ := json.Marshal(modelObj)
+	jsonStr := string(modelJson)
+	return jsonStr
 }
