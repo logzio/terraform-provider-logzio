@@ -1,9 +1,12 @@
 package logzio
 
 import (
+	"context"
 	"encoding/json"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/logzio/logzio_terraform_client/grafana_alerts"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"log"
 	"reflect"
@@ -32,7 +35,8 @@ const (
 	grafanaAlertRuleRuleGroup                 = "rule_group"
 	grafanaAlertRuleTitle                     = "title"
 	grafanaAlertRuleUid                       = "uid"
-	grafanaAlertRuleUpdated                   = "updated"
+
+	grafanaAlertRuleRetryAttempts = 8
 )
 
 func resourceGrafanaAlertRule() *schema.Resource {
@@ -46,8 +50,9 @@ func resourceGrafanaAlertRule() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			grafanaAlertRuleAnnotations: {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeMap,
 				Optional: true,
+				Default:  map[string]interface{}{},
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -152,13 +157,67 @@ func resourceGrafanaAlertRule() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			grafanaAlertRuleUpdated: {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
-			},
 		},
 	}
+}
+
+func grafanaAlertRuleClient(m interface{}) (*grafana_alerts.GrafanaAlertClient, error) {
+	client, err := grafana_alerts.New(m.(Config).apiToken, m.(Config).baseUrl)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+func resourceGrafanaAlertRuleCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client, err := grafanaAlertRuleClient(m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	req := getCreateUpdateGrafanaAlertRuleFromSchema(d)
+	result, err := client.CreateGrafanaAlertRule(req)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(result.Uid)
+	return resourceGrafanaAlertRuleRead(ctx, d, m)
+}
+
+func resourceGrafanaAlertRuleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+}
+
+func getCreateUpdateGrafanaAlertRuleFromSchema(d *schema.ResourceData) grafana_alerts.GrafanaAlertRule {
+	var alertRuleReq grafana_alerts.GrafanaAlertRule
+
+	alertRuleReq.Condition = d.Get(grafanaAlertRuleCondition).(string)
+	alertRuleReq.IsPaused = d.Get(grafanaAlertRuleIsPaused).(bool)
+	alertRuleReq.ExecErrState = d.Get(grafanaAlertRuleExecErrState).(grafana_alerts.ExecErrState)
+	alertRuleReq.FolderUID = d.Get(grafanaAlertRuleFolderUid).(string)
+	alertRuleReq.For = d.Get(grafanaAlertRuleFor).(int64)
+	alertRuleReq.NoDataState = d.Get(grafanaAlertRuleNoDataState).(grafana_alerts.NoDataState)
+	alertRuleReq.OrgID = d.Get(grafanaAlertRuleOrgId).(int64)
+	alertRuleReq.RuleGroup = d.Get(grafanaAlertRuleRuleGroup).(string)
+	alertRuleReq.Title = d.Get(grafanaAlertRuleTitle).(string)
+
+	if uid, ok := d.GetOk(grafanaAlertRuleUid); ok {
+		alertRuleReq.Uid = uid.(string)
+	}
+
+	if id, ok := d.GetOk(grafanaAlertRuleId); ok {
+		alertRuleReq.Id = id.(int64)
+	}
+
+	if annotations, ok := d.GetOk(grafanaAlertRuleAnnotations); ok {
+		alertRuleReq.Annotations = utils.InterfaceToMapOfStrings(annotations)
+	}
+
+	if labels, ok := d.GetOk(grafanaAlertRuleLabels); ok {
+		alertRuleReq.Labels = utils.InterfaceToMapOfStrings(labels)
+	}
+
+	return alertRuleReq
 }
 
 func suppressDiffJSON(k, old, new string, d *schema.ResourceData) bool {
