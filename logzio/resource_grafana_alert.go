@@ -3,6 +3,7 @@ package logzio
 import (
 	"context"
 	"encoding/json"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -62,7 +63,7 @@ func resourceGrafanaAlertRule() *schema.Resource {
 				Required: true,
 			},
 			grafanaAlertRuleData: {
-				Type:             schema.TypeSet,
+				Type:             schema.TypeList,
 				Required:         true,
 				MinItems:         1,
 				DiffSuppressFunc: suppressDiffJSON,
@@ -182,10 +183,74 @@ func resourceGrafanaAlertRuleCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(result.Uid)
+	d.Set(grafanaAlertRuleUid, result.Uid)
+	d.Set(grafanaAlertRuleId, result.Id)
+
 	return resourceGrafanaAlertRuleRead(ctx, d, m)
 }
 
 func resourceGrafanaAlertRuleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client, err := grafanaAlertRuleClient(m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	grafanaAlertRule, err := client.GetGrafanaAlertRule(d.Id())
+	if err != nil {
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing grafana alert") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
+		}
+	}
+
+	setGrafanaAlertRule(d, grafanaAlertRule)
+
+	return nil
+}
+
+func resourceGrafanaAlertRuleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+
+}
+
+func setGrafanaAlertRule(d *schema.ResourceData, grafanaAlertRule *grafana_alerts.GrafanaAlertRule) {
+	d.Set(grafanaAlertRuleAnnotations, grafanaAlertRule.Annotations)
+	d.Set(grafanaAlertRuleCondition, grafanaAlertRule.Condition)
+	d.Set(grafanaAlertRuleLabels, grafanaAlertRule.Labels)
+	d.Set(grafanaAlertRuleIsPaused, grafanaAlertRule.IsPaused)
+	d.Set(grafanaAlertRuleExecErrState, string(grafanaAlertRule.ExecErrState))
+	d.Set(grafanaAlertRuleFolderUid, grafanaAlertRule.FolderUID)
+	d.Set(grafanaAlertRuleFor, grafanaAlertRule.For)
+	d.Set(grafanaAlertRuleNoDataState, string(grafanaAlertRule.NoDataState))
+	d.Set(grafanaAlertRuleOrgId, grafanaAlertRule.OrgID)
+	d.Set(grafanaAlertRuleRuleGroup, grafanaAlertRule.RuleGroup)
+	d.Set(grafanaAlertRuleTitle, grafanaAlertRule.Title)
+	data := getDataMapFromAlertRuleObject(grafanaAlertRule.Data)
+	d.Set(grafanaAlertRuleData, data)
+}
+
+func getDataMapFromAlertRuleObject(data []*grafana_alerts.GrafanaAlertQuery) []map[string]interface{} {
+	dataList := make([]map[string]interface{}, 0)
+	for _, v := range data {
+		dataMap := map[string]interface{}{
+			grafanaAlertRuleDataRefId:         v.RefId,
+			grafanaAlertRuleDataDatasourceUid: v.DatasourceUid,
+			grafanaAlertRuleDataQueryType:     v.QueryType,
+			grafanaAlertRuleDataModel:         handleModelConfig(v.Model),
+		}
+
+		timeRange := map[string]int{}
+		timeRange[grafanaAlertRuleDataRelativeTimeRangeFrom] = int(v.RelativeTimeRange.From)
+		timeRange[grafanaAlertRuleDataRelativeTimeRangeTo] = int(v.RelativeTimeRange.To)
+		dataMap[grafanaAlertRuleDataRelativeTimeRange] = []interface{}{timeRange}
+
+		dataList = append(dataList, dataMap)
+	}
+
+	return dataList
 }
 
 func getCreateUpdateGrafanaAlertRuleFromSchema(d *schema.ResourceData) grafana_alerts.GrafanaAlertRule {
