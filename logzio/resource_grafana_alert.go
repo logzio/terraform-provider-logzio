@@ -3,6 +3,8 @@ package logzio
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -213,7 +215,48 @@ func resourceGrafanaAlertRuleRead(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceGrafanaAlertRuleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client, err := grafanaAlertRuleClient(m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
+	req := getCreateUpdateGrafanaAlertRuleFromSchema(d)
+	err = client.UpdateGrafanaAlertRule(req)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	var diagRet diag.Diagnostics
+	readErr := retry.Do(func() error {
+		diagRet = resourceGrafanaAlertRuleRead(ctx, d, m)
+		if diagRet.HasError() {
+			return fmt.Errorf("received error from read grafana alert rule")
+		}
+
+		return nil
+	},
+		retry.RetryIf(
+			// Retry ONLY if the resource was not updated yet
+			func(err error) bool {
+				if err != nil {
+					return false
+				} else {
+					// Check if the update shows on read
+					// if not updated yet - retry
+					grafanaAlertRuleFromSchema := getCreateUpdateGrafanaAlertRuleFromSchema(d)
+					return !reflect.DeepEqual(grafanaAlertRuleFromSchema, req)
+				}
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(grafanaAlertRuleRetryAttempts),
+	)
+
+	if readErr != nil {
+		tflog.Error(ctx, "could not update schema")
+		return diagRet
+	}
+
+	return nil
 }
 
 func setGrafanaAlertRule(d *schema.ResourceData, grafanaAlertRule *grafana_alerts.GrafanaAlertRule) {
