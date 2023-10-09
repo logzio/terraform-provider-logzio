@@ -259,6 +259,21 @@ func resourceGrafanaAlertRuleUpdate(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
+func resourceGrafanaAlertRuleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client, err := grafanaAlertRuleClient(m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.DeleteGrafanaAlertRule(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+	return nil
+}
+
 func setGrafanaAlertRule(d *schema.ResourceData, grafanaAlertRule *grafana_alerts.GrafanaAlertRule) {
 	d.Set(grafanaAlertRuleAnnotations, grafanaAlertRule.Annotations)
 	d.Set(grafanaAlertRuleCondition, grafanaAlertRule.Condition)
