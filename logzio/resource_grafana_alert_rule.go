@@ -316,20 +316,21 @@ func getCreateUpdateGrafanaAlertRuleFromSchema(d *schema.ResourceData) grafana_a
 
 	alertRuleReq.Condition = d.Get(grafanaAlertRuleCondition).(string)
 	alertRuleReq.IsPaused = d.Get(grafanaAlertRuleIsPaused).(bool)
-	alertRuleReq.ExecErrState = d.Get(grafanaAlertRuleExecErrState).(grafana_alerts.ExecErrState)
+	alertRuleReq.ExecErrState = grafana_alerts.ExecErrState(d.Get(grafanaAlertRuleExecErrState).(string))
 	alertRuleReq.FolderUID = d.Get(grafanaAlertRuleFolderUid).(string)
-	alertRuleReq.For = d.Get(grafanaAlertRuleFor).(int64)
-	alertRuleReq.NoDataState = d.Get(grafanaAlertRuleNoDataState).(grafana_alerts.NoDataState)
-	alertRuleReq.OrgID = d.Get(grafanaAlertRuleOrgId).(int64)
+	alertRuleReq.For = int64(d.Get(grafanaAlertRuleFor).(int))
+	alertRuleReq.NoDataState = grafana_alerts.NoDataState(d.Get(grafanaAlertRuleNoDataState).(string))
+	alertRuleReq.OrgID = int64(d.Get(grafanaAlertRuleOrgId).(int))
 	alertRuleReq.RuleGroup = d.Get(grafanaAlertRuleRuleGroup).(string)
 	alertRuleReq.Title = d.Get(grafanaAlertRuleTitle).(string)
+	alertRuleReq.Data = getDataObjectFromSchema(d.Get(grafanaAlertRuleData).([]interface{}))
 
 	if uid, ok := d.GetOk(grafanaAlertRuleUid); ok {
 		alertRuleReq.Uid = uid.(string)
 	}
 
 	if id, ok := d.GetOk(grafanaAlertRuleId); ok {
-		alertRuleReq.Id = id.(int64)
+		alertRuleReq.Id = int64(id.(int))
 	}
 
 	if annotations, ok := d.GetOk(grafanaAlertRuleAnnotations); ok {
@@ -341,6 +342,10 @@ func getCreateUpdateGrafanaAlertRuleFromSchema(d *schema.ResourceData) grafana_a
 	}
 
 	return alertRuleReq
+}
+
+func getDataObjectFromSchema(dataFromSchema []interface{}) []*grafana_alerts.GrafanaAlertQuery {
+
 }
 
 func suppressDiffJSON(k, old, new string, d *schema.ResourceData) bool {
