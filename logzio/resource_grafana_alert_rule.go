@@ -214,7 +214,10 @@ func resourceGrafanaAlertRuleRead(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	setGrafanaAlertRule(d, grafanaAlertRule)
+	err = setGrafanaAlertRule(d, grafanaAlertRule)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -283,7 +286,12 @@ func resourceGrafanaAlertRuleDelete(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func setGrafanaAlertRule(d *schema.ResourceData, grafanaAlertRule *grafana_alerts.GrafanaAlertRule) {
+func setGrafanaAlertRule(d *schema.ResourceData, grafanaAlertRule *grafana_alerts.GrafanaAlertRule) error {
+	data, err := getDataMapFromAlertRuleObject(grafanaAlertRule.Data)
+	if err != nil {
+		return err
+	}
+
 	d.Set(grafanaAlertRuleAnnotations, grafanaAlertRule.Annotations)
 	d.Set(grafanaAlertRuleCondition, grafanaAlertRule.Condition)
 	d.Set(grafanaAlertRuleLabels, grafanaAlertRule.Labels)
@@ -295,18 +303,24 @@ func setGrafanaAlertRule(d *schema.ResourceData, grafanaAlertRule *grafana_alert
 	d.Set(grafanaAlertRuleOrgId, grafanaAlertRule.OrgID)
 	d.Set(grafanaAlertRuleRuleGroup, grafanaAlertRule.RuleGroup)
 	d.Set(grafanaAlertRuleTitle, grafanaAlertRule.Title)
-	data := getDataMapFromAlertRuleObject(grafanaAlertRule.Data)
 	d.Set(grafanaAlertRuleData, data)
+
+	return nil
 }
 
-func getDataMapFromAlertRuleObject(data []*grafana_alerts.GrafanaAlertQuery) []map[string]interface{} {
+func getDataMapFromAlertRuleObject(data []*grafana_alerts.GrafanaAlertQuery) ([]map[string]interface{}, error) {
 	dataList := make([]map[string]interface{}, 0)
 	for _, v := range data {
+		model, err := json.Marshal(v.Model)
+		if err != nil {
+			return nil, fmt.Errorf("could not marshal model: %s", err.Error())
+		}
+
 		dataMap := map[string]interface{}{
 			grafanaAlertRuleDataRefId:         v.RefId,
 			grafanaAlertRuleDataDatasourceUid: v.DatasourceUid,
 			grafanaAlertRuleDataQueryType:     v.QueryType,
-			grafanaAlertRuleDataModel:         handleModelConfig(v.Model),
+			grafanaAlertRuleDataModel:         handleModelConfig(string(model)),
 		}
 
 		timeRange := map[string]int{}
@@ -317,7 +331,7 @@ func getDataMapFromAlertRuleObject(data []*grafana_alerts.GrafanaAlertQuery) []m
 		dataList = append(dataList, dataMap)
 	}
 
-	return dataList
+	return dataList, nil
 }
 
 func getCreateUpdateGrafanaAlertRuleFromSchema(d *schema.ResourceData) (grafana_alerts.GrafanaAlertRule, error) {
