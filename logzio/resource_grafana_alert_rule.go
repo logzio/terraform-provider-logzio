@@ -14,6 +14,7 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"time"
 )
 
 const (
@@ -178,7 +179,11 @@ func resourceGrafanaAlertRuleCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	req := getCreateUpdateGrafanaAlertRuleFromSchema(d)
+	req, err := getCreateUpdateGrafanaAlertRuleFromSchema(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	result, err := client.CreateGrafanaAlertRule(req)
 	if err != nil {
 		return diag.FromErr(err)
@@ -220,7 +225,11 @@ func resourceGrafanaAlertRuleUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	req := getCreateUpdateGrafanaAlertRuleFromSchema(d)
+	req, err := getCreateUpdateGrafanaAlertRuleFromSchema(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	err = client.UpdateGrafanaAlertRule(req)
 	if err != nil {
 		return diag.FromErr(err)
@@ -243,7 +252,7 @@ func resourceGrafanaAlertRuleUpdate(ctx context.Context, d *schema.ResourceData,
 				} else {
 					// Check if the update shows on read
 					// if not updated yet - retry
-					grafanaAlertRuleFromSchema := getCreateUpdateGrafanaAlertRuleFromSchema(d)
+					grafanaAlertRuleFromSchema, _ := getCreateUpdateGrafanaAlertRuleFromSchema(d)
 					return !reflect.DeepEqual(grafanaAlertRuleFromSchema, req)
 				}
 			}),
@@ -311,7 +320,7 @@ func getDataMapFromAlertRuleObject(data []*grafana_alerts.GrafanaAlertQuery) []m
 	return dataList
 }
 
-func getCreateUpdateGrafanaAlertRuleFromSchema(d *schema.ResourceData) grafana_alerts.GrafanaAlertRule {
+func getCreateUpdateGrafanaAlertRuleFromSchema(d *schema.ResourceData) (grafana_alerts.GrafanaAlertRule, error) {
 	var alertRuleReq grafana_alerts.GrafanaAlertRule
 
 	alertRuleReq.Condition = d.Get(grafanaAlertRuleCondition).(string)
@@ -323,7 +332,12 @@ func getCreateUpdateGrafanaAlertRuleFromSchema(d *schema.ResourceData) grafana_a
 	alertRuleReq.OrgID = int64(d.Get(grafanaAlertRuleOrgId).(int))
 	alertRuleReq.RuleGroup = d.Get(grafanaAlertRuleRuleGroup).(string)
 	alertRuleReq.Title = d.Get(grafanaAlertRuleTitle).(string)
-	alertRuleReq.Data = getDataObjectFromSchema(d.Get(grafanaAlertRuleData).([]interface{}))
+	dataFromSchema, err := getDataObjectFromSchema(d.Get(grafanaAlertRuleData).([]interface{}))
+	if err != nil {
+		return grafana_alerts.GrafanaAlertRule{}, err
+	}
+
+	alertRuleReq.Data = dataFromSchema
 
 	if uid, ok := d.GetOk(grafanaAlertRuleUid); ok {
 		alertRuleReq.Uid = uid.(string)
@@ -341,11 +355,40 @@ func getCreateUpdateGrafanaAlertRuleFromSchema(d *schema.ResourceData) grafana_a
 		alertRuleReq.Labels = utils.InterfaceToMapOfStrings(labels)
 	}
 
-	return alertRuleReq
+	return alertRuleReq, nil
 }
 
-func getDataObjectFromSchema(dataFromSchema []interface{}) []*grafana_alerts.GrafanaAlertQuery {
+func getDataObjectFromSchema(dataFromSchema []interface{}) ([]*grafana_alerts.GrafanaAlertQuery, error) {
+	dataList := make([]*grafana_alerts.GrafanaAlertQuery, 0, len(dataFromSchema))
+	for _, dataInterface := range dataFromSchema {
+		var alertQuery grafana_alerts.GrafanaAlertQuery
+		element := dataInterface.(map[string]interface{})
 
+		var modelJson interface{}
+		err := json.Unmarshal([]byte(element[grafanaAlertRuleDataModel].(string)), &modelJson)
+		if err != nil {
+			return nil, fmt.Errorf("could not unmarshel data model: %s", err.Error())
+		}
+
+		alertQuery.Model = modelJson
+		alertQuery.DatasourceUid = element[grafanaAlertRuleDataDatasourceUid].(string)
+		alertQuery.QueryType = element[grafanaAlertRuleDataQueryType].(string)
+		alertQuery.RefId = element[grafanaAlertRuleDataRefId].(string)
+		if relativeTimeRangeRaw, ok := element[grafanaAlertRuleDataRelativeTimeRange]; ok {
+			timeInterfaceSlice := relativeTimeRangeRaw.([]interface{})
+			// See object's definition, MaxItems is 1, so no need to iterate
+			timeMap := timeInterfaceSlice[0].(map[string]interface{})
+			alertQuery.RelativeTimeRange = grafana_alerts.RelativeTimeRangeObj{
+				From: time.Duration(timeMap[grafanaAlertRuleDataRelativeTimeRangeFrom].(int)),
+				To:   time.Duration(timeMap[grafanaAlertRuleDataRelativeTimeRangeTo].(int)),
+			}
+		}
+
+		dataList = append(dataList, &alertQuery)
+
+	}
+
+	return dataList, nil
 }
 
 func suppressDiffJSON(k, old, new string, d *schema.ResourceData) bool {
