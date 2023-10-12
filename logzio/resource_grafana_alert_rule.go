@@ -124,7 +124,8 @@ func resourceGrafanaAlertRule() *schema.Resource {
 			},
 			grafanaAlertRuleExecErrState: {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
+				Default:      string(grafana_alerts.ErrAlerting),
 				ValidateFunc: utils.ValidateExecErrState,
 			},
 			grafanaAlertRuleFolderUid: {
@@ -142,7 +143,8 @@ func resourceGrafanaAlertRule() *schema.Resource {
 			},
 			grafanaAlertRuleNoDataState: {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
+				Default:      string(grafana_alerts.NoData),
 				ValidateFunc: utils.ValidateExecNoDataState,
 			},
 			grafanaAlertRuleRuleGroup: {

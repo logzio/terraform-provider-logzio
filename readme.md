@@ -195,19 +195,21 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 
 ### Changelog
 
+- **v1.14.0**:
+  - Upgrade `logzio_client_terraform to 1.18.0`.
+  - Support [Grafana Alert Rule API](https://docs.logz.io/api/#tag/Grafana-alerting-provisioning).
 - **v1.13.2**:
   - **alerts v2**:
     - **Bug fix**: Add default value of `JSON` to `output_type` to match API behaviour.
   - **grafana dashboards**:
     - **Bug fix**: Handle dashboard configs with id and version fields.
-- **v1.13.1**:
-  - **s3 fetcher**:
-    - **Bug fix**: `prefix` field now being applied.
-
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
 
+- **v1.13.1**:
+    - **s3 fetcher**:
+        - **Bug fix**: `prefix` field now being applied.
 - **v1.13.0**:
     - Upgrade `logzio_client_terraform` to `1.16.0`.
     - Support [Grafana Dashboards API](https://docs.logz.io/api/#operation/createDashboard).
