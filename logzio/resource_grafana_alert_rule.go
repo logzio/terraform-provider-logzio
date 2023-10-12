@@ -131,6 +131,7 @@ func resourceGrafanaAlertRule() *schema.Resource {
 			grafanaAlertRuleFolderUid: {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			grafanaAlertRuleFor: {
 				Type:     schema.TypeInt,
@@ -148,6 +149,7 @@ func resourceGrafanaAlertRule() *schema.Resource {
 			grafanaAlertRuleOrgId: {
 				Type:     schema.TypeInt,
 				Required: true,
+				ForceNew: true,
 			},
 			grafanaAlertRuleRuleGroup: {
 				Type:     schema.TypeString,
@@ -192,6 +194,8 @@ func resourceGrafanaAlertRuleCreate(ctx context.Context, d *schema.ResourceData,
 	d.SetId(result.Uid)
 	d.Set(grafanaAlertRuleUid, result.Uid)
 	d.Set(grafanaAlertRuleId, result.Id)
+	// When doing GET of alert, it does not return OrgId, so the set needs to happen upon creation, from user input
+	d.Set(grafanaAlertRuleOrgId, req.OrgID)
 
 	return resourceGrafanaAlertRuleRead(ctx, d, m)
 }
@@ -300,7 +304,6 @@ func setGrafanaAlertRule(d *schema.ResourceData, grafanaAlertRule *grafana_alert
 	d.Set(grafanaAlertRuleFolderUid, grafanaAlertRule.FolderUID)
 	d.Set(grafanaAlertRuleFor, grafanaAlertRule.For)
 	d.Set(grafanaAlertRuleNoDataState, string(grafanaAlertRule.NoDataState))
-	d.Set(grafanaAlertRuleOrgId, grafanaAlertRule.OrgID)
 	d.Set(grafanaAlertRuleRuleGroup, grafanaAlertRule.RuleGroup)
 	d.Set(grafanaAlertRuleTitle, grafanaAlertRule.Title)
 	d.Set(grafanaAlertRuleData, data)
@@ -399,7 +402,6 @@ func getDataObjectFromSchema(dataFromSchema []interface{}) ([]*grafana_alerts.Gr
 		}
 
 		dataList = append(dataList, &alertQuery)
-
 	}
 
 	return dataList, nil
