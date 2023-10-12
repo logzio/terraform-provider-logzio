@@ -23,12 +23,11 @@ func TestAccLogzioGrafanaAlertRule_CreateUpdateDashboard(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceFullName, grafanaAlertRuleId),
 					resource.TestCheckResourceAttrSet(resourceFullName, grafanaAlertRuleFolderUid),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaAlertRuleTitle, "my_grafana_alert"),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaAlertRuleOrgId, "1"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.foo", grafanaAlertRuleAnnotations), "bar"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.hello", grafanaAlertRuleAnnotations), "world"),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaAlertRuleCondition, "A"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaAlertRuleData, grafanaAlertRuleDataModel), "{\"hide\":false,\"refId\":\"B\"}"),
-					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.hey", grafanaAlertRuleLabels), "ho"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.hey", grafanaAlertRuleLabels), "oh"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.lets", grafanaAlertRuleLabels), "go"),
 				),
 			},
@@ -64,7 +63,7 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
     }
   }
   labels = {
-    "hey" = "ho"
+    "hey" = "oh"
     "lets" = "go"
   }
   is_paused = false
@@ -72,7 +71,6 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
   folder_uid = "%s"
   for = 3
   no_data_state = "OK"
-  org_id = 1
   rule_group = "rule_group_1"
   title = "my_grafana_alert"
 }

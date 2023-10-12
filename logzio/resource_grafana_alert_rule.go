@@ -35,7 +35,6 @@ const (
 	grafanaAlertRuleFor                       = "for"
 	grafanaAlertRuleId                        = "alert_rule_id"
 	grafanaAlertRuleNoDataState               = "no_data_state"
-	grafanaAlertRuleOrgId                     = "org_id"
 	grafanaAlertRuleRuleGroup                 = "rule_group"
 	grafanaAlertRuleTitle                     = "title"
 	grafanaAlertRuleUid                       = "uid"
@@ -146,11 +145,6 @@ func resourceGrafanaAlertRule() *schema.Resource {
 				Required:     true,
 				ValidateFunc: utils.ValidateExecNoDataState,
 			},
-			grafanaAlertRuleOrgId: {
-				Type:     schema.TypeInt,
-				Required: true,
-				ForceNew: true,
-			},
 			grafanaAlertRuleRuleGroup: {
 				Type:     schema.TypeString,
 				Required: true,
@@ -192,8 +186,6 @@ func resourceGrafanaAlertRuleCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(result.Uid)
-	// When doing GET of alert, it does not return OrgId, so the set needs to happen upon creation, from user input
-	d.Set(grafanaAlertRuleOrgId, req.OrgID)
 
 	return resourceGrafanaAlertRuleRead(ctx, d, m)
 }
@@ -345,7 +337,6 @@ func getCreateUpdateGrafanaAlertRuleFromSchema(d *schema.ResourceData) (grafana_
 	alertRuleReq.FolderUID = d.Get(grafanaAlertRuleFolderUid).(string)
 	alertRuleReq.For = int64(d.Get(grafanaAlertRuleFor).(int))
 	alertRuleReq.NoDataState = grafana_alerts.NoDataState(d.Get(grafanaAlertRuleNoDataState).(string))
-	alertRuleReq.OrgID = int64(d.Get(grafanaAlertRuleOrgId).(int))
 	alertRuleReq.RuleGroup = d.Get(grafanaAlertRuleRuleGroup).(string)
 	alertRuleReq.Title = d.Get(grafanaAlertRuleTitle).(string)
 	dataFromSchema, err := getDataObjectFromSchema(d.Get(grafanaAlertRuleData).([]interface{}))
@@ -370,6 +361,9 @@ func getCreateUpdateGrafanaAlertRuleFromSchema(d *schema.ResourceData) (grafana_
 	if labels, ok := d.GetOk(grafanaAlertRuleLabels); ok {
 		alertRuleReq.Labels = utils.InterfaceToMapOfStrings(labels)
 	}
+
+	// org id is irrelevant, but must be set to a non-zero value to comply with the API
+	alertRuleReq.OrgID = 1
 
 	return alertRuleReq, nil
 }
