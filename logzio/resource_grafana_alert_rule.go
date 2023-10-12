@@ -192,8 +192,6 @@ func resourceGrafanaAlertRuleCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(result.Uid)
-	d.Set(grafanaAlertRuleUid, result.Uid)
-	d.Set(grafanaAlertRuleId, result.Id)
 	// When doing GET of alert, it does not return OrgId, so the set needs to happen upon creation, from user input
 	d.Set(grafanaAlertRuleOrgId, req.OrgID)
 
@@ -295,7 +293,8 @@ func setGrafanaAlertRule(d *schema.ResourceData, grafanaAlertRule *grafana_alert
 	if err != nil {
 		return err
 	}
-
+	d.Set(grafanaAlertRuleUid, grafanaAlertRule.Uid)
+	d.Set(grafanaAlertRuleId, grafanaAlertRule.Id)
 	d.Set(grafanaAlertRuleAnnotations, grafanaAlertRule.Annotations)
 	d.Set(grafanaAlertRuleCondition, grafanaAlertRule.Condition)
 	d.Set(grafanaAlertRuleLabels, grafanaAlertRule.Labels)
@@ -444,7 +443,6 @@ func handleModelConfig(model interface{}) string {
 	if ok {
 		maxDataPoints, ok := iMaxDataPoints.(float64)
 		if ok && maxDataPoints == defaultMaxDataPoints {
-			log.Printf("Found default value for %s (%f), removing from model config", maxDataPointsField, defaultMaxDataPoints)
 			delete(modelObj, maxDataPointsField)
 		}
 	}
@@ -453,7 +451,6 @@ func handleModelConfig(model interface{}) string {
 	if ok {
 		intervalMs, ok := iIntervalMs.(float64)
 		if ok && intervalMs == defaultIntervalMS {
-			log.Printf("Found default value for %s (%f), removing from model config", intervalMsField, defaultIntervalMS)
 			delete(modelObj, intervalMsField)
 		}
 	}

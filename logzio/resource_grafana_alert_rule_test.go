@@ -21,8 +21,22 @@ func TestAccLogzioGrafanaAlertRule_CreateUpdateDashboard(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceFullName, grafanaAlertRuleUid),
 					resource.TestCheckResourceAttrSet(resourceFullName, grafanaAlertRuleId),
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaAlertRuleFolderUid),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaAlertRuleTitle, "my_grafana_alert"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaAlertRuleOrgId, "1"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.foo", grafanaAlertRuleAnnotations), "bar"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.hello", grafanaAlertRuleAnnotations), "world"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaAlertRuleCondition, "A"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaAlertRuleData, grafanaAlertRuleDataModel), "{\"hide\":false,\"refId\":\"B\"}"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.hey", grafanaAlertRuleLabels), "ho"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.lets", grafanaAlertRuleLabels), "go"),
 				),
+			},
+			{
+				// Import
+				ResourceName:      resourceFullName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -42,8 +56,6 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
     query_type = ""
     model = jsonencode({
       hide          = false
-      intervalMs    = 1000
-      maxDataPoints = 43200
       refId         = "B"
     })
     relative_time_range {
