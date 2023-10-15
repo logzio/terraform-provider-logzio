@@ -81,7 +81,7 @@ func resourceGrafanaAlertRule() *schema.Resource {
 						},
 						grafanaAlertRuleDataQueryType: {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 						},
 						grafanaAlertRuleDataModel: {
 							Type:         schema.TypeString,
