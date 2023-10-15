@@ -69,6 +69,23 @@ func TestAccLogzioGrafanaAlertRule_CreateUpdateAlertRule(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.lets", grafanaAlertRuleLabels), "go"),
 				),
 			},
+			{
+				// Update for
+				Config: getGrafanaAlertRuleConfigUpdateFor(folderUid),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaAlertRuleUid),
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaAlertRuleId),
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaAlertRuleFolderUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaAlertRuleTitle, "updated_title"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.foo", grafanaAlertRuleAnnotations), "bar"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.hello", grafanaAlertRuleAnnotations), "world"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaAlertRuleCondition, "A"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaAlertRuleData, grafanaAlertRuleDataModel), "{\"hide\":false,\"intervalMs\":2000,\"refId\":\"B\"}"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.hey", grafanaAlertRuleLabels), "oh"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.lets", grafanaAlertRuleLabels), "go"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaAlertRuleFor, "4m30s"),
+				),
+			},
 		},
 	})
 }
@@ -175,6 +192,43 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
   exec_err_state = "Alerting"
   folder_uid = "%s"
   for = "3m"
+  no_data_state = "OK"
+  rule_group = "rule_group_1"
+  title = "updated_title"
+}
+`, folderUid)
+}
+
+func getGrafanaAlertRuleConfigUpdateFor(folderUid string) string {
+	return fmt.Sprintf(`
+resource "logzio_grafana_alert_rule" "test_grafana_alert" {
+  annotations = {
+    "foo" = "bar"
+    "hello" = "world"
+  }
+  condition = "A"
+  data {
+    ref_id = "B"
+    datasource_uid = "AB1C234567D89012E"
+    query_type = ""
+    model = jsonencode({
+      hide          = false
+      intervalMs    = 2000
+      refId         = "B"
+    })
+    relative_time_range {
+      from = 700
+      to   = 0
+    }
+  }
+  labels = {
+    "hey" = "oh"
+    "lets" = "go"
+  }
+  is_paused = false
+  exec_err_state = "Alerting"
+  folder_uid = "%s"
+  for = "4m30s"
   no_data_state = "OK"
   rule_group = "rule_group_1"
   title = "updated_title"
