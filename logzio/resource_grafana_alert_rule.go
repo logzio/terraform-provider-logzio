@@ -133,6 +133,7 @@ func resourceGrafanaAlertRule() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			// Note - in this provider field "for" is a duration string, but in the API it's an int representing nanoseconds
 			grafanaAlertRuleFor: {
 				Type:         schema.TypeString,
 				Required:     true,
