@@ -33,7 +33,7 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
   is_paused = false
   exec_err_state = "Alerting"
   folder_uid = "my-folder-uid"
-  for = 3
+  for = "3m"
   no_data_state = "OK"
   rule_group = "rule_group_1"
   title = "my_grafana_alert"
@@ -46,3 +46,5 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
 
 * `condition` - (String) The `ref_id` of the query node in the `data` field to use as the alert condition.
 * `data` - (Block List) A sequence of stages that describe the contents of the rule. See below for **nested schema**.
+* `folder_uid` - (String) The UID of the folder that the alert rule belongs to.
+* `for` - 

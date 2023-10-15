@@ -12,6 +12,7 @@ import (
 	"github.com/logzio/logzio_terraform_client/s3_fetcher"
 	"github.com/logzio/logzio_terraform_client/users"
 	"regexp"
+	"time"
 )
 
 func contains(slice []string, s string) bool {
@@ -259,6 +260,16 @@ func ValidateExecNoDataState(v interface{}, k string) (ws []string, errors []err
 
 	if !contains(validNoDataState, value) {
 		errors = append(errors, fmt.Errorf("value for no data state is unknown"))
+	}
+
+	return
+}
+
+func ValidateTimeDurationString(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	_, err := time.ParseDuration(value)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("could not parse string to duration: %s", err.Error()))
 	}
 
 	return

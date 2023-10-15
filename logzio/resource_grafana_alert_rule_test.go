@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestAccLogzioGrafanaAlertRule_CreateUpdateDashboard(t *testing.T) {
+func TestAccLogzioGrafanaAlertRule_CreateUpdateAlertRule(t *testing.T) {
 	defer utils.SleepAfterTest()
 	folderUid := os.Getenv(grafanaFolderIdEnv)
 	resourceFullName := "logzio_grafana_alert_rule.test_grafana_alert"
@@ -101,7 +101,7 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
   is_paused = false
   exec_err_state = "Alerting"
   folder_uid = "%s"
-  for = 3
+  for = "3m"
   no_data_state = "OK"
   rule_group = "rule_group_1"
   title = "my_grafana_alert"
@@ -137,7 +137,7 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
   is_paused = false
   exec_err_state = "Alerting"
   folder_uid = "%s"
-  for = 3
+  for = "3m"
   no_data_state = "OK"
   rule_group = "rule_group_1"
   title = "updated_title"
@@ -174,7 +174,7 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
   is_paused = false
   exec_err_state = "Alerting"
   folder_uid = "%s"
-  for = 3
+  for = "3m"
   no_data_state = "OK"
   rule_group = "rule_group_1"
   title = "updated_title"

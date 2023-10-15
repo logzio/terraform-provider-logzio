@@ -24,7 +24,7 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
   is_paused = false
   exec_err_state = "Alerting"
   folder_uid = "my_folder_uid"
-  for = 3
+  for = "3m"
   no_data_state = "OK"
   rule_group = "rule_group_1"
   title = "my_grafana_alert"

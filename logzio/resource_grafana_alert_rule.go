@@ -134,8 +134,10 @@ func resourceGrafanaAlertRule() *schema.Resource {
 				ForceNew: true,
 			},
 			grafanaAlertRuleFor: {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: utils.ValidateTimeDurationString,
+				StateFunc:    handleDurationString,
 			},
 			grafanaAlertRuleId: {
 				Type:     schema.TypeInt,
@@ -287,6 +289,9 @@ func setGrafanaAlertRule(d *schema.ResourceData, grafanaAlertRule *grafana_alert
 	if err != nil {
 		return err
 	}
+
+	forFieldStr := parseNanosecondsToDurationString(grafanaAlertRule.For)
+	d.Set(grafanaAlertRuleFor, forFieldStr)
 	d.Set(grafanaAlertRuleUid, grafanaAlertRule.Uid)
 	d.Set(grafanaAlertRuleId, grafanaAlertRule.Id)
 	d.Set(grafanaAlertRuleAnnotations, grafanaAlertRule.Annotations)
@@ -295,7 +300,6 @@ func setGrafanaAlertRule(d *schema.ResourceData, grafanaAlertRule *grafana_alert
 	d.Set(grafanaAlertRuleIsPaused, grafanaAlertRule.IsPaused)
 	d.Set(grafanaAlertRuleExecErrState, string(grafanaAlertRule.ExecErrState))
 	d.Set(grafanaAlertRuleFolderUid, grafanaAlertRule.FolderUID)
-	d.Set(grafanaAlertRuleFor, grafanaAlertRule.For)
 	d.Set(grafanaAlertRuleNoDataState, string(grafanaAlertRule.NoDataState))
 	d.Set(grafanaAlertRuleRuleGroup, grafanaAlertRule.RuleGroup)
 	d.Set(grafanaAlertRuleTitle, grafanaAlertRule.Title)
@@ -337,7 +341,6 @@ func getCreateUpdateGrafanaAlertRuleFromSchema(d *schema.ResourceData) (grafana_
 	alertRuleReq.IsPaused = d.Get(grafanaAlertRuleIsPaused).(bool)
 	alertRuleReq.ExecErrState = grafana_alerts.ExecErrState(d.Get(grafanaAlertRuleExecErrState).(string))
 	alertRuleReq.FolderUID = d.Get(grafanaAlertRuleFolderUid).(string)
-	alertRuleReq.For = int64(d.Get(grafanaAlertRuleFor).(int))
 	alertRuleReq.NoDataState = grafana_alerts.NoDataState(d.Get(grafanaAlertRuleNoDataState).(string))
 	alertRuleReq.RuleGroup = d.Get(grafanaAlertRuleRuleGroup).(string)
 	alertRuleReq.Title = d.Get(grafanaAlertRuleTitle).(string)
@@ -345,6 +348,8 @@ func getCreateUpdateGrafanaAlertRuleFromSchema(d *schema.ResourceData) (grafana_
 	if err != nil {
 		return grafana_alerts.GrafanaAlertRule{}, err
 	}
+
+	alertRuleReq.For = parseDurationStringToNanoseconds(d.Get(grafanaAlertRuleFor).(string))
 
 	alertRuleReq.Data = dataFromSchema
 
@@ -454,4 +459,19 @@ func handleModelConfig(model interface{}) string {
 	modelJson, _ := json.Marshal(modelObj)
 	jsonStr := string(modelJson)
 	return jsonStr
+}
+
+func parseNanosecondsToDurationString(nanoseconds int64) string {
+	duration := time.Duration(nanoseconds) * time.Nanosecond
+	return duration.String()
+}
+
+func handleDurationString(durationStr interface{}) string {
+	duration, _ := time.ParseDuration(durationStr.(string))
+	return duration.String()
+}
+
+func parseDurationStringToNanoseconds(durationString string) int64 {
+	duration, _ := time.ParseDuration(durationString)
+	return duration.Nanoseconds()
 }
