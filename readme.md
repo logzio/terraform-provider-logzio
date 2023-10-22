@@ -25,6 +25,7 @@ The following Logz.io API endpoints are supported by this provider:
 * [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
 * [S3 Fetcher](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets)
 * [Grafana Dashboards](https://docs.logz.io/api/#operation/createDashboard)
+* [Grafana Alert Rules](https://docs.logz.io/api/#tag/Grafana-alerting-provisioning)
 
 #### Working with Terraform
 
