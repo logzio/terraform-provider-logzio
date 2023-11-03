@@ -9,6 +9,7 @@ import (
 	"github.com/logzio/logzio_terraform_client/grafana_notification_policies"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"strings"
+	"time"
 )
 
 const (
@@ -30,6 +31,8 @@ const (
 
 	// Since one resource manages the entire tree, and does not create an id, we'll use this id for Terraform
 	grafanaNotificationPolicyStaticId = "logzio_policy"
+
+	grafanaNotificationPolicyUpdateDelaySeconds = 4
 )
 
 // resourceGrafanaNotificationPolicy represents a Grafana notification policy tree. Note that one resource represents the entire policy tree
@@ -37,7 +40,7 @@ func resourceGrafanaNotificationPolicy() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceGrafanaNotificationPolicyCreate,
 		ReadContext:   resourceGrafanaNotificationPolicyRead,
-		//UpdateContext: resourceGrafanaNotificationPolicyUpdate,
+		UpdateContext: resourceGrafanaNotificationPolicyUpdate,
 		//DeleteContext: resourceGrafanaNotificationPolicyDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -192,6 +195,22 @@ func resourceGrafanaNotificationPolicyRead(ctx context.Context, d *schema.Resour
 
 	setGrafanaNotificationPolicy(d, grafanaNotificationPolicy)
 	return nil
+}
+
+func resourceGrafanaNotificationPolicyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	grafanaNotificationPolicy, err := createGrafanaNotificationPolicyFromSchema(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = grafanaNotificationPolicyClient(m).SetupGrafanaNotificationPolicyTree(grafanaNotificationPolicy)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	time.Sleep(grafanaNotificationPolicyUpdateDelaySeconds * time.Second)
+
+	return resourceGrafanaNotificationPolicyRead(ctx, d, m)
 }
 
 func setGrafanaNotificationPolicy(d *schema.ResourceData, grafanaNotificationPolicy grafana_notification_policies.GrafanaNotificationPolicyTree) {
