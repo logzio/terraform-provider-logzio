@@ -67,3 +67,16 @@ func ParseStringToMapList(value string) []map[string]interface{} {
 
 	return returnObject
 }
+
+// ParseInterfaceSliceToStringSlice receives slice of interface, and returns a slice of string
+func ParseInterfaceSliceToStringSlice(interfaceSlice []interface{}) []string {
+	stringSlice := make([]string, 0, len(interfaceSlice))
+	for _, s := range interfaceSlice {
+		val, ok := s.(string)
+		if !ok {
+			val = ""
+		}
+		stringSlice = append(stringSlice, val)
+	}
+	return stringSlice
+}
