@@ -2,11 +2,13 @@ package logzio
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/logzio/logzio_terraform_client/grafana_notification_policies"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
+	"strings"
 )
 
 const (
@@ -21,7 +23,7 @@ const (
 	grafanaNotificationPolicyMatcherLabel = "label"
 	grafanaNotificationPolicyMatcherMatch = "match"
 	grafanaNotificationPolicyMatcherValue = "value"
-	grafanaNotificationPolicyMuteTiming   = "mute_timing"
+	grafanaNotificationPolicyMuteTimings  = "mute_timings"
 	grafanaNotificationPolicyContinue     = "continue"
 
 	grafanaNotificationPolicyTreeDepth = 4
@@ -117,7 +119,7 @@ func buildPolicySchema(treeDepth uint) *schema.Resource {
 					},
 				},
 			},
-			grafanaNotificationPolicyMuteTiming: {
+			grafanaNotificationPolicyMuteTimings: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -176,7 +178,97 @@ func resourceGrafanaNotificationPolicyCreate(ctx context.Context, d *schema.Reso
 }
 
 func resourceGrafanaNotificationPolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	grafanaNotificationPolicy, err := grafanaNotificationPolicyClient(m).GetGrafanaNotificationPolicyTree()
+	if err != nil {
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing grafana notification policy") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
+		}
+	}
 
+	setGrafanaNotificationPolicy(d, grafanaNotificationPolicy)
+	return nil
+}
+
+func setGrafanaNotificationPolicy(d *schema.ResourceData, grafanaNotificationPolicy grafana_notification_policies.GrafanaNotificationPolicyTree) {
+	d.Set(grafanaNotificationPolicyContactPoint, grafanaNotificationPolicy.Receiver)
+	d.Set(grafanaNotificationPolicyGroupBy, grafanaNotificationPolicy.GroupBy)
+	d.Set(grafanaNotificationPolicyGroupWait, grafanaNotificationPolicy.GroupWait)
+	d.Set(grafanaNotificationPolicyGroupInterval, grafanaNotificationPolicy.GroupInterval)
+	d.Set(grafanaNotificationPolicyRepeatInterval, grafanaNotificationPolicy.RepeatInterval)
+
+	if len(grafanaNotificationPolicy.Routes) > 0 {
+		policies := make([]interface{}, 0, len(grafanaNotificationPolicy.Routes))
+		for _, route := range grafanaNotificationPolicy.Routes {
+			policies = append(policies, getPolicyFromObject(route, grafanaNotificationPolicyTreeDepth))
+		}
+
+		d.Set(grafanaNotificationPolicyPolicy, policies)
+	}
+}
+
+func getPolicyFromObject(policy grafana_notification_policies.GrafanaNotificationPolicy, treeDepth uint) interface{} {
+	policyMap := map[string]interface{}{}
+
+	policyMap[grafanaNotificationPolicyContinue] = policy.Continue
+
+	if len(policy.GroupBy) > 0 {
+		policyMap[grafanaNotificationPolicyGroupBy] = policy.GroupBy
+	}
+
+	if len(policy.GroupInterval) > 0 {
+		policyMap[grafanaNotificationPolicyGroupInterval] = policy.GroupInterval
+	}
+
+	if len(policy.GroupWait) > 0 {
+		policyMap[grafanaNotificationPolicyGroupWait] = policy.GroupWait
+	}
+
+	if policy.MuteTimeIntervals != nil && len(policy.MuteTimeIntervals) > 0 {
+		policyMap[grafanaNotificationPolicyMuteTimings] = policy.MuteTimeIntervals
+	}
+
+	if policy.ObjectMatchers != nil && len(policy.ObjectMatchers) > 0 {
+		matchers := make([]interface{}, 0, len(policy.ObjectMatchers))
+		for _, matcher := range policy.ObjectMatchers {
+			matchers = append(matchers, getMatcherFromObject(matcher))
+		}
+		policyMap[grafanaNotificationPolicyMatcher] = matchers
+	}
+
+	policyMap[grafanaNotificationPolicyContactPoint] = policy.Receiver
+
+	if len(policy.RepeatInterval) > 0 {
+		policyMap[grafanaNotificationPolicyRepeatInterval] = policy.RepeatInterval
+	}
+
+	if treeDepth > 1 && policy.Routes != nil && len(policy.Routes) > 0 {
+		policies := make([]interface{}, 0, len(policy.Routes))
+		for _, route := range policy.Routes {
+			policies = append(policies, getPolicyFromObject(route, treeDepth-1))
+		}
+		policyMap[grafanaNotificationPolicyPolicy] = policies
+	}
+
+	return policyMap
+}
+
+func getMatcherFromObject(matcherObject grafana_notification_policies.MatcherObj) interface{} {
+	const (
+		labelIndex = iota
+		matchIndex
+		valueIndex
+	)
+
+	return map[string]interface{}{
+		grafanaNotificationPolicyMatcherLabel: matcherObject[labelIndex],
+		grafanaNotificationPolicyMatcherMatch: matcherObject[matchIndex],
+		grafanaNotificationPolicyMatcherValue: matcherObject[valueIndex],
+	}
 }
 
 func createGrafanaNotificationPolicyFromSchema(d *schema.ResourceData) (grafana_notification_policies.GrafanaNotificationPolicyTree, error) {
@@ -228,7 +320,7 @@ func getPolicyFromSchema(policyFromSchema interface{}) (grafana_notification_pol
 		policy.GroupWait = v.(string)
 	}
 
-	if v, ok := policyMap[grafanaNotificationPolicyMuteTiming]; ok && v != nil {
+	if v, ok := policyMap[grafanaNotificationPolicyMuteTimings]; ok && v != nil {
 		policy.MuteTimeIntervals = utils.ParseInterfaceSliceToStringSlice(v.([]interface{}))
 	}
 
