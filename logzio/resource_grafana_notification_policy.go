@@ -25,13 +25,16 @@ const (
 	grafanaNotificationPolicyContinue     = "continue"
 
 	grafanaNotificationPolicyTreeDepth = 4
+
+	// Since one resource manages the entire tree, and does not create an id, we'll use this id for Terraform
+	grafanaNotificationPolicyStaticId = "logzio_policy"
 )
 
 // resourceGrafanaNotificationPolicy represents a Grafana notification policy tree. Note that one resource represents the entire policy tree
 func resourceGrafanaNotificationPolicy() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceGrafanaNotificationPolicyCreate,
-		//ReadContext:   resourceGrafanaNotificationPolicyRead,
+		ReadContext:   resourceGrafanaNotificationPolicyRead,
 		//UpdateContext: resourceGrafanaNotificationPolicyUpdate,
 		//DeleteContext: resourceGrafanaNotificationPolicyDelete,
 		Importer: &schema.ResourceImporter{
@@ -159,6 +162,21 @@ func grafanaNotificationPolicyClient(m interface{}) *grafana_notification_polici
 
 func resourceGrafanaNotificationPolicyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	grafanaNotificationPolicy, err := createGrafanaNotificationPolicyFromSchema(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = grafanaNotificationPolicyClient(m).SetupGrafanaNotificationPolicyTree(grafanaNotificationPolicy)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(grafanaNotificationPolicyStaticId)
+	return resourceGrafanaNotificationPolicyRead(ctx, d, m)
+}
+
+func resourceGrafanaNotificationPolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+
 }
 
 func createGrafanaNotificationPolicyFromSchema(d *schema.ResourceData) (grafana_notification_policies.GrafanaNotificationPolicyTree, error) {
