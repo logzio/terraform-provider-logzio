@@ -41,7 +41,7 @@ func resourceGrafanaNotificationPolicy() *schema.Resource {
 		CreateContext: resourceGrafanaNotificationPolicyCreate,
 		ReadContext:   resourceGrafanaNotificationPolicyRead,
 		UpdateContext: resourceGrafanaNotificationPolicyUpdate,
-		//DeleteContext: resourceGrafanaNotificationPolicyDelete,
+		DeleteContext: resourceGrafanaNotificationPolicyDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -211,6 +211,18 @@ func resourceGrafanaNotificationPolicyUpdate(ctx context.Context, d *schema.Reso
 	time.Sleep(grafanaNotificationPolicyUpdateDelaySeconds * time.Second)
 
 	return resourceGrafanaNotificationPolicyRead(ctx, d, m)
+}
+
+// resourceGrafanaNotificationPolicyDelete only RESETS the notification policy tree (because of the way the Grafana Notification Policy API works).
+// Using this endpoint will reset the entire notification policy tree.
+func resourceGrafanaNotificationPolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	err := grafanaNotificationPolicyClient(m).ResetGrafanaNotificationPolicyTree()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+	return nil
 }
 
 func setGrafanaNotificationPolicy(d *schema.ResourceData, grafanaNotificationPolicy grafana_notification_policies.GrafanaNotificationPolicyTree) {
