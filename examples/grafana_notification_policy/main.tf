@@ -26,6 +26,8 @@ resource logzio_grafana_notification_policy test_np {
     group_wait      = "50s"
     group_interval  = "7m"
     repeat_interval = "4h"
+    mute_timings = ["some-mute-timing"]
+
 
     policy {
       matcher {
