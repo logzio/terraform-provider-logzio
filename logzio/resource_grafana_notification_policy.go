@@ -311,9 +311,8 @@ func createGrafanaNotificationPolicyFromSchema(d *schema.ResourceData) (grafana_
 	}
 
 	groupByInterface := d.Get(grafanaNotificationPolicyGroupBy).([]interface{})
-	groupBy := make([]string, 0, len(groupByInterface))
 	for _, group := range groupByInterface {
-		groupBy = append(groupBy, group.(string))
+		grafanaNotificationPolicyTree.GroupBy = append(grafanaNotificationPolicyTree.GroupBy, group.(string))
 	}
 
 	var policies []grafana_notification_policies.GrafanaNotificationPolicy
@@ -327,6 +326,8 @@ func createGrafanaNotificationPolicyFromSchema(d *schema.ResourceData) (grafana_
 			policies = append(policies, policy)
 		}
 	}
+
+	grafanaNotificationPolicyTree.Routes = policies
 
 	return grafanaNotificationPolicyTree, nil
 }
