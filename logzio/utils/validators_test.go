@@ -1,41 +1,10 @@
 package utils
 
 import (
-	"github.com/logzio/logzio_terraform_client/alerts"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
-
-func TestValidateOperation(t *testing.T) {
-	validOperations := []string{
-		alerts.OperatorGreaterThanOrEquals,
-		alerts.OperatorLessThanOrEquals,
-		alerts.OperatorGreaterThan,
-		alerts.OperatorLessThan,
-		alerts.OperatorEquals,
-		alerts.OperatorNotEquals,
-	}
-
-	for _, s := range validOperations {
-		_, errors := ValidateOperation(s, "operation")
-		if len(errors) > 0 {
-			t.Fatalf("%q should be a validd operation: %v", s, errors)
-		}
-	}
-
-	invalidNames := []string{
-		"",
-		"this is not a valid operation",
-	}
-
-	for _, s := range invalidNames {
-		_, errors := ValidateOperation(s, "operation")
-		if len(errors) == 0 {
-			t.Fatalf("%q should not be a valid operations: %v", s, errors)
-		}
-	}
-}
 
 func TestValidUrl(t *testing.T) {
 	str := "https://some.url"
