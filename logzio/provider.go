@@ -25,6 +25,7 @@ const (
 	resourceS3FetcherType            = "logzio_s3_fetcher"
 	resourceGrafanaDashboardType     = "logzio_grafana_dashboard"
 	resourceGrafanaAlertRuleType     = "logzio_grafana_alert_rule"
+	resourceGrafanaNotificationPolicyType = "logzio_grafana_notification_policy"
 
 	envLogzioApiToken = "LOGZIO_API_TOKEN"
 	envLogzioRegion   = "LOGZIO_REGION"
@@ -79,6 +80,7 @@ func Provider() *schema.Provider {
 			resourceS3FetcherType:            resourceS3Fetcher(),
 			resourceGrafanaDashboardType:     resourceGrafanaDashboard(),
 			resourceGrafanaAlertRuleType:     resourceGrafanaAlertRule(),
+			resourceGrafanaNotificationPolicyType: resourceGrafanaNotificationPolicy(),
 		},
 		ConfigureContextFunc: providerConfigureWrapper,
 	}
