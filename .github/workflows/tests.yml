@@ -18,6 +18,7 @@ env:
   AWS_ARN: ${{ secrets.AWS_ARN }}
   AWS_ACCESS_KEY_UPDATE: ${{ secrets.AWS_ACCESS_KEY_UPDATE }}
   AWS_SECRET_KEY_UPDATE: ${{ secrets.AWS_SECRET_KEY_UPDATE }}
+  GRAFANA_FOLDER_UID: ${{ secrets.GRAFANA_FOLDER_UID }}
 
 jobs:
   test:

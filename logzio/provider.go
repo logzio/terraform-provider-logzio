@@ -8,22 +8,23 @@ import (
 )
 
 const (
-	providerApiToken                      = "api_token"
-	providerBaseUrl                       = "base_url"
-	providerRegion                        = "region"
-	resourceAlertType                     = "logzio_alert"
-	resourceAlertV2Type                   = "logzio_alert_v2"
-	resourceEndpointType                  = "logzio_endpoint"
-	resourceUserType                      = "logzio_user"
-	resourceSubAccountType                = "logzio_subaccount"
-	resourceLogShippingTokenType          = "logzio_log_shipping_token"
-	resourceDropFilterType                = "logzio_drop_filter"
-	resourceArchiveLogsType               = "logzio_archive_logs"
-	resourceRestoreLogsType               = "logzio_restore_logs"
-	resourceAuthenticationGroupsType      = "logzio_authentication_groups"
-	resourceKibanaObjectType              = "logzio_kibana_object"
-	resourceS3FetcherType                 = "logzio_s3_fetcher"
-	resourceGrafanaDashboardType          = "logzio_grafana_dashboard"
+	providerApiToken                 = "api_token"
+	providerBaseUrl                  = "base_url"
+	providerRegion                   = "region"
+	resourceAlertType                = "logzio_alert"
+	resourceAlertV2Type              = "logzio_alert_v2"
+	resourceEndpointType             = "logzio_endpoint"
+	resourceUserType                 = "logzio_user"
+	resourceSubAccountType           = "logzio_subaccount"
+	resourceLogShippingTokenType     = "logzio_log_shipping_token"
+	resourceDropFilterType           = "logzio_drop_filter"
+	resourceArchiveLogsType          = "logzio_archive_logs"
+	resourceRestoreLogsType          = "logzio_restore_logs"
+	resourceAuthenticationGroupsType = "logzio_authentication_groups"
+	resourceKibanaObjectType         = "logzio_kibana_object"
+	resourceS3FetcherType            = "logzio_s3_fetcher"
+	resourceGrafanaDashboardType     = "logzio_grafana_dashboard"
+	resourceGrafanaAlertRuleType     = "logzio_grafana_alert_rule"
 	resourceGrafanaNotificationPolicyType = "logzio_grafana_notification_policy"
 
 	envLogzioApiToken = "LOGZIO_API_TOKEN"
@@ -66,18 +67,19 @@ func Provider() *schema.Provider {
 			resourceGrafanaDashboardType:     dataSourceGrafanaDashboard(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			resourceEndpointType:                  resourceEndpoint(),
-			resourceUserType:                      resourceUser(),
-			resourceSubAccountType:                resourceSubAccount(),
-			resourceAlertV2Type:                   resourceAlertV2(),
-			resourceLogShippingTokenType:          resourceLogShippingToken(),
-			resourceDropFilterType:                resourceDropFilter(),
-			resourceArchiveLogsType:               resourceArchiveLogs(),
-			resourceRestoreLogsType:               resourceRestoreLogs(),
-			resourceAuthenticationGroupsType:      resourceAuthenticationGroups(),
-			resourceKibanaObjectType:              resourceKibanaObject(),
-			resourceS3FetcherType:                 resourceS3Fetcher(),
-			resourceGrafanaDashboardType:          resourceGrafanaDashboard(),
+			resourceEndpointType:             resourceEndpoint(),
+			resourceUserType:                 resourceUser(),
+			resourceSubAccountType:           resourceSubAccount(),
+			resourceAlertV2Type:              resourceAlertV2(),
+			resourceLogShippingTokenType:     resourceLogShippingToken(),
+			resourceDropFilterType:           resourceDropFilter(),
+			resourceArchiveLogsType:          resourceArchiveLogs(),
+			resourceRestoreLogsType:          resourceRestoreLogs(),
+			resourceAuthenticationGroupsType: resourceAuthenticationGroups(),
+			resourceKibanaObjectType:         resourceKibanaObject(),
+			resourceS3FetcherType:            resourceS3Fetcher(),
+			resourceGrafanaDashboardType:     resourceGrafanaDashboard(),
+			resourceGrafanaAlertRuleType:     resourceGrafanaAlertRule(),
 			resourceGrafanaNotificationPolicyType: resourceGrafanaNotificationPolicy(),
 		},
 		ConfigureContextFunc: providerConfigureWrapper,
