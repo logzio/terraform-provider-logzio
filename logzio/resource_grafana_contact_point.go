@@ -2,12 +2,15 @@ package logzio
 
 import (
 	"context"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/logzio/logzio_terraform_client/grafana_contact_points"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"github.com/stoewer/go-strcase"
+	"strings"
 )
 
 const (
@@ -139,7 +142,7 @@ func resourceGrafanaContactPoint() *schema.Resource {
 						grafanaContactPointGoogleChatUrl: {
 							Type:      schema.TypeString,
 							Required:  true,
-							Sensitive: true, // TODO - note set
+							Sensitive: true,
 						},
 						grafanaContactPointGoogleChatMessage: {
 							Type:     schema.TypeString,
@@ -359,11 +362,83 @@ func resourceGrafanaContactPointCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	d.SetId(contactPoint.Uid)
+	// when using GET, sensitive fields return as "[REDACTED]" so we can't set them from read, we need to do it at this point
+	setSensitiveFields(d, contactPoint)
 	return resourceGrafanaContactPointRead(ctx, d, m)
 }
 
 func resourceGrafanaContactPointRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id := d.Id()
+	contactPoint, err := grafanaContactPointClient(m).GetGrafanaContactPointByUid(d.Id())
+
+	if err != nil {
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing grafana contact point") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
+		}
+	}
+
+	setGrafanaContactPointNonSensitive(d, contactPoint)
+	return nil
+}
+
+func setSensitiveFields(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) {
+	var sensitiveFields []string
+	switch contactPoint.Type {
+	case grafanaContactPointGoogleChat:
+		sensitiveFields = []string{grafanaContactPointGoogleChatUrl}
+	case grafanaContactPointOpsgenie:
+		sensitiveFields = []string{grafanaContactPointOpsgenieApiKey}
+	case grafanaContactPointPagerduty:
+		sensitiveFields = []string{grafanaContactPointPagerdutyIntegrationKey}
+	case grafanaContactPointSlack:
+		sensitiveFields = []string{grafanaContactPointSlackToken, grafanaContactPointSlackUrl}
+	case grafanaContactPointMicrosoftTeams:
+		sensitiveFields = []string{grafanaContactPointMicrosoftTeamsUrl}
+	case grafanaContactPointWebhook:
+		sensitiveFields = []string{grafanaContactPointWebhookPassword}
+	default:
+		panic("unidentified Grafana Contact Point type!")
+	}
+
+	prefix := fmt.Sprintf("%s.0.", contactPoint.Type)
+	setFieldsFromApiKey(d, prefix, sensitiveFields, contactPoint.Settings)
+}
+
+func setGrafanaContactPointNonSensitive(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) {
+	d.Set(grafanaContactPointName, contactPoint.Name)
+	d.Set(grafanaContactPointUid, contactPoint.Uid)
+	d.Set(grafanaContactPointDisableResolveMessage, contactPoint.DisableResolveMessage)
+	d.Set(grafanaContactPointType, contactPoint.Type)
+
+	var fieldsToSet []string
+	switch contactPoint.Type {
+	case grafanaContactPointEmail:
+		fieldsToSet = []string{grafanaContactPointEmailAddresses, grafanaContactPointEmailSingleEmail, grafanaContactPointEmailMessage}
+	case grafanaContactPointGoogleChat:
+		fieldsToSet = []string{grafanaContactPointGoogleChatMessage}
+	case grafanaContactPointOpsgenie:
+		fieldsToSet = []string{grafanaContactPointOpsgenieApiUrl,
+			grafanaContactPointOpsgenieAutoClose,
+			grafanaContactPointOpsgenieOverridePriority,
+			grafanaContactPointOpsgenieSendTagsAs,
+		}
+	default:
+		panic("unidentified Grafana Contact Point type!")
+
+	}
+}
+
+func setFieldsFromApiKey(d *schema.ResourceData, prefix string, fieldsToSet []string, settings map[string]interface{}) {
+	for _, fieldToSet := range fieldsToSet {
+		apiKey := strcase.LowerCamelCase(fieldToSet)
+		if val, ok := settings[apiKey]; ok {
+			d.Set(prefix+fieldToSet, val)
+		}
+	}
 }
 
 func getGrafanaContactPointFromSchema(d *schema.ResourceData) (grafana_contact_points.GrafanaContactPoint, error) {
@@ -404,6 +479,8 @@ func getGrafanaContactPointFromSchema(d *schema.ResourceData) (grafana_contact_p
 		convertKeys = []string{grafanaContactPointWebhookHttpMethod,
 			grafanaContactPointWebhookMaxAlerts,
 		}
+	default:
+		panic("unidentified Grafana Contact Point type!")
 	}
 
 	for _, key := range convertKeys {
