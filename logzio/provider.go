@@ -24,6 +24,7 @@ const (
 	resourceKibanaObjectType         = "logzio_kibana_object"
 	resourceS3FetcherType            = "logzio_s3_fetcher"
 	resourceGrafanaDashboardType     = "logzio_grafana_dashboard"
+	resourceGrafanaContactPointType  = "logzio_grafana_contact"
 
 	envLogzioApiToken = "LOGZIO_API_TOKEN"
 	envLogzioRegion   = "LOGZIO_REGION"
@@ -77,6 +78,7 @@ func Provider() *schema.Provider {
 			resourceKibanaObjectType:         resourceKibanaObject(),
 			resourceS3FetcherType:            resourceS3Fetcher(),
 			resourceGrafanaDashboardType:     resourceGrafanaDashboard(),
+			resourceGrafanaContactPointType:  resourceGrafanaContactPoint(),
 		},
 		ConfigureContextFunc: providerConfigureWrapper,
 	}
