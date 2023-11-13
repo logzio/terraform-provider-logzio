@@ -321,7 +321,7 @@ func resourceGrafanaContactPoint() *schema.Resource {
 							Optional: true,
 						},
 						grafanaContactPointWebhookMaxAlerts: {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Optional: true,
 						},
 						grafanaContactPointWebhookPassword: {
@@ -385,6 +385,9 @@ func resourceGrafanaContactPointRead(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
+func resourceGrafanaContactPointUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+}
+
 func setSensitiveFields(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) {
 	var sensitiveFields []string
 	switch contactPoint.Type {
@@ -426,10 +429,43 @@ func setGrafanaContactPointNonSensitive(d *schema.ResourceData, contactPoint gra
 			grafanaContactPointOpsgenieOverridePriority,
 			grafanaContactPointOpsgenieSendTagsAs,
 		}
+	case grafanaContactPointPagerduty:
+		fieldsToSet = []string{
+			grafanaContactPointPagerdutyClass,
+			grafanaContactPointPagerdutyComponent,
+			grafanaContactPointPagerdutyGroup,
+			grafanaContactPointPagerdutySeverity,
+			grafanaContactPointPagerdutySummary,
+		}
+	case grafanaContactPointSlack:
+		fieldsToSet = []string{
+			grafanaContactPointSlackEndpointUrl,
+			grafanaContactPointSlackMentionChannel,
+			grafanaContactPointSlackMentionGroups,
+			grafanaContactPointSlackMentionUsers,
+			grafanaContactPointSlackRecipient,
+			grafanaContactPointSlackText,
+			grafanaContactPointSlackTitle,
+			grafanaContactPointSlackUsername,
+		}
+	case grafanaContactPointMicrosoftTeams:
+		fieldsToSet = []string{grafanaContactPointMicrosoftTeamsMessage}
+	case grafanaContactPointVictorops:
+		fieldsToSet = []string{grafanaContactPointVictoropsMessageType, grafanaContactPointVictoropsUrl}
+	case grafanaContactPointWebhook:
+		fieldsToSet = []string{
+			grafanaContactPointWebhookHttpMethod,
+			grafanaContactPointWebhookMaxAlerts,
+			grafanaContactPointWebhookUrl,
+			grafanaContactPointWebhookUsername,
+		}
 	default:
 		panic("unidentified Grafana Contact Point type!")
 
 	}
+
+	prefix := fmt.Sprintf("%s.0.", contactPoint.Type)
+	setFieldsFromApiKey(d, prefix, fieldsToSet, contactPoint.Settings)
 }
 
 func setFieldsFromApiKey(d *schema.ResourceData, prefix string, fieldsToSet []string, settings map[string]interface{}) {
