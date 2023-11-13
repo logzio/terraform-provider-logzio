@@ -351,7 +351,7 @@ func getCreateOrUpdateEndpointFromSchema(d *schema.ResourceData) endpoints.Creat
 		Type:        d.Get(endpointType).(string),
 	}
 
-	opts, _ := mappingsFromResourceData(d, createEndpoint.Type)
+	opts, _ := utils.ParseTypeSetToMap(d, createEndpoint.Type)
 	switch createEndpoint.Type {
 	case endpoints.EndpointTypeSlack:
 		createEndpoint.Url = opts[endpointUrl].(string)
@@ -385,23 +385,6 @@ func getCreateOrUpdateEndpointFromSchema(d *schema.ResourceData) endpoints.Creat
 	}
 
 	return createEndpoint
-}
-
-/*
-* mappingsFromResourceData returns the mapping stored in terraform map value - who knows why this is not "just" a map, but instead a map
-* wrapped in an array
- */
-func mappingsFromResourceData(d *schema.ResourceData, key string) (map[string]interface{}, error) {
-	if v, ok := d.GetOk(key); ok {
-		rawMappings := v.(*schema.Set).List()
-		for i := 0; i < len(rawMappings); i++ {
-			x := rawMappings[i]
-			y := x.(map[string]interface{})
-			return y, nil
-		}
-	}
-
-	return nil, fmt.Errorf("can't load mapping for key %s", key)
 }
 
 func setEndpoint(d *schema.ResourceData, endpoint *endpoints.Endpoint) {

@@ -1,9 +1,13 @@
 package logzio
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/logzio/logzio_terraform_client/grafana_contact_points"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
+	"github.com/stoewer/go-strcase"
 )
 
 const (
@@ -334,5 +338,86 @@ func resourceGrafanaContactPoint() *schema.Resource {
 				},
 			},
 		},
+	}
+}
+
+func grafanaContactPointClient(m interface{}) *grafana_contact_points.GrafanaContactPointClient {
+	var client *grafana_contact_points.GrafanaContactPointClient
+	client, _ = grafana_contact_points.New(m.(Config).apiToken, m.(Config).baseUrl)
+	return client
+}
+
+func resourceGrafanaContactPointCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	createContactPoint, err := getGrafanaContactPointFromSchema(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	contactPoint, err := grafanaContactPointClient(m).CreateGrafanaContactPoint(createContactPoint)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(contactPoint.Uid)
+	return resourceGrafanaContactPointRead(ctx, d, m)
+}
+
+func resourceGrafanaContactPointRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	id := d.Id()
+}
+
+func getGrafanaContactPointFromSchema(d *schema.ResourceData) (grafana_contact_points.GrafanaContactPoint, error) {
+	contactPoint := grafana_contact_points.GrafanaContactPoint{
+		Name:                  d.Get(grafanaContactPointName).(string),
+		Type:                  d.Get(grafanaContactPointType).(string),
+		DisableResolveMessage: d.Get(grafanaContactPointDisableResolveMessage).(bool),
+	}
+
+	settings, err := utils.ParseTypeSetToMap(d, contactPoint.Type)
+	if err != nil {
+		return contactPoint, err
+	}
+
+	// in tf we use snake case for keys, but in the api uses lower camel case, so we need to convert the relevant fields
+	var convertKeys []string
+	switch contactPoint.Type {
+	case grafanaContactPointEmail:
+		convertKeys = []string{grafanaContactPointEmailSingleEmail}
+	case grafanaContactPointOpsgenie:
+		convertKeys = []string{grafanaContactPointOpsgenieApiUrl,
+			grafanaContactPointOpsgenieApiKey,
+			grafanaContactPointOpsgenieAutoClose,
+			grafanaContactPointOpsgenieOverridePriority,
+			grafanaContactPointOpsgenieSendTagsAs,
+		}
+	case grafanaContactPointPagerduty:
+		convertKeys = []string{grafanaContactPointPagerdutyIntegrationKey}
+	case grafanaContactPointSlack:
+		convertKeys = []string{grafanaContactPointSlackEndpointUrl,
+			grafanaContactPointSlackMentionChannel,
+			grafanaContactPointSlackMentionGroups,
+			grafanaContactPointSlackMentionUsers,
+		}
+	case grafanaContactPointVictorops:
+		convertKeys = []string{grafanaContactPointVictoropsMessageType}
+	case grafanaContactPointWebhook:
+		convertKeys = []string{grafanaContactPointWebhookHttpMethod,
+			grafanaContactPointWebhookMaxAlerts,
+		}
+	}
+
+	for _, key := range convertKeys {
+		convertSettingsMapToApiKeys(settings, key)
+	}
+
+	contactPoint.Settings = settings
+	return contactPoint, nil
+}
+
+func convertSettingsMapToApiKeys(settings map[string]interface{}, schemaKey string) {
+	if val, ok := settings[schemaKey]; ok {
+		apiKey := strcase.LowerCamelCase(schemaKey)
+		settings[apiKey] = val
+		delete(settings, schemaKey)
 	}
 }
