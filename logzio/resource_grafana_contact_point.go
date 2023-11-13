@@ -3,6 +3,7 @@ package logzio
 import (
 	"context"
 	"fmt"
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -10,6 +11,7 @@ import (
 	"github.com/logzio/logzio_terraform_client/grafana_contact_points"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"github.com/stoewer/go-strcase"
+	"reflect"
 	"strings"
 )
 
@@ -72,6 +74,8 @@ const (
 	grafanaContactPointWebhookPassword   = "password"
 	grafanaContactPointWebhookUrl        = "url"
 	grafanaContactPointWebhookUsername   = "username"
+
+	grafanaContactPointRetryAttempts = 8
 )
 
 func resourceGrafanaContactPoint() *schema.Resource {
@@ -386,6 +390,58 @@ func resourceGrafanaContactPointRead(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceGrafanaContactPointUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	updateContactPoint, err := getGrafanaContactPointFromSchema(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = grafanaContactPointClient(m).UpdateContactPoint(updateContactPoint)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	var diagRet diag.Diagnostics
+	readErr := retry.Do(
+		func() error {
+			diagRet = resourceGrafanaContactPointRead(ctx, d, m)
+			if diagRet.HasError() {
+				return fmt.Errorf("received error from read grafana contact point")
+			}
+
+			return nil
+		},
+		retry.RetryIf(
+			// Retry ONLY if the resource was not updated yet
+			func(err error) bool {
+				if err != nil {
+					return false
+				} else {
+					// Check if the update shows on read
+					// if not updated yet - retry
+					grafanaContactPointFromSchema, _ := getGrafanaContactPointFromSchema(d)
+					return !reflect.DeepEqual(updateContactPoint, grafanaContactPointFromSchema)
+				}
+			}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(grafanaContactPointRetryAttempts),
+	)
+
+	if readErr != nil {
+		tflog.Error(ctx, "could not update schema")
+		return diagRet
+	}
+
+	return nil
+}
+
+func resourceGrafanaContactPointDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	err := grafanaContactPointClient(m).DeleteGrafanaContactPoint(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+	return nil
 }
 
 func setSensitiveFields(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) {
@@ -482,6 +538,10 @@ func getGrafanaContactPointFromSchema(d *schema.ResourceData) (grafana_contact_p
 		Name:                  d.Get(grafanaContactPointName).(string),
 		Type:                  d.Get(grafanaContactPointType).(string),
 		DisableResolveMessage: d.Get(grafanaContactPointDisableResolveMessage).(bool),
+	}
+
+	if uid, ok := d.GetOk(grafanaContactPointUid); ok {
+		contactPoint.Uid = uid.(string)
 	}
 
 	settings, err := utils.ParseTypeSetToMap(d, contactPoint.Type)
