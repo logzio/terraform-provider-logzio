@@ -75,6 +75,8 @@ const (
 	grafanaContactPointWebhookUrl        = "url"
 	grafanaContactPointWebhookUsername   = "username"
 
+	grafanaContactPointEmailAddressSeparator = ";"
+
 	grafanaContactPointRetryAttempts = 8
 )
 
@@ -528,7 +530,12 @@ func setFieldsFromApiKey(d *schema.ResourceData, prefix string, fieldsToSet []st
 	for _, fieldToSet := range fieldsToSet {
 		apiKey := strcase.LowerCamelCase(fieldToSet)
 		if val, ok := settings[apiKey]; ok {
-			d.Set(prefix+fieldToSet, val)
+			switch fieldToSet {
+			case grafanaContactPointEmailAddresses:
+				d.Set(prefix+fieldToSet, parseAddressStringToList(val.(string)))
+			default:
+				d.Set(prefix+fieldToSet, val)
+			}
 		}
 	}
 }
@@ -590,7 +597,25 @@ func getGrafanaContactPointFromSchema(d *schema.ResourceData) (grafana_contact_p
 func convertSettingsMapToApiKeys(settings map[string]interface{}, schemaKey string) {
 	if val, ok := settings[schemaKey]; ok {
 		apiKey := strcase.LowerCamelCase(schemaKey)
-		settings[apiKey] = val
+		switch schemaKey {
+		case grafanaContactPointEmail:
+			settings[apiKey] = parseAddressListToString(val.([]interface{}))
+		default:
+			settings[apiKey] = val
+		}
 		delete(settings, schemaKey)
 	}
+}
+
+func parseAddressListToString(addressList []interface{}) string {
+	strArr := make([]string, len(addressList))
+	for i, v := range addressList {
+		strArr[i] = fmt.Sprintf("%v", v)
+	}
+
+	return strings.Join(strArr, grafanaContactPointEmailAddressSeparator)
+}
+
+func parseAddressStringToList(addressString string) []string {
+	return strings.Split(addressString, grafanaContactPointEmailAddressSeparator)
 }
