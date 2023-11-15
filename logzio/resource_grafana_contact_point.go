@@ -48,17 +48,20 @@ const (
 	grafanaContactPointPagerdutySeverityError    = "error"
 	grafanaContactPointPagerdutySeverityCritical = "critical"
 
-	grafanaContactPointSlack               = "slack"
-	grafanaContactPointSlackEndpointUrl    = "endpoint_url"
-	grafanaContactPointSlackMentionChannel = "mention_channel"
-	grafanaContactPointSlackMentionGroups  = "mention_groups"
-	grafanaContactPointSlackMentionUsers   = "mention_users"
-	grafanaContactPointSlackRecipient      = "recipient"
-	grafanaContactPointSlackText           = "text"
-	grafanaContactPointSlackTitle          = "title"
-	grafanaContactPointSlackToken          = "token"
-	grafanaContactPointSlackUrl            = "url"
-	grafanaContactPointSlackUsername       = "username"
+	grafanaContactPointSlack                      = "slack"
+	grafanaContactPointSlackEndpointUrl           = "endpoint_url"
+	grafanaContactPointSlackMentionChannel        = "mention_channel"
+	grafanaContactPointSlackMentionChannelHere    = "here"
+	grafanaContactPointSlackMentionChannelChannel = "channel"
+	grafanaContactPointSlackMentionChannelDisable = ""
+	grafanaContactPointSlackMentionGroups         = "mention_groups"
+	grafanaContactPointSlackMentionUsers          = "mention_users"
+	grafanaContactPointSlackRecipient             = "recipient"
+	grafanaContactPointSlackText                  = "text"
+	grafanaContactPointSlackTitle                 = "title"
+	grafanaContactPointSlackToken                 = "token"
+	grafanaContactPointSlackUrl                   = "url"
+	grafanaContactPointSlackUsername              = "username"
 
 	grafanaContactPointMicrosoftTeams        = "teams"
 	grafanaContactPointMicrosoftTeamsMessage = "message"
@@ -85,7 +88,7 @@ var notifiers = []grafanaContactPointNotifier{
 	googleChatNotifier{},
 	opsGenieNotifier{},
 	pagerDutyNotifier{},
-	//slackNotifier{},
+	slackNotifier{},
 	//teamsNotifier{},
 	//victorOpsNotifier{},
 	//webhookNotifier{},

@@ -211,6 +211,68 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointPagerDuty(t *testing.T) {
 	})
 }
 
+func TestAccLogzioGrafanaContactPoint_GrafanaPointSlack(t *testing.T) {
+	defer utils.SleepAfterTest()
+	resourceFullName := "logzio_grafana_contact_point.test_cp_slack"
+	tokenCreate := "some_api"
+	tokenUpdate := "other"
+	mentionChannelCreate := "here"
+	mentionChannelUpdate := ""
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Create
+				Config: getGrafanaContactPointConfigSlack(tokenCreate, mentionChannelCreate),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-slack-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackMentionChannel), mentionChannelCreate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken), tokenCreate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackTitle), "some-title"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackText), "{{ len .Alerts.Firing }} firing."),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackRecipient), "me"),
+				),
+			},
+			{
+				// Update
+				Config: getGrafanaContactPointConfigSlack(tokenCreate, mentionChannelUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-slack-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackMentionChannel), mentionChannelUpdate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken), tokenCreate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackTitle), "some-title"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackText), "{{ len .Alerts.Firing }} firing."),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackRecipient), "me"),
+				),
+			},
+			{
+				// Update sensitive
+				Config: getGrafanaContactPointConfigSlack(tokenUpdate, mentionChannelUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-slack-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackMentionChannel), mentionChannelUpdate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken), tokenUpdate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackTitle), "some-title"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackText), "{{ len .Alerts.Firing }} firing."),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackRecipient), "me"),
+				),
+			},
+			{
+				ResourceName:            resourceFullName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken)},
+			},
+		},
+	})
+}
+
 func getGrafanaContactPointConfigEmail(emails string) string {
 	return fmt.Sprintf(`
 resource "logzio_grafana_contact_point" "test_cp_email" {
@@ -268,4 +330,20 @@ resource "logzio_grafana_contact_point" "test_cp_pagerduty" {
 	}
 }
 `, token, severity)
+}
+
+func getGrafanaContactPointConfigSlack(token, mentionChannel string) string {
+	return fmt.Sprintf(`
+resource "logzio_grafana_contact_point" "test_cp_slack" {
+	name = "my-slack-cp"
+	disable_resolve_message = false
+	slack {
+		token = "%s"
+		title = "some-title"
+		text = "{{ len .Alerts.Firing }} firing."
+		mention_channel = "%s"
+		recipient = "me"
+	}
+}
+`, token, mentionChannel)
 }
