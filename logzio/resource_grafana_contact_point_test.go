@@ -367,6 +367,43 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointVictorops(t *testing.T) {
 	})
 }
 
+func TestAccLogzioGrafanaContactPoint_GrafanaPointWebhook(t *testing.T) {
+	defer utils.SleepAfterTest()
+	resourceFullName := "logzio_grafana_contact_point.test_cp_webhook"
+	urlCreate := "some.url"
+	urlUpdate := "another.url"
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Create
+				Config: getGrafanaContactPointConfigWebhook(urlCreate),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-webhook-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointVictoropsUrl), urlCreate),
+				),
+			},
+			{
+				// Update
+				Config: getGrafanaContactPointConfigWebhook(urlUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-webhook-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointVictoropsUrl), urlUpdate),
+				),
+			},
+			{
+				ResourceName:      resourceFullName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func getGrafanaContactPointConfigEmail(emails string) string {
 	return fmt.Sprintf(`
 resource "logzio_grafana_contact_point" "test_cp_email" {
@@ -466,4 +503,16 @@ resource "logzio_grafana_contact_point" "test_cp_victorops" {
 	}
 }
 `, url, messageType)
+}
+
+func getGrafanaContactPointConfigWebhook(url string) string {
+	return fmt.Sprintf(`
+resource "logzio_grafana_contact_point" "test_cp_webhook" {
+	name = "my-webhook-cp"
+	disable_resolve_message = false
+	webhook {
+		url = "%s"
+	}
+}
+`, url)
 }

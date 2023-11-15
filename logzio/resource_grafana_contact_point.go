@@ -76,6 +76,8 @@ const (
 
 	grafanaContactPointWebhook           = "webhook"
 	grafanaContactPointWebhookHttpMethod = "http_method"
+	grafanaContactPointWebhookHttpPut    = "PUT"
+	grafanaContactPointWebhookHttpPost   = "POST"
 	grafanaContactPointWebhookMaxAlerts  = "max_alerts"
 	grafanaContactPointWebhookPassword   = "password"
 	grafanaContactPointWebhookUrl        = "url"
@@ -94,7 +96,7 @@ var notifiers = []grafanaContactPointNotifier{
 	slackNotifier{},
 	teamsNotifier{},
 	victorOpsNotifier{},
-	//webhookNotifier{},
+	webhookNotifier{},
 }
 
 func resourceGrafanaContactPoint() *schema.Resource {
