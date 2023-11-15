@@ -46,7 +46,45 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointEmail(t *testing.T) {
 			},
 		},
 	})
+}
 
+func TestAccLogzioGrafanaContactPoint_GrafanaPointGoogleChat(t *testing.T) {
+	defer utils.SleepAfterTest()
+	resourceFullName := "logzio_grafana_contact_point.test_cp_googlechat"
+	urlCreate := "some.url"
+	urlUpdate := "other.url"
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Create
+				Config: getGrafanaContactPointConfigGoogleChat(urlCreate),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-googlechat-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointGoogleChatUrl), urlCreate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointGoogleChatMessage), "{{ len .Alerts.Firing }} firing."),
+				),
+			},
+			{
+				// Update
+				Config: getGrafanaContactPointConfigGoogleChat(urlUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-googlechat-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointGoogleChatUrl), urlUpdate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointGoogleChatMessage), "{{ len .Alerts.Firing }} firing."),
+				),
+			},
+			{
+				ResourceName:      resourceFullName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func getGrafanaContactPointConfigEmail(emails string) string {
@@ -61,4 +99,17 @@ resource "logzio_grafana_contact_point" "test_cp_email" {
 	}
 }
 `, emails)
+}
+
+func getGrafanaContactPointConfigGoogleChat(url string) string {
+	return fmt.Sprintf(`
+resource "logzio_grafana_contact_point" "test_cp_googlechat" {
+	name = "my-googlechat-cp"
+	disable_resolve_message = false
+	googlechat {
+		url = "%s"
+		message = "{{ len .Alerts.Firing }} firing."
+	}
+}
+`, url)
 }

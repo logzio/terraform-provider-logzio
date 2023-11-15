@@ -22,14 +22,23 @@ type grafanaContactPointNotifierMeta struct {
 	secureFields []string
 }
 
+func getAddressFromSchema(addresses []interface{}) string {
+	strSlice := utils.ParseInterfaceSliceToStringSlice(addresses)
+	return strings.Join(strSlice, grafanaContactPointEmailAddressSeparator)
+}
+
+func addressStringToStringList(addresses string) []string {
+	return strings.Split(addresses, grafanaContactPointEmailAddressSeparator)
+}
+
 type emailNotifier struct{}
 
 var _ grafanaContactPointNotifier = (*emailNotifier)(nil)
 
 func (e emailNotifier) meta() grafanaContactPointNotifierMeta {
 	return grafanaContactPointNotifierMeta{
-		field:   "email",
-		typeStr: "email",
+		field:   grafanaContactPointEmail,
+		typeStr: grafanaContactPointEmail,
 	}
 }
 
@@ -58,6 +67,21 @@ func (e emailNotifier) schema() *schema.Resource {
 	return r
 }
 
+func (e emailNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) (interface{}, error) {
+	notifier := make(map[string]interface{}, 0)
+	if v, ok := contactPoint.Settings[grafanaContactPointEmailAddresses]; ok && v != nil {
+		notifier[grafanaContactPointEmailAddresses] = addressStringToStringList(v.(string))
+	}
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointEmailSingleEmail)]; ok && v != nil {
+		notifier[grafanaContactPointEmailSingleEmail] = v.(bool)
+	}
+	if v, ok := contactPoint.Settings[grafanaContactPointEmailMessage]; ok && v != nil {
+		notifier[grafanaContactPointEmailMessage] = v.(string)
+	}
+
+	return notifier, nil
+}
+
 func (e emailNotifier) getGrafanaContactPointFromSchema(raw []interface{}, name string, disableResolveMessage bool, uid string) grafana_contact_points.GrafanaContactPoint {
 	json := raw[0].(map[string]interface{})
 	settings := make(map[string]interface{})
@@ -80,29 +104,57 @@ func (e emailNotifier) getGrafanaContactPointFromSchema(raw []interface{}, name 
 	}
 }
 
-func (e emailNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) (interface{}, error) {
-	notifier := make(map[string]interface{}, 0)
-	if v, ok := contactPoint.Settings[grafanaContactPointEmailAddresses]; ok && v != nil {
-		notifier[grafanaContactPointEmailAddresses] = addressStringToStringList(v.(string))
-		delete(contactPoint.Settings, grafanaContactPointEmailAddresses)
-	}
-	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointEmailSingleEmail)]; ok && v != nil {
-		notifier[grafanaContactPointEmailSingleEmail] = v.(bool)
-		delete(contactPoint.Settings, strcase.LowerCamelCase(grafanaContactPointEmailSingleEmail))
-	}
-	if v, ok := contactPoint.Settings[grafanaContactPointEmailMessage]; ok && v != nil {
-		notifier[grafanaContactPointEmailMessage] = v.(string)
-		delete(contactPoint.Settings, grafanaContactPointEmailMessage)
-	}
+type googleChatNotifier struct{}
 
+var _ grafanaContactPointNotifier = (*googleChatNotifier)(nil)
+
+func (g googleChatNotifier) meta() grafanaContactPointNotifierMeta {
+	return grafanaContactPointNotifierMeta{
+		field:   grafanaContactPointGoogleChat,
+		typeStr: grafanaContactPointGoogleChat,
+	}
+}
+
+func (g googleChatNotifier) schema() *schema.Resource {
+	r := &schema.Resource{
+		Schema: map[string]*schema.Schema{},
+	}
+	r.Schema[grafanaContactPointGoogleChatUrl] = &schema.Schema{
+		Type:      schema.TypeString,
+		Required:  true,
+		Sensitive: true,
+	}
+	r.Schema[grafanaContactPointGoogleChatMessage] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	return r
+}
+
+func (g googleChatNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) (interface{}, error) {
+	notifier := make(map[string]interface{}, 0)
+	if v, ok := contactPoint.Settings[grafanaContactPointGoogleChatUrl]; ok && v != nil {
+		notifier[grafanaContactPointGoogleChatUrl] = v.(string)
+	}
+	if v, ok := contactPoint.Settings[grafanaContactPointGoogleChatMessage]; ok && v != nil {
+		notifier[grafanaContactPointGoogleChatMessage] = v.(string)
+	}
 	return notifier, nil
 }
 
-func getAddressFromSchema(addresses []interface{}) string {
-	strSlice := utils.ParseInterfaceSliceToStringSlice(addresses)
-	return strings.Join(strSlice, grafanaContactPointEmailAddressSeparator)
-}
+func (g googleChatNotifier) getGrafanaContactPointFromSchema(raw []interface{}, name string, disableResolveMessage bool, uid string) grafana_contact_points.GrafanaContactPoint {
+	json := raw[0].(map[string]interface{})
+	settings := make(map[string]interface{})
 
-func addressStringToStringList(addresses string) []string {
-	return strings.Split(addresses, grafanaContactPointEmailAddressSeparator)
+	settings[grafanaContactPointGoogleChatUrl] = json[grafanaContactPointGoogleChatUrl].(string)
+	if v, ok := json[grafanaContactPointGoogleChatMessage]; ok && v != nil {
+		settings[grafanaContactPointGoogleChatMessage] = v.(string)
+	}
+	return grafana_contact_points.GrafanaContactPoint{
+		Uid:                   uid,
+		Name:                  name,
+		Type:                  g.meta().typeStr,
+		DisableResolveMessage: disableResolveMessage,
+		Settings:              settings,
+	}
 }

@@ -16,7 +16,6 @@ const (
 	grafanaContactPointName                  = "name"
 	grafanaContactPointUid                   = "uid"
 	grafanaContactPointDisableResolveMessage = "disable_resolve_message"
-	grafanaContactPointSettings              = "settings"
 
 	grafanaContactPointEmail            = "email"
 	grafanaContactPointEmailAddresses   = "addresses"
@@ -79,7 +78,7 @@ const (
 
 var notifiers = []grafanaContactPointNotifier{
 	emailNotifier{},
-	//googleChatNotifier{},
+	googleChatNotifier{},
 	//opsGenieNotifier{},
 	//pagerDutyNotifier{},
 	//slackNotifier{},
@@ -269,23 +268,12 @@ func getGrafanaContactPointFromSchema(d *schema.ResourceData) (grafana_contact_p
 
 func unpackPointConfig(n grafanaContactPointNotifier, data []interface{}, name string, disableResolveMessage bool, uid string) grafana_contact_points.GrafanaContactPoint {
 	pt := n.getGrafanaContactPointFromSchema(data, name, disableResolveMessage, uid)
-	// Treat settings like `omitempty`
 	for k, v := range pt.Settings {
 		if v == "" {
 			delete(pt.Settings, k)
 		}
 	}
 	return pt
-}
-
-func parseAddressStringToList(addressString string) []interface{} {
-	arrStr := strings.Split(addressString, grafanaContactPointEmailAddressSeparator)
-	var interfaceSlice = make([]interface{}, len(arrStr))
-	for i, v := range arrStr {
-		interfaceSlice[i] = v
-	}
-
-	return interfaceSlice
 }
 
 //package logzio
