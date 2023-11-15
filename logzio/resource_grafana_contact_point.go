@@ -67,9 +67,12 @@ const (
 	grafanaContactPointMicrosoftTeamsMessage = "message"
 	grafanaContactPointMicrosoftTeamsUrl     = "url"
 
-	grafanaContactPointVictorops            = "victorops"
-	grafanaContactPointVictoropsMessageType = "message_type"
-	grafanaContactPointVictoropsUrl         = "url"
+	grafanaContactPointVictorops                    = "victorops"
+	grafanaContactPointVictoropsMessageType         = "message_type"
+	grafanaContactPointVictoropsMessageTypeCritical = "CRITICAL"
+	grafanaContactPointVictoropsMessageTypeWarning  = "WARNING"
+	grafanaContactPointVictoropsMessageTypeNone     = ""
+	grafanaContactPointVictoropsUrl                 = "url"
 
 	grafanaContactPointWebhook           = "webhook"
 	grafanaContactPointWebhookHttpMethod = "http_method"
@@ -90,7 +93,7 @@ var notifiers = []grafanaContactPointNotifier{
 	pagerDutyNotifier{},
 	slackNotifier{},
 	teamsNotifier{},
-	//victorOpsNotifier{},
+	victorOpsNotifier{},
 	//webhookNotifier{},
 }
 

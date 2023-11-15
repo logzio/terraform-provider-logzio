@@ -602,3 +602,69 @@ func (t teamsNotifier) getGrafanaContactPointFromSchema(raw []interface{}, name 
 		Settings:              settings,
 	}
 }
+
+type victorOpsNotifier struct{}
+
+var _ grafanaContactPointNotifier = (*victorOpsNotifier)(nil)
+
+func (vo victorOpsNotifier) meta() grafanaContactPointNotifierMeta {
+	return grafanaContactPointNotifierMeta{
+		field:   grafanaContactPointVictorops,
+		typeStr: grafanaContactPointVictorops,
+	}
+}
+
+func (vo victorOpsNotifier) schema() *schema.Resource {
+	r := &schema.Resource{
+		Schema: map[string]*schema.Schema{},
+	}
+	r.Schema[grafanaContactPointVictoropsUrl] = &schema.Schema{
+		Type:     schema.TypeString,
+		Required: true,
+	}
+	r.Schema[grafanaContactPointVictoropsMessageType] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true, ValidateFunc: validation.StringInSlice(
+			[]string{grafanaContactPointVictoropsMessageTypeCritical,
+				grafanaContactPointVictoropsMessageTypeWarning,
+				grafanaContactPointVictoropsMessageTypeNone},
+			false),
+	}
+
+	return r
+}
+
+func (vo victorOpsNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) (interface{}, error) {
+	notifier := make(map[string]interface{}, 0)
+
+	if v, ok := contactPoint.Settings[grafanaContactPointVictoropsUrl]; ok && v != nil {
+		notifier[grafanaContactPointVictoropsUrl] = v.(string)
+	}
+
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointVictoropsMessageType)]; ok && v != nil {
+		notifier[grafanaContactPointVictoropsMessageType] = v.(string)
+	}
+
+	return notifier, nil
+}
+
+func (vo victorOpsNotifier) getGrafanaContactPointFromSchema(raw []interface{}, name string, disableResolveMessage bool, uid string) grafana_contact_points.GrafanaContactPoint {
+	json := raw[0].(map[string]interface{})
+	settings := make(map[string]interface{})
+
+	if v, ok := json[grafanaContactPointVictoropsUrl]; ok && v != nil {
+		settings[grafanaContactPointVictoropsUrl] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointVictoropsMessageType]; ok && v != nil {
+		settings[strcase.LowerCamelCase(grafanaContactPointVictoropsMessageType)] = v.(string)
+	}
+
+	return grafana_contact_points.GrafanaContactPoint{
+		Uid:                   uid,
+		Name:                  name,
+		Type:                  vo.meta().typeStr,
+		DisableResolveMessage: disableResolveMessage,
+		Settings:              settings,
+	}
+}
