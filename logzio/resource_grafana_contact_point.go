@@ -36,13 +36,17 @@ const (
 	grafanaContactPointOpsgenieSendTagsDetails  = "details"
 	grafanaContactPointOpsgenieSendTagsBoth     = "both"
 
-	grafanaContactPointPagerduty               = "pagerduty"
-	grafanaContactPointPagerdutyClass          = "class"
-	grafanaContactPointPagerdutyComponent      = "component"
-	grafanaContactPointPagerdutyGroup          = "group"
-	grafanaContactPointPagerdutyIntegrationKey = "integration_key"
-	grafanaContactPointPagerdutySeverity       = "severity"
-	grafanaContactPointPagerdutySummary        = "summary"
+	grafanaContactPointPagerduty                 = "pagerduty"
+	grafanaContactPointPagerdutyClass            = "class"
+	grafanaContactPointPagerdutyComponent        = "component"
+	grafanaContactPointPagerdutyGroup            = "group"
+	grafanaContactPointPagerdutyIntegrationKey   = "integration_key"
+	grafanaContactPointPagerdutySummary          = "summary"
+	grafanaContactPointPagerdutySeverity         = "severity"
+	grafanaContactPointPagerdutySeverityInfo     = "info"
+	grafanaContactPointPagerdutySeverityWarning  = "warning"
+	grafanaContactPointPagerdutySeverityError    = "error"
+	grafanaContactPointPagerdutySeverityCritical = "critical"
 
 	grafanaContactPointSlack               = "slack"
 	grafanaContactPointSlackEndpointUrl    = "endpoint_url"
@@ -72,7 +76,6 @@ const (
 	grafanaContactPointWebhookUsername   = "username"
 
 	grafanaContactPointEmailAddressSeparator = ";"
-	grafanaContactPointRedacted              = "[REDACTED]"
 
 	grafanaContactPointRetryAttempts = 8
 )
@@ -81,7 +84,7 @@ var notifiers = []grafanaContactPointNotifier{
 	emailNotifier{},
 	googleChatNotifier{},
 	opsGenieNotifier{},
-	//pagerDutyNotifier{},
+	pagerDutyNotifier{},
 	//slackNotifier{},
 	//teamsNotifier{},
 	//victorOpsNotifier{},
