@@ -273,6 +273,59 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointSlack(t *testing.T) {
 	})
 }
 
+func TestAccLogzioGrafanaContactPoint_GrafanaPointTeams(t *testing.T) {
+	defer utils.SleepAfterTest()
+	resourceFullName := "logzio_grafana_contact_point.test_cp_teams"
+	urlCreate := "some.url"
+	urlUpdate := "another.url"
+	messageCreate := "some message"
+	messageUpdate := "another message"
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Create
+				Config: getGrafanaContactPointConfigTeams(urlCreate, messageCreate),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-teams-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointMicrosoftTeamsUrl), urlCreate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointMicrosoftTeamsMessage), messageCreate),
+				),
+			},
+			{
+				// Update
+				Config: getGrafanaContactPointConfigTeams(urlUpdate, messageCreate),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-teams-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointMicrosoftTeamsUrl), urlUpdate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointMicrosoftTeamsMessage), messageCreate),
+				),
+			},
+			{
+				// Update sensitive
+				Config: getGrafanaContactPointConfigTeams(urlUpdate, messageUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-teams-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointMicrosoftTeamsUrl), urlUpdate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointMicrosoftTeamsMessage), messageUpdate),
+				),
+			},
+			{
+				ResourceName:            resourceFullName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointMicrosoftTeamsUrl)},
+			},
+		},
+	})
+}
+
 func getGrafanaContactPointConfigEmail(emails string) string {
 	return fmt.Sprintf(`
 resource "logzio_grafana_contact_point" "test_cp_email" {
@@ -346,4 +399,17 @@ resource "logzio_grafana_contact_point" "test_cp_slack" {
 	}
 }
 `, token, mentionChannel)
+}
+
+func getGrafanaContactPointConfigTeams(url, message string) string {
+	return fmt.Sprintf(`
+resource "logzio_grafana_contact_point" "test_cp_teams" {
+	name = "my-teams-cp"
+	disable_resolve_message = false
+	teams {
+		url = "%s"
+		message = "%s"
+	}
+}
+`, url, message)
 }

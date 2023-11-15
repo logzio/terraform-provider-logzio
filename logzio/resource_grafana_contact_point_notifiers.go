@@ -537,3 +537,68 @@ func (s slackNotifier) getGrafanaContactPointFromSchema(raw []interface{}, name 
 		Settings:              settings,
 	}
 }
+
+type teamsNotifier struct{}
+
+var _ grafanaContactPointNotifier = (*teamsNotifier)(nil)
+
+func (t teamsNotifier) meta() grafanaContactPointNotifierMeta {
+	return grafanaContactPointNotifierMeta{
+		field:        grafanaContactPointMicrosoftTeams,
+		typeStr:      grafanaContactPointMicrosoftTeams,
+		secureFields: []string{grafanaContactPointMicrosoftTeamsUrl},
+	}
+}
+
+func (t teamsNotifier) schema() *schema.Resource {
+	r := &schema.Resource{
+		Schema: map[string]*schema.Schema{},
+	}
+	r.Schema[grafanaContactPointMicrosoftTeamsUrl] = &schema.Schema{
+		Type:      schema.TypeString,
+		Required:  true,
+		Sensitive: true,
+	}
+	r.Schema[grafanaContactPointMicrosoftTeamsMessage] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	return r
+}
+
+func (t teamsNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) (interface{}, error) {
+	notifier := make(map[string]interface{}, 0)
+
+	if v, ok := contactPoint.Settings[grafanaContactPointMicrosoftTeamsUrl]; ok && v != nil {
+		notifier[grafanaContactPointMicrosoftTeamsUrl] = v.(string)
+	}
+
+	if v, ok := contactPoint.Settings[grafanaContactPointMicrosoftTeamsMessage]; ok && v != nil {
+		notifier[grafanaContactPointMicrosoftTeamsMessage] = v.(string)
+	}
+
+	getSecuredFieldsFromSchema(notifier, t.meta().secureFields, t.meta().field, d)
+
+	return notifier, nil
+}
+
+func (t teamsNotifier) getGrafanaContactPointFromSchema(raw []interface{}, name string, disableResolveMessage bool, uid string) grafana_contact_points.GrafanaContactPoint {
+	json := raw[0].(map[string]interface{})
+	settings := make(map[string]interface{})
+
+	if v, ok := json[grafanaContactPointMicrosoftTeamsUrl]; ok && v != nil {
+		settings[grafanaContactPointMicrosoftTeamsUrl] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointMicrosoftTeamsMessage]; ok && v != nil {
+		settings[grafanaContactPointMicrosoftTeamsMessage] = v.(string)
+	}
+
+	return grafana_contact_points.GrafanaContactPoint{
+		Uid:                   uid,
+		Name:                  name,
+		Type:                  t.meta().typeStr,
+		DisableResolveMessage: disableResolveMessage,
+		Settings:              settings,
+	}
+}
