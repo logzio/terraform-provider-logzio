@@ -87,6 +87,68 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointGoogleChat(t *testing.T) {
 	})
 }
 
+func TestAccLogzioGrafanaContactPoint_GrafanaPointOpsgenie(t *testing.T) {
+	defer utils.SleepAfterTest()
+	resourceFullName := "logzio_grafana_contact_point.test_cp_opsgenie"
+	urlCreate := "some.url"
+	urlUpdate := "other.url"
+	apiTokenCreate := "some_api"
+	apiTokenUpdate := "other"
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Create
+				Config: getGrafanaContactPointConfigOpsgenie(urlCreate, apiTokenCreate),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-opsgenie-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieApiUrl), urlCreate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieApiKey), apiTokenCreate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieAutoClose), "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieOverridePriority), "true"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieSendTagsAs), grafanaContactPointOpsgenieSendTagsBoth),
+				),
+			},
+			{
+				// Update
+				Config: getGrafanaContactPointConfigOpsgenie(urlUpdate, apiTokenCreate),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-opsgenie-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieApiUrl), urlUpdate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieApiKey), apiTokenCreate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieAutoClose), "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieOverridePriority), "true"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieSendTagsAs), grafanaContactPointOpsgenieSendTagsBoth),
+				),
+			},
+			{
+				// Update sensitive
+				Config: getGrafanaContactPointConfigOpsgenie(urlUpdate, apiTokenUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-opsgenie-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieApiUrl), urlUpdate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieApiKey), apiTokenUpdate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieAutoClose), "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieOverridePriority), "true"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieSendTagsAs), grafanaContactPointOpsgenieSendTagsBoth),
+				),
+			},
+			{
+				ResourceName:            resourceFullName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieApiKey)},
+			},
+		},
+	})
+}
+
 func getGrafanaContactPointConfigEmail(emails string) string {
 	return fmt.Sprintf(`
 resource "logzio_grafana_contact_point" "test_cp_email" {
@@ -112,4 +174,20 @@ resource "logzio_grafana_contact_point" "test_cp_googlechat" {
 	}
 }
 `, url)
+}
+
+func getGrafanaContactPointConfigOpsgenie(url, apiToken string) string {
+	return fmt.Sprintf(`
+resource "logzio_grafana_contact_point" "test_cp_opsgenie" {
+	name = "my-opsgenie-cp"
+	disable_resolve_message = false
+	opsgenie {
+		api_url = "%s"
+		api_key = "%s"
+		auto_close = false
+		override_priority = true
+		send_tags_as = "both"
+	}
+}
+`, url, apiToken)
 }
