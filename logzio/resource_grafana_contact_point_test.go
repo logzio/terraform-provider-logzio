@@ -340,9 +340,9 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointVictorops(t *testing.T) {
 				// Create
 				Config: getGrafanaContactPointConfigVictorOps(urlCreate, messageTypeCreate),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-victorops-cp"),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointVictoropsUrl), urlCreate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointVictoropsMessageType), messageTypeCreate),
 				),
@@ -351,9 +351,9 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointVictorops(t *testing.T) {
 				// Update
 				Config: getGrafanaContactPointConfigVictorOps(urlUpdate, messageTypeUpdate),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-victorops-cp"),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointVictoropsUrl), urlUpdate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointVictoropsMessageType), messageTypeUpdate),
 				),
@@ -496,8 +496,8 @@ func getGrafanaContactPointConfigVictorOps(url, messageType string) string {
 	return fmt.Sprintf(`
 resource "logzio_grafana_contact_point" "test_cp_victorops" {
 	name = "my-victorops-cp"
-	disable_resolve_message = false
 	victorops {
+		disable_resolve_message = false
 		url = "%s"
 		message_type = "%s"
 	}
