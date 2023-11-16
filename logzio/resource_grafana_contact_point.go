@@ -2,14 +2,12 @@ package logzio
 
 import (
 	"context"
-	"fmt"
-	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/grafana_contact_points"
-	"reflect"
 	"strings"
+	"time"
 )
 
 const (
@@ -209,38 +207,16 @@ func resourceGrafanaContactPointUpdate(ctx context.Context, d *schema.ResourceDa
 		delete(unprocessedUIDs, contactPointToUpdate.Uid)
 		err = grafanaContactPointClient(m).UpdateContactPoint(contactPointToUpdate)
 		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		var diagRet diag.Diagnostics
-		readErr := retry.Do(
-			func() error {
-				diagRet = resourceGrafanaContactPointRead(ctx, d, m)
-				if diagRet.HasError() {
-					return fmt.Errorf("received error from read grafana contact point")
+			if strings.Contains(err.Error(), "failed with missing grafana contact point") ||
+				strings.Contains(err.Error(), "uid must be set") {
+				newCp, err := grafanaContactPointClient(m).CreateGrafanaContactPoint(contactPointToUpdate)
+				newUIDs = append(newUIDs, newCp.Uid)
+				if err != nil {
+					return diag.FromErr(err)
 				}
-
-				return nil
-			},
-			retry.RetryIf(
-				// Retry ONLY if the resource was not updated yet
-				func(err error) bool {
-					if err != nil {
-						return false
-					} else {
-						// Check if the update shows on read
-						// if not updated yet - retry
-						grafanaContactPointFromSchema, _ := getGrafanaContactPointsFromSchema(d)
-						return !reflect.DeepEqual(updateContactPoints, grafanaContactPointFromSchema)
-					}
-				}),
-			retry.DelayType(retry.BackOffDelay),
-			retry.Attempts(grafanaContactPointRetryAttempts),
-		)
-
-		if readErr != nil {
-			tflog.Error(ctx, "could not update schema")
-			return diagRet
+				continue
+			}
+			return diag.FromErr(err)
 		}
 
 		newUIDs = append(newUIDs, contactPointToUpdate.Uid)
@@ -256,7 +232,9 @@ func resourceGrafanaContactPointUpdate(ctx context.Context, d *schema.ResourceDa
 
 	d.SetId(createUid(newUIDs))
 
-	return nil
+	// We can't use the regular update that we usually use to verify the update happened before the read
+	time.Sleep(4 * time.Second)
+	return resourceGrafanaContactPointRead(ctx, d, m)
 }
 
 func resourceGrafanaContactPointDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

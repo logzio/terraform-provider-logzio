@@ -404,6 +404,61 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointWebhook(t *testing.T) {
 	})
 }
 
+func TestAccLogzioGrafanaContactPoint_GrafanaPointMultiple(t *testing.T) {
+	defer utils.SleepAfterTest()
+	resourceFullName := "logzio_grafana_contact_point.test_cp_multi"
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Create
+				Config: getGrafanaContactPointConfigMultiple(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointUid)),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-multiple-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointDisableResolveMessage), "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointWebhookUrl), "some.url"),
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointUid)),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointDisableResolveMessage), "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackMentionChannel), "here"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken), "some-token"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackTitle), "some-title"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackText), "{{ len .Alerts.Firing }} firing."),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackRecipient), "me"),
+				),
+			},
+			{
+				// Update
+				Config: getGrafanaContactPointConfigMultipleUpdate(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointUid)),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-multiple-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointDisableResolveMessage), "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointWebhookUrl), "some.url"),
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointUid)),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointDisableResolveMessage), "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackMentionChannel), "here"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken), "some-token"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackTitle), "some-title"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackText), "{{ len .Alerts.Firing }} firing."),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackRecipient), "me"),
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointEmail, grafanaContactPointUid)),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointEmail, grafanaContactPointDisableResolveMessage), "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointEmail, grafanaContactPointEmailSingleEmail), "true"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s.#", grafanaContactPointEmail, grafanaContactPointEmailAddresses), "1"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointEmail, grafanaContactPointEmailMessage), "{{ len .Alerts.Firing }} firing."),
+				),
+			},
+			{
+				ResourceName:            resourceFullName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken)},
+			},
+		},
+	})
+}
+
 func getGrafanaContactPointConfigEmail(emails string) string {
 	return fmt.Sprintf(`
 resource "logzio_grafana_contact_point" "test_cp_email" {
@@ -515,4 +570,53 @@ resource "logzio_grafana_contact_point" "test_cp_webhook" {
 	}
 }
 `, url)
+}
+
+func getGrafanaContactPointConfigMultiple() string {
+	return fmt.Sprintf(`
+resource "logzio_grafana_contact_point" "test_cp_multi" {
+	name = "my-multiple-cp"
+	webhook {
+		disable_resolve_message = false
+		url = "some.url"
+	}
+
+	slack {
+		disable_resolve_message = false
+		token = "some-token"
+		title = "some-title"
+		text = "{{ len .Alerts.Firing }} firing."
+		mention_channel = "here"
+		recipient = "me"
+	}
+}
+`)
+}
+
+func getGrafanaContactPointConfigMultipleUpdate() string {
+	return fmt.Sprintf(`
+resource "logzio_grafana_contact_point" "test_cp_multi" {
+	name = "my-multiple-cp"
+	webhook {
+		disable_resolve_message = false
+		url = "some.url"
+	}
+
+	slack {
+		disable_resolve_message = false
+		token = "some-token"
+		title = "some-title"
+		text = "{{ len .Alerts.Firing }} firing."
+		mention_channel = "here"
+		recipient = "me"
+	}
+
+	email {
+			addresses = ["som@address"]
+			single_email = true
+			message = "{{ len .Alerts.Firing }} firing."
+			disable_resolve_message = false
+	}
+}
+`)
 }
