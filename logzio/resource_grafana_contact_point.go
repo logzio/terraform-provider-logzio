@@ -95,7 +95,7 @@ var notifiers = []grafanaContactPointNotifier{
 	googleChatNotifier{},
 	opsGenieNotifier{},
 	pagerDutyNotifier{},
-	//slackNotifier{},
+	slackNotifier{},
 	//teamsNotifier{},
 	//victorOpsNotifier{},
 	//webhookNotifier{},

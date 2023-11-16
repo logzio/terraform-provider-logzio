@@ -437,166 +437,185 @@ func (p pagerDutyNotifier) getGrafanaContactPointFromSchema(raw interface{}, nam
 	}
 }
 
-//type slackNotifier struct{}
-//
-//var _ grafanaContactPointNotifier = (*slackNotifier)(nil)
-//
-//func (s slackNotifier) meta() grafanaContactPointNotifierMeta {
-//	return grafanaContactPointNotifierMeta{
-//		field:        grafanaContactPointSlack,
-//		typeStr:      grafanaContactPointSlack,
-//		secureFields: []string{grafanaContactPointSlackUrl, grafanaContactPointSlackToken},
-//	}
-//}
-//
-//func (s slackNotifier) schema() *schema.Resource {
-//	r := &schema.Resource{
-//		Schema: map[string]*schema.Schema{},
-//	}
-//	r.Schema[grafanaContactPointSlackEndpointUrl] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//	}
-//	r.Schema[grafanaContactPointSlackUrl] = &schema.Schema{
-//		Type:      schema.TypeString,
-//		Optional:  true,
-//		Sensitive: true,
-//	}
-//	r.Schema[grafanaContactPointSlackToken] = &schema.Schema{
-//		Type:      schema.TypeString,
-//		Optional:  true,
-//		Sensitive: true,
-//	}
-//	r.Schema[grafanaContactPointSlackRecipient] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Required: true,
-//	}
-//	r.Schema[grafanaContactPointSlackText] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//	}
-//	r.Schema[grafanaContactPointSlackTitle] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//	}
-//	r.Schema[grafanaContactPointSlackUsername] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//	}
-//	r.Schema[grafanaContactPointSlackMentionChannel] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//		ValidateFunc: validation.StringInSlice(
-//			[]string{grafanaContactPointSlackMentionChannelHere,
-//				grafanaContactPointSlackMentionChannelChannel,
-//				grafanaContactPointSlackMentionChannelDisable},
-//			false),
-//	}
-//	r.Schema[grafanaContactPointSlackMentionUsers] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//	}
-//	r.Schema[grafanaContactPointSlackMentionGroups] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//	}
-//
-//	return r
-//}
-//
-//func (s slackNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) (interface{}, error) {
-//	notifier := make(map[string]interface{}, 0)
-//
-//	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointSlackEndpointUrl)]; ok && v != nil {
-//		notifier[grafanaContactPointSlackEndpointUrl] = v.(string)
-//	}
-//
-//	if v, ok := contactPoint.Settings[grafanaContactPointSlackRecipient]; ok && v != nil {
-//		notifier[grafanaContactPointSlackRecipient] = v.(string)
-//	}
-//
-//	if v, ok := contactPoint.Settings[grafanaContactPointSlackText]; ok && v != nil {
-//		notifier[grafanaContactPointSlackText] = v.(string)
-//	}
-//
-//	if v, ok := contactPoint.Settings[grafanaContactPointSlackTitle]; ok && v != nil {
-//		notifier[grafanaContactPointSlackTitle] = v.(string)
-//	}
-//
-//	if v, ok := contactPoint.Settings[grafanaContactPointSlackUsername]; ok && v != nil {
-//		notifier[grafanaContactPointSlackUsername] = v.(string)
-//	}
-//
-//	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointSlackMentionChannel)]; ok && v != nil {
-//		notifier[grafanaContactPointSlackMentionChannel] = v.(string)
-//	}
-//
-//	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointSlackMentionUsers)]; ok && v != nil {
-//		notifier[grafanaContactPointSlackMentionUsers] = v.(string)
-//	}
-//
-//	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointSlackMentionGroups)]; ok && v != nil {
-//		notifier[grafanaContactPointSlackMentionGroups] = v.(string)
-//	}
-//
-//	getSecuredFieldsFromSchema(notifier, s.meta().secureFields, s.meta().field, d)
-//
-//	return notifier, nil
-//}
-//
-//func (s slackNotifier) getGrafanaContactPointsFromSchema(raw []interface{}, name string, disableResolveMessage bool, uid string) grafana_contact_points.GrafanaContactPoint {
-//	json := raw[0].(map[string]interface{})
-//	settings := make(map[string]interface{})
-//
-//	if v, ok := json[grafanaContactPointSlackEndpointUrl]; ok && v != nil {
-//		settings[strcase.LowerCamelCase(grafanaContactPointSlackEndpointUrl)] = v.(string)
-//	}
-//
-//	if v, ok := json[grafanaContactPointSlackUrl]; ok && v != nil {
-//		settings[grafanaContactPointSlackUrl] = v.(string)
-//	}
-//
-//	if v, ok := json[grafanaContactPointSlackToken]; ok && v != nil {
-//		settings[grafanaContactPointSlackToken] = v.(string)
-//	}
-//
-//	if v, ok := json[grafanaContactPointSlackRecipient]; ok && v != nil {
-//		settings[grafanaContactPointSlackRecipient] = v.(string)
-//	}
-//
-//	if v, ok := json[grafanaContactPointSlackText]; ok && v != nil {
-//		settings[grafanaContactPointSlackText] = v.(string)
-//	}
-//
-//	if v, ok := json[grafanaContactPointSlackTitle]; ok && v != nil {
-//		settings[grafanaContactPointSlackTitle] = v.(string)
-//	}
-//
-//	if v, ok := json[grafanaContactPointSlackUsername]; ok && v != nil {
-//		settings[grafanaContactPointSlackUsername] = v.(string)
-//	}
-//
-//	if v, ok := json[grafanaContactPointSlackMentionChannel]; ok && v != nil {
-//		settings[strcase.LowerCamelCase(grafanaContactPointSlackMentionChannel)] = v.(string)
-//	}
-//
-//	if v, ok := json[grafanaContactPointSlackMentionUsers]; ok && v != nil {
-//		settings[strcase.LowerCamelCase(grafanaContactPointSlackMentionUsers)] = v.(string)
-//	}
-//
-//	if v, ok := json[grafanaContactPointSlackMentionGroups]; ok && v != nil {
-//		settings[strcase.LowerCamelCase(grafanaContactPointSlackMentionGroups)] = v.(string)
-//	}
-//
-//	return grafana_contact_points.GrafanaContactPoint{
-//		Uid:                   uid,
-//		Name:                  name,
-//		Type:                  s.meta().typeStr,
-//		DisableResolveMessage: disableResolveMessage,
-//		Settings:              settings,
-//	}
-//}
-//
+type slackNotifier struct{}
+
+var _ grafanaContactPointNotifier = (*slackNotifier)(nil)
+
+func (s slackNotifier) meta() grafanaContactPointNotifierMeta {
+	return grafanaContactPointNotifierMeta{
+		field:        grafanaContactPointSlack,
+		typeStr:      grafanaContactPointSlack,
+		secureFields: []string{grafanaContactPointSlackUrl, grafanaContactPointSlackToken},
+	}
+}
+
+func (s slackNotifier) schema() *schema.Resource {
+	r := getCommonNotifierFields()
+
+	r.Schema[grafanaContactPointSlackEndpointUrl] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	r.Schema[grafanaContactPointSlackUrl] = &schema.Schema{
+		Type:      schema.TypeString,
+		Optional:  true,
+		Sensitive: true,
+	}
+	r.Schema[grafanaContactPointSlackToken] = &schema.Schema{
+		Type:      schema.TypeString,
+		Optional:  true,
+		Sensitive: true,
+	}
+	r.Schema[grafanaContactPointSlackRecipient] = &schema.Schema{
+		Type:     schema.TypeString,
+		Required: true,
+	}
+	r.Schema[grafanaContactPointSlackText] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	r.Schema[grafanaContactPointSlackTitle] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	r.Schema[grafanaContactPointSlackUsername] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	r.Schema[grafanaContactPointSlackMentionChannel] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+		ValidateFunc: validation.StringInSlice(
+			[]string{grafanaContactPointSlackMentionChannelHere,
+				grafanaContactPointSlackMentionChannelChannel,
+				grafanaContactPointSlackMentionChannelDisable},
+			false),
+	}
+	r.Schema[grafanaContactPointSlackMentionUsers] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	r.Schema[grafanaContactPointSlackMentionGroups] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+
+	return r
+}
+
+func (s slackNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) (interface{}, error) {
+	notifier := getCommonNotifierFieldsFromObject(&contactPoint)
+
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointSlackEndpointUrl)]; ok && v != nil {
+		notifier[grafanaContactPointSlackEndpointUrl] = v.(string)
+		delete(contactPoint.Settings, strcase.LowerCamelCase(grafanaContactPointSlackEndpointUrl))
+	}
+
+	if v, ok := contactPoint.Settings[grafanaContactPointSlackRecipient]; ok && v != nil {
+		notifier[grafanaContactPointSlackRecipient] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointSlackRecipient)
+
+	}
+
+	if v, ok := contactPoint.Settings[grafanaContactPointSlackText]; ok && v != nil {
+		notifier[grafanaContactPointSlackText] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointSlackText)
+	}
+
+	if v, ok := contactPoint.Settings[grafanaContactPointSlackTitle]; ok && v != nil {
+		notifier[grafanaContactPointSlackTitle] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointSlackTitle)
+	}
+
+	if v, ok := contactPoint.Settings[grafanaContactPointSlackUsername]; ok && v != nil {
+		notifier[grafanaContactPointSlackUsername] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointSlackUsername)
+	}
+
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointSlackMentionChannel)]; ok && v != nil {
+		notifier[grafanaContactPointSlackMentionChannel] = v.(string)
+		delete(contactPoint.Settings, strcase.LowerCamelCase(grafanaContactPointSlackMentionChannel))
+	}
+
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointSlackMentionUsers)]; ok && v != nil {
+		notifier[grafanaContactPointSlackMentionUsers] = v.(string)
+		delete(contactPoint.Settings, strcase.LowerCamelCase(grafanaContactPointSlackMentionUsers))
+	}
+
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointSlackMentionGroups)]; ok && v != nil {
+		notifier[grafanaContactPointSlackMentionGroups] = v.(string)
+		delete(contactPoint.Settings, strcase.LowerCamelCase(grafanaContactPointSlackMentionGroups))
+	}
+
+	if v, ok := contactPoint.Settings[grafanaContactPointSlackUrl]; ok && v != nil {
+		notifier[grafanaContactPointSlackUrl] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointSlackUrl)
+	}
+
+	if v, ok := contactPoint.Settings[grafanaContactPointSlackToken]; ok && v != nil {
+		notifier[grafanaContactPointSlackToken] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointSlackToken)
+	}
+
+	getSecuredFieldsFromSchema(notifier, s.meta().secureFields, s.meta().field, d)
+	notifier[grafanaContactPointSettings] = packSettings(&contactPoint)
+
+	return notifier, nil
+}
+
+func (s slackNotifier) getGrafanaContactPointFromSchema(raw interface{}, name string) grafana_contact_points.GrafanaContactPoint {
+	json := raw.(map[string]interface{})
+	uid, disableResolve, settings := getCommonNotifierFieldsFromSchema(json)
+
+	if v, ok := json[grafanaContactPointSlackEndpointUrl]; ok && v != nil {
+		settings[strcase.LowerCamelCase(grafanaContactPointSlackEndpointUrl)] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointSlackUrl]; ok && v != nil {
+		settings[grafanaContactPointSlackUrl] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointSlackToken]; ok && v != nil {
+		settings[grafanaContactPointSlackToken] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointSlackRecipient]; ok && v != nil {
+		settings[grafanaContactPointSlackRecipient] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointSlackText]; ok && v != nil {
+		settings[grafanaContactPointSlackText] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointSlackTitle]; ok && v != nil {
+		settings[grafanaContactPointSlackTitle] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointSlackUsername]; ok && v != nil {
+		settings[grafanaContactPointSlackUsername] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointSlackMentionChannel]; ok && v != nil {
+		settings[strcase.LowerCamelCase(grafanaContactPointSlackMentionChannel)] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointSlackMentionUsers]; ok && v != nil {
+		settings[strcase.LowerCamelCase(grafanaContactPointSlackMentionUsers)] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointSlackMentionGroups]; ok && v != nil {
+		settings[strcase.LowerCamelCase(grafanaContactPointSlackMentionGroups)] = v.(string)
+	}
+
+	return grafana_contact_points.GrafanaContactPoint{
+		Uid:                   uid,
+		Name:                  name,
+		Type:                  s.meta().typeStr,
+		DisableResolveMessage: disableResolve,
+		Settings:              settings,
+	}
+}
+
 //type teamsNotifier struct{}
 //
 //var _ grafanaContactPointNotifier = (*teamsNotifier)(nil)

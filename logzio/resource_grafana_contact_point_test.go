@@ -225,9 +225,9 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointSlack(t *testing.T) {
 				// Create
 				Config: getGrafanaContactPointConfigSlack(tokenCreate, mentionChannelCreate),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-slack-cp"),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackMentionChannel), mentionChannelCreate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken), tokenCreate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackTitle), "some-title"),
@@ -239,9 +239,9 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointSlack(t *testing.T) {
 				// Update
 				Config: getGrafanaContactPointConfigSlack(tokenCreate, mentionChannelUpdate),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-slack-cp"),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackMentionChannel), mentionChannelUpdate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken), tokenCreate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackTitle), "some-title"),
@@ -253,9 +253,9 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointSlack(t *testing.T) {
 				// Update sensitive
 				Config: getGrafanaContactPointConfigSlack(tokenUpdate, mentionChannelUpdate),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-slack-cp"),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackMentionChannel), mentionChannelUpdate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken), tokenUpdate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackTitle), "some-title"),
@@ -467,8 +467,8 @@ func getGrafanaContactPointConfigSlack(token, mentionChannel string) string {
 	return fmt.Sprintf(`
 resource "logzio_grafana_contact_point" "test_cp_slack" {
 	name = "my-slack-cp"
-	disable_resolve_message = false
 	slack {
+		disable_resolve_message = false
 		token = "%s"
 		title = "some-title"
 		text = "{{ len .Alerts.Firing }} firing."
