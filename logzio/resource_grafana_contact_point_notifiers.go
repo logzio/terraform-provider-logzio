@@ -217,107 +217,111 @@ func (g googleChatNotifier) getGrafanaContactPointFromSchema(raw interface{}, na
 	}
 }
 
-//type opsGenieNotifier struct{}
-//
-//var _ grafanaContactPointNotifier = (*opsGenieNotifier)(nil)
-//
-//func (o opsGenieNotifier) meta() grafanaContactPointNotifierMeta {
-//	return grafanaContactPointNotifierMeta{
-//		field:        grafanaContactPointOpsgenie,
-//		typeStr:      grafanaContactPointOpsgenie,
-//		secureFields: []string{grafanaContactPointOpsgenieApiKey},
-//	}
-//}
-//
-//func (o opsGenieNotifier) schema() *schema.Resource {
-//	r := &schema.Resource{
-//		Schema: map[string]*schema.Schema{},
-//	}
-//	r.Schema[grafanaContactPointOpsgenieApiUrl] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//	}
-//	r.Schema[grafanaContactPointOpsgenieApiKey] = &schema.Schema{
-//		Type:      schema.TypeString,
-//		Required:  true,
-//		Sensitive: true,
-//	}
-//	r.Schema[grafanaContactPointOpsgenieAutoClose] = &schema.Schema{
-//		Type:     schema.TypeBool,
-//		Optional: true,
-//	}
-//	r.Schema[grafanaContactPointOpsgenieOverridePriority] = &schema.Schema{
-//		Type:     schema.TypeBool,
-//		Optional: true,
-//	}
-//	r.Schema[grafanaContactPointOpsgenieSendTagsAs] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//		ValidateFunc: validation.StringInSlice(
-//			[]string{grafanaContactPointOpsgenieSendTagsTags,
-//				grafanaContactPointOpsgenieSendTagsDetails,
-//				grafanaContactPointOpsgenieSendTagsBoth},
-//			false),
-//	}
-//
-//	return r
-//}
-//
-//func (o opsGenieNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) (interface{}, error) {
-//	notifier := make(map[string]interface{}, 0)
-//
-//	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieApiUrl)]; ok && v != nil {
-//		notifier[grafanaContactPointOpsgenieApiUrl] = v.(string)
-//	}
-//
-//	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieApiKey)]; ok && v != nil {
-//		notifier[grafanaContactPointOpsgenieApiKey] = v.(string)
-//	}
-//
-//	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieAutoClose)]; ok && v != nil {
-//		notifier[grafanaContactPointOpsgenieAutoClose] = v.(bool)
-//	}
-//	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieOverridePriority)]; ok && v != nil {
-//		notifier[grafanaContactPointOpsgenieOverridePriority] = v.(bool)
-//	}
-//	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieSendTagsAs)]; ok && v != nil {
-//		notifier[grafanaContactPointOpsgenieSendTagsAs] = v.(string)
-//	}
-//
-//	getSecuredFieldsFromSchema(notifier, o.meta().secureFields, o.meta().field, d)
-//
-//	return notifier, nil
-//}
-//
-//func (o opsGenieNotifier) getGrafanaContactPointsFromSchema(raw []interface{}, name string, disableResolveMessage bool, uid string) grafana_contact_points.GrafanaContactPoint {
-//	json := raw[0].(map[string]interface{})
-//	settings := make(map[string]interface{})
-//
-//	if v, ok := json[grafanaContactPointOpsgenieApiUrl]; ok && v != nil {
-//		settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieApiUrl)] = v.(string)
-//	}
-//	if v, ok := json[grafanaContactPointOpsgenieApiKey]; ok && v != nil {
-//		settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieApiKey)] = v.(string)
-//	}
-//	if v, ok := json[grafanaContactPointOpsgenieAutoClose]; ok && v != nil {
-//		settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieAutoClose)] = v.(bool)
-//	}
-//	if v, ok := json[grafanaContactPointOpsgenieOverridePriority]; ok && v != nil {
-//		settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieOverridePriority)] = v.(bool)
-//	}
-//	if v, ok := json[grafanaContactPointOpsgenieSendTagsAs]; ok && v != nil {
-//		settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieSendTagsAs)] = v.(string)
-//	}
-//
-//	return grafana_contact_points.GrafanaContactPoint{
-//		Uid:                   uid,
-//		Name:                  name,
-//		Type:                  o.meta().typeStr,
-//		DisableResolveMessage: disableResolveMessage,
-//		Settings:              settings,
-//	}
-//}
-//
+type opsGenieNotifier struct{}
+
+var _ grafanaContactPointNotifier = (*opsGenieNotifier)(nil)
+
+func (o opsGenieNotifier) meta() grafanaContactPointNotifierMeta {
+	return grafanaContactPointNotifierMeta{
+		field:        grafanaContactPointOpsgenie,
+		typeStr:      grafanaContactPointOpsgenie,
+		secureFields: []string{grafanaContactPointOpsgenieApiKey},
+	}
+}
+
+func (o opsGenieNotifier) schema() *schema.Resource {
+	r := getCommonNotifierFields()
+	r.Schema[grafanaContactPointOpsgenieApiUrl] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	r.Schema[grafanaContactPointOpsgenieApiKey] = &schema.Schema{
+		Type:      schema.TypeString,
+		Required:  true,
+		Sensitive: true,
+	}
+	r.Schema[grafanaContactPointOpsgenieAutoClose] = &schema.Schema{
+		Type:     schema.TypeBool,
+		Optional: true,
+	}
+	r.Schema[grafanaContactPointOpsgenieOverridePriority] = &schema.Schema{
+		Type:     schema.TypeBool,
+		Optional: true,
+	}
+	r.Schema[grafanaContactPointOpsgenieSendTagsAs] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+		ValidateFunc: validation.StringInSlice(
+			[]string{grafanaContactPointOpsgenieSendTagsTags,
+				grafanaContactPointOpsgenieSendTagsDetails,
+				grafanaContactPointOpsgenieSendTagsBoth},
+			false),
+	}
+
+	return r
+}
+
+func (o opsGenieNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) (interface{}, error) {
+	notifier := getCommonNotifierFieldsFromObject(&contactPoint)
+
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieApiUrl)]; ok && v != nil {
+		notifier[grafanaContactPointOpsgenieApiUrl] = v.(string)
+		delete(contactPoint.Settings, strcase.LowerCamelCase(grafanaContactPointOpsgenieApiUrl))
+	}
+
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieApiKey)]; ok && v != nil {
+		notifier[grafanaContactPointOpsgenieApiKey] = v.(string)
+		delete(contactPoint.Settings, strcase.LowerCamelCase(grafanaContactPointOpsgenieApiKey))
+	}
+
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieAutoClose)]; ok && v != nil {
+		notifier[grafanaContactPointOpsgenieAutoClose] = v.(bool)
+		delete(contactPoint.Settings, strcase.LowerCamelCase(grafanaContactPointOpsgenieAutoClose))
+	}
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieOverridePriority)]; ok && v != nil {
+		notifier[grafanaContactPointOpsgenieOverridePriority] = v.(bool)
+		delete(contactPoint.Settings, strcase.LowerCamelCase(grafanaContactPointOpsgenieOverridePriority))
+	}
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieSendTagsAs)]; ok && v != nil {
+		notifier[grafanaContactPointOpsgenieSendTagsAs] = v.(string)
+		delete(contactPoint.Settings, strcase.LowerCamelCase(grafanaContactPointOpsgenieSendTagsAs))
+	}
+
+	getSecuredFieldsFromSchema(notifier, o.meta().secureFields, o.meta().field, d)
+	notifier[grafanaContactPointSettings] = packSettings(&contactPoint)
+
+	return notifier, nil
+}
+
+func (o opsGenieNotifier) getGrafanaContactPointFromSchema(raw interface{}, name string) grafana_contact_points.GrafanaContactPoint {
+	json := raw.(map[string]interface{})
+	uid, disableResolve, settings := getCommonNotifierFieldsFromSchema(json)
+
+	if v, ok := json[grafanaContactPointOpsgenieApiUrl]; ok && v != nil {
+		settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieApiUrl)] = v.(string)
+	}
+	if v, ok := json[grafanaContactPointOpsgenieApiKey]; ok && v != nil {
+		settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieApiKey)] = v.(string)
+	}
+	if v, ok := json[grafanaContactPointOpsgenieAutoClose]; ok && v != nil {
+		settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieAutoClose)] = v.(bool)
+	}
+	if v, ok := json[grafanaContactPointOpsgenieOverridePriority]; ok && v != nil {
+		settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieOverridePriority)] = v.(bool)
+	}
+	if v, ok := json[grafanaContactPointOpsgenieSendTagsAs]; ok && v != nil {
+		settings[strcase.LowerCamelCase(grafanaContactPointOpsgenieSendTagsAs)] = v.(string)
+	}
+
+	return grafana_contact_points.GrafanaContactPoint{
+		Uid:                   uid,
+		Name:                  name,
+		Type:                  o.meta().typeStr,
+		DisableResolveMessage: disableResolve,
+		Settings:              settings,
+	}
+}
+
 //type pagerDutyNotifier struct{}
 //
 //var _ grafanaContactPointNotifier = (*pagerDutyNotifier)(nil)
