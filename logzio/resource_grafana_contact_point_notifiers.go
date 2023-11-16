@@ -322,116 +322,121 @@ func (o opsGenieNotifier) getGrafanaContactPointFromSchema(raw interface{}, name
 	}
 }
 
-//type pagerDutyNotifier struct{}
-//
-//var _ grafanaContactPointNotifier = (*pagerDutyNotifier)(nil)
-//
-//func (p pagerDutyNotifier) meta() grafanaContactPointNotifierMeta {
-//	return grafanaContactPointNotifierMeta{
-//		field:        grafanaContactPointPagerduty,
-//		typeStr:      grafanaContactPointPagerduty,
-//		secureFields: []string{grafanaContactPointPagerdutyIntegrationKey},
-//	}
-//}
-//
-//func (p pagerDutyNotifier) schema() *schema.Resource {
-//	r := &schema.Resource{
-//		Schema: map[string]*schema.Schema{},
-//	}
-//	r.Schema[grafanaContactPointPagerdutyClass] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//	}
-//	r.Schema[grafanaContactPointPagerdutyComponent] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//	}
-//	r.Schema[grafanaContactPointPagerdutyGroup] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//	}
-//	r.Schema[grafanaContactPointPagerdutyIntegrationKey] = &schema.Schema{
-//		Type:      schema.TypeString,
-//		Required:  true,
-//		Sensitive: true,
-//	}
-//	r.Schema[grafanaContactPointPagerdutySeverity] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//		ValidateFunc: validation.StringInSlice(
-//			[]string{grafanaContactPointPagerdutySeverityInfo,
-//				grafanaContactPointPagerdutySeverityWarning,
-//				grafanaContactPointPagerdutySeverityError,
-//				grafanaContactPointPagerdutySeverityCritical},
-//			false),
-//	}
-//	r.Schema[grafanaContactPointPagerdutySummary] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//	}
-//
-//	return r
-//}
-//
-//func (p pagerDutyNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) (interface{}, error) {
-//	notifier := make(map[string]interface{}, 0)
-//
-//	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointPagerdutyIntegrationKey)]; ok && v != nil {
-//		notifier[grafanaContactPointPagerdutyIntegrationKey] = v.(string)
-//	}
-//	if v, ok := contactPoint.Settings[grafanaContactPointPagerdutySeverity]; ok && v != nil {
-//		notifier[grafanaContactPointPagerdutySeverity] = v.(string)
-//	}
-//	if v, ok := contactPoint.Settings[grafanaContactPointPagerdutyClass]; ok && v != nil {
-//		notifier[grafanaContactPointPagerdutyClass] = v.(string)
-//	}
-//	if v, ok := contactPoint.Settings[grafanaContactPointPagerdutyComponent]; ok && v != nil {
-//		notifier[grafanaContactPointPagerdutyComponent] = v.(string)
-//	}
-//	if v, ok := contactPoint.Settings[grafanaContactPointPagerdutyGroup]; ok && v != nil {
-//		notifier[grafanaContactPointPagerdutyGroup] = v.(string)
-//	}
-//	if v, ok := contactPoint.Settings[grafanaContactPointPagerdutySummary]; ok && v != nil {
-//		notifier[grafanaContactPointPagerdutySummary] = v.(string)
-//	}
-//
-//	getSecuredFieldsFromSchema(notifier, p.meta().secureFields, p.meta().field, d)
-//
-//	return notifier, nil
-//}
-//
-//func (p pagerDutyNotifier) getGrafanaContactPointsFromSchema(raw []interface{}, name string, disableResolveMessage bool, uid string) grafana_contact_points.GrafanaContactPoint {
-//	json := raw[0].(map[string]interface{})
-//	settings := make(map[string]interface{})
-//
-//	if v, ok := json[grafanaContactPointPagerdutyIntegrationKey]; ok && v != nil {
-//		settings[strcase.LowerCamelCase(grafanaContactPointPagerdutyIntegrationKey)] = v.(string)
-//	}
-//	if v, ok := json[grafanaContactPointPagerdutySeverity]; ok && v != nil {
-//		settings[grafanaContactPointPagerdutySeverity] = v.(string)
-//	}
-//	if v, ok := json[grafanaContactPointPagerdutyClass]; ok && v != nil {
-//		settings[grafanaContactPointPagerdutyClass] = v.(string)
-//	}
-//	if v, ok := json[grafanaContactPointPagerdutyComponent]; ok && v != nil {
-//		settings[grafanaContactPointPagerdutyComponent] = v.(string)
-//	}
-//	if v, ok := json[grafanaContactPointPagerdutyGroup]; ok && v != nil {
-//		settings[grafanaContactPointPagerdutyGroup] = v.(string)
-//	}
-//	if v, ok := json[grafanaContactPointPagerdutySummary]; ok && v != nil {
-//		settings[grafanaContactPointPagerdutySummary] = v.(string)
-//	}
-//
-//	return grafana_contact_points.GrafanaContactPoint{
-//		Uid:                   uid,
-//		Name:                  name,
-//		Type:                  p.meta().typeStr,
-//		DisableResolveMessage: disableResolveMessage,
-//		Settings:              settings,
-//	}
-//}
-//
+type pagerDutyNotifier struct{}
+
+var _ grafanaContactPointNotifier = (*pagerDutyNotifier)(nil)
+
+func (p pagerDutyNotifier) meta() grafanaContactPointNotifierMeta {
+	return grafanaContactPointNotifierMeta{
+		field:        grafanaContactPointPagerduty,
+		typeStr:      grafanaContactPointPagerduty,
+		secureFields: []string{grafanaContactPointPagerdutyIntegrationKey},
+	}
+}
+
+func (p pagerDutyNotifier) schema() *schema.Resource {
+	r := getCommonNotifierFields()
+	r.Schema[grafanaContactPointPagerdutyClass] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	r.Schema[grafanaContactPointPagerdutyComponent] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	r.Schema[grafanaContactPointPagerdutyGroup] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	r.Schema[grafanaContactPointPagerdutyIntegrationKey] = &schema.Schema{
+		Type:      schema.TypeString,
+		Required:  true,
+		Sensitive: true,
+	}
+	r.Schema[grafanaContactPointPagerdutySeverity] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+		ValidateFunc: validation.StringInSlice(
+			[]string{grafanaContactPointPagerdutySeverityInfo,
+				grafanaContactPointPagerdutySeverityWarning,
+				grafanaContactPointPagerdutySeverityError,
+				grafanaContactPointPagerdutySeverityCritical},
+			false),
+	}
+	r.Schema[grafanaContactPointPagerdutySummary] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+
+	return r
+}
+
+func (p pagerDutyNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) (interface{}, error) {
+	notifier := getCommonNotifierFieldsFromObject(&contactPoint)
+
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointPagerdutyIntegrationKey)]; ok && v != nil {
+		notifier[grafanaContactPointPagerdutyIntegrationKey] = v.(string)
+		delete(contactPoint.Settings, strcase.LowerCamelCase(grafanaContactPointPagerdutyIntegrationKey))
+	}
+	if v, ok := contactPoint.Settings[grafanaContactPointPagerdutySeverity]; ok && v != nil {
+		notifier[grafanaContactPointPagerdutySeverity] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointPagerdutySeverity)
+	}
+	if v, ok := contactPoint.Settings[grafanaContactPointPagerdutyClass]; ok && v != nil {
+		notifier[grafanaContactPointPagerdutyClass] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointPagerdutyClass)
+	}
+	if v, ok := contactPoint.Settings[grafanaContactPointPagerdutyComponent]; ok && v != nil {
+		notifier[grafanaContactPointPagerdutyComponent] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointPagerdutyComponent)
+	}
+	if v, ok := contactPoint.Settings[grafanaContactPointPagerdutyGroup]; ok && v != nil {
+		notifier[grafanaContactPointPagerdutyGroup] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointPagerdutyGroup)
+	}
+	if v, ok := contactPoint.Settings[grafanaContactPointPagerdutySummary]; ok && v != nil {
+		notifier[grafanaContactPointPagerdutySummary] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointPagerdutySummary)
+	}
+
+	getSecuredFieldsFromSchema(notifier, p.meta().secureFields, p.meta().field, d)
+	notifier[grafanaContactPointSettings] = packSettings(&contactPoint)
+
+	return notifier, nil
+}
+
+func (p pagerDutyNotifier) getGrafanaContactPointFromSchema(raw interface{}, name string) grafana_contact_points.GrafanaContactPoint {
+	json := raw.(map[string]interface{})
+	uid, disableResolve, settings := getCommonNotifierFieldsFromSchema(json)
+
+	if v, ok := json[grafanaContactPointPagerdutyIntegrationKey]; ok && v != nil {
+		settings[strcase.LowerCamelCase(grafanaContactPointPagerdutyIntegrationKey)] = v.(string)
+	}
+	if v, ok := json[grafanaContactPointPagerdutySeverity]; ok && v != nil {
+		settings[grafanaContactPointPagerdutySeverity] = v.(string)
+	}
+	if v, ok := json[grafanaContactPointPagerdutyClass]; ok && v != nil {
+		settings[grafanaContactPointPagerdutyClass] = v.(string)
+	}
+	if v, ok := json[grafanaContactPointPagerdutyComponent]; ok && v != nil {
+		settings[grafanaContactPointPagerdutyComponent] = v.(string)
+	}
+	if v, ok := json[grafanaContactPointPagerdutyGroup]; ok && v != nil {
+		settings[grafanaContactPointPagerdutyGroup] = v.(string)
+	}
+	if v, ok := json[grafanaContactPointPagerdutySummary]; ok && v != nil {
+		settings[grafanaContactPointPagerdutySummary] = v.(string)
+	}
+
+	return grafana_contact_points.GrafanaContactPoint{
+		Uid:                   uid,
+		Name:                  name,
+		Type:                  p.meta().typeStr,
+		DisableResolveMessage: disableResolve,
+		Settings:              settings,
+	}
+}
+
 //type slackNotifier struct{}
 //
 //var _ grafanaContactPointNotifier = (*slackNotifier)(nil)

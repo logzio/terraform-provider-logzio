@@ -94,7 +94,7 @@ var notifiers = []grafanaContactPointNotifier{
 	emailNotifier{},
 	googleChatNotifier{},
 	opsGenieNotifier{},
-	//pagerDutyNotifier{},
+	pagerDutyNotifier{},
 	//slackNotifier{},
 	//teamsNotifier{},
 	//victorOpsNotifier{},
