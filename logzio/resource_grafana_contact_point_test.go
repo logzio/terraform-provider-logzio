@@ -60,9 +60,9 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointGoogleChat(t *testing.T) {
 				// Create
 				Config: getGrafanaContactPointConfigGoogleChat(urlCreate),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-googlechat-cp"),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointGoogleChatUrl), urlCreate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointGoogleChatMessage), "{{ len .Alerts.Firing }} firing."),
 				),
@@ -71,9 +71,9 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointGoogleChat(t *testing.T) {
 				// Update
 				Config: getGrafanaContactPointConfigGoogleChat(urlUpdate),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-googlechat-cp"),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointGoogleChatUrl), urlUpdate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointGoogleChatMessage), "{{ len .Alerts.Firing }} firing."),
 				),
@@ -422,8 +422,8 @@ func getGrafanaContactPointConfigGoogleChat(url string) string {
 	return fmt.Sprintf(`
 resource "logzio_grafana_contact_point" "test_cp_googlechat" {
 	name = "my-googlechat-cp"
-	disable_resolve_message = false
 	googlechat {
+		disable_resolve_message = false
 		url = "%s"
 		message = "{{ len .Alerts.Firing }} firing."
 	}

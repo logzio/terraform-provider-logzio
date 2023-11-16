@@ -92,7 +92,7 @@ const (
 
 var notifiers = []grafanaContactPointNotifier{
 	emailNotifier{},
-	//googleChatNotifier{},
+	googleChatNotifier{},
 	//opsGenieNotifier{},
 	//pagerDutyNotifier{},
 	//slackNotifier{},

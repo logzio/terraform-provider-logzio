@@ -81,3 +81,16 @@ func ParseTypeSetToMap(d *schema.ResourceData, key string) (map[string]interface
 
 	return nil, fmt.Errorf("can't load mapping for key %s", key)
 }
+
+// ParseInterfaceSliceToStringSlice receives slice of interface, and returns a slice of string
+func ParseInterfaceSliceToStringSlice(interfaceSlice []interface{}) []string {
+	stringSlice := make([]string, 0, len(interfaceSlice))
+	for _, s := range interfaceSlice {
+		val, ok := s.(string)
+		if !ok {
+			val = ""
+		}
+		stringSlice = append(stringSlice, val)
+	}
+	return stringSlice
+}
