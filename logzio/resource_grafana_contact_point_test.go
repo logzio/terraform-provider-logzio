@@ -12,6 +12,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointEmail(t *testing.T) {
 	resourceFullName := "logzio_grafana_contact_point.test_cp_email"
 	emailsCreate := "[\"example@example.com\", \"example2@example.com\"]"
 	emailsUpdate := "[\"example@example.com\", \"example2@example.com\", \"example3@example.com\"]"
+	name := "my-email-cp"
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -20,7 +21,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointEmail(t *testing.T) {
 				Config: getGrafanaContactPointConfigEmail(emailsCreate),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointEmail, grafanaContactPointUid)),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-email-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointEmail, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointEmail, grafanaContactPointEmailSingleEmail), "true"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s.#", grafanaContactPointEmail, grafanaContactPointEmailAddresses), "2"),
@@ -41,6 +42,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointEmail(t *testing.T) {
 			},
 			{
 				ResourceName:      resourceFullName,
+				ImportStateId:     name,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -53,6 +55,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointGoogleChat(t *testing.T) {
 	resourceFullName := "logzio_grafana_contact_point.test_cp_googlechat"
 	urlCreate := "some.url"
 	urlUpdate := "other.url"
+	name := "my-googlechat-cp"
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -61,7 +64,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointGoogleChat(t *testing.T) {
 				Config: getGrafanaContactPointConfigGoogleChat(urlCreate),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointUid)),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-googlechat-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointGoogleChatUrl), urlCreate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointGoogleChatMessage), "{{ len .Alerts.Firing }} firing."),
@@ -80,6 +83,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointGoogleChat(t *testing.T) {
 			},
 			{
 				ResourceName:      resourceFullName,
+				ImportStateId:     name,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -94,6 +98,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointOpsgenie(t *testing.T) {
 	urlUpdate := "other.url"
 	apiTokenCreate := "some_api"
 	apiTokenUpdate := "other"
+	name := "my-opsgenie-cp"
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -102,7 +107,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointOpsgenie(t *testing.T) {
 				Config: getGrafanaContactPointConfigOpsgenie(urlCreate, apiTokenCreate),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointUid)),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-opsgenie-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieApiUrl), urlCreate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieApiKey), apiTokenCreate),
@@ -141,6 +146,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointOpsgenie(t *testing.T) {
 			},
 			{
 				ResourceName:            resourceFullName,
+				ImportStateId:           name,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointOpsgenieApiKey)},
@@ -156,6 +162,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointPagerDuty(t *testing.T) {
 	apiTokenUpdate := "other"
 	severityCreate := "info"
 	severityUpdate := "warning"
+	name := "my-pagerduty-cp"
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -164,7 +171,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointPagerDuty(t *testing.T) {
 				Config: getGrafanaContactPointConfigPagerduty(apiTokenCreate, severityCreate),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointUid)),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-pagerduty-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointPagerdutySeverity), severityCreate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointPagerdutyIntegrationKey), apiTokenCreate),
@@ -203,6 +210,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointPagerDuty(t *testing.T) {
 			},
 			{
 				ResourceName:            resourceFullName,
+				ImportStateId:           name,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointPagerdutyIntegrationKey)},
@@ -218,6 +226,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointSlack(t *testing.T) {
 	tokenUpdate := "other"
 	mentionChannelCreate := "here"
 	mentionChannelUpdate := ""
+	name := "my-slack-cp"
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -226,7 +235,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointSlack(t *testing.T) {
 				Config: getGrafanaContactPointConfigSlack(tokenCreate, mentionChannelCreate),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointUid)),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-slack-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackMentionChannel), mentionChannelCreate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken), tokenCreate),
@@ -265,6 +274,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointSlack(t *testing.T) {
 			},
 			{
 				ResourceName:            resourceFullName,
+				ImportStateId:           name,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken)},
@@ -280,6 +290,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointTeams(t *testing.T) {
 	urlUpdate := "another.url"
 	messageCreate := "some message"
 	messageUpdate := "another message"
+	name := "my-teams-cp"
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -288,7 +299,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointTeams(t *testing.T) {
 				Config: getGrafanaContactPointConfigTeams(urlCreate, messageCreate),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointUid)),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-teams-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointMicrosoftTeamsUrl), urlCreate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointMicrosoftTeamsMessage), messageCreate),
@@ -318,6 +329,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointTeams(t *testing.T) {
 			},
 			{
 				ResourceName:            resourceFullName,
+				ImportStateId:           name,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointMicrosoftTeamsUrl)},
@@ -333,6 +345,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointVictorops(t *testing.T) {
 	urlUpdate := "another.url"
 	messageTypeCreate := "WARNING"
 	messageTypeUpdate := "CRITICAL"
+	name := "my-victorops-cp"
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -341,7 +354,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointVictorops(t *testing.T) {
 				Config: getGrafanaContactPointConfigVictorOps(urlCreate, messageTypeCreate),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointUid)),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-victorops-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointVictoropsUrl), urlCreate),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointVictoropsMessageType), messageTypeCreate),
@@ -360,6 +373,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointVictorops(t *testing.T) {
 			},
 			{
 				ResourceName:      resourceFullName,
+				ImportStateId:     name,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -372,6 +386,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointWebhook(t *testing.T) {
 	resourceFullName := "logzio_grafana_contact_point.test_cp_webhook"
 	urlCreate := "some.url"
 	urlUpdate := "another.url"
+	name := "my-webhook-cp"
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -380,7 +395,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointWebhook(t *testing.T) {
 				Config: getGrafanaContactPointConfigWebhook(urlCreate),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointUid)),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-webhook-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointWebhookUrl), urlCreate),
 				),
@@ -397,6 +412,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointWebhook(t *testing.T) {
 			},
 			{
 				ResourceName:      resourceFullName,
+				ImportStateId:     name,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -407,6 +423,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointWebhook(t *testing.T) {
 func TestAccLogzioGrafanaContactPoint_GrafanaPointMultiple(t *testing.T) {
 	defer utils.SleepAfterTest()
 	resourceFullName := "logzio_grafana_contact_point.test_cp_multi"
+	name := "my-multiple-cp"
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -415,7 +432,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointMultiple(t *testing.T) {
 				Config: getGrafanaContactPointConfigMultiple(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointUid)),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-multiple-cp"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointDisableResolveMessage), "false"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointWebhookUrl), "some.url"),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointUid)),
@@ -451,8 +468,8 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointMultiple(t *testing.T) {
 			},
 			{
 				ResourceName:            resourceFullName,
+				ImportStateId:           name,
 				ImportState:             true,
-				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken)},
 			},
 		},

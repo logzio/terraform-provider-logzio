@@ -2,6 +2,7 @@ package logzio
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -106,7 +107,7 @@ func resourceGrafanaContactPoint() *schema.Resource {
 		UpdateContext: resourceGrafanaContactPointUpdate,
 		DeleteContext: resourceGrafanaContactPointDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: importContactPoint,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -248,6 +249,27 @@ func resourceGrafanaContactPointDelete(ctx context.Context, d *schema.ResourceDa
 
 	d.SetId("")
 	return nil
+}
+
+func importContactPoint(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	name := d.Id()
+
+	contactPoints, err := grafanaContactPointClient(m).GetGrafanaContactPointsByName(name)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(contactPoints) == 0 {
+		return nil, fmt.Errorf("no contact points with the given name were found to import")
+	}
+
+	uids := make([]string, 0, len(contactPoints))
+	for _, contactPoint := range contactPoints {
+		uids = append(uids, contactPoint.Uid)
+	}
+
+	d.SetId(createUid(uids))
+	return []*schema.ResourceData{d}, nil
 }
 
 func setGrafanaContactPoints(d *schema.ResourceData, contactPoints []grafana_contact_points.GrafanaContactPoint) error {
