@@ -69,19 +69,6 @@ func ParseStringToMapList(value string) []map[string]interface{} {
 	return returnObject
 }
 
-func ParseTypeSetToMap(d *schema.ResourceData, key string) (map[string]interface{}, error) {
-	if v, ok := d.GetOk(key); ok {
-		rawMappings := v.(*schema.Set).List()
-		for i := 0; i < len(rawMappings); i++ {
-			x := rawMappings[i]
-			y := x.(map[string]interface{})
-			return y, nil
-		}
-	}
-
-	return nil, fmt.Errorf("can't load mapping for key %s", key)
-}
-
 // ParseInterfaceSliceToStringSlice receives slice of interface, and returns a slice of string
 func ParseInterfaceSliceToStringSlice(interfaceSlice []interface{}) []string {
 	stringSlice := make([]string, 0, len(interfaceSlice))
@@ -93,4 +80,17 @@ func ParseInterfaceSliceToStringSlice(interfaceSlice []interface{}) []string {
 		stringSlice = append(stringSlice, val)
 	}
 	return stringSlice
+}
+
+func ParseTypeSetToMap(d *schema.ResourceData, key string) (map[string]interface{}, error) {
+	if v, ok := d.GetOk(key); ok {
+		rawMappings := v.(*schema.Set).List()
+		for i := 0; i < len(rawMappings); i++ {
+			x := rawMappings[i]
+			y := x.(map[string]interface{})
+			return y, nil
+		}
+	}
+
+	return nil, fmt.Errorf("can't load mapping for key %s", key)
 }

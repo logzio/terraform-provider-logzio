@@ -45,5 +45,5 @@ EOD
 You can import existing dashboard as follows:
 
 ```
-terraform import logzio_grafana_dashboard.my_dashboard <FETCHER-ID>
+terraform import logzio_grafana_dashboard.my_dashboard <DASHBOARD-ID>
 ```
