@@ -16,6 +16,7 @@ const (
 	grafanaContactPointName                  = "name"
 	grafanaContactPointUid                   = "uid"
 	grafanaContactPointDisableResolveMessage = "disable_resolve_message"
+	grafanaContactPointSettings              = "settings"
 
 	grafanaContactPointEmail            = "email"
 	grafanaContactPointEmailAddresses   = "addresses"
@@ -84,19 +85,20 @@ const (
 	grafanaContactPointWebhookUsername   = "username"
 
 	grafanaContactPointEmailAddressSeparator = ";"
+	grafanaContactPointUidsSeparator         = ";"
 
 	grafanaContactPointRetryAttempts = 8
 )
 
 var notifiers = []grafanaContactPointNotifier{
 	emailNotifier{},
-	googleChatNotifier{},
-	opsGenieNotifier{},
-	pagerDutyNotifier{},
-	slackNotifier{},
-	teamsNotifier{},
-	victorOpsNotifier{},
-	webhookNotifier{},
+	//googleChatNotifier{},
+	//opsGenieNotifier{},
+	//pagerDutyNotifier{},
+	//slackNotifier{},
+	//teamsNotifier{},
+	//victorOpsNotifier{},
+	//webhookNotifier{},
 }
 
 func resourceGrafanaContactPoint() *schema.Resource {
@@ -114,15 +116,6 @@ func resourceGrafanaContactPoint() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			grafanaContactPointUid: {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			grafanaContactPointDisableResolveMessage: {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
 		},
 	}
 
@@ -137,7 +130,7 @@ func resourceGrafanaContactPoint() *schema.Resource {
 			Type:         schema.TypeList,
 			Optional:     true,
 			Elem:         n.schema(),
-			ExactlyOneOf: notifierFields,
+			AtLeastOneOf: notifierFields,
 		}
 	}
 
@@ -151,139 +144,194 @@ func grafanaContactPointClient(m interface{}) *grafana_contact_points.GrafanaCon
 }
 
 func resourceGrafanaContactPointCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	createContactPoint, err := getGrafanaContactPointFromSchema(d)
+	createContactPoints, err := getGrafanaContactPointsFromSchema(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	contactPoint, err := grafanaContactPointClient(m).CreateGrafanaContactPoint(createContactPoint)
-	if err != nil {
-		return diag.FromErr(err)
+	uids := make([]string, 0, len(createContactPoints))
+	for _, cp := range createContactPoints {
+		contactPoint, err := grafanaContactPointClient(m).CreateGrafanaContactPoint(cp)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		uids = append(uids, contactPoint.Uid)
 	}
 
-	d.SetId(contactPoint.Uid)
+	d.SetId(createUid(uids))
 	return resourceGrafanaContactPointRead(ctx, d, m)
 }
 
 func resourceGrafanaContactPointRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	contactPoint, err := grafanaContactPointClient(m).GetGrafanaContactPointByUid(d.Id())
+	uidsToFetch := getUidsToFetch(d.Id())
+	contactPoints := []grafana_contact_points.GrafanaContactPoint{}
+	for _, uid := range uidsToFetch {
+		contactPoint, err := grafanaContactPointClient(m).GetGrafanaContactPointByUid(uid)
 
-	if err != nil {
-		tflog.Error(ctx, err.Error())
-		if strings.Contains(err.Error(), "missing grafana contact point") {
-			// If we were not able to find the resource - delete from state
-			d.SetId("")
-			return diag.Diagnostics{}
-		} else {
-			return diag.FromErr(err)
+		if err != nil {
+			tflog.Error(ctx, err.Error())
+			if strings.Contains(err.Error(), "missing grafana contact point") {
+				// If we were not able to find the resource - delete from state
+				d.SetId("")
+				return diag.Diagnostics{}
+			} else {
+				return diag.FromErr(err)
+			}
 		}
+		contactPoints = append(contactPoints, contactPoint)
 	}
 
-	err = setGrafanaContactPoint(d, contactPoint)
+	err := setGrafanaContactPoints(d, contactPoints)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	uids := make([]string, 0, len(contactPoints))
+	for _, p := range contactPoints {
+		uids = append(uids, p.Uid)
+	}
+
+	d.SetId(createUid(uids))
 
 	return nil
 }
 
 func resourceGrafanaContactPointUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	updateContactPoint, err := getGrafanaContactPointFromSchema(d)
+	updateContactPoints, err := getGrafanaContactPointsFromSchema(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	existingUIDs := getUidsToFetch(d.Id())
+	unprocessedUIDs := toUIDSet(existingUIDs)
+	newUIDs := make([]string, 0, len(updateContactPoints))
 
-	err = grafanaContactPointClient(m).UpdateContactPoint(updateContactPoint)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	for _, contactPointToUpdate := range updateContactPoints {
+		delete(unprocessedUIDs, contactPointToUpdate.Uid)
+		err = grafanaContactPointClient(m).UpdateContactPoint(contactPointToUpdate)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 
-	var diagRet diag.Diagnostics
-	readErr := retry.Do(
-		func() error {
-			diagRet = resourceGrafanaContactPointRead(ctx, d, m)
-			if diagRet.HasError() {
-				return fmt.Errorf("received error from read grafana contact point")
-			}
-
-			return nil
-		},
-		retry.RetryIf(
-			// Retry ONLY if the resource was not updated yet
-			func(err error) bool {
-				if err != nil {
-					return false
-				} else {
-					// Check if the update shows on read
-					// if not updated yet - retry
-					grafanaContactPointFromSchema, _ := getGrafanaContactPointFromSchema(d)
-					return !reflect.DeepEqual(updateContactPoint, grafanaContactPointFromSchema)
+		var diagRet diag.Diagnostics
+		readErr := retry.Do(
+			func() error {
+				diagRet = resourceGrafanaContactPointRead(ctx, d, m)
+				if diagRet.HasError() {
+					return fmt.Errorf("received error from read grafana contact point")
 				}
-			}),
-		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(grafanaContactPointRetryAttempts),
-	)
 
-	if readErr != nil {
-		tflog.Error(ctx, "could not update schema")
-		return diagRet
+				return nil
+			},
+			retry.RetryIf(
+				// Retry ONLY if the resource was not updated yet
+				func(err error) bool {
+					if err != nil {
+						return false
+					} else {
+						// Check if the update shows on read
+						// if not updated yet - retry
+						grafanaContactPointFromSchema, _ := getGrafanaContactPointsFromSchema(d)
+						return !reflect.DeepEqual(updateContactPoints, grafanaContactPointFromSchema)
+					}
+				}),
+			retry.DelayType(retry.BackOffDelay),
+			retry.Attempts(grafanaContactPointRetryAttempts),
+		)
+
+		if readErr != nil {
+			tflog.Error(ctx, "could not update schema")
+			return diagRet
+		}
+
+		newUIDs = append(newUIDs, contactPointToUpdate.Uid)
 	}
+
+	// Any UIDs still left in the state that we haven't seen must map to deleted receivers.
+	// Delete them on the server and drop them from state.
+	for u := range unprocessedUIDs {
+		if err := grafanaContactPointClient(m).DeleteGrafanaContactPoint(u); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	d.SetId(createUid(newUIDs))
 
 	return nil
 }
 
 func resourceGrafanaContactPointDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	err := grafanaContactPointClient(m).DeleteGrafanaContactPoint(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
+	uids := getUidsToFetch(d.Id())
+	for _, uid := range uids {
+		err := grafanaContactPointClient(m).DeleteGrafanaContactPoint(uid)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	d.SetId("")
 	return nil
 }
 
-func setGrafanaContactPoint(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) error {
-	d.Set(grafanaContactPointName, contactPoint.Name)
-	d.Set(grafanaContactPointUid, contactPoint.Uid)
-	d.Set(grafanaContactPointDisableResolveMessage, contactPoint.DisableResolveMessage)
-	for _, n := range notifiers {
-		if contactPoint.Type == n.meta().typeStr {
-			packed, err := n.getGrafanaContactPointFromObject(d, contactPoint)
-			if err != nil {
-				return err
+func setGrafanaContactPoints(d *schema.ResourceData, contactPoints []grafana_contact_points.GrafanaContactPoint) error {
+	pointsPerNotifier := map[grafanaContactPointNotifier][]interface{}{}
+	for _, contactPoint := range contactPoints {
+		d.Set(grafanaContactPointName, contactPoint.Name)
+		for _, n := range notifiers {
+			if contactPoint.Type == n.meta().typeStr {
+				packed, err := n.getGrafanaContactPointFromObject(d, contactPoint)
+				if err != nil {
+					return err
+				}
+				pointsPerNotifier[n] = append(pointsPerNotifier[n], packed)
+				continue
 			}
-			d.Set(n.meta().field, []interface{}{packed})
-			return nil
 		}
 	}
 
-	return fmt.Errorf("could not find notifier")
+	for n, pts := range pointsPerNotifier {
+		d.Set(n.meta().field, pts)
+	}
+
+	return nil
 }
 
-func getGrafanaContactPointFromSchema(d *schema.ResourceData) (grafana_contact_points.GrafanaContactPoint, error) {
+func getGrafanaContactPointsFromSchema(d *schema.ResourceData) ([]grafana_contact_points.GrafanaContactPoint, error) {
+	contactPoints := make([]grafana_contact_points.GrafanaContactPoint, 0)
 	for _, notifier := range notifiers {
-		if point, ok := d.GetOk(notifier.meta().field); ok {
-			uid := ""
-			if v, okUid := d.GetOk(grafanaContactPointUid); okUid {
-				uid = v.(string)
+		if points, ok := d.GetOk(notifier.meta().field); ok {
+			for _, p := range points.([]interface{}) {
+				cp := unpackPointConfig(notifier, p, d.Get(grafanaContactPointName).(string))
+				contactPoints = append(contactPoints, cp)
 			}
-			return unpackPointConfig(notifier,
-				point.([]interface{}),
-				d.Get(grafanaContactPointName).(string),
-				d.Get(grafanaContactPointDisableResolveMessage).(bool),
-				uid), nil
+
 		}
 	}
 
-	return grafana_contact_points.GrafanaContactPoint{}, fmt.Errorf("could not find notifier")
+	return contactPoints, nil
 }
 
-func unpackPointConfig(n grafanaContactPointNotifier, data []interface{}, name string, disableResolveMessage bool, uid string) grafana_contact_points.GrafanaContactPoint {
-	pt := n.getGrafanaContactPointFromSchema(data, name, disableResolveMessage, uid)
+func unpackPointConfig(n grafanaContactPointNotifier, data interface{}, name string) grafana_contact_points.GrafanaContactPoint {
+	pt := n.getGrafanaContactPointFromSchema(data, name)
 	for k, v := range pt.Settings {
 		if v == "" {
 			delete(pt.Settings, k)
 		}
 	}
 	return pt
+}
+
+func createUid(uids []string) string {
+	return strings.Join(uids, grafanaContactPointUidsSeparator)
+}
+
+func getUidsToFetch(uidsStr string) []string {
+	return strings.Split(uidsStr, grafanaContactPointUidsSeparator)
+}
+
+func toUIDSet(uids []string) map[string]bool {
+	set := map[string]bool{}
+	for _, uid := range uids {
+		set[uid] = true
+	}
+	return set
 }
