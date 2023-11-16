@@ -7,6 +7,7 @@ import (
 	"github.com/logzio/logzio_terraform_client/grafana_contact_points"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"github.com/stoewer/go-strcase"
+	"strconv"
 	"strings"
 )
 
@@ -753,122 +754,131 @@ func (vo victorOpsNotifier) getGrafanaContactPointFromSchema(raw interface{}, na
 	}
 }
 
-//type webhookNotifier struct{}
-//
-//var _ grafanaContactPointNotifier = (*webhookNotifier)(nil)
-//
-//func (w webhookNotifier) meta() grafanaContactPointNotifierMeta {
-//	return grafanaContactPointNotifierMeta{
-//		field:        grafanaContactPointWebhook,
-//		typeStr:      grafanaContactPointWebhook,
-//		secureFields: []string{grafanaContactPointWebhookPassword},
-//	}
-//}
-//
-//func (w webhookNotifier) schema() *schema.Resource {
-//	r := &schema.Resource{
-//		Schema: map[string]*schema.Schema{},
-//	}
-//	r.Schema[grafanaContactPointWebhookUrl] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Required: true,
-//	}
-//	r.Schema[grafanaContactPointWebhookHttpMethod] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//		ValidateFunc: validation.StringInSlice(
-//			[]string{grafanaContactPointWebhookHttpPut,
-//				grafanaContactPointWebhookHttpPost},
-//			false),
-//	}
-//	r.Schema[grafanaContactPointWebhookUsername] = &schema.Schema{
-//		Type:     schema.TypeString,
-//		Optional: true,
-//	}
-//	r.Schema[grafanaContactPointWebhookPassword] = &schema.Schema{
-//		Type:      schema.TypeString,
-//		Optional:  true,
-//		Sensitive: true,
-//	}
-//	r.Schema[grafanaContactPointWebhookMaxAlerts] = &schema.Schema{
-//		Type:     schema.TypeInt,
-//		Optional: true,
-//	}
-//	return r
-//}
-//
-//func (w webhookNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) (interface{}, error) {
-//	notifier := make(map[string]interface{}, 0)
-//
-//	if v, ok := contactPoint.Settings[grafanaContactPointWebhookUrl]; ok && v != nil {
-//		notifier[grafanaContactPointWebhookUrl] = v.(string)
-//	}
-//
-//	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointWebhookHttpMethod)]; ok && v != nil {
-//		notifier[grafanaContactPointWebhookHttpMethod] = v.(string)
-//	}
-//
-//	if v, ok := contactPoint.Settings[grafanaContactPointWebhookUsername]; ok && v != nil {
-//		notifier[grafanaContactPointWebhookUsername] = v.(string)
-//	}
-//
-//	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointWebhookMaxAlerts)]; ok && v != nil {
-//		switch typ := v.(type) {
-//		case int:
-//			notifier[grafanaContactPointWebhookMaxAlerts] = v.(int)
-//		case float64:
-//			notifier[grafanaContactPointWebhookMaxAlerts] = int(v.(float64))
-//		case string:
-//			val, err := strconv.Atoi(typ)
-//			if err != nil {
-//				panic(fmt.Errorf("failed to parse value of 'maxAlerts' to integer: %w", err))
-//			}
-//			notifier[grafanaContactPointWebhookMaxAlerts] = val
-//		default:
-//			panic(fmt.Sprintf("unexpected type %T for 'maxAlerts': %v", typ, typ))
-//		}
-//	}
-//
-//	getSecuredFieldsFromSchema(notifier, w.meta().secureFields, w.meta().field, d)
-//
-//	return notifier, nil
-//}
-//
-//func (w webhookNotifier) getGrafanaContactPointsFromSchema(raw []interface{}, name string, disableResolveMessage bool, uid string) grafana_contact_points.GrafanaContactPoint {
-//	json := raw[0].(map[string]interface{})
-//	settings := make(map[string]interface{})
-//
-//	if v, ok := json[grafanaContactPointWebhookUrl]; ok && v != nil {
-//		settings[grafanaContactPointWebhookUrl] = v.(string)
-//	}
-//
-//	if v, ok := json[grafanaContactPointWebhookHttpMethod]; ok && v != nil {
-//		settings[strcase.LowerCamelCase(grafanaContactPointWebhookHttpMethod)] = v.(string)
-//	}
-//
-//	if v, ok := json[grafanaContactPointWebhookUsername]; ok && v != nil {
-//		settings[grafanaContactPointWebhookUsername] = v.(string)
-//	}
-//
-//	if v, ok := json[grafanaContactPointWebhookPassword]; ok && v != nil {
-//		settings[grafanaContactPointWebhookPassword] = v.(string)
-//	}
-//	if v, ok := json[grafanaContactPointWebhookMaxAlerts]; ok && v != nil {
-//		switch typ := v.(type) {
-//		case int:
-//			settings[strcase.LowerCamelCase(grafanaContactPointWebhookMaxAlerts)] = v.(int)
-//		case float64:
-//			settings[strcase.LowerCamelCase(grafanaContactPointWebhookMaxAlerts)] = int(v.(float64))
-//		default:
-//			panic(fmt.Sprintf("unexpected type for %s: %v", grafanaContactPointWebhookMaxAlerts, typ))
-//		}
-//	}
-//
-//	return grafana_contact_points.GrafanaContactPoint{
-//		Uid:                   uid,
-//		Name:                  name,
-//		Type:                  w.meta().typeStr,
-//		DisableResolveMessage: disableResolveMessage,
-//		Settings:              settings,
-//	}
-//}
+type webhookNotifier struct{}
+
+var _ grafanaContactPointNotifier = (*webhookNotifier)(nil)
+
+func (w webhookNotifier) meta() grafanaContactPointNotifierMeta {
+	return grafanaContactPointNotifierMeta{
+		field:        grafanaContactPointWebhook,
+		typeStr:      grafanaContactPointWebhook,
+		secureFields: []string{grafanaContactPointWebhookPassword},
+	}
+}
+
+func (w webhookNotifier) schema() *schema.Resource {
+	r := getCommonNotifierFields()
+
+	r.Schema[grafanaContactPointWebhookUrl] = &schema.Schema{
+		Type:     schema.TypeString,
+		Required: true,
+	}
+	r.Schema[grafanaContactPointWebhookHttpMethod] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+		ValidateFunc: validation.StringInSlice(
+			[]string{grafanaContactPointWebhookHttpPut,
+				grafanaContactPointWebhookHttpPost},
+			false),
+	}
+	r.Schema[grafanaContactPointWebhookUsername] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	r.Schema[grafanaContactPointWebhookPassword] = &schema.Schema{
+		Type:      schema.TypeString,
+		Optional:  true,
+		Sensitive: true,
+	}
+	r.Schema[grafanaContactPointWebhookMaxAlerts] = &schema.Schema{
+		Type:     schema.TypeInt,
+		Optional: true,
+	}
+	return r
+}
+
+func (w webhookNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData, contactPoint grafana_contact_points.GrafanaContactPoint) (interface{}, error) {
+	notifier := getCommonNotifierFieldsFromObject(&contactPoint)
+
+	if v, ok := contactPoint.Settings[grafanaContactPointWebhookUrl]; ok && v != nil {
+		notifier[grafanaContactPointWebhookUrl] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointWebhookUrl)
+	}
+
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointWebhookHttpMethod)]; ok && v != nil {
+		notifier[grafanaContactPointWebhookHttpMethod] = v.(string)
+		delete(contactPoint.Settings, strcase.LowerCamelCase(grafanaContactPointWebhookHttpMethod))
+	}
+
+	if v, ok := contactPoint.Settings[grafanaContactPointWebhookUsername]; ok && v != nil {
+		notifier[grafanaContactPointWebhookUsername] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointWebhookUsername)
+	}
+
+	if v, ok := contactPoint.Settings[grafanaContactPointWebhookPassword]; ok && v != nil {
+		notifier[grafanaContactPointWebhookPassword] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointWebhookPassword)
+	}
+
+	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointWebhookMaxAlerts)]; ok && v != nil {
+		switch typ := v.(type) {
+		case int:
+			notifier[grafanaContactPointWebhookMaxAlerts] = v.(int)
+		case float64:
+			notifier[grafanaContactPointWebhookMaxAlerts] = int(v.(float64))
+		case string:
+			val, err := strconv.Atoi(typ)
+			if err != nil {
+				panic(fmt.Errorf("failed to parse value of 'maxAlerts' to integer: %w", err))
+			}
+			notifier[grafanaContactPointWebhookMaxAlerts] = val
+		default:
+			panic(fmt.Sprintf("unexpected type %T for 'maxAlerts': %v", typ, typ))
+		}
+		delete(contactPoint.Settings, strcase.LowerCamelCase(grafanaContactPointWebhookMaxAlerts))
+	}
+
+	getSecuredFieldsFromSchema(notifier, w.meta().secureFields, w.meta().field, d)
+	notifier[grafanaContactPointSettings] = packSettings(&contactPoint)
+
+	return notifier, nil
+}
+
+func (w webhookNotifier) getGrafanaContactPointFromSchema(raw interface{}, name string) grafana_contact_points.GrafanaContactPoint {
+	json := raw.(map[string]interface{})
+	uid, disableResolve, settings := getCommonNotifierFieldsFromSchema(json)
+
+	if v, ok := json[grafanaContactPointWebhookUrl]; ok && v != nil {
+		settings[grafanaContactPointWebhookUrl] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointWebhookHttpMethod]; ok && v != nil {
+		settings[strcase.LowerCamelCase(grafanaContactPointWebhookHttpMethod)] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointWebhookUsername]; ok && v != nil {
+		settings[grafanaContactPointWebhookUsername] = v.(string)
+	}
+
+	if v, ok := json[grafanaContactPointWebhookPassword]; ok && v != nil {
+		settings[grafanaContactPointWebhookPassword] = v.(string)
+	}
+	if v, ok := json[grafanaContactPointWebhookMaxAlerts]; ok && v != nil {
+		switch typ := v.(type) {
+		case int:
+			settings[strcase.LowerCamelCase(grafanaContactPointWebhookMaxAlerts)] = v.(int)
+		case float64:
+			settings[strcase.LowerCamelCase(grafanaContactPointWebhookMaxAlerts)] = int(v.(float64))
+		default:
+			panic(fmt.Sprintf("unexpected type for %s: %v", grafanaContactPointWebhookMaxAlerts, typ))
+		}
+	}
+
+	return grafana_contact_points.GrafanaContactPoint{
+		Uid:                   uid,
+		Name:                  name,
+		Type:                  w.meta().typeStr,
+		DisableResolveMessage: disableResolve,
+		Settings:              settings,
+	}
+}

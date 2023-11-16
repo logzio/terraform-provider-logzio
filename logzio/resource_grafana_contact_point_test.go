@@ -379,20 +379,20 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointWebhook(t *testing.T) {
 				// Create
 				Config: getGrafanaContactPointConfigWebhook(urlCreate),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-webhook-cp"),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
-					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointVictoropsUrl), urlCreate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointDisableResolveMessage), "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointWebhookUrl), urlCreate),
 				),
 			},
 			{
 				// Update
 				Config: getGrafanaContactPointConfigWebhook(urlUpdate),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceFullName, grafanaContactPointUid),
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-webhook-cp"),
-					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointDisableResolveMessage, "false"),
-					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointVictoropsUrl), urlUpdate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointDisableResolveMessage), "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointWebhookUrl), urlUpdate),
 				),
 			},
 			{
@@ -509,8 +509,8 @@ func getGrafanaContactPointConfigWebhook(url string) string {
 	return fmt.Sprintf(`
 resource "logzio_grafana_contact_point" "test_cp_webhook" {
 	name = "my-webhook-cp"
-	disable_resolve_message = false
 	webhook {
+		disable_resolve_message = false
 		url = "%s"
 	}
 }

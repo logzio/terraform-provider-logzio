@@ -98,7 +98,7 @@ var notifiers = []grafanaContactPointNotifier{
 	slackNotifier{},
 	teamsNotifier{},
 	victorOpsNotifier{},
-	//webhookNotifier{},
+	webhookNotifier{},
 }
 
 func resourceGrafanaContactPoint() *schema.Resource {
