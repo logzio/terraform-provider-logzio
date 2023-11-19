@@ -27,6 +27,8 @@ The following Logz.io API endpoints are supported by this provider:
 * [Grafana Dashboards](https://docs.logz.io/api/#operation/createDashboard)
 * Grafana folders
 * [Grafana Alert Rules](https://docs.logz.io/api/#tag/Grafana-alerting-provisioning)
+* [Grafana Contact Point](https://docs.logz.io/api/#tag/Grafana-contact-points)
+* Grafana Notification Policy.
 
 #### Working with Terraform
 
