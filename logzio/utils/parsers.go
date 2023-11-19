@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
 	"strconv"
 )
@@ -79,4 +80,17 @@ func ParseInterfaceSliceToStringSlice(interfaceSlice []interface{}) []string {
 		stringSlice = append(stringSlice, val)
 	}
 	return stringSlice
+}
+
+func ParseTypeSetToMap(d *schema.ResourceData, key string) (map[string]interface{}, error) {
+	if v, ok := d.GetOk(key); ok {
+		rawMappings := v.(*schema.Set).List()
+		for i := 0; i < len(rawMappings); i++ {
+			x := rawMappings[i]
+			y := x.(map[string]interface{})
+			return y, nil
+		}
+	}
+
+	return nil, fmt.Errorf("can't load mapping for key %s", key)
 }
