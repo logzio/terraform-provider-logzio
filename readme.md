@@ -201,7 +201,10 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 
 - **v1.14.0**:
   - Upgrade `logzio_client_terraform to 1.18.0`.
-  - Support [Grafana Alert Rule API](https://docs.logz.io/api/#tag/Grafana-alerting-provisioning).
+  - Support Grafana folders.
+  - Support [Grafana Alert Rules](https://docs.logz.io/api/#tag/Grafana-alerting-provisioning).
+  - Support [Grafana Contact Point](https://docs.logz.io/api/#tag/Grafana-contact-points). 
+  - Grafana Notification Policy.
 - **v1.13.2**:
   - **alerts v2**:
     - **Bug fix**: Add default value of `JSON` to `output_type` to match API behaviour.
