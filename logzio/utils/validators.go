@@ -9,7 +9,6 @@ import (
 	"github.com/logzio/logzio_terraform_client/authentication_groups"
 	"github.com/logzio/logzio_terraform_client/endpoints"
 	"github.com/logzio/logzio_terraform_client/grafana_alerts"
-	"github.com/logzio/logzio_terraform_client/grafana_contact_points"
 	"github.com/logzio/logzio_terraform_client/grafana_notification_policies"
 	"github.com/logzio/logzio_terraform_client/s3_fetcher"
 	"github.com/logzio/logzio_terraform_client/users"
@@ -272,6 +271,10 @@ func ValidateTimeDurationString(v interface{}, k string) (ws []string, errors []
 	_, err := time.ParseDuration(value)
 	if err != nil {
 		errors = append(errors, fmt.Errorf("could not parse string to duration: %s", err.Error()))
+	}
+
+	return
+}
 
 func ValidateGrafanaNotificationPolicyMatcherMatch(v interface{}, k string) (ws []string, errors []error) {
 	match := v.(string)
