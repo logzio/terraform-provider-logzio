@@ -8,9 +8,13 @@ import (
 	"github.com/logzio/logzio_terraform_client/archive_logs"
 	"github.com/logzio/logzio_terraform_client/authentication_groups"
 	"github.com/logzio/logzio_terraform_client/endpoints"
+	"github.com/logzio/logzio_terraform_client/grafana_alerts"
+	"github.com/logzio/logzio_terraform_client/grafana_contact_points"
+	"github.com/logzio/logzio_terraform_client/grafana_notification_policies"
 	"github.com/logzio/logzio_terraform_client/s3_fetcher"
 	"github.com/logzio/logzio_terraform_client/users"
 	"regexp"
+	"time"
 )
 
 func contains(slice []string, s string) bool {
@@ -231,4 +235,57 @@ func ValidateS3FetcherLogsType(v interface{}, path cty.Path) diag.Diagnostics {
 	}
 
 	return diag.Errorf("Logs type %s is not in the allowed logs types list: %s", logsType, validLogsTypes)
+}
+
+func ValidateExecErrState(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	validExecErrState := []string{
+		string(grafana_alerts.ErrAlerting),
+		string(grafana_alerts.ErrOK),
+		string(grafana_alerts.ErrError),
+	}
+
+	if !contains(validExecErrState, value) {
+		errors = append(errors, fmt.Errorf("value for exec err state is unknown"))
+	}
+
+	return
+}
+
+func ValidateExecNoDataState(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	validNoDataState := []string{
+		string(grafana_alerts.NoDataAlerting),
+		string(grafana_alerts.NoDataOk),
+		string(grafana_alerts.NoData),
+	}
+
+	if !contains(validNoDataState, value) {
+		errors = append(errors, fmt.Errorf("value for no data state is unknown"))
+	}
+
+	return
+}
+
+func ValidateTimeDurationString(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	_, err := time.ParseDuration(value)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("could not parse string to duration: %s", err.Error()))
+
+func ValidateGrafanaNotificationPolicyMatcherMatch(v interface{}, k string) (ws []string, errors []error) {
+	match := v.(string)
+	validMatchTypes := grafana_notification_policies.GetValidMatchTypes()
+	isValidMatcher := false
+	for _, validMatch := range validMatchTypes {
+		if match == validMatch.String() {
+			isValidMatcher = true
+		}
+	}
+
+	if !isValidMatcher {
+		errors = append(errors, fmt.Errorf("Match type %s is not in the allowed match types list %s", match, validMatchTypes))
+	}
+
+	return
 }

@@ -25,7 +25,8 @@ The following Logz.io API endpoints are supported by this provider:
 * [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
 * [S3 Fetcher](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets)
 * [Grafana Dashboards](https://docs.logz.io/api/#operation/createDashboard)
-* [Grafana folders]()
+* Grafana folders
+* [Grafana Alert Rules](https://docs.logz.io/api/#tag/Grafana-alerting-provisioning)
 
 #### Working with Terraform
 
@@ -195,17 +196,22 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 ```
 
 ### Changelog
+
 - **v1.14.0**:
-  - Support [Grafana folders API]().
-  - Upgrade `logzio_client_terraform` to `1.17.0`.
-  - Upgrade `terraform-plugin-sdk` to `2.26.1`. 
-- **v1.13.1**:
-  - **s3 fetcher**:
-    - **Bug fix**: `prefix` field now being applied.
+  - Upgrade `logzio_client_terraform to 1.18.0`.
+  - Support [Grafana Alert Rule API](https://docs.logz.io/api/#tag/Grafana-alerting-provisioning).
+- **v1.13.2**:
+  - **alerts v2**:
+    - **Bug fix**: Add default value of `JSON` to `output_type` to match API behaviour.
+  - **grafana dashboards**:
+    - **Bug fix**: Handle dashboard configs with id and version fields.
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
 
+- **v1.13.1**:
+    - **s3 fetcher**:
+        - **Bug fix**: `prefix` field now being applied.
 - **v1.13.0**:
     - Upgrade `logzio_client_terraform` to `1.16.0`.
     - Support [Grafana Dashboards API](https://docs.logz.io/api/#operation/createDashboard).
@@ -350,3 +356,6 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
   
 </details>
 
+### Trademark Disclaimer
+
+Terraform is a trademark of HashiCorp, Inc.

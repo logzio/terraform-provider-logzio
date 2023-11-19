@@ -120,15 +120,13 @@ func resourceGrafanaDashboardRead(ctx context.Context, d *schema.ResourceData, m
 
 	grafanaDashboard, err := client.GetGrafanaDashboard(d.Id())
 	if err != nil {
-		if err != nil {
-			tflog.Error(ctx, err.Error())
-			if strings.Contains(err.Error(), "missing grafana dashboard") {
-				// If we were not able to find the resource - delete from state
-				d.SetId("")
-				return diag.Diagnostics{}
-			} else {
-				return diag.FromErr(err)
-			}
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing grafana dashboard") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
 		}
 	}
 
@@ -212,13 +210,13 @@ func getCreateUpdateGrafanaDashboardFromSchema(d *schema.ResourceData) (grafana_
 	var dashboardObject map[string]interface{}
 	var payload grafana_dashboards.CreateUpdatePayload
 
-	for _, key := range grafanaDashboardsFieldsToDelete {
-		delete(dashboardObject, key)
-	}
-
 	err := json.Unmarshal([]byte(d.Get(grafanaDashboardJson).(string)), &dashboardObject)
 	if err != nil {
 		return payload, err
+	}
+
+	for _, key := range grafanaDashboardsFieldsToDelete {
+		delete(dashboardObject, key)
 	}
 
 	payload = grafana_dashboards.CreateUpdatePayload{

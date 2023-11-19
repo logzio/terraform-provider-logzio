@@ -124,6 +124,7 @@ func resourceAlertV2() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: utils.ValidateOutputType,
+				Default:      alerts_v2.OutputTypeJson,
 			},
 			alertV2SubComponents: {
 				Type:     schema.TypeList,
