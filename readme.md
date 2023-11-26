@@ -200,7 +200,7 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 ### Changelog
 
 - **v1.14.0**:
-  - Upgrade `logzio_client_terraform to 1.18.0`.
+  - Upgrade `logzio_client_terraform to 1.20.0`.
   - Support Grafana folders.
   - Support [Grafana Alert Rules](https://docs.logz.io/api/#tag/Grafana-alerting-provisioning).
   - Support [Grafana Contact Point](https://docs.logz.io/api/#tag/Grafana-contact-points). 
