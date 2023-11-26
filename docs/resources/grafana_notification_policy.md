@@ -66,7 +66,7 @@ resource logzio_grafana_notification_policy test_np {
 #### Optional:
 
 * `group_by` - (List of String) A list of alert labels to group alerts into notifications by.
-* `mute_timings` - (List of String) A list of mute timing names to apply to alerts that match this policy.
+* `mute_timings` - (List of String) A list of mute timing names to apply to alerts that match this policy. **Warning** - insert names of mute-timing that already exists, otherwise it can cause problems in your system.
 * `continue` - (Boolean) Whether to continue matching subsequent rules if an alert matches the current rule. Otherwise, the rule will be 'consumed' by the first policy to match it.
 * `group_wait` - (String) Time to wait to buffer alerts of the same group before sending a notification.
 * `group_interval` - (String) Minimum time interval between two notifications for the same group.
@@ -91,7 +91,7 @@ resource logzio_grafana_notification_policy test_np {
 #### Optional:
 
 * `group_by` - (List of String) A list of alert labels to group alerts into notifications by.
-* `mute_timings` - (List of String) A list of mute timing names to apply to alerts that match this policy.
+* `mute_timings` - (List of String) A list of mute timing names to apply to alerts that match this policy. **Warning** - insert names of mute-timing that already exists, otherwise it can cause problems in your system.
 * `continue` - (Boolean) Whether to continue matching subsequent rules if an alert matches the current rule. Otherwise, the rule will be 'consumed' by the first policy to match it.
 * `group_wait` - (String) Time to wait to buffer alerts of the same group before sending a notification.
 * `group_interval` - (String) Minimum time interval between two notifications for the same group.
@@ -116,7 +116,7 @@ resource logzio_grafana_notification_policy test_np {
 #### Optional:
 
 * `group_by` - (List of String) A list of alert labels to group alerts into notifications by.
-* `mute_timings` - (List of String) A list of mute timing names to apply to alerts that match this policy.
+* `mute_timings` - (List of String) A list of mute timing names to apply to alerts that match this policy. **Warning** - insert names of mute-timing that already exists, otherwise it can cause problems in your system.
 * `continue` - (Boolean) Whether to continue matching subsequent rules if an alert matches the current rule. Otherwise, the rule will be 'consumed' by the first policy to match it.
 * `group_wait` - (String) Time to wait to buffer alerts of the same group before sending a notification.
 * `group_interval` - (String) Minimum time interval between two notifications for the same group.
@@ -141,7 +141,7 @@ resource logzio_grafana_notification_policy test_np {
 
 #### Optional:
 
-* `mute_timings` - (List of String) A list of mute timing names to apply to alerts that match this policy.
+* `mute_timings` - (List of String) A list of mute timing names to apply to alerts that match this policy. **Warning** - insert names of mute-timing that already exists, otherwise it can cause problems in your system.
 * `continue` - (Boolean) Whether to continue matching subsequent rules if an alert matches the current rule. Otherwise, the rule will be 'consumed' by the first policy to match it.
 * `group_wait` - (String) Time to wait to buffer alerts of the same group before sending a notification.
 * `group_interval` - (String) Minimum time interval between two notifications for the same group.
