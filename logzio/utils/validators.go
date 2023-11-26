@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/logzio/logzio_terraform_client/alerts"
 	"github.com/logzio/logzio_terraform_client/alerts_v2"
 	"github.com/logzio/logzio_terraform_client/archive_logs"
 	"github.com/logzio/logzio_terraform_client/authentication_groups"
 	"github.com/logzio/logzio_terraform_client/endpoints"
+	"github.com/logzio/logzio_terraform_client/grafana_alerts"
+	"github.com/logzio/logzio_terraform_client/grafana_notification_policies"
 	"github.com/logzio/logzio_terraform_client/s3_fetcher"
 	"github.com/logzio/logzio_terraform_client/users"
 	"regexp"
+	"time"
 )
 
 func contains(slice []string, s string) bool {
@@ -22,36 +24,6 @@ func contains(slice []string, s string) bool {
 		}
 	}
 	return false
-}
-
-func ValidateOperation(v interface{}, k string) (ws []string, errors []error) {
-
-	value := v.(string)
-
-	validOperations := []string{
-		alerts.OperatorGreaterThanOrEquals,
-		alerts.OperatorGreaterThan,
-		alerts.OperatorEquals,
-		alerts.OperatorLessThan,
-		alerts.OperatorLessThanOrEquals,
-		alerts.OperatorNotEquals,
-	}
-
-	if len(value) == 0 {
-		errors = append(errors, fmt.Errorf("operation %q must not be blank and be one of %s", k, validOperations))
-	}
-
-	valid := false
-	for _, op := range validOperations {
-		if op == value {
-			valid = true
-		}
-	}
-
-	if !valid {
-		errors = append(errors, fmt.Errorf("operation %q must be one of %s", k, validOperations))
-	}
-	return
 }
 
 func ValidateOperationV2(v interface{}, k string) (ws []string, errors []error) {
@@ -80,42 +52,6 @@ func ValidateOperationV2(v interface{}, k string) (ws []string, errors []error) 
 
 	if !valid {
 		errors = append(errors, fmt.Errorf("operation %q must be one of %s", k, validOperations))
-	}
-	return
-}
-
-func validAggregationTypes(v interface{}, k string) (ws []string, errors []error) {
-
-	value := v.(string)
-
-	validAggregationTypes := []string{
-		alerts.AggregationTypeUniqueCount,
-		alerts.AggregationTypeAvg,
-		alerts.AggregationTypeMax,
-		alerts.AggregationTypeNone,
-		alerts.AggregationTypeSum,
-		alerts.AggregationTypeCount,
-		alerts.AggregationTypeMin,
-	}
-
-	if !contains(validAggregationTypes, value) {
-		errors = append(errors, fmt.Errorf("valueAggregationType %q must be one of %s", k, validAggregationTypes))
-	}
-	return
-}
-
-func validateSeverityTypes(v interface{}, k string) (ws []string, errors []error) {
-
-	value := v.(string)
-
-	validSeverityTypes := []string{
-		alerts.SeverityHigh,
-		alerts.SeverityMedium,
-		alerts.SeverityHigh,
-	}
-
-	if !contains(validSeverityTypes, value) {
-		errors = append(errors, fmt.Errorf("validSeverityType %q must be one of %s", k, validSeverityTypes))
 	}
 	return
 }
@@ -298,4 +234,61 @@ func ValidateS3FetcherLogsType(v interface{}, path cty.Path) diag.Diagnostics {
 	}
 
 	return diag.Errorf("Logs type %s is not in the allowed logs types list: %s", logsType, validLogsTypes)
+}
+
+func ValidateExecErrState(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	validExecErrState := []string{
+		string(grafana_alerts.ErrAlerting),
+		string(grafana_alerts.ErrOK),
+		string(grafana_alerts.ErrError),
+	}
+
+	if !contains(validExecErrState, value) {
+		errors = append(errors, fmt.Errorf("value for exec err state is unknown"))
+	}
+
+	return
+}
+
+func ValidateExecNoDataState(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	validNoDataState := []string{
+		string(grafana_alerts.NoDataAlerting),
+		string(grafana_alerts.NoDataOk),
+		string(grafana_alerts.NoData),
+	}
+
+	if !contains(validNoDataState, value) {
+		errors = append(errors, fmt.Errorf("value for no data state is unknown"))
+	}
+
+	return
+}
+
+func ValidateTimeDurationString(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	_, err := time.ParseDuration(value)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("could not parse string to duration: %s", err.Error()))
+	}
+
+	return
+}
+
+func ValidateGrafanaNotificationPolicyMatcherMatch(v interface{}, k string) (ws []string, errors []error) {
+	match := v.(string)
+	validMatchTypes := grafana_notification_policies.GetValidMatchTypes()
+	isValidMatcher := false
+	for _, validMatch := range validMatchTypes {
+		if match == validMatch.String() {
+			isValidMatcher = true
+		}
+	}
+
+	if !isValidMatcher {
+		errors = append(errors, fmt.Errorf("Match type %s is not in the allowed match types list %s", match, validMatchTypes))
+	}
+
+	return
 }

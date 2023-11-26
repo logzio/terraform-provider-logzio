@@ -120,15 +120,13 @@ func resourceGrafanaDashboardRead(ctx context.Context, d *schema.ResourceData, m
 
 	grafanaDashboard, err := client.GetGrafanaDashboard(d.Id())
 	if err != nil {
-		if err != nil {
-			tflog.Error(ctx, err.Error())
-			if strings.Contains(err.Error(), "missing grafana dashboard") {
-				// If we were not able to find the resource - delete from state
-				d.SetId("")
-				return diag.Diagnostics{}
-			} else {
-				return diag.FromErr(err)
-			}
+		tflog.Error(ctx, err.Error())
+		if strings.Contains(err.Error(), "missing grafana dashboard") {
+			// If we were not able to find the resource - delete from state
+			d.SetId("")
+			return diag.Diagnostics{}
+		} else {
+			return diag.FromErr(err)
 		}
 	}
 

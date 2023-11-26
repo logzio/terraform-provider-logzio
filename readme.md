@@ -25,6 +25,10 @@ The following Logz.io API endpoints are supported by this provider:
 * [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
 * [S3 Fetcher](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets)
 * [Grafana Dashboards](https://docs.logz.io/api/#operation/createDashboard)
+* Grafana folders
+* [Grafana Alert Rules](https://docs.logz.io/api/#tag/Grafana-alerting-provisioning)
+* [Grafana Contact Point](https://docs.logz.io/api/#tag/Grafana-contact-points)
+* Grafana Notification Policy.
 
 #### Working with Terraform
 
@@ -195,19 +199,24 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 
 ### Changelog
 
+- **v1.14.0**:
+  - Upgrade `logzio_client_terraform to 1.20.0`.
+  - Support Grafana folders.
+  - Support [Grafana Alert Rules](https://docs.logz.io/api/#tag/Grafana-alerting-provisioning).
+  - Support [Grafana Contact Point](https://docs.logz.io/api/#tag/Grafana-contact-points). 
+  - Grafana Notification Policy.
 - **v1.13.2**:
   - **alerts v2**:
     - **Bug fix**: Add default value of `JSON` to `output_type` to match API behaviour.
   - **grafana dashboards**:
     - **Bug fix**: Handle dashboard configs with id and version fields.
-- **v1.13.1**:
-  - **s3 fetcher**:
-    - **Bug fix**: `prefix` field now being applied.
-
 
 <details>
   <summary markdown="span"> Expand to check old versions </summary>
 
+- **v1.13.1**:
+    - **s3 fetcher**:
+        - **Bug fix**: `prefix` field now being applied.
 - **v1.13.0**:
     - Upgrade `logzio_client_terraform` to `1.16.0`.
     - Support [Grafana Dashboards API](https://docs.logz.io/api/#operation/createDashboard).

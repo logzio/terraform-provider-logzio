@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
 	"strconv"
 )
@@ -66,4 +67,30 @@ func ParseStringToMapList(value string) []map[string]interface{} {
 	}
 
 	return returnObject
+}
+
+// ParseInterfaceSliceToStringSlice receives slice of interface, and returns a slice of string
+func ParseInterfaceSliceToStringSlice(interfaceSlice []interface{}) []string {
+	stringSlice := make([]string, 0, len(interfaceSlice))
+	for _, s := range interfaceSlice {
+		val, ok := s.(string)
+		if !ok {
+			val = ""
+		}
+		stringSlice = append(stringSlice, val)
+	}
+	return stringSlice
+}
+
+func ParseTypeSetToMap(d *schema.ResourceData, key string) (map[string]interface{}, error) {
+	if v, ok := d.GetOk(key); ok {
+		rawMappings := v.(*schema.Set).List()
+		for i := 0; i < len(rawMappings); i++ {
+			x := rawMappings[i]
+			y := x.(map[string]interface{})
+			return y, nil
+		}
+	}
+
+	return nil, fmt.Errorf("can't load mapping for key %s", key)
 }
