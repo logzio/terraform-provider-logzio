@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
+	"regexp"
 	"testing"
 )
 
@@ -85,6 +86,11 @@ func TestAccLogzioGrafanaAlertRule_CreateUpdateAlertRule(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.lets", grafanaAlertRuleLabels), "go"),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaAlertRuleFor, "4m30s"),
 				),
+			},
+			{
+				// Update invalid name
+				Config:      getGrafanaAlertRuleConfigInvalidTitle(folderUid),
+				ExpectError: regexp.MustCompile("alert Title cannot contain '/' or '\\\\\\\\' charchters"),
 			},
 		},
 	})
@@ -232,6 +238,43 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
   no_data_state = "OK"
   rule_group = "rule_group_1"
   title = "updated_title"
+}
+`, folderUid)
+}
+
+func getGrafanaAlertRuleConfigInvalidTitle(folderUid string) string {
+	return fmt.Sprintf(`
+resource "logzio_grafana_alert_rule" "test_grafana_alert" {
+  annotations = {
+    "foo" = "bar"
+    "hello" = "world"
+  }
+  condition = "A"
+  data {
+    ref_id = "B"
+    datasource_uid = "AB1C234567D89012E"
+    query_type = ""
+    model = jsonencode({
+      hide          = false
+      intervalMs    = 2000
+      refId         = "B"
+    })
+    relative_time_range {
+      from = 700
+      to   = 0
+    }
+  }
+  labels = {
+    "hey" = "oh"
+    "lets" = "go"
+  }
+  is_paused = false
+  exec_err_state = "Alerting"
+  folder_uid = "%s"
+  for = "4m30s"
+  no_data_state = "OK"
+  rule_group = "rule_group_1"
+  title = "invalid/title"
 }
 `, folderUid)
 }
