@@ -12,7 +12,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const (
@@ -23,7 +22,6 @@ const (
 	metricsAccountPlanUts            string = "plan_uts"
 	metricsAccountAuthorizedAccounts string = "authorized_accounts"
 
-	delayGetMetricsAccount      = 2 * time.Second
 	metricsAccountRetryAttempts = 8
 )
 
@@ -60,7 +58,7 @@ func resourceMetricsAccount() *schema.Resource {
 			},
 			metricsAccountPlanUts: {
 				Type:     schema.TypeInt,
-				Required: true,
+				Optional: true,
 			},
 			metricsAccountAuthorizedAccounts: {
 				Type: schema.TypeList,
@@ -82,14 +80,14 @@ func MetricsAccountClient(m interface{}) *metrics_accounts.MetricsAccountClient 
 
 func resourceMetricsAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	createSubAccount := getCreateMetricsAccountFromSchema(d)
-	subAccount, err := MetricsAccountClient(m).CreateMetricsAccount(createSubAccount)
+	metricsAccount, err := MetricsAccountClient(m).CreateMetricsAccount(createSubAccount)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(strconv.FormatInt(int64(subAccount.Id), 10))
-	d.Set(metricsAccountToken, subAccount.Token)
-	d.Set(metricsAccountId, subAccount.Id)
+	d.SetId(strconv.FormatInt(int64(metricsAccount.Id), 10))
+	d.Set(metricsAccountToken, metricsAccount.Token)
+	d.Set(metricsAccountId, metricsAccount.Id)
 	return resourceMetricsAccountRead(ctx, d, m)
 }
 
@@ -98,7 +96,7 @@ func resourceMetricsAccountRead(ctx context.Context, d *schema.ResourceData, m i
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	subAccount, err := MetricsAccountClient(m).GetMetricsAccount(id)
+	metricsAccount, err := MetricsAccountClient(m).GetMetricsAccount(id)
 	if err != nil {
 		tflog.Error(ctx, err.Error())
 		if strings.Contains(err.Error(), "missing metrics account") {
@@ -111,7 +109,7 @@ func resourceMetricsAccountRead(ctx context.Context, d *schema.ResourceData, m i
 
 	}
 
-	setMetricsAccount(d, subAccount)
+	setMetricsAccount(d, metricsAccount)
 
 	return nil
 }
@@ -122,8 +120,8 @@ func resourceMetricsAccountUpdate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	updateSubAccount := getCreateMetricsAccountFromSchema(d)
-	err = MetricsAccountClient(m).UpdateMetricsAccount(id, updateSubAccount)
+	updateMetricsAccount := getCreateMetricsAccountFromSchema(d)
+	err = MetricsAccountClient(m).UpdateMetricsAccount(id, updateMetricsAccount)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -146,8 +144,8 @@ func resourceMetricsAccountUpdate(ctx context.Context, d *schema.ResourceData, m
 				} else {
 					// Check if the update shows on read
 					// if not updated yet - retry
-					subAccountFromSchema := getCreateMetricsAccountFromSchema(d)
-					return !reflect.DeepEqual(subAccountFromSchema, updateSubAccount)
+					MetricsAccountFromSchema := getCreateMetricsAccountFromSchema(d)
+					return !reflect.DeepEqual(MetricsAccountFromSchema, updateMetricsAccount)
 				}
 			}),
 		retry.DelayType(retry.BackOffDelay),
@@ -178,14 +176,14 @@ func resourceMetricsAccountDelete(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func setMetricsAccount(d *schema.ResourceData, subAccount *metrics_accounts.MetricsAccount) {
-	d.Set(metricsAccountId, subAccount.Id)
-	d.Set(metricsAccountName, subAccount.AccountName)
-	d.Set(metricsAccountPlanUts, subAccount.PlanUts)
-	d.Set(metricsAccountToken, subAccount.Token)
+func setMetricsAccount(d *schema.ResourceData, metricsAccount *metrics_accounts.MetricsAccount) {
+	d.Set(metricsAccountId, metricsAccount.Id)
+	d.Set(metricsAccountName, metricsAccount.AccountName)
+	d.Set(metricsAccountPlanUts, metricsAccount.PlanUts)
+	d.Set(metricsAccountToken, metricsAccount.AccountToken)
 
 	sharingObjectAccounts := make([]int32, 0)
-	for _, accountId := range subAccount.AuthorizedAccountsIds {
+	for _, accountId := range metricsAccount.AuthorizedAccountsIds {
 		sharingObjectAccounts = append(sharingObjectAccounts, accountId)
 	}
 
@@ -200,12 +198,17 @@ func getCreateMetricsAccountFromSchema(d *schema.ResourceData) metrics_accounts.
 		authorizedAccounts = append(authorizedAccounts, int32(accountId.(int)))
 	}
 
-	createSubAccount := metrics_accounts.CreateOrUpdateMetricsAccount{
+	PlanUtsVal := int32(d.Get(metricsAccountPlanUts).(int))
+	var planUts *int32
+	planUts = new(int32)
+	*planUts = PlanUtsVal
+
+	createMetricsAccount := metrics_accounts.CreateOrUpdateMetricsAccount{
 		Email:                 d.Get(metricsAccountEmail).(string),
 		AccountName:           d.Get(metricsAccountName).(string),
-		PlanUts:               int32(d.Get(metricsAccountPlanUts).(int)),
+		PlanUts:               planUts,
 		AuthorizedAccountsIds: authorizedAccounts,
 	}
 
-	return createSubAccount
+	return createMetricsAccount
 }

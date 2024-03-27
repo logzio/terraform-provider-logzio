@@ -16,7 +16,7 @@ func dataSourceMetricsAccount() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceMetricsAccountReadWrapper,
 		Schema: map[string]*schema.Schema{
-			subAccountId: {
+			metricsAccountId: {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
@@ -54,6 +54,8 @@ func dataSourceMetricsAccountReadWrapper(ctx context.Context, d *schema.Resource
 	var err error
 	readErr := retry.Do(
 		func() error {
+			// we use this instead of return dataSourceSubaccountRead(d, m) directly
+			// to avoid 'no "id" found in attributes' error
 			err = dataSourceMetricsAccountRead(d, m)
 			if err != nil {
 				return err
@@ -88,23 +90,23 @@ func dataSourceMetricsAccountRead(d *schema.ResourceData, m interface{}) error {
 
 	accountId, ok := d.GetOk(metricsAccountId)
 	if ok {
-		subAccount, err := client.GetMetricsAccount(int64(accountId.(int)))
+		metricsAccount, err := client.GetMetricsAccount(int64(accountId.(int)))
 		if err != nil {
 			return err
 		}
 		d.SetId(strconv.FormatInt(int64(accountId.(int)), 10))
-		setMetricsAccount(d, subAccount)
+		setMetricsAccount(d, metricsAccount)
 		return nil
 	}
 
 	accountName, ok := d.GetOk(metricsAccountName)
 	if ok {
-		subAccounts, err := client.ListMetricsAccounts()
+		metricsAccounts, err := client.ListMetricsAccounts()
 		if err != nil {
 			return err
 		}
 
-		for _, account := range subAccounts {
+		for _, account := range metricsAccounts {
 			if account.AccountName == accountName.(string) {
 				d.SetId(strconv.FormatInt(int64(account.Id), 10))
 				setMetricsAccount(d, &account)
@@ -112,6 +114,5 @@ func dataSourceMetricsAccountRead(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 	}
-
 	return fmt.Errorf("couldn't find metrics account with specified attributes")
 }

@@ -108,7 +108,7 @@ func testAccMetricsAccountDataSourceResource(email string, accountId int64, acco
 
 func testAccCheckLogzioMetricsAccountDatasourceConfig() string {
 	return fmt.Sprint(`data "logzio_metrics_account" "metrics_account_datasource_by_id" {
-  account_id = "${logzio_metrics_account.metrics_account_datasource.id}"
+  account_id = "${logzio_metrics_account.metrics_account_datasource.Id}"
 }
 `)
 }
@@ -125,11 +125,4 @@ func testAccCheckLogzioMetricsAccountDatasourceConfigNotExist() string {
   account_name = "name_not_exist"
 }
 `)
-}
-
-func testAccCheckLogzioMetricsAccountDatasourceConfigById(accountId string) string {
-	return fmt.Sprintf(`data "logzio_metrics_account" "metrics_account_datasource_by_id" {
-  account_id = "%s"
-}
-`, accountId)
 }
