@@ -12,23 +12,24 @@ You can use the Terraform Logz.io Provider to manage users and log accounts in L
 
 The following Logz.io API endpoints are supported by this provider:
 
-* [User management](https://docs.logz.io/api/#tag/Manage-users)
-* [Notification channels](https://docs.logz.io/api/#tag/Manage-notification-endpoints)
+* [User management](https://api-docs.logz.io/docs/logz/manage-users)
+* [Notification channels](https://api-docs.logz.io/docs/logz/manage-notification-endpoints)
 * [Log-based alerts](https://github.com/logzio/public-api/tree/master/alerts)
-* [Sub accounts](https://docs.logz.io/api/#tag/Manage-sub-accounts)
-* [Alerts(v2)](https://docs.logz.io/api/#tag/Alerts)
-* [Log shipping token](https://docs.logz.io/api/#tag/Manage-log-shipping-tokens)
-* [Drop filters](https://docs.logz.io/api/#tag/Drop-filters)
-* [Archive logs](https://docs.logz.io/api/#tag/Archive-logs)
-* [Restore logs](https://docs.logz.io/api/#tag/Restore-logs)
-* [Authentication groups](https://docs.logz.io/api/#tag/Authentication-groups)
-* [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
-* [S3 Fetcher](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets)
-* [Grafana Dashboards](https://docs.logz.io/api/#operation/createDashboard)
-* Grafana folders
-* [Grafana Alert Rules](https://docs.logz.io/api/#tag/Grafana-alerting-provisioning)
-* [Grafana Contact Point](https://docs.logz.io/api/#tag/Grafana-contact-points)
-* Grafana Notification Policy.
+* [Sub accounts](https://api-docs.logz.io/docs/logz/manage-time-based-log-accounts)
+* [Alerts(v2)](https://api-docs.logz.io/docs/logz/alerts)
+* [Log shipping token](https://api-docs.logz.io/docs/logz/manage-log-shipping-tokens)
+* [Drop filters](https://api-docs.logz.io/docs/logz/drop-filters)
+* [Archive logs](https://api-docs.logz.io/docs/logz/archive-logs)
+* [Restore logs](https://api-docs.logz.io/docs/logz/restore-logs)
+* [Authentication groups](https://api-docs.logz.io/docs/logz/authentication-groups)
+* [Kibana objects](https://api-docs.logz.io/docs/logz/import-or-export-kibana-objects)
+* [S3 Fetcher](https://api-docs.logz.io/docs/logz/connect-to-s-3-buckets)
+* [Grafana Dashboards](https://api-docs.logz.io/docs/logz/create-dashboard)
+* [Grafana folders](https://api-docs.logz.io/docs/logz/get-all-folders)
+* [Grafana Alert Rules](https://api-docs.logz.io/docs/logz/get-alert-rules)
+* [Grafana Contact Point](https://api-docs.logz.io/docs/logz/route-get-contactpoints)
+* [Grafana Notification Policy](https://api-docs.logz.io/docs/logz/route-get-policy-tree)
+* [Metrics Accounts](https://api-docs.logz.io/docs/logz/create-a-new-metrics-account)
 
 #### Working with Terraform
 
@@ -199,13 +200,16 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 
 ### Changelog
 
+- **v1.15.0**:
+    - Upgrade `logzio_client_terraform` to `1.21.0`.
+    - Support [Metrics Accounts API](https://api-docs.logz.io/docs/logz/create-a-new-metrics-account)
 - **v1.14.1**:
-  - Upgrade `logzio_client_terraform to 1.20.1`.
+  - Upgrade `logzio_client_terraform` to `1.20.1`.
 - **v1.14.0**:
-  - Upgrade `logzio_client_terraform to 1.20.0`.
+  - Upgrade `logzio_client_terraform` to `1.20.0`.
   - Support Grafana folders.
-  - Support [Grafana Alert Rules](https://docs.logz.io/api/#tag/Grafana-alerting-provisioning).
-  - Support [Grafana Contact Point](https://docs.logz.io/api/#tag/Grafana-contact-points). 
+  - Support [Grafana Alert Rules](https://api-docs.logz.io/docs/logz/get-alert-rules).
+  - Support [Grafana Contact Point](https://api-docs.logz.io/docs/logz/route-get-contactpoints). 
   - Grafana Notification Policy.
 - **v1.13.2**:
   - **alerts v2**:
@@ -221,10 +225,10 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
         - **Bug fix**: `prefix` field now being applied.
 - **v1.13.0**:
     - Upgrade `logzio_client_terraform` to `1.16.0`.
-    - Support [Grafana Dashboards API](https://docs.logz.io/api/#operation/createDashboard).
+    - Support [Grafana Dashboards API](https://api-docs.logz.io/docs/logz/get-datasource-by-account).
 - **v1.12.0**:
     - Upgrade `logzio_client_terraform` to `1.15.0`.
-    - Support [S3 Fetcher API](https://docs.logz.io/api/#tag/Connect-to-S3-Buckets).
+    - Support [S3 Fetcher API](https://api-docs.logz.io/docs/logz/create-buckets).
 - **v1.11.0**:
     - Upgrade `terraform-plugin-sdk` to `v2.24.1`.
     - Upgrade `logzio_client_terraform` to `1.14.0`.
@@ -263,7 +267,7 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
     - *Bug fix*: plugin won't crash when import for `archive_logs` fails.
 - **v1.9.0**
     - Update client version(v1.11.0).
-    - Support [Kibana objects](https://docs.logz.io/api/#tag/Import-or-export-Kibana-objects)
+    - Support [Kibana objects](https://api-docs.logz.io/docs/logz/import-or-export-kibana-objects)
 - **v1.8.3**
     - Update client version(v1.10.3).
     - Bug fixes:
@@ -285,15 +289,15 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
     - Add to custom endpoint datasource Description field.
 - **v1.7.0**
   - Update client version (v1.10).
-  - Support [authentication groups resource](https://docs.logz.io/api/#tag/Authentication-groups).
+  - Support [authentication groups resource](https://api-docs.logz.io/docs/logz/authentication-groups).
   - `alerts_v2`: fix noisy diff for `severity_threshold_tiers`.
 
 - **v1.6.1**
     - Update client version (v1.9.1) - bug fix for not found messages.
 - **v1.6**
   - Update client version (v1.9).
-  - Support [archive logs resource](https://docs.logz.io/api/#tag/Archive-logs).
-  - Support [restore logs resource](https://docs.logz.io/api/#tag/Restore-logs).
+  - Support [archive logs resource](https://api-docs.logz.io/docs/logz/archive-logs).
+  - Support [restore logs resource](https://api-docs.logz.io/docs/logz/restore-logs).
 - **v1.5**
     - Update client version(v1.8).
     - `sub_account`:
@@ -317,7 +321,7 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
         - Improve tests.
 - v1.4
     - Update client version(v1.7).
-    - Support [Drop Filter](https://docs.logz.io/api/#tag/Drop-filters) resource.
+    - Support [Drop Filter](https://api-docs.logz.io/docs/logz/drop-filters) resource.
 - v1.3
     - Update client version(v1.6).
     - Support Log Shipping Token resource.
