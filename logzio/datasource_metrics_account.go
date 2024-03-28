@@ -56,8 +56,7 @@ func dataSourceMetricsAccountReadWrapper(ctx context.Context, d *schema.Resource
 		func() error {
 			// we use this instead of return dataSourceMetricsAccountRead(d, m) directly
 			// to avoid 'no "id" found in attributes' error
-			err = dataSourceMetricsAccountRead(d, m)
-			if err != nil {
+			if err = dataSourceMetricsAccountRead(d, m); err != nil {
 				return err
 			}
 
