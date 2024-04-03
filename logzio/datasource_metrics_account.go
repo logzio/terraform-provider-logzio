@@ -54,8 +54,6 @@ func dataSourceMetricsAccountReadWrapper(ctx context.Context, d *schema.Resource
 	var err error
 	readErr := retry.Do(
 		func() error {
-			// we use this instead of return dataSourceMetricsAccountRead(d, m) directly
-			// to avoid 'no "id" found in attributes' error
 			if err = dataSourceMetricsAccountRead(d, m); err != nil {
 				return err
 			}
@@ -77,7 +75,7 @@ func dataSourceMetricsAccountReadWrapper(ctx context.Context, d *schema.Resource
 	)
 
 	if readErr != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(readErr)
 	}
 
 	return nil
@@ -85,7 +83,12 @@ func dataSourceMetricsAccountReadWrapper(ctx context.Context, d *schema.Resource
 
 func dataSourceMetricsAccountRead(d *schema.ResourceData, m interface{}) error {
 	var client *metrics_accounts.MetricsAccountClient
-	client, _ = metrics_accounts.New(m.(Config).apiToken, m.(Config).baseUrl)
+	var clientErr error
+	client, clientErr = metrics_accounts.New(m.(Config).apiToken, m.(Config).baseUrl)
+
+	if clientErr != nil {
+		return clientErr
+	}
 
 	accountId, ok := d.GetOk(metricsAccountId)
 	if ok {
