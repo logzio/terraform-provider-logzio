@@ -72,15 +72,25 @@ func resourceMetricsAccount() *schema.Resource {
 	}
 }
 
-func MetricsAccountClient(m interface{}) *metrics_accounts.MetricsAccountClient {
+func MetricsAccountClient(m interface{}) (*metrics_accounts.MetricsAccountClient, error) {
 	var client *metrics_accounts.MetricsAccountClient
-	client, _ = metrics_accounts.New(m.(Config).apiToken, m.(Config).baseUrl)
-	return client
+	var clientError error
+	client, clientError = metrics_accounts.New(m.(Config).apiToken, m.(Config).baseUrl)
+
+	if clientError != nil {
+		return nil, clientError
+	}
+	return client, nil
 }
 
 func resourceMetricsAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	createSubAccount := getCreateMetricsAccountFromSchema(d)
-	metricsAccount, err := MetricsAccountClient(m).CreateMetricsAccount(createSubAccount)
+	MetricsClient, err := MetricsAccountClient(m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	metricsAccount, err := MetricsClient.CreateMetricsAccount(createSubAccount)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -96,7 +106,12 @@ func resourceMetricsAccountRead(ctx context.Context, d *schema.ResourceData, m i
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	metricsAccount, err := MetricsAccountClient(m).GetMetricsAccount(id)
+	MetricsClient, err := MetricsAccountClient(m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	metricsAccount, err := MetricsClient.GetMetricsAccount(id)
 	if err != nil {
 		tflog.Error(ctx, err.Error())
 		if strings.Contains(err.Error(), "missing metrics account") {
@@ -119,9 +134,13 @@ func resourceMetricsAccountUpdate(ctx context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	MetricsClient, err := MetricsAccountClient(m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	updateMetricsAccount := getCreateMetricsAccountFromSchema(d)
-	err = MetricsAccountClient(m).UpdateMetricsAccount(id, updateMetricsAccount)
+	err = MetricsClient.UpdateMetricsAccount(id, updateMetricsAccount)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -165,8 +184,12 @@ func resourceMetricsAccountDelete(ctx context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	MetricsClient, err := MetricsAccountClient(m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err = MetricsAccountClient(m).DeleteMetricsAccount(id)
+	err = MetricsClient.DeleteMetricsAccount(id)
 
 	if err != nil {
 		return diag.FromErr(err)
