@@ -1,5 +1,14 @@
+terraform {
+  required_providers {
+    logzio = {
+      source  = "logzio/logzio"
+      version = "~> 1.0"
+    }
+  }
+}
+
 variable "api_token" {
-  type = string
+  type        = string
   description = "your logzio API token"
 }
 
@@ -8,48 +17,42 @@ provider "logzio" {
 }
 
 resource "logzio_alert_v2" "my_alert" {
-  title = "hello"
-  description = "this is a description"
-  tags = [
-    "some",
-    "test"]
-  search_timeframe_minutes = 5
-  is_enabled = false
-  notification_emails = [
-    "testx@test.com"]
+  title                     = "hello"
+  description               = "this is a description"
+  tags                      = ["some", "test"]
+  search_timeframe_minutes  = 5
+  is_enabled                = false
+  notification_emails       = ["testx@test.com"]
   suppress_notifications_minutes = 5
-  output_type = "JSON"
+  output_type               = "JSON"
   sub_components {
-    query_string = "loglevel:ERROR"
+    query_string              = "loglevel:ERROR"
     should_query_on_all_accounts = true
-    operation = "EQUALS"
-    value_aggregation_type = "COUNT"
+    operation                = "EQUALS"
+    value_aggregation_type   = "COUNT"
     severity_threshold_tiers {
-      severity = "HIGH"
+      severity  = "HIGH"
       threshold = 10
     }
     severity_threshold_tiers {
-      severity = "LOW"
+      severity  = "LOW"
       threshold = 2
     }
     filter_must = jsonencode([
       {
-        match_phrase: {
-          "some_field": {
-            "query": "some_query"
-          }
-        }
-      },
-      {
-        match_phrase: {
-          "some_field2": {
-            "query": "hello world"
-          }
+        "bool": {
+          "should": [
+            {
+              "match_phrase": {
+                "query": "some_query"
+              }
+            }
+          ]
         }
       }
     ])
   }
 
   schedule_cron_expression = "0 0/5 9-17 ? * * *"
-  schedule_timezone = "IET"
+  schedule_timezone        = "IET"
 }
