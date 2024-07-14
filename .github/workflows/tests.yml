@@ -25,13 +25,14 @@ jobs:
     name: Test
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v5
       with:
         go-version: 1.18
     - name: Test
+      working-directory: logzio
       run: |
         go clean -testcache
-        go test -v -race ./... -covermode=atomic -coverprofile=coverage.out
+        go test -v -race -covermode=atomic -coverprofile=coverage.out
