@@ -108,7 +108,7 @@ func testAccMetricsAccountDataSourceResource(email string, accountId int64, acco
 
 func testAccCheckLogzioMetricsAccountDatasourceConfig() string {
 	return fmt.Sprint(`data "logzio_metrics_account" "metrics_account_datasource_by_id" {
-  account_id = "${logzio_metrics_account.metrics_account_datasource.Id}"
+  account_id = "${logzio_metrics_account.metrics_account_datasource.account_id}"
 }
 `)
 }
