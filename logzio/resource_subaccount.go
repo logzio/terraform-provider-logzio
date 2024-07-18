@@ -281,6 +281,11 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 		*reservedDailyGb = reservedDailyGbVal
 	}
 
+	docSizeSetting := d.Get(subAccountDocSizeSetting).(bool)
+	if !docSizeSetting {
+		docSizeSetting = false
+	}
+
 	createSubAccount := sub_accounts.CreateOrUpdateSubAccount{
 		Email:                  d.Get(subAccountEmail).(string),
 		AccountName:            d.Get(subAccountName).(string),
@@ -291,7 +296,7 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 		Searchable:             strconv.FormatBool(d.Get(subAccountSearchable).(bool)),
 		Accessible:             strconv.FormatBool(d.Get(subAccountAccessible).(bool)),
 		SharingObjectsAccounts: sharingObjectAccounts,
-		DocSizeSetting:         strconv.FormatBool(d.Get(subAccountDocSizeSetting).(bool)),
+		DocSizeSetting:         strconv.FormatBool(docSizeSetting),
 		UtilizationSettings: sub_accounts.AccountUtilizationSettingsCreateOrUpdate{
 			FrequencyMinutes:   int32(d.Get(subAccountUtilizationSettingsFrequencyMinutes).(int)),
 			UtilizationEnabled: strconv.FormatBool(d.Get(subAccountUtilizationSettingsUtilizationEnabled).(bool)),

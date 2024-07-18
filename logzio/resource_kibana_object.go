@@ -255,6 +255,7 @@ func compareData(old, new string) bool {
 	newDataObj["_score"] = 0
 	oldDataObj["_source"].(map[string]interface{})["updated_at"] = 0
 	newDataObj["_source"].(map[string]interface{})["updated_at"] = 0
+
 	res := reflect.DeepEqual(oldDataObj, newDataObj)
 	return res
 }
