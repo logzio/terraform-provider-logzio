@@ -102,8 +102,6 @@ func resourceS3FetcherCreate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	fmt.Println("NAAMA TEST:")
-	fmt.Println(createFetcher)
 	fetcher, err := s3FetcherClient(m).CreateS3Fetcher(createFetcher)
 	if err != nil {
 		return diag.FromErr(err)

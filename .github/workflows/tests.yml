@@ -16,6 +16,7 @@ env:
   AZURE_ACCOUNT_NAME: ${{ secrets.AZURE_ACCOUNT_NAME }}
   AZURE_CONTAINER_NAME: ${{ secrets.AZURE_CONTAINER_NAME }}
   AWS_ARN: ${{ secrets.AWS_ARN }}
+  AWS_ARN_S3_FETCHER: ${{ secrets.AWS_ARN_S3_FETCHER }}
   AWS_ACCESS_KEY_UPDATE: ${{ secrets.AWS_ACCESS_KEY_UPDATE }}
   AWS_SECRET_KEY_UPDATE: ${{ secrets.AWS_SECRET_KEY_UPDATE }}
   GRAFANA_FOLDER_UID: ${{ secrets.GRAFANA_FOLDER_UID }}
@@ -35,4 +36,4 @@ jobs:
       working-directory: logzio
       run: |
         go clean -testcache
-        go test -v -race -covermode=atomic -coverprofile=coverage.out
+        go test -v -race -covermode=atomic -coverprofile=coverage.out -timeout 0
