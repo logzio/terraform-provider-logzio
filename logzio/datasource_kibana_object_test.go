@@ -23,7 +23,7 @@ func TestAccDataSourceKibanaObject(t *testing.T) {
 				PreventPostDestroyRefresh: true,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.logzio_kibana_object.ds_kb", kibanaObjectKibanaVersionField, "7.2.1"),
-					resource.TestMatchOutput("output_id", regexp.MustCompile("search:tf-provider-test-search")),
+					resource.TestMatchOutput("output_id", regexp.MustCompile("search:tf-provider-datasource-test-search")),
 				),
 			},
 		},
@@ -33,7 +33,7 @@ func TestAccDataSourceKibanaObject(t *testing.T) {
 func getResourceConfigKibanaObject() string {
 	return `resource "logzio_kibana_object" "test_kb_for_datasource" {
   kibana_version = "7.2.1"
-  data = file("./testdata/fixtures/kibana_objects/create_search.json")
+  data = file("./testdata/fixtures/kibana_objects/create_search_for_datasource.json")
 }
 `
 }

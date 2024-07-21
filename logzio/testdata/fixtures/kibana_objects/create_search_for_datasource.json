@@ -1,6 +1,6 @@
 {
   "_index": "logzioCustomerIndex*",
-  "_id": "search:tf-provider-test-search",
+  "_id": "search:tf-provider-datasource-test-search",
   "_score": 1.290984,
   "_source": {
     "search": {
@@ -13,8 +13,8 @@
         "@timestamp",
         "desc"
       ],
-      "id": "tf-provider-test-search",
-      "title": "tf provider test update search",
+      "id": "tf-provider-datasource-test-search",
+      "title": "tf provider test datasource search",
       "version": 1,
       "_updatedAt": 1561454443631,
       "kibanaSavedObjectMeta": {
@@ -23,6 +23,7 @@
       "panelsJSON": "[]"
     },
     "type": "search",
+    "updated_at": 1561454443631,
     "references": [
       {
         "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
@@ -30,6 +31,6 @@
         "id": "logzioCustomerIndex*"
       }
     ],
-    "id": "tf-provider-test-search"
+    "id": "tf-provider-datasource-test-search"
   }
 }

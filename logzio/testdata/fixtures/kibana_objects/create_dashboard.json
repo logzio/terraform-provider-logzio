@@ -1,6 +1,5 @@
 {
   "_index": "logzioCustomerIndex*",
-  "_type": "_doc",
   "_id": "dashboard:tf-provider-test-dashboard",
   "_score": 2.5902672,
   "_source": {
