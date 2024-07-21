@@ -167,7 +167,7 @@ func resourceSubAccountUpdate(ctx context.Context, d *schema.ResourceData, m int
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	
+
 	updateSubAccount := getCreateSubAccountFromSchema(d)
 	err = subAccountClient(m).UpdateSubAccount(id, updateSubAccount)
 	if err != nil {
