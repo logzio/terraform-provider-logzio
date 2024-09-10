@@ -199,7 +199,9 @@ terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 ```
 
 ### Changelog
-
+- **v1.16.0**:
+    - Upgrade `logzio_client_terraform` to `1.22.0`.
+    - Validate account existence before updating and set an empty account name If the name did not change to prevent API errors
 - **v1.15.0**:
     - Upgrade `logzio_client_terraform` to `1.21.0`.
     - Support [Metrics Accounts API](https://api-docs.logz.io/docs/logz/create-a-new-metrics-account)
