@@ -8,6 +8,10 @@ import (
 	"testing"
 )
 
+const (
+	grafanaDefaultReceiver = "grafana-default-email"
+)
+
 func TestAccLogzioGrafanaNotificationPolicy_ManageGrafanaNotificationPolicy(t *testing.T) {
 	defer utils.SleepAfterTest()
 	resourceFullName := "logzio_grafana_notification_policy.test_np"
@@ -18,7 +22,7 @@ func TestAccLogzioGrafanaNotificationPolicy_ManageGrafanaNotificationPolicy(t *t
 				// Create
 				Config: getGrafanaNotificationPolicyConfig(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceFullName, grafanaNotificationPolicyContactPoint, "default-email"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaNotificationPolicyContactPoint, grafanaDefaultReceiver),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.#", grafanaNotificationPolicyGroupBy), "1"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0", grafanaNotificationPolicyGroupBy), "p8s_logzio_name"),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaNotificationPolicyGroupWait, "50s"),
@@ -42,7 +46,7 @@ func TestAccLogzioGrafanaNotificationPolicy_ManageGrafanaNotificationPolicy(t *t
 						grafanaNotificationPolicyContinue), "true"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s",
 						grafanaNotificationPolicyPolicy,
-						grafanaNotificationPolicyContactPoint), "default-email"),
+						grafanaNotificationPolicyContactPoint), grafanaDefaultReceiver),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s",
 						grafanaNotificationPolicyPolicy,
 						grafanaNotificationPolicyGroupWait), "50s"),
@@ -57,7 +61,7 @@ func TestAccLogzioGrafanaNotificationPolicy_ManageGrafanaNotificationPolicy(t *t
 				// Update
 				Config: getGrafanaNotificationPolicyConfigUpdate(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceFullName, grafanaNotificationPolicyContactPoint, "default-email"),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaNotificationPolicyContactPoint, grafanaDefaultReceiver),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.#", grafanaNotificationPolicyGroupBy), "2"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0", grafanaNotificationPolicyGroupBy), "p8s_logzio_name"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.1", grafanaNotificationPolicyGroupBy), "new_new"),
@@ -82,7 +86,7 @@ func TestAccLogzioGrafanaNotificationPolicy_ManageGrafanaNotificationPolicy(t *t
 						grafanaNotificationPolicyContinue), "true"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s",
 						grafanaNotificationPolicyPolicy,
-						grafanaNotificationPolicyContactPoint), "default-email"),
+						grafanaNotificationPolicyContactPoint), grafanaDefaultReceiver),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s",
 						grafanaNotificationPolicyPolicy,
 						grafanaNotificationPolicyGroupWait), "50s"),
@@ -118,7 +122,7 @@ func TestAccLogzioGrafanaNotificationPolicy_InvalidMatchType(t *testing.T) {
 func getGrafanaNotificationPolicyConfig() string {
 	return fmt.Sprintf(`
 resource logzio_grafana_notification_policy test_np {
-	contact_point = "default-email"
+	contact_point = "%s"
 	group_by = ["p8s_logzio_name"]
 	group_wait      = "50s"
   	group_interval  = "7m"
@@ -130,7 +134,7 @@ resource logzio_grafana_notification_policy test_np {
 		  match = "="
 		  value = "some_value"
 		}
-		contact_point = "default-email"
+		contact_point = "%s"
 		continue      = true
 	
 		group_wait      = "50s"
@@ -143,17 +147,17 @@ resource logzio_grafana_notification_policy test_np {
 			match = "="
 			value = "another_value"
 		  }
-		  contact_point = "default-email"
+		  contact_point = "%s"
 		}
   }
 }
-`)
+`, grafanaDefaultReceiver, grafanaDefaultReceiver, grafanaDefaultReceiver)
 }
 
 func getGrafanaNotificationPolicyConfigUpdate() string {
 	return fmt.Sprintf(`
 resource logzio_grafana_notification_policy test_np {
-	contact_point = "default-email"
+	contact_point = "%s"
 	group_by = ["p8s_logzio_name", "new_new"]
 	group_wait      = "50s"
   	group_interval  = "7m"
@@ -165,7 +169,7 @@ resource logzio_grafana_notification_policy test_np {
 		  match = "="
 		  value = "some_value"
 		}
-		contact_point = "default-email"
+		contact_point = "%s"
 		continue      = true
 	
 		group_wait      = "50s"
@@ -178,17 +182,17 @@ resource logzio_grafana_notification_policy test_np {
 			match = "="
 			value = "another_value"
 		  }
-		  contact_point = "default-email"
+		  contact_point = "%s"
 		}
   }
 }
-`)
+`, grafanaDefaultReceiver, grafanaDefaultReceiver, grafanaDefaultReceiver)
 }
 
 func getGrafanaNotificationPolicyConfigInvalidMatchType() string {
 	return fmt.Sprintf(`
 resource logzio_grafana_notification_policy test_np {
-	contact_point = "default-email"
+	contact_point = "%s"
 	group_by = ["p8s_logzio_name", "new_new"]
 	group_wait      = "50s"
   	group_interval  = "7m"
@@ -200,7 +204,7 @@ resource logzio_grafana_notification_policy test_np {
 		  match = "@@"
 		  value = "some_value"
 		}
-		contact_point = "default-email"
+		contact_point = "%s"
 		continue      = true
 	
 		group_wait      = "50s"
@@ -213,9 +217,9 @@ resource logzio_grafana_notification_policy test_np {
 			match = "="
 			value = "another_value"
 		  }
-		  contact_point = "default-email"
+		  contact_point = "%s"
 		}
   }
 }
-`)
+`, grafanaDefaultReceiver, grafanaDefaultReceiver, grafanaDefaultReceiver)
 }

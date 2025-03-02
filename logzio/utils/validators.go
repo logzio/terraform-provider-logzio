@@ -236,21 +236,6 @@ func ValidateS3FetcherLogsType(v interface{}, path cty.Path) diag.Diagnostics {
 	return diag.Errorf("Logs type %s is not in the allowed logs types list: %s", logsType, validLogsTypes)
 }
 
-func ValidateExecErrState(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	validExecErrState := []string{
-		string(grafana_alerts.ErrAlerting),
-		string(grafana_alerts.ErrOK),
-		string(grafana_alerts.ErrError),
-	}
-
-	if !contains(validExecErrState, value) {
-		errors = append(errors, fmt.Errorf("value for exec err state is unknown"))
-	}
-
-	return
-}
-
 func ValidateExecNoDataState(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	validNoDataState := []string{

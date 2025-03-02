@@ -273,11 +273,14 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointSlack(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceFullName,
-				ImportStateId:           name,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken)},
+				ResourceName:      resourceFullName,
+				ImportStateId:     name,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken),
+					fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackUrl),
+				},
 			},
 		},
 	})
@@ -411,10 +414,13 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointWebhook(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceFullName,
-				ImportStateId:     name,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:  resourceFullName,
+				ImportStateId: name,
+				ImportState:   true,
+				ImportStateVerifyIgnore: []string{
+					fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointWebhookPassword),
+					fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointWebhookAuthorizationCredentials),
+				},
 			},
 		},
 	})
@@ -467,10 +473,14 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointMultiple(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceFullName,
-				ImportStateId:           name,
-				ImportState:             true,
-				ImportStateVerifyIgnore: []string{fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken)},
+				ResourceName:  resourceFullName,
+				ImportStateId: name,
+				ImportState:   true,
+				ImportStateVerifyIgnore: []string{
+					fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointSlackToken),
+					fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointWebhookPassword),
+					fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointWebhookAuthorizationCredentials),
+				},
 			},
 		},
 	})
