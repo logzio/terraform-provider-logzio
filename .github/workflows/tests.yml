@@ -36,4 +36,4 @@ jobs:
       working-directory: logzio
       run: |
         go clean -testcache
-        go test -v -race -covermode=atomic -coverprofile=coverage.out -timeout 0
+        go test -v -parallel 1 -covermode=atomic -coverprofile=coverage.out -timeout 0
