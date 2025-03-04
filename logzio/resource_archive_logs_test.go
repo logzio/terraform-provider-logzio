@@ -171,7 +171,7 @@ func TestAccLogzioArchiveLogs_UpdateArchive(t *testing.T) {
 			{
 				Config: getConfigTestArchiveS3Keys(resourceName, path, accessKey, secretKey),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					awaitApply(15),
+					awaitApply(25),
 					resource.TestCheckResourceAttr(fullResourceName, archiveLogsStorageType, archive_logs.StorageTypeS3),
 					resource.TestCheckResourceAttr(fullResourceName, archiveLogsEnabled, "false"),
 					resource.TestCheckResourceAttrSet(fullResourceName, archiveLogsS3CredentialsType),
@@ -186,7 +186,7 @@ func TestAccLogzioArchiveLogs_UpdateArchive(t *testing.T) {
 				},
 				Config: getConfigTestArchiveS3Keys(resourceName, path, newAccessKey, newSecretKey),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					awaitApply(15),
+					awaitApply(25),
 					resource.TestCheckResourceAttr(fullResourceName, archiveLogsStorageType, archive_logs.StorageTypeS3),
 					resource.TestCheckResourceAttr(fullResourceName, archiveLogsEnabled, "false"),
 					resource.TestCheckResourceAttrSet(fullResourceName, archiveLogsS3CredentialsType),
