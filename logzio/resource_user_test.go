@@ -24,6 +24,7 @@ func TestAccLogzioUser_CreateUser(t *testing.T) {
 			{
 				Config: testAccCheckLogzioUserConfig(username, fullName, accountId),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(15),
 					resource.TestCheckResourceAttr(
 						resourceName, userUsername, username),
 					resource.TestCheckResourceAttr(resourceName, userFullName, fullName),
@@ -32,6 +33,7 @@ func TestAccLogzioUser_CreateUser(t *testing.T) {
 			{
 				Config: testAccCheckLogzioUserConfig(username, fullNameUpdate, accountId),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(15),
 					resource.TestCheckResourceAttr(
 						resourceName, userUsername, username),
 					resource.TestCheckResourceAttr(resourceName, userFullName, fullNameUpdate),
