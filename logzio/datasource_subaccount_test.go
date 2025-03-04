@@ -33,6 +33,7 @@ func TestAccDataSourceSubaccount(t *testing.T) {
 			{
 				Config: testAccSubAccountDataSourceResource(email, accountId, accountName),
 				Check: resource.ComposeAggregateTestCheckFunc(
+					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "account_name", accountName),
 					resource.TestCheckResourceAttr(resourceName, "retention_days", "2"),
 					resource.TestCheckResourceAttr(resourceName, "max_daily_gb", "1"),
@@ -42,6 +43,7 @@ func TestAccDataSourceSubaccount(t *testing.T) {
 				Config: testAccSubAccountDataSourceResource(email, accountId, accountName) +
 					testAccCheckLogzioSubaccountDatasourceConfig(),
 				Check: resource.ComposeAggregateTestCheckFunc(
+					awaitApply(15),
 					resource.TestCheckResourceAttr(dataSourceName, "account_name", accountName),
 					resource.TestCheckResourceAttr(dataSourceName, "retention_days", "2"),
 					resource.TestCheckResourceAttr(dataSourceName, "max_daily_gb", "1"),
