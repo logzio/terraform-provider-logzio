@@ -21,6 +21,7 @@ func TestAccLogzioGrafanaFolder_GrafanaFolder(t *testing.T) {
 			{
 				Config: getGrafanaFolderConfig(title),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(15),
 					resource.TestCheckResourceAttr(fullResourceName, grafanaFolderTitle, title),
 					resource.TestCheckResourceAttrSet(fullResourceName, grafanaFolderUid),
 					resource.TestCheckResourceAttrSet(fullResourceName, grafanaFolderId),
@@ -31,6 +32,7 @@ func TestAccLogzioGrafanaFolder_GrafanaFolder(t *testing.T) {
 			{
 				Config: getGrafanaFolderConfig(newTitle),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(15),
 					resource.TestCheckResourceAttr(fullResourceName, grafanaFolderTitle, newTitle),
 					resource.TestCheckResourceAttrSet(fullResourceName, grafanaFolderUid),
 					resource.TestCheckResourceAttrSet(fullResourceName, grafanaFolderId),

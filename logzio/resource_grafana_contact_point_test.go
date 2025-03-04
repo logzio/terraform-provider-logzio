@@ -20,6 +20,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointEmail(t *testing.T) {
 				// Create
 				Config: getGrafanaContactPointConfigEmail(emailsCreate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointEmail, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointEmail, grafanaContactPointDisableResolveMessage), "false"),
@@ -32,6 +33,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointEmail(t *testing.T) {
 				// Update
 				Config: getGrafanaContactPointConfigEmail(emailsUpdate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointEmail, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-email-cp"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointEmail, grafanaContactPointDisableResolveMessage), "false"),
@@ -63,6 +65,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointGoogleChat(t *testing.T) {
 				// Create
 				Config: getGrafanaContactPointConfigGoogleChat(urlCreate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointDisableResolveMessage), "false"),
@@ -74,6 +77,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointGoogleChat(t *testing.T) {
 				// Update
 				Config: getGrafanaContactPointConfigGoogleChat(urlUpdate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-googlechat-cp"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointGoogleChat, grafanaContactPointDisableResolveMessage), "false"),
@@ -106,6 +110,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointOpsgenie(t *testing.T) {
 				// Create
 				Config: getGrafanaContactPointConfigOpsgenie(urlCreate, apiTokenCreate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointDisableResolveMessage), "false"),
@@ -120,6 +125,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointOpsgenie(t *testing.T) {
 				// Update
 				Config: getGrafanaContactPointConfigOpsgenie(urlUpdate, apiTokenCreate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-opsgenie-cp"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointDisableResolveMessage), "false"),
@@ -134,6 +140,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointOpsgenie(t *testing.T) {
 				// Update sensitive
 				Config: getGrafanaContactPointConfigOpsgenie(urlUpdate, apiTokenUpdate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-opsgenie-cp"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointOpsgenie, grafanaContactPointDisableResolveMessage), "false"),
@@ -170,6 +177,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointPagerDuty(t *testing.T) {
 				// Create
 				Config: getGrafanaContactPointConfigPagerduty(apiTokenCreate, severityCreate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointDisableResolveMessage), "false"),
@@ -184,6 +192,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointPagerDuty(t *testing.T) {
 				// Update
 				Config: getGrafanaContactPointConfigPagerduty(apiTokenCreate, severityUpdate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-pagerduty-cp"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointDisableResolveMessage), "false"),
@@ -198,6 +207,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointPagerDuty(t *testing.T) {
 				// Update sensitive
 				Config: getGrafanaContactPointConfigPagerduty(apiTokenUpdate, severityUpdate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-pagerduty-cp"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointDisableResolveMessage), "false"),
@@ -234,6 +244,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointSlack(t *testing.T) {
 				// Create
 				Config: getGrafanaContactPointConfigSlack(tokenCreate, mentionChannelCreate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointDisableResolveMessage), "false"),
@@ -248,6 +259,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointSlack(t *testing.T) {
 				// Update
 				Config: getGrafanaContactPointConfigSlack(tokenCreate, mentionChannelUpdate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-slack-cp"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointDisableResolveMessage), "false"),
@@ -262,6 +274,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointSlack(t *testing.T) {
 				// Update sensitive
 				Config: getGrafanaContactPointConfigSlack(tokenUpdate, mentionChannelUpdate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-slack-cp"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointSlack, grafanaContactPointDisableResolveMessage), "false"),
@@ -301,6 +314,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointTeams(t *testing.T) {
 				// Create
 				Config: getGrafanaContactPointConfigTeams(urlCreate, messageCreate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointDisableResolveMessage), "false"),
@@ -312,6 +326,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointTeams(t *testing.T) {
 				// Update
 				Config: getGrafanaContactPointConfigTeams(urlUpdate, messageCreate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-teams-cp"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointDisableResolveMessage), "false"),
@@ -323,6 +338,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointTeams(t *testing.T) {
 				// Update sensitive
 				Config: getGrafanaContactPointConfigTeams(urlUpdate, messageUpdate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-teams-cp"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointMicrosoftTeams, grafanaContactPointDisableResolveMessage), "false"),
@@ -356,6 +372,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointVictorops(t *testing.T) {
 				// Create
 				Config: getGrafanaContactPointConfigVictorOps(urlCreate, messageTypeCreate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointDisableResolveMessage), "false"),
@@ -367,6 +384,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointVictorops(t *testing.T) {
 				// Update
 				Config: getGrafanaContactPointConfigVictorOps(urlUpdate, messageTypeUpdate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-victorops-cp"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointVictorops, grafanaContactPointDisableResolveMessage), "false"),
@@ -397,6 +415,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointWebhook(t *testing.T) {
 				// Create
 				Config: getGrafanaContactPointConfigWebhook(urlCreate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointDisableResolveMessage), "false"),
@@ -407,6 +426,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointWebhook(t *testing.T) {
 				// Update
 				Config: getGrafanaContactPointConfigWebhook(urlUpdate),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-webhook-cp"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointDisableResolveMessage), "false"),
@@ -437,6 +457,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointMultiple(t *testing.T) {
 				// Create
 				Config: getGrafanaContactPointConfigMultiple(),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointDisableResolveMessage), "false"),
@@ -454,6 +475,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointMultiple(t *testing.T) {
 				// Update
 				Config: getGrafanaContactPointConfigMultipleUpdate(),
 				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointUid)),
 					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, "my-multiple-cp"),
 					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointWebhook, grafanaContactPointDisableResolveMessage), "false"),
