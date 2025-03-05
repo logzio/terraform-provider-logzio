@@ -33,7 +33,7 @@ resource "logzio_s3_fetcher" "my_s3_fetcher_arn" {
 
 * `aws_access_key` - (String) AWS S3 bucket access key. Not applicable if you choose to authenticate with `aws_arn`. If you choose to authenticate with AWS keys, both `aws_access_key` and `aws_secret key` must be set.
 * `aws_secret_key` - (String) AWS S3 bucket secret key. Not applicable if you choose to authenticate with `aws_arn`. If you choose to authenticate with AWS keys, both `aws_access_key` and `aws_secret key` must be set.
-* `aws_arn` - (String) Amazon Resource Name (ARN) to uniquely identify the S3 bucket. To generate a new ARN, create a new IAM Role in your AWS admin console. Not applicable if you choose to authenticate with AWS keys (access key & secret key).
+* `aws_arn` - (String) Amazon Resource Name (ARN) of the IAM Role used for authentication. To generate a new ARN, create a new IAM Role in your AWS admin console. Not applicable if you choose to authenticate with AWS keys (access key & secret key).
 * `bucket_name` - (String) AWS S3 bucket name.
 * `active` - (Boolean) If true, the S3 bucket connector is active and logs are being fetched to Logz.io. If false, the connector is disabled.
 * `aws_region` - (String) Bucket's region. Specify one supported AWS region: `US_EAST_1`, `US_EAST_2`, `US_WEST_1`, `US_WEST_2`, `EU_WEST_1`, `EU_WEST_2`, `EU_WEST_3`, `EU_CENTRAL_1`, `AP_NORTHEAST_1`, `AP_NORTHEAST_2`, `AP_SOUTHEAST_1`, `AP_SOUTHEAST_2`, `SA_EAST_1`, `AP_SOUTH_1`, `CA_CENTRAL_1`.

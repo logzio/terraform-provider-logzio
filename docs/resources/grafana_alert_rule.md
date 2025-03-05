@@ -31,7 +31,6 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
     "lets" = "go"
   }
   is_paused = false
-  exec_err_state = "Alerting"
   folder_uid = "my-folder-uid"
   for = "3m"
   no_data_state = "OK"
@@ -56,7 +55,6 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
 * `annotations` - (Map of String) Key-value pairs of metadata to attach to the alert rule that may add user-defined context, but cannot be used for matching, grouping, or routing.
 * `labels` - (Map of String) Key-value pairs to attach to the alert rule that can be used in matching, grouping, and routing.
 * `is_paused` - (Boolean) Sets whether the alert should be paused or not. Defaults to `false`.
-* `exec_err_state` - (String) Describes what state to enter when the rule's query is invalid and the rule cannot be executed. Options are `OK`, `Error`, and `Alerting`. Defaults to `Alerting`.
 * `no_data_state` - (String) Describes what state to enter when the rule's query returns No Data. Options are `OK`, `NoData`, and `Alerting`. Defaults to `NoData`.
 
 #### Nested schema for `data`:

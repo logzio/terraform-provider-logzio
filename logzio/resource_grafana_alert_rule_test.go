@@ -122,7 +122,6 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
     "lets" = "go"
   }
   is_paused = false
-  exec_err_state = "Alerting"
   folder_uid = "%s"
   for = "3m"
   no_data_state = "OK"
@@ -158,7 +157,6 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
     "lets" = "go"
   }
   is_paused = false
-  exec_err_state = "Alerting"
   folder_uid = "%s"
   for = "3m"
   no_data_state = "OK"
@@ -195,7 +193,6 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
     "lets" = "go"
   }
   is_paused = false
-  exec_err_state = "Alerting"
   folder_uid = "%s"
   for = "3m"
   no_data_state = "OK"
@@ -232,7 +229,6 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
     "lets" = "go"
   }
   is_paused = false
-  exec_err_state = "Alerting"
   folder_uid = "%s"
   for = "4m30s"
   no_data_state = "OK"
@@ -269,7 +265,6 @@ resource "logzio_grafana_alert_rule" "test_grafana_alert" {
     "lets" = "go"
   }
   is_paused = false
-  exec_err_state = "Alerting"
   folder_uid = "%s"
   for = "4m30s"
   no_data_state = "OK"

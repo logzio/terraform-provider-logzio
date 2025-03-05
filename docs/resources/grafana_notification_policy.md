@@ -11,7 +11,7 @@ Deleting the resource will reset your ENTIRE notification policy tree.
 
 ```hcl
 resource logzio_grafana_notification_policy test_np {
-  contact_point = "default-email"
+  contact_point = "grafana-default-email"
   group_by = ["p8s_logz_name"]
   group_wait      = "50s"
   group_interval  = "7m"
@@ -23,7 +23,7 @@ resource logzio_grafana_notification_policy test_np {
       match = "="
       value = "some_value"
     }
-    contact_point = "default-email"
+    contact_point = "grafana-default-email"
     continue      = true
 
     group_wait      = "50s"
@@ -37,7 +37,7 @@ resource logzio_grafana_notification_policy test_np {
         match = "="
         value = "another_value"
       }
-      contact_point = "default-email"
+      contact_point = "grafana-default-email"
     }
   }
 }

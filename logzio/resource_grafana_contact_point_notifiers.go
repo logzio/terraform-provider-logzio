@@ -762,7 +762,7 @@ func (w webhookNotifier) meta() grafanaContactPointNotifierMeta {
 	return grafanaContactPointNotifierMeta{
 		field:        grafanaContactPointWebhook,
 		typeStr:      grafanaContactPointWebhook,
-		secureFields: []string{grafanaContactPointWebhookPassword},
+		secureFields: []string{grafanaContactPointWebhookPassword, grafanaContactPointWebhookAuthorizationCredentials},
 	}
 }
 
@@ -794,6 +794,11 @@ func (w webhookNotifier) schema() *schema.Resource {
 		Type:     schema.TypeInt,
 		Optional: true,
 	}
+	r.Schema[grafanaContactPointWebhookAuthorizationCredentials] = &schema.Schema{
+		Type:      schema.TypeString,
+		Optional:  true,
+		Sensitive: true,
+	}
 	return r
 }
 
@@ -818,6 +823,11 @@ func (w webhookNotifier) getGrafanaContactPointFromObject(d *schema.ResourceData
 	if v, ok := contactPoint.Settings[grafanaContactPointWebhookPassword]; ok && v != nil {
 		notifier[grafanaContactPointWebhookPassword] = v.(string)
 		delete(contactPoint.Settings, grafanaContactPointWebhookPassword)
+	}
+
+	if v, ok := contactPoint.Settings[grafanaContactPointWebhookAuthorizationCredentials]; ok && v != nil {
+		notifier[grafanaContactPointWebhookAuthorizationCredentials] = v.(string)
+		delete(contactPoint.Settings, grafanaContactPointWebhookAuthorizationCredentials)
 	}
 
 	if v, ok := contactPoint.Settings[strcase.LowerCamelCase(grafanaContactPointWebhookMaxAlerts)]; ok && v != nil {
@@ -863,6 +873,11 @@ func (w webhookNotifier) getGrafanaContactPointFromSchema(raw interface{}, name 
 	if v, ok := json[grafanaContactPointWebhookPassword]; ok && v != nil {
 		settings[grafanaContactPointWebhookPassword] = v.(string)
 	}
+
+	if v, ok := json[grafanaContactPointWebhookAuthorizationCredentials]; ok && v != nil {
+		settings[grafanaContactPointWebhookAuthorizationCredentials] = v.(string)
+	}
+
 	if v, ok := json[grafanaContactPointWebhookMaxAlerts]; ok && v != nil {
 		switch typ := v.(type) {
 		case int:

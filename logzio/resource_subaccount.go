@@ -101,6 +101,7 @@ func resourceSubAccount() *schema.Resource {
 			subAccountDocSizeSetting: {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  true,
 			},
 			subAccountUtilizationSettingsFrequencyMinutes: {
 				Type:     schema.TypeInt,
