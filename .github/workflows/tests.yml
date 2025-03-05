@@ -1,6 +1,11 @@
 name: Tests
 
-on: [pull_request]
+on:
+  pull_request:
+    paths:
+      - 'logzio/*'
+      - 'go.sum'
+      - 'go.mod'
 
 env:
   LOGZIO_API_TOKEN: ${{ secrets.LOGZIO_API_TOKEN }}
