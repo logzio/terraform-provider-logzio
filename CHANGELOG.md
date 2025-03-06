@@ -1,6 +1,8 @@
 # Changes by Version
 
 <!-- next version -->
+## v1.17.1
+- Add missing platform builds for `windows/arm64` and `darwin/arm64`, which were not included in `v1.17.0`
 
 ## v1.17.0
 - Upgrade `logzio_client_terraform` to `1.23.2`.
