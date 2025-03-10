@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/avast/retry-go v3.0.0+incompatible
-	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
+	github.com/hashicorp/go-cty v1.4.1
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.36.1
 	github.com/logzio/logzio_terraform_client v1.23.2
