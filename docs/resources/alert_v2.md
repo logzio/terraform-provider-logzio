@@ -89,7 +89,8 @@ resource "logzio_alert_v2" "my_alert" {
 ##### Required:
 
 * `query_string` - (String) Provide a Kibana search query written in Lucene syntax. The search query together with the filters select for the relevant logs. Cannot be null - send an asterisk wildcard `"*"` if not using a search query.
-* `value_aggregation_type` - (String) Specifies the aggregation operator. Can be: `"SUM"`, `"MIN"`, `"MAX"`, `"AVG"`, `"COUNT"`, `"UNIQUE_COUNT"`, `"NONE"`. If `"COUNT"` or `"NONE"`, `value_aggregation_field` must be null, and `group_by_aggregation_fields` fields must not be empty. If any other operator type (other than `"NONE"` or `"COUNT"`), `value_aggregation_field` must not be null.
+* `value_aggregation_type` - (String) Specifies the aggregation operator. Can be: `"SUM"`, `"MIN"`, `"MAX"`, `"AVG"`, `"COUNT"`, `"UNIQUE_COUNT"`, `"RATIO"`, `"PERCENTILE"`, `"NONE"`. If `"COUNT"` or `"NONE"`, `value_aggregation_field` must be null, and `group_by_aggregation_fields` fields must not be empty. If any other operator type (other than `"NONE"` or `"COUNT"`), `value_aggregation_field` must not be null.
+* `field value` - (String) Specifies the value that the selected field must match. This parameter is required to define the condition for triggering the query logic. Ensure that this value corresponds to the selected field in the query.
 * `severity_threshold_tiers` - (Block) Sets a severity label per trigger threshold. If using more than one sub-component, only 1 severityThresholdTiers is allowed. Otherwise, 1 per enum are allowed (for a total of 5 thresholds of increasing severities). Increasing severity must adhere to the logic of the operator. See  below for **nested schema**.
 
 ##### Optional:
