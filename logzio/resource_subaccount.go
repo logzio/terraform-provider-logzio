@@ -31,6 +31,11 @@ const (
 	subAccountSharingObjectsAccounts                string = "sharing_objects_accounts"
 	subAccountUtilizationSettingsFrequencyMinutes   string = "frequency_minutes"
 	subAccountUtilizationSettingsUtilizationEnabled string = "utilization_enabled"
+	subAccountsSnapSearchRetentionDays              string = "snap_search_retention_days"
+	subAccountsIsCapped                             string = "is_capped"
+	subAccountsSharedGb                             string = "shared_gb"
+	subAccountsTotalTimeBasedDailyGb                string = "total_time_based_daily_gb"
+	subAccountIsOwner                               string = "is_owner"
 
 	delayGetSubAccount      = 2 * time.Second
 	subAccountRetryAttempts = 8
@@ -110,6 +115,26 @@ func resourceSubAccount() *schema.Resource {
 			subAccountUtilizationSettingsUtilizationEnabled: {
 				Type:     schema.TypeBool,
 				Optional: true,
+			},
+			subAccountsSnapSearchRetentionDays: {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			subAccountsIsCapped: {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			subAccountsSharedGb: {
+				Type:     schema.TypeFloat,
+				Computed: true,
+			},
+			subAccountsTotalTimeBasedDailyGb: {
+				Type:     schema.TypeFloat,
+				Computed: true,
+			},
+			subAccountIsOwner: {
+				Type:     schema.TypeBool,
+				Computed: true,
 			},
 		},
 	}
@@ -237,6 +262,11 @@ func setSubAccount(d *schema.ResourceData, subAccount *sub_accounts.SubAccount) 
 	d.Set(subAccountDocSizeSetting, subAccount.DocSizeSetting)
 	d.Set(subAccountUtilizationSettingsFrequencyMinutes, subAccount.UtilizationSettings.FrequencyMinutes)
 	d.Set(subAccountUtilizationSettingsUtilizationEnabled, subAccount.UtilizationSettings.UtilizationEnabled)
+	d.Set(subAccountsSnapSearchRetentionDays, subAccount.SnapSearchRetentionDays)
+	d.Set(subAccountsIsCapped, subAccount.IsCapped)
+	d.Set(subAccountsSharedGb, subAccount.SharedGB)
+	d.Set(subAccountsTotalTimeBasedDailyGb, subAccount.TotalTimeBasedDailyGB)
+	d.Set(subAccountIsOwner, subAccount.IsOwner)
 
 	sharingObjectAccounts := make([]int32, 0)
 	for _, account := range subAccount.SharingObjectsAccounts {
@@ -282,6 +312,11 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 		*reservedDailyGb = reservedDailyGbVal
 	}
 
+	snapSearchRetentionVal := int32(d.Get(subAccountsSnapSearchRetentionDays).(int))
+	var snapSearchRetention *int32
+	snapSearchRetention = new(int32)
+	*snapSearchRetention = snapSearchRetentionVal
+
 	createSubAccount := sub_accounts.CreateOrUpdateSubAccount{
 		Email:                  d.Get(subAccountEmail).(string),
 		AccountName:            d.Get(subAccountName).(string),
@@ -297,6 +332,7 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 			FrequencyMinutes:   int32(d.Get(subAccountUtilizationSettingsFrequencyMinutes).(int)),
 			UtilizationEnabled: strconv.FormatBool(d.Get(subAccountUtilizationSettingsUtilizationEnabled).(bool)),
 		},
+		SnapSearchRetentionDays: snapSearchRetention,
 	}
 
 	return createSubAccount

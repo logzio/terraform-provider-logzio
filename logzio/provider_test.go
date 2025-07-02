@@ -9,6 +9,7 @@ import (
 
 const (
 	envLogzioAccountId          = "LOGZIO_ACCOUNT_ID"
+	envLogzioWarmAccountId      = "LOGZIO_WARM_ACCOUNT_ID"
 	envLogzioS3Path             = "S3_PATH"
 	envLogzioAwsAccessKey       = "AWS_ACCESS_KEY"
 	envLogzioAwsSecretKey       = "AWS_SECRET_KEY"
@@ -20,6 +21,7 @@ const (
 	envLogzioAzureContainerName = "AZURE_CONTAINER_NAME"
 	envLogzioAzureTenantId      = "AZURE_TENANT_ID"
 	envLogzioAzurePath          = "BLOB_PATH"
+	envLogzioApiTokenWarm       = "LOGZIO_WARM_API_TOKEN"
 )
 
 var (
@@ -30,6 +32,11 @@ var (
 			return Provider(), nil
 		},
 	}
+	testAccWarmProviderFactories = map[string]func() (*schema.Provider, error){
+		"kubernetes": func() (*schema.Provider, error) {
+			return ProviderWithEnvVar(envLogzioApiTokenWarm), nil
+		},
+	}
 	testAccProvider *schema.Provider
 )
 
@@ -38,6 +45,11 @@ func init() {
 	testAccProviderFactories = map[string]func() (*schema.Provider, error){
 		"logzio": func() (*schema.Provider, error) {
 			return Provider(), nil
+		},
+	}
+	testAccWarmProviderFactories = map[string]func() (*schema.Provider, error){
+		"logzio": func() (*schema.Provider, error) {
+			return ProviderWithEnvVar(envLogzioApiTokenWarm), nil
 		},
 	}
 }
@@ -60,6 +72,9 @@ func testAccPreCheckEnv(t *testing.T, env string) {
 
 func testAccPreCheckApiToken(t *testing.T) {
 	testAccPreCheckEnv(t, envLogzioApiToken)
+}
+func testAccPreCheckApiTokenWarm(t *testing.T) {
+	testAccPreCheckEnv(t, envLogzioApiTokenWarm)
 }
 func testAccPreCheckAccountId(t *testing.T) {
 	testAccPreCheckEnv(t, envLogzioAccountId)
