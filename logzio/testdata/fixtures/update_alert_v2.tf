@@ -17,7 +17,7 @@ resource "logzio_alert_v2" "%s" {
     value_aggregation_type = "COUNT"
     severity_threshold_tiers {
       severity = "HIGH"
-      threshold = 10
+      threshold = 10.5
     }
     severity_threshold_tiers {
       severity = "LOW"

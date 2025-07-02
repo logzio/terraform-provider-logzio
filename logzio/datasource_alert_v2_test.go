@@ -15,11 +15,11 @@ func TestAccDataSourceLogzIoAlertV2(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config:  getConfigResourceAlertV2(),
+				Config:  getConfigResourceAlertV2("10"),
 				Destroy: false,
 			},
 			{
-				Config: getConfigResourceAlertV2() + getConfigDatasourceAlertV2(),
+				Config: getConfigResourceAlertV2("10") + getConfigDatasourceAlertV2(),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "title", "hello"),
 					resource.TestCheckResourceAttr(resourceName, "sub_components.#", "1"),
@@ -32,11 +32,25 @@ func TestAccDataSourceLogzIoAlertV2(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, alertV2ScheduleTimezone, "IET"),
 				),
 			},
+			{
+				Config: getConfigResourceAlertV2("10.5") + getConfigDatasourceAlertV2(),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "title", "hello"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.severity", "HIGH"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.threshold", "10.5"),
+					resource.TestCheckResourceAttr(resourceName, "is_enabled", "false"),
+					resource.TestCheckResourceAttrSet(resourceName, "sub_components.0.filter_must"),
+					resource.TestCheckResourceAttr(resourceName, alertV2ScheduleCronExpression, "0 0/5 9-17 ? * * *"),
+					resource.TestCheckResourceAttr(resourceName, alertV2ScheduleTimezone, "IET"),
+				),
+			},
 		},
 	})
 }
 
-func getConfigResourceAlertV2() string {
+func getConfigResourceAlertV2(threshold string) string {
 	return `resource "logzio_alert_v2" "alert_v2_datasource" {
   title = "hello"
   description = "this is a description"
@@ -56,7 +70,7 @@ func getConfigResourceAlertV2() string {
     value_aggregation_type = "COUNT"
     severity_threshold_tiers {
       severity = "HIGH"
-      threshold = 10
+      threshold =` + threshold + `
     }
     filter_must = jsonencode([
       {

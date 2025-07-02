@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
-	"io/ioutil"
 	"log"
+	"os"
 	"testing"
 )
 
@@ -74,7 +74,7 @@ func TestAccLogzioAlertV2_UpdateAlert(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.1.severity", "LOW"),
 					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.severity", "HIGH"),
 					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.1.threshold", "2"),
-					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.threshold", "10"),
+					resource.TestCheckResourceAttr(resourceName, "sub_components.0.severity_threshold_tiers.0.threshold", "10.5"),
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "false"),
 					resource.TestCheckResourceAttrSet(resourceName, "sub_components.0.filter_must"),
 				),
@@ -145,7 +145,7 @@ func TestAccLogzioAlertV2_ScheduleTests(t *testing.T) {
 }
 
 func resourceTestAlertV2(name string, path string) string {
-	content, err := ioutil.ReadFile(fmt.Sprintf("testdata/fixtures/%s.tf", path))
+	content, err := os.ReadFile(fmt.Sprintf("testdata/fixtures/%s.tf", path))
 	if err != nil {
 		log.Fatal(err)
 	}
