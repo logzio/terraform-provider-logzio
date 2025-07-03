@@ -32,6 +32,9 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        group: [ 0, 1, 2, 3]
     steps:
     - uses: actions/checkout@v4
 
@@ -39,8 +42,13 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: 1.24
+
+    - name: Verify that all test files are grouped
+      run: bash scripts/check_test_group_coverage.sh
+
     - name: Test
       working-directory: logzio
       run: |
+        FILES=$(cat .github/test-groups/group_${{ matrix.group }}.txt | tr '\n' ' ')
         go clean -testcache
-        go test -v -race -covermode=atomic -coverprofile=coverage.out -timeout 0
+        go test -v -race $FILES -covermode=atomic -coverprofile=coverage.out -timeout 0

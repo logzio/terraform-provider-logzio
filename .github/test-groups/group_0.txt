@@ -1,0 +1,8 @@
+logzio/datasource_alert_v2_test.go
+logzio/resource_alert_v2_test.go
+logzio/datasource_archive_logs_test.go
+logzio/resource_archive_logs_test.go
+logzio/datasource_grafana_folder_test.go
+logzio/resource_grafana_folder_test.go
+logzio/datasource_endpoint_test.go
+logzio/resource_endpoint_test.go
