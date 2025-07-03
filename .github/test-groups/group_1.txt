@@ -1,8 +1,8 @@
-logzio/datasource_authentication_groups_test.go
-logzio/resource_authentication_groups_test.go
-logzio/datasource_drop_filter_test.go
-logzio/resource_drop_filter_test.go
-logzio/datasource_grafana_dashboard_test.go
-logzio/resource_grafana_dashboard_test.go
-logzio/datasource_user_test.go
-logzio/resource_user_test.go
+datasource_authentication_groups_test.go
+resource_authentication_groups_test.go
+datasource_drop_filter_test.go
+resource_drop_filter_test.go
+datasource_grafana_dashboard_test.go
+resource_grafana_dashboard_test.go
+datasource_user_test.go
+resource_user_test.go

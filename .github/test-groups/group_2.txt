@@ -1,8 +1,8 @@
-logzio/datasource_kibana_object_test.go
-logzio/resource_kibana_object_test.go
-logzio/datasource_log_shipping_token_test.go
-logzio/resource_log_shipping_token_test.go
-logzio/datasource_metrics_account_test.go
-logzio/resource_metrics_account_test.go
-logzio/resource_grafana_alert_rule_test.go
-logzio/resource_grafana_notification_policy_test.go
+datasource_kibana_object_test.go
+resource_kibana_object_test.go
+datasource_log_shipping_token_test.go
+resource_log_shipping_token_test.go
+datasource_metrics_account_test.go
+resource_metrics_account_test.go
+resource_grafana_alert_rule_test.go
+resource_grafana_notification_policy_test.go

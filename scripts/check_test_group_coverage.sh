@@ -3,11 +3,11 @@ set -euo pipefail
 
 echo "🔍 Verifying all test files are included in test groups..."
 
-# 1. List all *_test.go files, relative to repo root
+# 1. List all *_test.go files (including subfolders, relative to root)
 all_test_files=$(find logzio -type f -name '*_test.go' | sort)
 
-# 2. Get all test files mentioned in group files (ignoring empty/whitespace lines)
-grouped_files=$(cat .github/test-groups/group_*.txt | grep -v '^\s*$' | sed 's/^[[:space:]]*//' | sort)
+# 2. Gather all grouped files and prepend 'logzio/' to each
+grouped_files=$(cat .github/test-groups/group_*.txt | grep -v '^\s*$' | sed 's/^[[:space:]]*//' | sed 's|^|logzio/|' | sort)
 
 # 3. Diff the two
 missing_files=$(comm -23 <(echo "$all_test_files") <(echo "$grouped_files"))

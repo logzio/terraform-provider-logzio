@@ -30,7 +30,7 @@ env:
 
 jobs:
   test:
-    name: Test
+    name: Test group
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
