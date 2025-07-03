@@ -6,3 +6,5 @@ datasource_grafana_folder_test.go
 resource_grafana_folder_test.go
 datasource_endpoint_test.go
 resource_endpoint_test.go
+utils_test.go
+provider_test.go

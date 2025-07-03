@@ -6,3 +6,5 @@ datasource_grafana_dashboard_test.go
 resource_grafana_dashboard_test.go
 datasource_user_test.go
 resource_user_test.go
+utils_test.go
+provider_test.go

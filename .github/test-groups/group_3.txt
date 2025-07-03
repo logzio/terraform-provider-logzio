@@ -4,7 +4,6 @@ datasource_s3_fetcher_test.go
 resource_s3_fetcher_test.go
 datasource_subaccount_test.go
 resource_subaccount_test.go
-provider_test.go
 resource_grafana_contact_point_test.go
 utils_test.go
-utils/validators_test.go
+provider_test.go

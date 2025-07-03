@@ -6,3 +6,5 @@ datasource_metrics_account_test.go
 resource_metrics_account_test.go
 resource_grafana_alert_rule_test.go
 resource_grafana_notification_policy_test.go
+utils_test.go
+provider_test.go
