@@ -51,6 +51,6 @@ jobs:
       - name: Test
         working-directory: logzio
         run: |
-          FILES=$(cat ../.github/test-groups/group_${{ matrix.group }}.txt | tr '\n' ' ')
+          TEST_NAMES=$(cat ../.github/test-groups/group_${{ matrix.group }}.txt | tr '\n' '|' | sed 's/|$//')
           go clean -testcache
-          go test -v -race $FILES -covermode=atomic -coverprofile=coverage.out -timeout 0
+          go test -v -race -covermode=atomic -coverprofile=coverage.out -timeout 0 -run "^(${TEST_NAMES})$"

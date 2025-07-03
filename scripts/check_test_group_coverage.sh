@@ -1,21 +1,47 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "🔍 Verifying all test files are included in test groups..."
+echo "🔍 Verifying that all test functions are included in test groups..."
 
-# 1. List all *_test.go files (including subfolders, relative to root)
-all_test_files=$(find logzio -type f -name '*_test.go' | sort)
+# Step 1: Get all test function names from *_test.go files
+grep -h -o '^func Test[^(]*' logzio/*_test.go | awk '{print $2}' | sort -u > /tmp/defined_tests.txt
 
-# 2. Gather all grouped files and prepend 'logzio/' to each
-grouped_files=$(cat .github/test-groups/group_*.txt | grep -v '^\s*$' | sed 's/^[[:space:]]*//' | sed 's|^|logzio/|' | sort)
+# Step 2: Safely read all group files line by line, even if missing final newline
+tmp_group_file="/tmp/grouped_tests.txt"
+> "$tmp_group_file"
 
-# 3. Diff the two
-missing_files=$(comm -23 <(echo "$all_test_files") <(echo "$grouped_files"))
+for f in .github/test-groups/group_*.txt; do
+  # Append every line, even the last one if no trailing newline
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    # Strip leading/trailing whitespace and ignore empty lines
+    trimmed=$(echo "$line" | xargs)
+    if [[ -n "$trimmed" ]]; then
+      echo "$trimmed" >> "$tmp_group_file"
+    fi
+  done < "$f"
+done
 
-if [[ -n "$missing_files" ]]; then
-  echo "❌ ERROR: The following test files are not included in any test group:"
-  echo "$missing_files"
+# Sort and deduplicate
+sort -u "$tmp_group_file" > /tmp/grouped_tests_sorted.txt
+
+# Step 3: Compare
+missing=$(comm -23 /tmp/defined_tests.txt /tmp/grouped_tests_sorted.txt || true)
+extra=$(comm -13 /tmp/defined_tests.txt /tmp/grouped_tests_sorted.txt || true)
+
+if [[ -n "$missing" ]]; then
+  echo "❌ ERROR: The following test functions are defined but NOT included in any group:"
+  echo "$missing"
+  echo
+fi
+
+if [[ -n "$extra" ]]; then
+  echo "⚠️ WARNING: The following test functions are in a group but NOT defined in code:"
+  echo "$extra"
+  echo
+fi
+
+if [[ -n "$missing" ]]; then
   exit 1
 else
-  echo "✅ All test files are assigned to a test group."
+  echo "✅ All defined test functions are included in the test groups."
 fi
