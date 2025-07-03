@@ -175,7 +175,7 @@ func TestAccLogzioSubaccount_CreateSubaccountWarmRetention(t *testing.T) {
 }
 
 func TestAccLogzioSubaccount_CreateSubaccountWarmRetentionIssues(t *testing.T) {
-	accountId := os.Getenv(envLogzioAccountId)
+	accountId := os.Getenv(envLogzioWarmAccountId)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_invalid_snap_retention"
 	retention := 4

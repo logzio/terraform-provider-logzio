@@ -33,7 +33,7 @@ var (
 		},
 	}
 	testAccWarmProviderFactories = map[string]func() (*schema.Provider, error){
-		"kubernetes": func() (*schema.Provider, error) {
+		"logzio": func() (*schema.Provider, error) {
 			return ProviderWithEnvVar(envLogzioApiTokenWarm), nil
 		},
 	}
