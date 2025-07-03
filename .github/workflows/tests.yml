@@ -9,9 +9,11 @@ on:
 
 env:
   LOGZIO_API_TOKEN: ${{ secrets.LOGZIO_API_TOKEN }}
+  LOGZIO_WARM_API_TOKEN: ${{ secrets.LOGZIO_WARM_API_TOKEN }}
   TF_ACC: true
   LOGZIO_EMAIL: ${{ secrets.LOGZIO_EMAIL }}
   LOGZIO_ACCOUNT_ID: ${{ secrets.LOGZIO_ACCOUNT_ID }}
+  LOGZIO_WARM_ACCOUNT_ID: ${{ secrets.LOGZIO_WARM_ACCOUNT_ID }}
   S3_PATH: ${{ secrets.S3_PATH }}
   AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
   AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
