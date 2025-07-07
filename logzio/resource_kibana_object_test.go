@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/logzio/logzio_terraform_client/kibana_objects"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
-	"io/ioutil"
 	"log"
+	"os"
 	"testing"
 )
 
@@ -120,7 +120,7 @@ func resourceTestKibanaObject(objType kibana_objects.ExportType, update bool) st
 }
 
 func getKibanaObjectResourceConfig(path string) string {
-	content, err := ioutil.ReadFile(fmt.Sprintf("testdata/fixtures/%s.tf", path))
+	content, err := os.ReadFile(fmt.Sprintf("testdata/fixtures/%s.tf", path))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,6 +1,13 @@
 # Changes by Version
 
 <!-- next version -->
+## v1.18.0
+- Upgrade `logzio_client_terraform` to `1.24.0`.
+- Support Warm Retention settings in `sub_accounts`.
+    - Add `snap_search_retention_days` to create and update requests
+    - Add new fields to account data (read-only): `is_capped`, `shared_gb`, `total_time_based_daily_gb` and `is_owner`.
+- Fix `severity_threshold_tiers` to accept decimal numbers.
+
 ## v1.17.1
 - Add missing platform builds for `windows/arm64` and `darwin/arm64`, which were not included in `v1.17.0`
 

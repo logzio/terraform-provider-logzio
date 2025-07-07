@@ -9,9 +9,11 @@ on:
 
 env:
   LOGZIO_API_TOKEN: ${{ secrets.LOGZIO_API_TOKEN }}
+  LOGZIO_WARM_API_TOKEN: ${{ secrets.LOGZIO_WARM_API_TOKEN }}
   TF_ACC: true
   LOGZIO_EMAIL: ${{ secrets.LOGZIO_EMAIL }}
   LOGZIO_ACCOUNT_ID: ${{ secrets.LOGZIO_ACCOUNT_ID }}
+  LOGZIO_WARM_ACCOUNT_ID: ${{ secrets.LOGZIO_WARM_ACCOUNT_ID }}
   S3_PATH: ${{ secrets.S3_PATH }}
   AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
   AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
@@ -28,17 +30,27 @@ env:
 
 jobs:
   test:
-    name: Test
+    name: Test group
     runs-on: ubuntu-24.04
-    steps:
-    - uses: actions/checkout@v4
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [ 0, 1, 2, 3]
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: 1.24
-    - name: Test
-      working-directory: logzio
-      run: |
-        go clean -testcache
-        go test -v -race -covermode=atomic -coverprofile=coverage.out -timeout 0
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.24
+
+      - name: Verify that all test files are grouped
+        run: bash scripts/check_test_group_coverage.sh
+
+      - name: Test
+        working-directory: logzio
+        run: |
+          TEST_NAMES=$(cat ../.github/test-groups/group_${{ matrix.group }}.txt | tr '\n' '|' | sed 's/|$//')
+          go clean -testcache
+          go test -v -race -covermode=atomic -coverprofile=coverage.out -timeout 0 -run "^(${TEST_NAMES})$"

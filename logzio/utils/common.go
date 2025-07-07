@@ -3,8 +3,8 @@ package utils
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -31,7 +31,7 @@ func IdFromResourceData(d *schema.ResourceData) (int64, error) {
 }
 
 func ReadFixtureFromFile(fileName string) string {
-	content, err := ioutil.ReadFile("testdata/fixtures/" + fileName)
+	content, err := os.ReadFile("testdata/fixtures/" + fileName)
 	if err != nil {
 		log.Fatal(err)
 	}

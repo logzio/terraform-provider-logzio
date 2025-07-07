@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/avast/retry-go"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -31,6 +32,11 @@ const (
 	subAccountSharingObjectsAccounts                string = "sharing_objects_accounts"
 	subAccountUtilizationSettingsFrequencyMinutes   string = "frequency_minutes"
 	subAccountUtilizationSettingsUtilizationEnabled string = "utilization_enabled"
+	subAccountsSnapSearchRetentionDays              string = "snap_search_retention_days"
+	subAccountsIsCapped                             string = "is_capped"
+	subAccountsSharedGb                             string = "shared_gb"
+	subAccountsTotalTimeBasedDailyGb                string = "total_time_based_daily_gb"
+	subAccountIsOwner                               string = "is_owner"
 
 	delayGetSubAccount      = 2 * time.Second
 	subAccountRetryAttempts = 8
@@ -110,6 +116,26 @@ func resourceSubAccount() *schema.Resource {
 			subAccountUtilizationSettingsUtilizationEnabled: {
 				Type:     schema.TypeBool,
 				Optional: true,
+			},
+			subAccountsSnapSearchRetentionDays: {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			subAccountsIsCapped: {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			subAccountsSharedGb: {
+				Type:     schema.TypeFloat,
+				Computed: true,
+			},
+			subAccountsTotalTimeBasedDailyGb: {
+				Type:     schema.TypeFloat,
+				Computed: true,
+			},
+			subAccountIsOwner: {
+				Type:     schema.TypeBool,
+				Computed: true,
 			},
 		},
 	}
@@ -237,6 +263,11 @@ func setSubAccount(d *schema.ResourceData, subAccount *sub_accounts.SubAccount) 
 	d.Set(subAccountDocSizeSetting, subAccount.DocSizeSetting)
 	d.Set(subAccountUtilizationSettingsFrequencyMinutes, subAccount.UtilizationSettings.FrequencyMinutes)
 	d.Set(subAccountUtilizationSettingsUtilizationEnabled, subAccount.UtilizationSettings.UtilizationEnabled)
+	d.Set(subAccountsSnapSearchRetentionDays, subAccount.SnapSearchRetentionDays)
+	d.Set(subAccountsIsCapped, subAccount.IsCapped)
+	d.Set(subAccountsSharedGb, subAccount.SharedGB)
+	d.Set(subAccountsTotalTimeBasedDailyGb, subAccount.TotalTimeBasedDailyGB)
+	d.Set(subAccountIsOwner, subAccount.IsOwner)
 
 	sharingObjectAccounts := make([]int32, 0)
 	for _, account := range subAccount.SharingObjectsAccounts {
@@ -297,6 +328,7 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 			FrequencyMinutes:   int32(d.Get(subAccountUtilizationSettingsFrequencyMinutes).(int)),
 			UtilizationEnabled: strconv.FormatBool(d.Get(subAccountUtilizationSettingsUtilizationEnabled).(bool)),
 		},
+		SnapSearchRetentionDays: getOptionalInt32Pointer(d, subAccountsSnapSearchRetentionDays),
 	}
 
 	return createSubAccount
@@ -336,4 +368,18 @@ func insertAccountTokenAndId(d *schema.ResourceData, m interface{}, id int64) er
 			}),
 		retry.Delay(delayGetSubAccount),
 	)
+}
+
+// getOptionalInt32Pointer returns a pointer to the numeric value from the config, or nil if it was not set.
+// We don't use d.Get since it returns 0 for nil, when the field is unset.
+// And we don't use d.GetOk because it returns false for 0, even if it's explicitly set.
+func getOptionalInt32Pointer(d *schema.ResourceData, key string) *int32 {
+	val, diags := d.GetRawConfigAt(cty.GetAttrPath(key))
+	if diags.HasError() || val.IsNull() {
+		return nil
+	} else {
+		int64Val, _ := val.AsBigFloat().Int64()
+		int32Val := int32(int64Val)
+		return &int32Val
+	}
 }

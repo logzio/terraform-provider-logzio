@@ -75,6 +75,26 @@ func dataSourceSubAccount() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			subAccountsSnapSearchRetentionDays: {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			subAccountsIsCapped: {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			subAccountsSharedGb: {
+				Type:     schema.TypeFloat,
+				Computed: true,
+			},
+			subAccountsTotalTimeBasedDailyGb: {
+				Type:     schema.TypeFloat,
+				Computed: true,
+			},
+			subAccountIsOwner: {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(5 * time.Second),
