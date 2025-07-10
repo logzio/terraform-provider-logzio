@@ -64,6 +64,81 @@ func TestProviderImpl(t *testing.T) {
 	var _ *schema.Provider = Provider()
 }
 
+func TestProvider_CustomApiUrlOverride(t *testing.T) {
+	provider := Provider()
+	resourceData := schema.TestResourceDataRaw(t, provider.Schema, map[string]interface{}{
+		"api_token": "dummy-token",
+		"custom_api_url": "https://custom.example.com/api",
+	})
+	cfg, diags := providerConfigure(resourceData)
+	if len(diags) > 0 {
+		t.Fatalf("unexpected diagnostics: %v", diags)
+	}
+	config := cfg.(Config)
+	if config.baseUrl != "https://custom.example.com/api" {
+		t.Errorf("expected baseUrl to be custom_api_url, got %s", config.baseUrl)
+	}
+}
+
+func TestProvider_BaseUrlResolution(t *testing.T) {
+	testCases := []struct {
+		name           string
+		region         string
+		customApiUrl   string
+		expectedBaseUrl string
+	}{
+		{
+			name:           "Only region set (eu)",
+			region:         "eu",
+			expectedBaseUrl: "https://api-eu.logz.io",
+		},
+		{
+			name:           "Only custom_api_url set",
+			customApiUrl:   "https://custom.example.com/api",
+			expectedBaseUrl: "https://custom.example.com/api",
+		},
+		{
+			name:           "Both region and custom_api_url set (custom wins)",
+			region:         "eu",
+			customApiUrl:   "https://custom.example.com/api",
+			expectedBaseUrl: "https://custom.example.com/api",
+		},
+		{
+			name:           "Neither region nor custom_api_url set (default US)",
+			expectedBaseUrl: "https://api.logz.io",
+		},
+		{
+			name:           "Region set to us (default US)",
+			region:         "us",
+			expectedBaseUrl: "https://api.logz.io",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			provider := Provider()
+			attrs := map[string]interface{}{
+				"api_token": "dummy-token",
+			}
+			if tc.region != "" {
+				attrs["region"] = tc.region
+			}
+			if tc.customApiUrl != "" {
+				attrs["custom_api_url"] = tc.customApiUrl
+			}
+			resourceData := schema.TestResourceDataRaw(t, provider.Schema, attrs)
+			cfg, diags := providerConfigure(resourceData)
+			if len(diags) > 0 {
+				t.Fatalf("unexpected diagnostics: %v", diags)
+			}
+			config := cfg.(Config)
+			if config.baseUrl != tc.expectedBaseUrl {
+				t.Errorf("expected baseUrl to be %s, got %s", tc.expectedBaseUrl, config.baseUrl)
+			}
+		})
+	}
+}
+
 func testAccPreCheckEnv(t *testing.T, env string) {
 	if v := os.Getenv(env); v == "" {
 		t.Errorf("%s must be set for acceptance tests", env)
