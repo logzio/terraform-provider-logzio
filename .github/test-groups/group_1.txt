@@ -16,3 +16,4 @@ TestAccDataSourceUser
 TestAccLogzioUser_CreateUser
 TestProvider
 TestProviderImpl
+TestProvider_BaseUrlResolution

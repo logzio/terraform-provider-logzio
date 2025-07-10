@@ -64,21 +64,6 @@ func TestProviderImpl(t *testing.T) {
 	var _ *schema.Provider = Provider()
 }
 
-func TestProvider_CustomApiUrlOverride(t *testing.T) {
-	provider := Provider()
-	resourceData := schema.TestResourceDataRaw(t, provider.Schema, map[string]interface{}{
-		"api_token": "dummy-token",
-		"custom_api_url": "https://custom.example.com/api",
-	})
-	cfg, diags := providerConfigure(resourceData)
-	if len(diags) > 0 {
-		t.Fatalf("unexpected diagnostics: %v", diags)
-	}
-	config := cfg.(Config)
-	if config.baseUrl != "https://custom.example.com/api" {
-		t.Errorf("expected baseUrl to be custom_api_url, got %s", config.baseUrl)
-	}
-}
 
 func TestProvider_BaseUrlResolution(t *testing.T) {
 	testCases := []struct {
