@@ -67,17 +67,51 @@ The provider accepts the following arguments:
 * **region** - (Defaults to null) The 2-letter region code identifies where your Logz.io account is hosted.
 Defaults to null for accounts hosted in the US East - Northern Virginia region. [Learn more](https://docs.logz.io/user-guide/accounts/account-region.html)
 
+* **custom_api_url** - (Optional) Custom API URL to override the default Logz.io API endpoint. Useful for routing through internal gateways/proxies. If set, this URL will be used for all API requests instead of the default endpoint.
 ###### Example
 
 You can pass the variables in a bash command for the arguments:
 
 ```bash
 provider "logzio" {
-  api_token = var.api_token
-  region= var.your_api_region
+  api_token     = var.api_token
+  region        = var.your_api_region
 }
 ```
 </div>
+
+###### Example: Using custom_api_url
+
+```hcl
+provider "logzio" {
+  api_token      = var.api_token
+  custom_api_url = "https://my-internal-gateway.company.com/logzio"
+}
+```
+
+> **Note:** If `custom_api_url` is set, it takes precedence and will be used for all API requests, regardless of the value of `region`.
+
+##### Configuring via Environment Variables
+
+You can also configure the provider using environment variables instead of provider arguments. The following environment variables are supported:
+
+- `LOGZIO_API_TOKEN` (for `api_token`)
+- `LOGZIO_REGION` (for `region`)
+- `LOGZIO_CUSTOM_API_URL` (for `custom_api_url`)
+
+Example:
+
+```bash
+export LOGZIO_API_TOKEN="your-api-token"
+export LOGZIO_REGION="eu"
+export LOGZIO_CUSTOM_API_URL="https://my-internal-gateway.company.com/logzio"
+```
+
+Then your provider block can omit these arguments:
+
+```hcl
+provider "logzio" {}
+```
 
 
 ### Example - Create a new alert and a new Slack notification endpoint
