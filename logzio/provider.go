@@ -9,6 +9,7 @@ import (
 
 const (
 	providerApiToken                      = "api_token"
+	providerCustomApiUrl                  = "custom_api_url"
 	providerBaseUrl                       = "base_url"
 	providerRegion                        = "region"
 	resourceAlertType                     = "logzio_alert"
@@ -32,7 +33,7 @@ const (
 
 	envLogzioApiToken = "LOGZIO_API_TOKEN"
 	envLogzioRegion   = "LOGZIO_REGION"
-	envLogzioBaseURL  = "LOGZIO_BASE_URL"
+	envLogzioCustomApiUrl = "LOGZIO_CUSTOM_API_URL"
 
 	baseUrl = "https://api%s.logz.io"
 )
@@ -57,6 +58,12 @@ func ProviderWithEnvVar(apiTokenEnvVar string) *schema.Provider {
 				Description: descriptions[providerRegion],
 				DefaultFunc: schema.EnvDefaultFunc(envLogzioRegion, ""),
 				Sensitive:   false,
+			},
+			providerCustomApiUrl: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Custom API URL to override the default Logz.io API endpoint.",
+				DefaultFunc: schema.EnvDefaultFunc(envLogzioCustomApiUrl, ""),
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -101,7 +108,11 @@ func ProviderWithEnvVar(apiTokenEnvVar string) *schema.Provider {
 var descriptions map[string]string
 
 func init() {
-	descriptions = map[string]string{providerApiToken: "Your API token", providerRegion: "Your logz.io region"}
+	descriptions = map[string]string{
+		providerApiToken: "Your API token",
+		providerRegion: "Your logz.io region",
+		providerCustomApiUrl: "Custom API URL to override the default Logz.io API endpoint. Useful for routing through internal gateways/proxies.",
+	}
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -110,11 +121,17 @@ func providerConfigure(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		return nil, diag.Errorf("can't find the %s, either set it in the provider or set the %s env var", providerApiToken, envLogzioApiToken)
 	}
 	region := d.Get(providerRegion).(string)
-	regionCode := ""
-	if region != "" && region != "us" {
-		regionCode = fmt.Sprintf("-%s", region)
+	customApiUrl := d.Get(providerCustomApiUrl).(string)
+	var apiUrl string
+	if customApiUrl != "" {
+		apiUrl = customApiUrl
+	} else {
+		regionCode := ""
+		if region != "" && region != "us" {
+			regionCode = fmt.Sprintf("-%s", region)
+		}
+		apiUrl = fmt.Sprintf(baseUrl, regionCode)
 	}
-	apiUrl := fmt.Sprintf(baseUrl, regionCode)
 
 	config := Config{
 		apiToken: apiToken.(string),
