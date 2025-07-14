@@ -37,7 +37,7 @@ Provides a Logz.io log monitoring alert resource. This can be used to create and
 * `sub_components.operation` - Specifies the operator for evaluating the results. Can be: `"LESS_THAN"`, `"GREATER_THAN"`, `"LESS_THAN_OR_EQUALS"`, `"GREATER_THAN_OR_EQUALS"`, `"EQUALS"`, `"NOT_EQUALS"`.
 * `sub_components.severity_threshold_tiers` - Sets a severity label per trigger threshold. If using more than one sub-component, only 1 severityThresholdTiers is allowed. Otherwise, 1 per enum are allowed (for a total of 5 thresholds of increasing severities). Increasing severity must adhere to the logic of the operator.
 * `sub_components.severity_threshold_tiers.severity` - Labels the event with a severity tag. Available severity tags are: `"INFO"`, `"LOW"`, `"MEDIUM"`, `"HIGH"`, `"SEVERE"`.
-* `sub_components.severity_threshold_tiers.threshold` - Number of logs per search timeframe.
+* `sub_components.severity_threshold_tiers.threshold` - If the `value_aggregation_type` is `"NONE"`, this represents the number of logs within the search timeframe. Otherwise, specifies the aggregation threshold that must be met for the alert to trigger.
 * `sub_components.columns.field_name` - Specify the fields to be included in the notification. 
 * `sub_components.columns.regex` - Trims the data using regex filters. [Learn more](https://docs.logz.io/user-guide/alerts/regex-filters.html).
 * `sub_components.columns.sort` - Specify a single field to sort by. The field cannot be an analyzed field (a field that supports free text search or searching by part of a message, such as the 'message' field). Should be: `"DESC"`, `"ASC"`.

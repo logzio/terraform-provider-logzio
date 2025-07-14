@@ -46,13 +46,21 @@ resource "logzio_subaccount" "my_subaccount" {
 * `frequency_minutes` - (Int) Determines the sampling rate in minutes of the utilization.
 * `flexible` - (Boolean) Defaults to false. Whether the sub account that created is flexible or not. Can be set to flexible only if the main account is flexible.
 * `reserved_daily_gb` - (Float) The maximum volume of data that an account can index per calendar day. Depends on `flexible`. For further info see [the docs](https://docs.logz.io/api/#operation/createTimeBasedAccount).
+* `snap_search_retention_days` - (Int) Number of days to retain data in the warm tier. Minimum value is 1. (Requires Logz.io Log account with warm tier enabled)
 
 ##  Attribute Reference
 
 * `account_id` - ID of the subaccount.
 * `account_token` - Log shipping token for the subaccount. [Learn more](https://docs.logz.io/user-guide/tokens/log-shipping-tokens/)
 
-**Note:** The above attributes displayed only from v1.2.4. If you're using an earlier version, please upgrade and use `terraform apply -refersh` to add those attributes to your existing resources.
+**Note:** The above attributes displayed only from v1.2.4. If you're using an earlier version, please upgrade and use `terraform apply -refresh` to add those attributes to your existing resources.
+
+* `is_capped` - (Boolean) False by default. If `flexible` is `true`, indicates whether the subaccount is capped.
+* `shared_gb` - (Float) If `flexible` is `true`, determines the sharable volume in GB. Otherwise, `null`.
+* `total_time_based_daily_gb` - (Float) If `flexible` is `true`, determines the account's plan volume in GB. Otherwise, `null`.
+* `is_owner` - (Boolean) Indicates whether the account is the main account.
+
+**Note:** The above attributes displayed only from v1.18.0. If you're using an earlier version, please upgrade and use `terraform apply -refresh` to add those attributes to your existing resources.
 
 ### Import sub-accounts as resources 
 

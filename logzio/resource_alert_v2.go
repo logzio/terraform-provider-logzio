@@ -186,7 +186,7 @@ func resourceAlertV2() *schema.Resource {
 										Required: true,
 									},
 									alertV2Threshold: {
-										Type:     schema.TypeInt,
+										Type:     schema.TypeFloat,
 										Required: true,
 									},
 								},
@@ -522,7 +522,19 @@ func getSubComponents(subComponentsFromConfig []interface{}) []alerts_v2.SubAler
 		subAlertElement.Trigger.SeverityThresholdTiers = make(map[string]float32)
 		for _, t := range tiers {
 			tier := t.(map[string]interface{})
-			subAlertElement.Trigger.SeverityThresholdTiers[tier[alertV2Severity].(string)] = float32(tier[alertV2Threshold].(int))
+			thresholdVal := tier[alertV2Threshold]
+			var threshold float32
+
+			switch v := thresholdVal.(type) {
+			case int:
+				threshold = float32(v)
+			case float64:
+				threshold = float32(v)
+			default:
+				panic("invalid alert threshold type")
+			}
+
+			subAlertElement.Trigger.SeverityThresholdTiers[tier[alertV2Severity].(string)] = threshold
 		}
 
 		retArray = append(retArray, subAlertElement)

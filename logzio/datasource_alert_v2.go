@@ -119,7 +119,7 @@ func dataSourceAlertV2() *schema.Resource {
 										Computed: true,
 									},
 									alertV2Threshold: {
-										Type:     schema.TypeInt,
+										Type:     schema.TypeFloat,
 										Computed: true,
 									},
 								},

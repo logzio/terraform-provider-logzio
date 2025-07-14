@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
-	"io/ioutil"
 	"log"
+	"os"
 	"regexp"
 	"testing"
 )
@@ -204,7 +204,7 @@ func TestAccLogzioDropFilter_CreateDropFilterNoValue(t *testing.T) {
 }
 
 func resourceTestDropFilter(name string, path string) string {
-	content, err := ioutil.ReadFile(fmt.Sprintf("testdata/fixtures/%s.tf", path))
+	content, err := os.ReadFile(fmt.Sprintf("testdata/fixtures/%s.tf", path))
 	if err != nil {
 		log.Fatal(err)
 	}

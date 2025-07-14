@@ -90,6 +90,51 @@ func TestAccDataSourceSubaccountByAccountName(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceSubaccountWarm(t *testing.T) {
+	resourceName := "logzio_subaccount.subaccount_datasource"
+	dataSourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
+	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioWarmAccountId), utils.BASE_10, utils.BITSIZE_64)
+	email := os.Getenv(envLogzioEmail)
+	accountName := "test_datasource_create"
+	defer utils.SleepAfterTest()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckApiTokenWarm(t)
+			testAccPreCheckEmail(t)
+			testAccPreCheckAccountId(t)
+		},
+		ProviderFactories: testAccWarmProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSubAccountWarmDataSourceResource(email, accountId, accountName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					awaitApply(15),
+					resource.TestCheckResourceAttr(resourceName, "account_name", accountName),
+					resource.TestCheckResourceAttr(resourceName, "snap_search_retention_days", "2"),
+					resource.TestCheckResourceAttr(resourceName, "is_capped", "true"),
+					resource.TestCheckResourceAttr(resourceName, "shared_gb", "9"),
+					resource.TestCheckResourceAttr(resourceName, "total_time_based_daily_gb", "10"),
+					resource.TestCheckResourceAttr(resourceName, "is_owner", "false"),
+				),
+			},
+			{
+				Config: testAccSubAccountWarmDataSourceResource(email, accountId, accountName) +
+					testAccCheckLogzioSubaccountDatasourceConfig(),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					awaitApply(15),
+					resource.TestCheckResourceAttr(dataSourceName, "account_name", accountName),
+					resource.TestCheckResourceAttr(dataSourceName, "snap_search_retention_days", "2"),
+					resource.TestCheckResourceAttr(dataSourceName, "is_capped", "true"),
+					resource.TestCheckResourceAttr(dataSourceName, "shared_gb", "9"),
+					resource.TestCheckResourceAttr(dataSourceName, "total_time_based_daily_gb", "10"),
+					resource.TestCheckResourceAttr(dataSourceName, "is_owner", "false"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataSourceSubaccountNotExists(t *testing.T) {
 	defer utils.SleepAfterTest()
 
@@ -136,4 +181,20 @@ func testAccCheckLogzioSubaccountDatasourceConfigNotExist() string {
   account_name = "name_not_exist"
 }
 `)
+}
+
+func testAccSubAccountWarmDataSourceResource(email string, accountId int64, accountName string) string {
+	return fmt.Sprintf(`resource "logzio_subaccount" "subaccount_datasource" {
+  email = "%s"
+  account_name = "%s"
+  retention_days = 4
+  max_daily_gb = 1
+  reserved_daily_gb = 0.5
+  sharing_objects_accounts = [
+    %d
+  ]
+  flexible = "true"
+  snap_search_retention_days = 2
+}
+`, email, accountName, accountId)
 }

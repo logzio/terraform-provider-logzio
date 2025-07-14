@@ -6,9 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"testing"
 )
@@ -814,7 +814,7 @@ func testAccCheckOutputExists(n string, o string) resource.TestCheckFunc {
 }
 
 func createCustomEndpoint(name string) string {
-	content, err := ioutil.ReadFile("testdata/fixtures/create_custom_endpoint.tf")
+	content, err := os.ReadFile("testdata/fixtures/create_custom_endpoint.tf")
 	if err != nil {
 		log.Fatal(err)
 	}
