@@ -20,6 +20,7 @@ const (
 	resourceMetricsAccountType            = "logzio_metrics_account"
 	resourceLogShippingTokenType          = "logzio_log_shipping_token"
 	resourceDropFilterType                = "logzio_drop_filter"
+	resourceDropMetricsType               = "logzio_drop_metrics"
 	resourceArchiveLogsType               = "logzio_archive_logs"
 	resourceRestoreLogsType               = "logzio_restore_logs"
 	resourceAuthenticationGroupsType      = "logzio_authentication_groups"
@@ -31,8 +32,8 @@ const (
 	resourceGrafanaNotificationPolicyType = "logzio_grafana_notification_policy"
 	resourceGrafanaContactPointType       = "logzio_grafana_contact_point"
 
-	envLogzioApiToken = "LOGZIO_API_TOKEN"
-	envLogzioRegion   = "LOGZIO_REGION"
+	envLogzioApiToken     = "LOGZIO_API_TOKEN"
+	envLogzioRegion       = "LOGZIO_REGION"
 	envLogzioCustomApiUrl = "LOGZIO_CUSTOM_API_URL"
 
 	baseUrl = "https://api%s.logz.io"
@@ -67,13 +68,14 @@ func ProviderWithEnvVar(apiTokenEnvVar string) *schema.Provider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			resourceEndpointType:             dataSourceEndpoint(),
-			resourceUserType:                 dataSourceUser(),
-			resourceSubAccountType:           dataSourceSubAccount(),
-			resourceMetricsAccountType:       dataSourceMetricsAccount(),
-			resourceAlertV2Type:              dataSourceAlertV2(),
-			resourceLogShippingTokenType:     dataSourceLogShippingToken(),
-			resourceDropFilterType:           dataSourceDropFilter(),
+			resourceEndpointType:         dataSourceEndpoint(),
+			resourceUserType:             dataSourceUser(),
+			resourceSubAccountType:       dataSourceSubAccount(),
+			resourceMetricsAccountType:   dataSourceMetricsAccount(),
+			resourceAlertV2Type:          dataSourceAlertV2(),
+			resourceLogShippingTokenType: dataSourceLogShippingToken(),
+			resourceDropFilterType:       dataSourceDropFilter(),
+			// resourceDropMetricsType:    dataSourceDropMetrics(),
 			resourceArchiveLogsType:          dataSourceArchiveLogs(),
 			resourceRestoreLogsType:          dataSourceRestoreLogs(),
 			resourceAuthenticationGroupsType: dataSourceAuthenticationGroups(),
@@ -90,6 +92,7 @@ func ProviderWithEnvVar(apiTokenEnvVar string) *schema.Provider {
 			resourceAlertV2Type:                   resourceAlertV2(),
 			resourceLogShippingTokenType:          resourceLogShippingToken(),
 			resourceDropFilterType:                resourceDropFilter(),
+			resourceDropMetricsType:               resourceDropMetrics(),
 			resourceArchiveLogsType:               resourceArchiveLogs(),
 			resourceRestoreLogsType:               resourceRestoreLogs(),
 			resourceAuthenticationGroupsType:      resourceAuthenticationGroups(),
@@ -109,8 +112,8 @@ var descriptions map[string]string
 
 func init() {
 	descriptions = map[string]string{
-		providerApiToken: "Your API token",
-		providerRegion: "Your logz.io region",
+		providerApiToken:     "Your API token",
+		providerRegion:       "Your logz.io region",
 		providerCustomApiUrl: "Custom API URL to override the default Logz.io API endpoint. Useful for routing through internal gateways/proxies.",
 	}
 }
