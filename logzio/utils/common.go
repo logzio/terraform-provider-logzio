@@ -43,7 +43,7 @@ func ReadResourceFromFile(resourceName string, fileName string) string {
 }
 
 func SleepAfterTest() {
-	time.Sleep(3 * time.Second)
+	time.Sleep(5 * time.Second)
 }
 
 func InterfaceToMapOfStrings(original interface{}) map[string]string {
