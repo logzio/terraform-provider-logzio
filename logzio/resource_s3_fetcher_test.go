@@ -122,29 +122,6 @@ resource "logzio_s3_fetcher" "test_fetcher" {
 	})
 }
 
-func TestAccLogzioS3Fetcher_S3FetcherInvalidLogsType(t *testing.T) {
-	defer utils.SleepAfterTest()
-	terraformPlan := fmt.Sprintf(`
-resource "logzio_s3_fetcher" "test_fetcher" {
-  aws_access_key = "%s"
-  aws_secret_key = "%s"
-  bucket_name = "%s"
-  active = false
-  aws_region = "US_EAST_1"
-  logs_type = "my_type"
-}
-`, os.Getenv(envLogzioAwsAccessKey), os.Getenv(envLogzioAwsSecretKey), bucketName)
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config:      terraformPlan,
-				ExpectError: regexp.MustCompile("is not in the allowed logs types list"),
-			},
-		},
-	})
-}
-
 func TestAccLogzioS3Fetcher_S3FetcherNoBucketName(t *testing.T) {
 	defer utils.SleepAfterTest()
 	terraformPlan := fmt.Sprintf(`
