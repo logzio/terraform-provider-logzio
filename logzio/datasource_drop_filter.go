@@ -45,6 +45,10 @@ func dataSourceDropFilter() *schema.Resource {
 					},
 				},
 			},
+			dropFilterThresholdInGB: {
+				Type:     schema.TypeFloat,
+				Optional: true,
+			},
 		},
 	}
 }

@@ -12,6 +12,7 @@ import (
 
 const (
 	dropFilterResourceCreateDropFilter                  = "create_drop_filter"
+	dropFilterResourceCreateDropFilterWithGbThreshold   = "create_drop_filter_with_gb_threshold"
 	dropFilterResourceCreateDropFilterNoFieldConditions = "create_drop_filter_no_field_conditions"
 	dropFilterResourceCreateDropFilterNoFieldName       = "create_drop_filter_no_field_name"
 	dropFilterResourceCreateDropFilterNoValue           = "create_drop_filter_no_value"
@@ -35,6 +36,7 @@ func TestAccLogzioDropFilter_CreateDropFilter(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type_create"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterThresholdInGB, "0"),
 				),
 			},
 			{
@@ -82,11 +84,12 @@ func TestAccLogzioDropFilter_UpdateDropFilter(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilter),
+				Config: resourceTestDropFilter(filterName, dropFilterResourceCreateDropFilterWithGbThreshold),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type_create"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterActive, "true"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterThresholdInGB, "50"),
 				),
 			},
 			{
@@ -95,6 +98,7 @@ func TestAccLogzioDropFilter_UpdateDropFilter(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, dropFilterLogType, "some_type_create"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterFieldConditions+".#", "2"),
 					resource.TestCheckResourceAttr(resourceName, dropFilterActive, "false"),
+					resource.TestCheckResourceAttr(resourceName, dropFilterThresholdInGB, "50"),
 				),
 			},
 		},

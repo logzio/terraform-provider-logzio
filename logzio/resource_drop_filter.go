@@ -18,6 +18,7 @@ const (
 	dropFilterFieldConditions = "field_conditions"
 	dropFilterFieldName       = "field_name"
 	dropFilterValue           = "value"
+	dropFilterThresholdInGB   = "gb_threshold"
 
 	dropFilterRetryAttempts = 8
 )
@@ -72,6 +73,10 @@ func resourceDropFilter() *schema.Resource {
 						},
 					},
 				},
+			},
+			dropFilterThresholdInGB: {
+				Type:     schema.TypeFloat,
+				Optional: true,
 			},
 		},
 	}
@@ -177,6 +182,7 @@ func setDropFilter(d *schema.ResourceData, dropFilter *drop_filters.DropFilter) 
 	d.Set(dropFilterIdField, dropFilter.Id)
 	d.Set(dropFilterActive, dropFilter.Active)
 	d.Set(dropFilterLogType, dropFilter.LogType)
+	d.Set(dropFilterThresholdInGB, dropFilter.ThresholdInGB)
 
 	fieldConditions := getFieldConditionsMapping(dropFilter.FieldCondition)
 	d.Set(dropFilterFieldConditions, fieldConditions)
@@ -204,6 +210,7 @@ func createCreatDropFilterFromSchema(d *schema.ResourceData) drop_filters.Create
 	return drop_filters.CreateDropFilter{
 		LogType:         d.Get(dropFilterLogType).(string),
 		FieldConditions: fieldConditions,
+		ThresholdInGB:   d.Get(dropFilterThresholdInGB).(float64),
 	}
 }
 
@@ -233,6 +240,7 @@ func createDropFilterFromSchema(d *schema.ResourceData) drop_filters.DropFilter 
 		Active:         d.Get(dropFilterActive).(bool),
 		LogType:        d.Get(dropFilterLogType).(string),
 		FieldCondition: fieldConditions,
+		ThresholdInGB:  d.Get(dropFilterThresholdInGB).(float64),
 	}
 }
 

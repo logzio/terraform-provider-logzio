@@ -42,6 +42,7 @@ resource "logzio_drop_filter" "test_filter" {
 
 * `log_type` - (String) Filters for the [log type](https://docs.logz.io/user-guide/log-shipping/built-in-log-types.html). Omit or leave empty if you want this filter to apply to all types. **Note** that changing this field after creation will cause the resource to be destroyed and re-created. 
 * `active` - (Boolean) If true, the drop filter is active and logs that match the filter are dropped before indexing. If false, the drop filter is disabled. **Note** this argument can only be changed after the creation of the filter. Each filter is created with the `active` argument set to true.
+* `gb_threshold` - (Float) The threshold in GB for the drop filter. If the total size of the logs that match the filter exceeds this threshold, the logs are dropped before indexing. If not specified, the default is `0`, which means that all logs that match the filter are dropped.
 
 #### Nested schema for `field_conditions`:
 
