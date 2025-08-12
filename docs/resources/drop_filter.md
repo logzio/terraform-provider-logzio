@@ -1,8 +1,8 @@
 # Drop Filter Provider
 
-Provides a Logz.io drop filter resource. This can be used to create and manage Logz.io drop filters.
+Provides a Logz.io drop filter resource. This can be used to create and manage Logz.io logs drop filters.
 
-* Learn more about drop filters in the [Logz.io Docs](https://docs.logz.io/api/#tag/Drop-filters).
+* Learn more about drop filters in the [Logz.io Docs](https://docs.logz.io/docs/user-guide/data-hub/drop-filters/drop-fiters-logs/).
 
 ## Example Usage
 
