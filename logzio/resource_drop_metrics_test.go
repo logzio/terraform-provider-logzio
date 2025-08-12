@@ -19,7 +19,6 @@ const (
 	dropMetricResourceCreateInvalidCondition = "create_drop_metrics_invalid_condition"
 	dropMetricResourceCreateInvalidOperator  = "create_drop_metrics_invalid_operator"
 	dropMetricResourceUpdate                 = "update_drop_metrics"
-	dropMetricChangeAccountForcesNew         = "update_drop_metrics_account_id_forces_new"
 )
 
 func TestAccLogzioDropMetric_CreateDropMetricSimple(t *testing.T) {

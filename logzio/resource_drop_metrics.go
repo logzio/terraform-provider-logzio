@@ -133,8 +133,7 @@ func resourceDropMetricsCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	d.SetId(strconv.FormatInt(dropMetrics.Id, 10))
-
+	d.SetId(int64ToStr(dropMetrics.Id))
 	return resourceDropMetricsRead(ctx, d, m)
 }
 
@@ -255,6 +254,10 @@ func stateIDInt64(d *schema.ResourceData) (int64, error) {
 		return 0, fmt.Errorf("invalid resource ID %q: %v", id, err)
 	}
 	return n, nil
+}
+
+func int64ToStr(n int64) string {
+	return strconv.FormatInt(n, 10)
 }
 
 func updateActiveState(ctx context.Context, d *schema.ResourceData, m interface{}, dropId int64) diag.Diagnostics {
