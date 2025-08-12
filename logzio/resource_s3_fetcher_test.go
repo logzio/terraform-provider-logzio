@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	bucketName  = "terraform-auto-tests"
-	s3AcessType = "S3Access"
+	bucketName   = "terraform-auto-tests"
+	s3AccessType = "S3Access"
 )
 
 func TestAccLogzioS3Fetcher_S3FetcherKeys(t *testing.T) {
@@ -32,7 +32,7 @@ func TestAccLogzioS3Fetcher_S3FetcherKeys(t *testing.T) {
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherActive, "true"),
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherAddS3ObjectKeyAsLogField, "false"),
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherRegion, s3_fetcher.RegionUsEast1.String()),
-					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherLogsType, s3AcessType),
+					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherLogsType, s3AccessType),
 				),
 			},
 			{
@@ -45,7 +45,7 @@ func TestAccLogzioS3Fetcher_S3FetcherKeys(t *testing.T) {
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherActive, "false"),
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherAddS3ObjectKeyAsLogField, "false"),
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherRegion, s3_fetcher.RegionUsEast1.String()),
-					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherLogsType, s3AcessType),
+					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherLogsType, s3AccessType),
 				),
 			},
 			{
@@ -74,7 +74,7 @@ func TestAccLogzioS3Fetcher_S3FetcherArn(t *testing.T) {
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherActive, "true"),
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherAddS3ObjectKeyAsLogField, "false"),
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherRegion, s3_fetcher.RegionUsEast1.String()),
-					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherLogsType, s3AcessType),
+					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherLogsType, s3AccessType),
 				),
 			},
 			{
@@ -86,7 +86,7 @@ func TestAccLogzioS3Fetcher_S3FetcherArn(t *testing.T) {
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherActive, "false"),
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherAddS3ObjectKeyAsLogField, "false"),
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherRegion, s3_fetcher.RegionUsEast1.String()),
-					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherLogsType, s3AcessType),
+					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherLogsType, s3AccessType),
 				),
 			},
 			{
@@ -177,7 +177,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
   aws_region = "US_EAST_1"
   logs_type = "%s"
 }
-`, os.Getenv(envLogzioAwsAccessKey), os.Getenv(envLogzioAwsSecretKey), bucketName, s3AcessType)
+`, os.Getenv(envLogzioAwsAccessKey), os.Getenv(envLogzioAwsSecretKey), bucketName, s3AccessType)
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -198,7 +198,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
   aws_region = "US_EAST_1"
   logs_type = "%s"
 }
-`, bucketName, s3AcessType)
+`, bucketName, s3AccessType)
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -220,7 +220,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
   aws_region = "US_EAST_1"
   logs_type = "%s"
 }
-`, os.Getenv(envLogzioAwsAccessKey), bucketName, s3AcessType)
+`, os.Getenv(envLogzioAwsAccessKey), bucketName, s3AccessType)
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -242,7 +242,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
   aws_region = "US_EAST_1"
   logs_type = "%s"
 }
-`, os.Getenv(envLogzioAwsSecretKey), bucketName, s3AcessType)
+`, os.Getenv(envLogzioAwsSecretKey), bucketName, s3AccessType)
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -265,7 +265,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
   aws_region = "US_EAST_1"
   logs_type = "%s"
 }
-`, bucketName, s3AcessType)
+`, bucketName, s3AccessType)
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -289,7 +289,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
   aws_region = "US_EAST_1"
   logs_type = "%s"
 }
-`, os.Getenv(envLogzioAwsAccessKey), os.Getenv(envLogzioAwsSecretKey), os.Getenv(envLogzioAwsArnS3Fetcher), bucketName, s3AcessType)
+`, os.Getenv(envLogzioAwsAccessKey), os.Getenv(envLogzioAwsSecretKey), os.Getenv(envLogzioAwsArnS3Fetcher), bucketName, s3AccessType)
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -311,7 +311,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
   aws_region = "US_EAST_1"
   logs_type = "%s"
 }
-`, os.Getenv(envLogzioAwsAccessKey), os.Getenv(envLogzioAwsSecretKey), bucketName, active, s3AcessType)
+`, os.Getenv(envLogzioAwsAccessKey), os.Getenv(envLogzioAwsSecretKey), bucketName, active, s3AccessType)
 }
 
 func getS3FetcherConfigArn(active bool) string {
@@ -323,5 +323,5 @@ resource "logzio_s3_fetcher" "test_fetcher" {
   aws_region = "US_EAST_1"
   logs_type = "%s"
 }
-`, os.Getenv(envLogzioAwsArnS3Fetcher), bucketName, active, s3AcessType)
+`, os.Getenv(envLogzioAwsArnS3Fetcher), bucketName, active, s3AccessType)
 }

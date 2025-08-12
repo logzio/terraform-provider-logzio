@@ -290,7 +290,7 @@ func updateDropMetrics(ctx context.Context, d *schema.ResourceData, m interface{
 
 	diags := readUntilConsistent(ctx, d, m, dropMetricsRetryAttempts, "update filters", func() bool {
 		createFilter := createCreateUpdateDropMetricsFromSchema(d)
-		return !reflect.DeepEqual(createFilter, updateFilter)
+		return reflect.DeepEqual(createFilter, updateFilter)
 	})
 	return diags
 }

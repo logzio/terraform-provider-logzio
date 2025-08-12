@@ -40,7 +40,7 @@ resource "logzio_drop_metrics" "test_filter" {
 * `operator` - (Optional) The logical operator for combining filter expressions. Supported value is `AND`.
 
 ## Attribute Reference
-* `id` - (String) The unique identifier of the drop filter in the Logz.io database.
+* `drop_metric_id` - (String) The unique identifier of the drop filter in the Logz.io database.
 * `created_at` - (String) The timestamp when the drop filter was created.
 * `updated_at` - (String) The timestamp when the drop filter was last updated.
 * `created_by` - (String) The user who created the drop filter.

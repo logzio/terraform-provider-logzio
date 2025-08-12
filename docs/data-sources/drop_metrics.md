@@ -16,7 +16,7 @@ Provides a Logz.io metrics drop filter datasource. This can be used to get and m
 
 ## Attribute Reference
 
-* `id` - (String) The unique identifier of the drop filter in the Logz.io database.
+* `drop_metric_id` - (String) The unique identifier of the drop filter in the Logz.io database.
 * `created_at` - (String) The timestamp when the drop filter was created.
 * `updated_at` - (String) The timestamp when the drop filter was last updated.
 * `created_by` - (String) The user who created the drop filter.
