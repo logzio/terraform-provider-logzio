@@ -164,7 +164,8 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointOpsgenie(t *testing.T) {
 
 func TestAccLogzioGrafanaContactPoint_GrafanaPointPagerDuty(t *testing.T) {
 	defer utils.SleepAfterTest()
-	resourceFullName := "logzio_grafana_contact_point.test_cp_pagerduty"
+	contactPointResourceName := "test_cp_pagerduty"
+	resourceFullName := "logzio_grafana_contact_point." + contactPointResourceName
 	apiTokenCreate := "some_api"
 	apiTokenUpdate := "other"
 	severityCreate := "info"
@@ -175,7 +176,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointPagerDuty(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create
-				Config: getGrafanaContactPointConfigPagerduty(apiTokenCreate, severityCreate),
+				Config: getGrafanaContactPointConfigPagerduty(contactPointResourceName, name, apiTokenCreate, severityCreate),
 				Check: resource.ComposeTestCheckFunc(
 					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointUid)),
@@ -190,7 +191,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointPagerDuty(t *testing.T) {
 			},
 			{
 				// Update
-				Config: getGrafanaContactPointConfigPagerduty(apiTokenCreate, severityUpdate),
+				Config: getGrafanaContactPointConfigPagerduty(contactPointResourceName, name, apiTokenCreate, severityUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointUid)),
@@ -205,7 +206,7 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointPagerDuty(t *testing.T) {
 			},
 			{
 				// Update sensitive
-				Config: getGrafanaContactPointConfigPagerduty(apiTokenUpdate, severityUpdate),
+				Config: getGrafanaContactPointConfigPagerduty(contactPointResourceName, name, apiTokenUpdate, severityUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					awaitApply(1),
 					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointUid)),
@@ -508,6 +509,43 @@ func TestAccLogzioGrafanaContactPoint_GrafanaPointMultiple(t *testing.T) {
 	})
 }
 
+func TestAccLogzioGrafanaContactPoint_GrafanaPointPagerDuty_SeverityTemplatesSupport(t *testing.T) {
+	defer utils.SleepAfterTest()
+	contactPointName := "test_cp_pagerduty_severity_template"
+	resourceFullName := "logzio_grafana_contact_point." + contactPointName
+	apiTokenCreate := "some_api"
+	severityCreate := "{{ .myLabels.severity }}"
+	name := "my-pagerduty-cp-severity-template"
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Create
+				Config: getGrafanaContactPointConfigPagerduty(contactPointName, name, apiTokenCreate, severityCreate),
+				Check: resource.ComposeTestCheckFunc(
+					awaitApply(1),
+					resource.TestCheckResourceAttrSet(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointUid)),
+					resource.TestCheckResourceAttr(resourceFullName, grafanaContactPointName, name),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointDisableResolveMessage), "false"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointPagerdutySeverity), severityCreate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointPagerdutyIntegrationKey), apiTokenCreate),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointPagerdutyClass), "some-class"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointPagerdutyComponent), "some-component"),
+					resource.TestCheckResourceAttr(resourceFullName, fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointPagerdutyGroup), "some-group"),
+				),
+			},
+			{
+				ResourceName:            resourceFullName,
+				ImportStateId:           name,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{fmt.Sprintf("%s.0.%s", grafanaContactPointPagerduty, grafanaContactPointPagerdutyIntegrationKey)},
+			},
+		},
+	})
+
+}
+
 func getGrafanaContactPointConfigEmail(emails string) string {
 	return fmt.Sprintf(`
 resource "logzio_grafana_contact_point" "test_cp_email" {
@@ -551,10 +589,10 @@ resource "logzio_grafana_contact_point" "test_cp_opsgenie" {
 `, url, apiToken)
 }
 
-func getGrafanaContactPointConfigPagerduty(token, severity string) string {
+func getGrafanaContactPointConfigPagerduty(contactPointResourceName, contactPointName, token, severity string) string {
 	return fmt.Sprintf(`
-resource "logzio_grafana_contact_point" "test_cp_pagerduty" {
-	name = "my-pagerduty-cp"
+resource "logzio_grafana_contact_point" "%s" {
+	name = "%s"
 	pagerduty {
 		disable_resolve_message = false
 		integration_key = "%s"
@@ -564,7 +602,7 @@ resource "logzio_grafana_contact_point" "test_cp_pagerduty" {
 		severity = "%s"
 	}
 }
-`, token, severity)
+`, contactPointResourceName, contactPointName, token, severity)
 }
 
 func getGrafanaContactPointConfigSlack(token, mentionChannel string) string {

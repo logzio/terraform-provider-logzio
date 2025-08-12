@@ -2,6 +2,8 @@ package logzio
 
 import (
 	"fmt"
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/logzio/logzio_terraform_client/grafana_contact_points"
@@ -355,14 +357,9 @@ func (p pagerDutyNotifier) schema() *schema.Resource {
 		Sensitive: true,
 	}
 	r.Schema[grafanaContactPointPagerdutySeverity] = &schema.Schema{
-		Type:     schema.TypeString,
-		Optional: true,
-		ValidateFunc: validation.StringInSlice(
-			[]string{grafanaContactPointPagerdutySeverityInfo,
-				grafanaContactPointPagerdutySeverityWarning,
-				grafanaContactPointPagerdutySeverityError,
-				grafanaContactPointPagerdutySeverityCritical},
-			false),
+		Type:             schema.TypeString,
+		Optional:         true,
+		ValidateDiagFunc: validatePagerdutySeverity(),
 	}
 	r.Schema[grafanaContactPointPagerdutySummary] = &schema.Schema{
 		Type:     schema.TypeString,
@@ -435,6 +432,38 @@ func (p pagerDutyNotifier) getGrafanaContactPointFromSchema(raw interface{}, nam
 		Type:                  p.meta().typeStr,
 		DisableResolveMessage: disableResolve,
 		Settings:              settings,
+	}
+}
+
+func validatePagerdutySeverity() schema.SchemaValidateDiagFunc {
+	valid := map[string]struct{}{
+		grafanaContactPointPagerdutySeverityInfo:     {},
+		grafanaContactPointPagerdutySeverityWarning:  {},
+		grafanaContactPointPagerdutySeverityError:    {},
+		grafanaContactPointPagerdutySeverityCritical: {},
+	}
+
+	return func(i interface{}, path cty.Path) diag.Diagnostics {
+		v, ok := i.(string)
+		if !ok {
+			return diag.Errorf("expected type of %s to be string", grafanaContactPointPagerdutySeverity)
+		}
+
+		if strings.HasPrefix(v, grafanaTemplatePrefix) && strings.HasSuffix(v, grafanaTemplateSuffix) {
+			return nil
+		}
+
+		lv := strings.ToLower(v)
+		if _, ok := valid[lv]; ok {
+			return nil
+		}
+
+		validKeys := make([]string, 0, len(valid))
+		for k := range valid {
+			validKeys = append(validKeys, k)
+		}
+		
+		return diag.Errorf("invalid value for %s: %s, must be a template or one of %v", grafanaContactPointPagerdutySeverity, v, validKeys)
 	}
 }
 
