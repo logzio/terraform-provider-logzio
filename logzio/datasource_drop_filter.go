@@ -85,5 +85,6 @@ func dataSourceDropFilterRead(ctx context.Context, d *schema.ResourceData, m int
 
 func isSameDropFilter(dropFilterToSearch drop_filters.DropFilter, dropFilter drop_filters.DropFilter) bool {
 	return reflect.DeepEqual(dropFilterToSearch.FieldCondition, dropFilter.FieldCondition) &&
-		reflect.DeepEqual(dropFilterToSearch.LogType, dropFilter.LogType)
+		reflect.DeepEqual(dropFilterToSearch.LogType, dropFilter.LogType) &&
+		reflect.DeepEqual(dropFilterToSearch.ThresholdInGB, dropFilter.ThresholdInGB)
 }

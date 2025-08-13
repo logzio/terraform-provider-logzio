@@ -77,6 +77,7 @@ func resourceDropFilter() *schema.Resource {
 			dropFilterThresholdInGB: {
 				Type:     schema.TypeFloat,
 				Optional: true,
+				ForceNew: true,
 			},
 		},
 	}

@@ -102,6 +102,8 @@ func dataSourceDropMetrics() *schema.Resource {
 	}
 }
 
+// dataSourceDropMetricsRead gets a metrics drop filter from Logz.io.
+// It first tries to find the filter by ID, and if not found, it searches for a filter that matches the specified attributes and expressions.
 func dataSourceDropMetricsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var dropMetricsFilter *drop_metrics.DropMetric
 	client := dropMetricsClient(m)
@@ -135,6 +137,8 @@ func dataSourceDropMetricsRead(ctx context.Context, d *schema.ResourceData, m in
 	return nil
 }
 
+// searchMatchingDropMetrics searches for a metrics drop filter that matches the specified attributes in the schema.
+// It preforms a pagination search looking for a drop filter that matches the exact expressions specified in the schema.
 func searchMatchingDropMetrics(client *drop_metrics.DropMetricsClient, d *schema.ResourceData) (*drop_metrics.DropMetric, error) {
 	pageNum := 1
 	req, err := buildSearchReqFromDS(d, pageNum)
@@ -201,6 +205,8 @@ func searchMatchingDropMetrics(client *drop_metrics.DropMetricsClient, d *schema
 	return nil, fmt.Errorf("could not find metrics drop filter with the specified attributes: %v", wanted)
 }
 
+// buildSearchReqFromDS builds a search request from the schema.ResourceData.
+// It uses the attributes specified in the schema to create a search request for metrics drop filters.
 func buildSearchReqFromDS(d *schema.ResourceData, pageNumber int) (drop_metrics.SearchDropMetricsRequest, error) {
 	var req drop_metrics.SearchDropMetricsRequest
 	var filter drop_metrics.SearchFilter
@@ -248,6 +254,7 @@ func optionalBoolPtr(d *schema.ResourceData, key string) (*bool, error) {
 	return &b, nil
 }
 
+// getMetricNamesFromSchema extracts metric names used in the filter of the given metric drop filter schema.
 func getMetricNamesFromSchema(d *schema.ResourceData) []string {
 	var result []string
 	filterExps, ok := d.GetOk(dropMetricsFilters)
@@ -268,11 +275,14 @@ func getMetricNamesFromSchema(d *schema.ResourceData) []string {
 	return result
 }
 
+// setFoundDatasourceDropMetrics sets the schema.ResourceData with the found drop metrics filter.
+// It sets the ID and all other attributes of the drop metrics filter.
 func setFoundDatasourceDropMetrics(d *schema.ResourceData, dropMetrics *drop_metrics.DropMetric) {
 	d.SetId(int64ToStr(dropMetrics.Id))
 	setDropMetrics(d, dropMetrics)
 }
 
+// wantedExpressionsFromSchema extracts the wanted filter expressions from the schema in drop_metrics.FilterExpression format.
 func wantedExpressionsFromSchema(d *schema.ResourceData) []drop_metrics.FilterExpression {
 	rawList := d.Get(dropMetricsFilters).(*schema.Set).List()
 	exprs := make([]drop_metrics.FilterExpression, 0, len(rawList))
@@ -288,6 +298,10 @@ func wantedExpressionsFromSchema(d *schema.ResourceData) []drop_metrics.FilterEx
 	return exprs
 }
 
+// exprKey generates a unique key for a filter expression by combining its name, comparison filter, and value.
+// A nullByte ("\x00") separator is used between parts to prevent accidental collisions from
+// concatenation and to ensure the key can be used safely in hash-based
+// lookups (O(1) search in maps).
 func exprKey(e drop_metrics.FilterExpression) string {
 	return strings.ToLower(strings.TrimSpace(e.Name)) + nullByte +
 		strings.ToUpper(strings.TrimSpace(e.ComparisonFilter)) + nullByte +

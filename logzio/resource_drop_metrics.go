@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/logzio/logzio_terraform_client/drop_metrics"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"reflect"
 	"strconv"
 )
@@ -77,7 +78,6 @@ func resourceDropMetrics() *schema.Resource {
 			dropMetricsAccountId: {
 				Type:     schema.TypeInt,
 				Required: true,
-				ForceNew: true,
 			},
 			dropMetricsActive: {
 				Type:     schema.TypeBool,
@@ -139,7 +139,7 @@ func resourceDropMetricsCreate(ctx context.Context, d *schema.ResourceData, m in
 
 // resourceDropMetricsRead gets metrics drop filter by id
 func resourceDropMetricsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	dropId, err := stateIDInt64(d)
+	dropId, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -159,22 +159,29 @@ func resourceDropMetricsRead(ctx context.Context, d *schema.ResourceData, m inte
 
 // resourceDropMetricsUpdate updates an existing metrics drop filter in logzio
 func resourceDropMetricsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	dropId, err := stateIDInt64(d)
+	dropId, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	onlyActiveChanged := d.HasChange(dropMetricsActive) && !d.HasChanges(dropMetricsAccountId, dropMetricsFilters, dropMetricsFilterOperator)
+	updateFilter := createCreateUpdateDropMetricsFromSchema(d)
 
-	if onlyActiveChanged {
-		return updateActiveState(ctx, d, m, dropId)
+	client := dropMetricsClient(m)
+	_, err = client.UpdateDropMetric(dropId, updateFilter)
+	if err != nil {
+		return diag.FromErr(err)
 	}
-	return updateDropMetrics(ctx, d, m, dropId)
+
+	diags := readUntilConsistent(ctx, d, m, dropMetricsRetryAttempts, "update filters", func() bool {
+		createFilter := createCreateUpdateDropMetricsFromSchema(d)
+		return reflect.DeepEqual(createFilter, updateFilter)
+	})
+	return diags
 }
 
 // resourceDropMetricsDelete deletes a metrics drop filter in logzio
 func resourceDropMetricsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	dropId, err := stateIDInt64(d)
+	dropId, err := utils.IdFromResourceData(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -188,6 +195,7 @@ func resourceDropMetricsDelete(ctx context.Context, d *schema.ResourceData, m in
 	return nil
 }
 
+// createCreateUpdateDropMetricsFromSchema creates a CreateUpdateDropMetric object from the schema
 func createCreateUpdateDropMetricsFromSchema(d *schema.ResourceData) drop_metrics.CreateUpdateDropMetric {
 	activeVal := d.Get(dropMetricsActive).(bool)
 	activePtr := &activeVal
@@ -202,6 +210,7 @@ func createCreateUpdateDropMetricsFromSchema(d *schema.ResourceData) drop_metric
 	}
 }
 
+// setDropMetrics sets the resource data from a DropMetric object
 func setDropMetrics(d *schema.ResourceData, dropMetric *drop_metrics.DropMetric) {
 	d.Set(dropMetricsIdField, int(dropMetric.Id))
 	d.Set(dropMetricsAccountId, int(dropMetric.AccountId))
@@ -214,6 +223,7 @@ func setDropMetrics(d *schema.ResourceData, dropMetric *drop_metrics.DropMetric)
 	d.Set(dropMetricsFilterOperator, dropMetric.Filter.Operator)
 }
 
+// schemaToDropMetricsFilterExpression converts the schema resource data to a slice of FilterExpression
 func schemaToDropMetricsFilterExpression(d *schema.ResourceData) []drop_metrics.FilterExpression {
 	raw := d.Get(dropMetricsFilters).(*schema.Set).List()
 	result := make([]drop_metrics.FilterExpression, 0, len(raw))
@@ -228,6 +238,7 @@ func schemaToDropMetricsFilterExpression(d *schema.ResourceData) []drop_metrics.
 	return result
 }
 
+// dropMetricsFilterExpressionToInterface converts a slice of FilterExpression to a slice of maps
 func dropMetricsFilterExpressionToInterface(expressions []drop_metrics.FilterExpression) []map[string]interface{} {
 	result := make([]map[string]interface{}, 0, len(expressions))
 	for _, e := range expressions {
@@ -240,61 +251,17 @@ func dropMetricsFilterExpressionToInterface(expressions []drop_metrics.FilterExp
 	return result
 }
 
+// int64Attr retrieves an int64 attribute from the schema.ResourceData.
 func int64Attr(d *schema.ResourceData, key string) int64 {
 	return int64(d.Get(key).(int))
 }
 
-func stateIDInt64(d *schema.ResourceData) (int64, error) {
-	id := d.Id()
-	if id == "" {
-		return 0, fmt.Errorf("resource ID is empty")
-	}
-	n, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		return 0, fmt.Errorf("invalid resource ID %q: %v", id, err)
-	}
-	return n, nil
-}
-
+// int64ToStr converts an int64 to a string.
 func int64ToStr(n int64) string {
 	return strconv.FormatInt(n, 10)
 }
 
-func updateActiveState(ctx context.Context, d *schema.ResourceData, m interface{}, dropId int64) diag.Diagnostics {
-	activate := d.Get(dropMetricsActive).(bool)
-	var err error
-	if activate {
-		err = dropMetricsClient(m).EnableDropMetric(dropId)
-	} else {
-		err = dropMetricsClient(m).DisableDropMetric(dropId)
-	}
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	diags := readUntilConsistent(ctx, d, m, dropMetricsRetryAttempts, "toggle active", func() bool {
-		return d.Get(dropMetricsActive).(bool) == activate
-	})
-
-	return diags
-}
-
-func updateDropMetrics(ctx context.Context, d *schema.ResourceData, m interface{}, dropId int64) diag.Diagnostics {
-	updateFilter := createCreateUpdateDropMetricsFromSchema(d)
-
-	client := dropMetricsClient(m)
-	_, err := client.UpdateDropMetric(dropId, updateFilter)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	diags := readUntilConsistent(ctx, d, m, dropMetricsRetryAttempts, "update filters", func() bool {
-		createFilter := createCreateUpdateDropMetricsFromSchema(d)
-		return reflect.DeepEqual(createFilter, updateFilter)
-	})
-	return diags
-}
-
+// readUntilConsistent reads the resource data until it is consistent with the expected state.
 func readUntilConsistent(
 	ctx context.Context,
 	d *schema.ResourceData,
