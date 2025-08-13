@@ -1,12 +1,15 @@
 # Changes by Version
 
 <!-- next version -->
-## v1.19.0
+## v1.20.0
 - Upgrade `logzio_client_terraform` to `1.25.0`.
 - Add `gb_threshold` support for [drop filters API](./docs/resources/drop_filter.md).
 - Add [Metrics drop filters API](./docs/resources/drop_metrics.md).
 - Remove restriction on `logs_type` in S3 Fetcher to allow custom type names.
 - Allow templates in Grafana Contact Point API.
+
+## v1.19.0
+- Add support for custom api endpoint with `custom_api_url`
 
 ## v1.18.0
 - Upgrade `logzio_client_terraform` to `1.24.0`.
