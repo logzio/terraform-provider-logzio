@@ -30,6 +30,7 @@ The following Logz.io API endpoints are supported by this provider:
 * [Grafana Contact Point](https://api-docs.logz.io/docs/logz/route-get-contactpoints)
 * [Grafana Notification Policy](https://api-docs.logz.io/docs/logz/route-get-policy-tree)
 * [Metrics Accounts](https://api-docs.logz.io/docs/logz/create-a-new-metrics-account)
+* [Metrics Drop Filters](./docs/resources/drop_metrics.md) <!-- This should be replaced with the proper docs link once released. -->
 
 #### Working with Terraform
 

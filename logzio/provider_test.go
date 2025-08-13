@@ -10,6 +10,7 @@ import (
 const (
 	envLogzioAccountId          = "LOGZIO_ACCOUNT_ID"
 	envLogzioWarmAccountId      = "LOGZIO_WARM_ACCOUNT_ID"
+	envLogzioMetricsAccountId   = "LOGZIO_METRICS_ACCOUNT_ID"
 	envLogzioS3Path             = "S3_PATH"
 	envLogzioAwsAccessKey       = "AWS_ACCESS_KEY"
 	envLogzioAwsSecretKey       = "AWS_SECRET_KEY"
@@ -64,37 +65,36 @@ func TestProviderImpl(t *testing.T) {
 	var _ *schema.Provider = Provider()
 }
 
-
 func TestProvider_BaseUrlResolution(t *testing.T) {
 	testCases := []struct {
-		name           string
-		region         string
-		customApiUrl   string
+		name            string
+		region          string
+		customApiUrl    string
 		expectedBaseUrl string
 	}{
 		{
-			name:           "Only region set (eu)",
-			region:         "eu",
+			name:            "Only region set (eu)",
+			region:          "eu",
 			expectedBaseUrl: "https://api-eu.logz.io",
 		},
 		{
-			name:           "Only custom_api_url set",
-			customApiUrl:   "https://custom.example.com/api",
+			name:            "Only custom_api_url set",
+			customApiUrl:    "https://custom.example.com/api",
 			expectedBaseUrl: "https://custom.example.com/api",
 		},
 		{
-			name:           "Both region and custom_api_url set (custom wins)",
-			region:         "eu",
-			customApiUrl:   "https://custom.example.com/api",
+			name:            "Both region and custom_api_url set (custom wins)",
+			region:          "eu",
+			customApiUrl:    "https://custom.example.com/api",
 			expectedBaseUrl: "https://custom.example.com/api",
 		},
 		{
-			name:           "Neither region nor custom_api_url set (default US)",
+			name:            "Neither region nor custom_api_url set (default US)",
 			expectedBaseUrl: "https://api.logz.io",
 		},
 		{
-			name:           "Region set to us (default US)",
-			region:         "us",
+			name:            "Region set to us (default US)",
+			region:          "us",
 			expectedBaseUrl: "https://api.logz.io",
 		},
 	}
@@ -141,4 +141,8 @@ func testAccPreCheckAccountId(t *testing.T) {
 }
 func testAccPreCheckEmail(t *testing.T) {
 	testAccPreCheckEnv(t, envLogzioEmail)
+}
+
+func testAccPreCheckMetricsAccountId(t *testing.T) {
+	testAccPreCheckEnv(t, envLogzioMetricsAccountId)
 }

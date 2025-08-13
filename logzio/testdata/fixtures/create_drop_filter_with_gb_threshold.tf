@@ -9,7 +9,5 @@ resource "logzio_drop_filter" "%s" {
     field_name = "another_field"
     value = 200
   }
-
-  active = false
   gb_threshold = 50
 }

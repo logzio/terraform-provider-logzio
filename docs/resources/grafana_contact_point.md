@@ -194,7 +194,7 @@ resource "logzio_grafana_contact_point" "test_cp_webhook" {
 * `component` - (String) The component being affected by the event.
 * `group` - (String) The group to which the provided component belongs to.
 * `summary` - (String) The templated summary message of the event.
-* `severity` - (String) The PagerDuty event severity level. Can be one of `info`, `warning`, `error`, `critical`.
+* `severity` - (String) The PagerDuty event severity level. Can be one of `info`, `warning`, `error`, `critical` or a grafana template `{{ ... }}`.
 * `disable_resolve_message` - (Boolean) Whether to disable sending resolve messages. Defaults to `false`.
 * `settings` - (Map of String, Sensitive) Additional custom properties to attach to the notifier. Defaults to `map[]`.
 

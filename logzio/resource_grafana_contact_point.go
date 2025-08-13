@@ -86,6 +86,8 @@ const (
 
 	grafanaContactPointEmailAddressSeparator = ";"
 	grafanaContactPointUidsSeparator         = ";"
+	grafanaTemplatePrefix                    = "{{"
+	grafanaTemplateSuffix                    = "}}"
 
 	grafanaContactPointRetryAttempts = 8
 )

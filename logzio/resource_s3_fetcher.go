@@ -82,9 +82,8 @@ func resourceS3Fetcher() *schema.Resource {
 				ValidateDiagFunc: utils.ValidateS3FetcherRegion,
 			},
 			s3FetcherLogsType: {
-				Type:             schema.TypeString,
-				Required:         true,
-				ValidateDiagFunc: utils.ValidateS3FetcherLogsType,
+				Type:     schema.TypeString,
+				Required: true,
 			},
 		},
 	}
@@ -215,7 +214,7 @@ func getCreateUpdateS3FetcherFromSchema(ctx context.Context, d *schema.ResourceD
 	var request s3_fetcher.S3FetcherRequest
 	request.Bucket = d.Get(s3FetcherBucket).(string)
 	request.Region = s3_fetcher.AwsRegion(d.Get(s3FetcherRegion).(string))
-	request.LogsType = s3_fetcher.AwsLogsType(d.Get(s3FetcherLogsType).(string))
+	request.LogsType = d.Get(s3FetcherLogsType).(string)
 	arn := d.Get(s3FetcherArn).(string)
 	accessKey := d.Get(s3FetcherAccessKey).(string)
 	secretKey := d.Get(s3FetcherSecretKey).(string)

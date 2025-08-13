@@ -9,6 +9,7 @@ Provides a Logz.io drop filter datasource. This can be used to create and manage
 * `field_conditions` - Filters for an exact match of a field:value pair. **Note** that changing this field after creation will cause the resource to be destroyed and re-created. See below for **nested schema**.
 * `log_type` - Filters for the [log type](https://docs.logz.io/user-guide/log-shipping/built-in-log-types.html). Emit or leave empty if you want this filter to apply to all types. **Note** that changing this field after creation will cause the resource to be destroyed and re-created. 
 * `drop_filter_id` - Drop filter ID in the Logz.io database.
+* `gb_threshold` - The threshold in GB for the drop filter. If the total size of the logs that match the filter exceeds this threshold, the logs are dropped before indexing.
 
 ## Attribute Reference
 

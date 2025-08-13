@@ -27,7 +27,7 @@ func TestAccDataSourceS3Fetcher(t *testing.T) {
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherActive, "false"),
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherAddS3ObjectKeyAsLogField, "false"),
 					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherRegion, s3_fetcher.RegionUsEast1.String()),
-					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherLogsType, s3_fetcher.LogsTypeS3Access.String()),
+					resource.TestCheckResourceAttr("logzio_s3_fetcher.test_fetcher", s3FetcherLogsType, s3AccessType),
 				),
 			},
 			{
@@ -43,7 +43,7 @@ func TestAccDataSourceS3Fetcher(t *testing.T) {
 					resource.TestCheckResourceAttr("data.logzio_s3_fetcher.my_ds_fetcher", s3FetcherActive, "false"),
 					resource.TestCheckResourceAttr("data.logzio_s3_fetcher.my_ds_fetcher", s3FetcherAddS3ObjectKeyAsLogField, "false"),
 					resource.TestCheckResourceAttr("data.logzio_s3_fetcher.my_ds_fetcher", s3FetcherRegion, s3_fetcher.RegionUsEast1.String()),
-					resource.TestCheckResourceAttr("data.logzio_s3_fetcher.my_ds_fetcher", s3FetcherLogsType, s3_fetcher.LogsTypeS3Access.String()),
+					resource.TestCheckResourceAttr("data.logzio_s3_fetcher.my_ds_fetcher", s3FetcherLogsType, s3AccessType),
 				),
 			},
 		},

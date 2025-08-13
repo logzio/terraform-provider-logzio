@@ -224,18 +224,6 @@ func ValidateS3FetcherRegion(v interface{}, path cty.Path) diag.Diagnostics {
 	return diag.Errorf("Region %s is not in the allowed aws regions list: %s", region, regions)
 }
 
-func ValidateS3FetcherLogsType(v interface{}, path cty.Path) diag.Diagnostics {
-	logsType := v.(string)
-	validLogsTypes := s3_fetcher.GetValidLogsType()
-	for _, validType := range validLogsTypes {
-		if logsType == validType.String() {
-			return diag.Diagnostics{}
-		}
-	}
-
-	return diag.Errorf("Logs type %s is not in the allowed logs types list: %s", logsType, validLogsTypes)
-}
-
 func ValidateExecNoDataState(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	validNoDataState := []string{
