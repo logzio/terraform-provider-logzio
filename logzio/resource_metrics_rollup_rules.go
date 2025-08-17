@@ -52,8 +52,9 @@ func resourceMetricsRollupRules() *schema.Resource {
 				Required: true,
 			},
 			metricsRollupRulesMetricName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringLenBetween(1, 255),
 			},
 			metricsRollupRulesMetricType: {
 				Type:     schema.TypeString,
@@ -87,6 +88,7 @@ func resourceMetricsRollupRules() *schema.Resource {
 			metricsRollupRulesLabels: {
 				Type:     schema.TypeList,
 				Required: true,
+				MinItems: 1,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
