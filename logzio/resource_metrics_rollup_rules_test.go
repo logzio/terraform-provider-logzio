@@ -41,9 +41,9 @@ func TestAccLogzioMetricsRollupRules_CreateSimple(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesAccountId, accountId),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricName, "cpu_usage"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricType, "gauge"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesRollupFunction, "last"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabelsEliminationMethod, "exclude_by"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricType, "GAUGE"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesRollupFunction, "LAST"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabelsEliminationMethod, "EXCLUDE_BY"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabels+".#", "1"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabels+".0", "instance_id"),
 				),
