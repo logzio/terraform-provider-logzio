@@ -33,9 +33,9 @@ func TestAccDataSourceMetricsRollupRules_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesAccountId, accountId),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricName, "memory_usage"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricType, "gauge"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesRollupFunction, "last"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabelsEliminationMethod, "exclude_by"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricType, "GAUGE"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesRollupFunction, "LAST"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabelsEliminationMethod, "EXCLUDE_BY"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabels+".#", "2"),
 				),
 			},
@@ -45,9 +45,9 @@ func TestAccDataSourceMetricsRollupRules_Basic(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceFullName, metricsRollupRulesAccountId, accountId),
 					resource.TestCheckResourceAttr(datasourceFullName, metricsRollupRulesMetricName, "memory_usage"),
-					resource.TestCheckResourceAttr(datasourceFullName, metricsRollupRulesMetricType, "gauge"),
-					resource.TestCheckResourceAttr(datasourceFullName, metricsRollupRulesRollupFunction, "last"),
-					resource.TestCheckResourceAttr(datasourceFullName, metricsRollupRulesLabelsEliminationMethod, "exclude_by"),
+					resource.TestCheckResourceAttr(datasourceFullName, metricsRollupRulesMetricType, "GAUGE"),
+					resource.TestCheckResourceAttr(datasourceFullName, metricsRollupRulesRollupFunction, "LAST"),
+					resource.TestCheckResourceAttr(datasourceFullName, metricsRollupRulesLabelsEliminationMethod, "EXCLUDE_BY"),
 					resource.TestCheckResourceAttr(datasourceFullName, metricsRollupRulesLabels+".#", "2"),
 					resource.TestCheckResourceAttr(datasourceFullName, metricsRollupRulesLabels+".0", "instance_id"),
 					resource.TestCheckResourceAttr(datasourceFullName, metricsRollupRulesLabels+".1", "region"),
@@ -81,9 +81,9 @@ func datasourceResourceTestMetricsRollupRules(resourceName, accountId string) st
 	return fmt.Sprintf(`resource "logzio_metrics_rollup_rules" "%s" {
   account_id = %s
   metric_name = "memory_usage"
-  metric_type = "gauge"
-  rollup_function = "last"
-  labels_elimination_method = "exclude_by"
+  metric_type = "GAUGE"
+  rollup_function = "LAST"
+  labels_elimination_method = "EXCLUDE_BY"
   labels = ["instance_id", "region"]
 }
 `, resourceName, accountId)

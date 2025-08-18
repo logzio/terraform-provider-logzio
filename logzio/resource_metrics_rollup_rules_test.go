@@ -77,9 +77,9 @@ func TestAccLogzioMetricsRollupRules_CreateComplex(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesAccountId, accountId),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricName, "http_requests_total"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricType, "counter"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesRollupFunction, "sum"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabelsEliminationMethod, "exclude_by"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricType, "COUNTER"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesRollupFunction, "SUM"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabelsEliminationMethod, "EXCLUDE_BY"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabels+".#", "3"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabels+".0", "path"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabels+".1", "method"),
@@ -111,7 +111,7 @@ func TestAccLogzioMetricsRollupRules_CreateInvalidMetricType(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateInvalidMetricType, accountId),
-				ExpectError: regexp.MustCompile("expected metric_type to be one of \\[\"gauge\" \"counter\"\\]"),
+				ExpectError: regexp.MustCompile("expected metric_type to be one of \\[\"GAUGE\" \"COUNTER\"\\]"),
 			},
 		},
 	})
@@ -132,7 +132,7 @@ func TestAccLogzioMetricsRollupRules_CreateInvalidRollupFunction(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateInvalidRollupFunction, accountId),
-				ExpectError: regexp.MustCompile("expected rollup_function to be one of \\[\"sum\" \"min\" \"max\" \"count\" \"last\"\\]"),
+				ExpectError: regexp.MustCompile("expected rollup_function to be one of \\[\"SUM\" \"MIN\" \"MAX\" \"COUNT\" \"LAST\"\\]"),
 			},
 		},
 	})
@@ -153,7 +153,7 @@ func TestAccLogzioMetricsRollupRules_CreateInvalidEliminationMethod(t *testing.T
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateInvalidEliminationMethod, accountId),
-				ExpectError: regexp.MustCompile("expected labels_elimination_method to be one of \\[\"exclude_by\"\\]"),
+				ExpectError: regexp.MustCompile("expected labels_elimination_method to be one of \\[\"EXCLUDE_BY\"\\]"),
 			},
 		},
 	})
@@ -174,7 +174,7 @@ func TestAccLogzioMetricsRollupRules_CreateEmptyMetricName(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateEmptyMetricName, accountId),
-				ExpectError: regexp.MustCompile("metric_name cannot be empty"),
+				ExpectError: regexp.MustCompile("expected length of metric_name to be in the range \\(1 - 255\\)"),
 			},
 		},
 	})
@@ -195,7 +195,7 @@ func TestAccLogzioMetricsRollupRules_CreateEmptyLabels(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateEmptyLabels, accountId),
-				ExpectError: regexp.MustCompile("At least 1 \"labels\" must be configured"),
+				ExpectError: regexp.MustCompile("Attribute labels requires 1 item minimum"),
 			},
 		},
 	})
@@ -220,9 +220,9 @@ func TestAccLogzioMetricsRollupRules_Update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesAccountId, accountId),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricName, "cpu_usage"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricType, "gauge"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesRollupFunction, "last"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabelsEliminationMethod, "exclude_by"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricType, "GAUGE"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesRollupFunction, "LAST"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabelsEliminationMethod, "EXCLUDE_BY"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabels+".#", "1"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabels+".0", "instance_id"),
 				),
@@ -232,9 +232,9 @@ func TestAccLogzioMetricsRollupRules_Update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesAccountId, accountId),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricName, "cpu_usage"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricType, "gauge"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesRollupFunction, "max"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabelsEliminationMethod, "exclude_by"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricType, "GAUGE"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesRollupFunction, "MAX"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabelsEliminationMethod, "EXCLUDE_BY"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabels+".#", "2"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabels+".0", "instance_id"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabels+".1", "region"),

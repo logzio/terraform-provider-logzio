@@ -8,9 +8,9 @@ Provides a Logz.io metrics rollup rules resource. This allows you to manage metr
 resource "logzio_metrics_rollup_rules" "cpu_usage_rollup" {
   account_id               = 123456
   metric_name              = "cpu_usage"
-  metric_type              = "gauge"
-  rollup_function          = "last"
-  labels_elimination_method = "exclude_by"
+  metric_type              = "GAUGE"
+  rollup_function          = "LAST"
+  labels_elimination_method = "EXCLUDE_BY"
   labels                   = ["instance_id", "process_id"]
 }
 ```
@@ -21,9 +21,9 @@ The following arguments are supported:
 
 * `account_id` - (Required) The metrics account ID for the metrics rollup rule.
 * `metric_name` - (Required) The name of the metric for which to create the rollup rule.
-* `metric_type` - (Required) The type of the metric. Valid values are `gauge` and `counter`.
-* `rollup_function` - (Required) The aggregation function to use for rolling up the metric. Valid values are `sum`, `min`, `max`, `count`, and `last`.
-* `labels_elimination_method` - (Required) The method for eliminating labels. Valid values are `exclude_by`.
+* `metric_type` - (Required) The type of the metric. Valid values are `GAUGE` and `COUNTER`.
+* `rollup_function` - (Required) The aggregation function to use for rolling up the metric. Valid values are `SUM`, `MIN`, `MAX`, `COUNT`, and `LAST`.
+* `labels_elimination_method` - (Required) The method for eliminating labels. Valid values are `EXCLUDE_BY`.
 * `labels` - (Required) A list of label names to be eliminated from the metric.
 
 ## Attributes Reference

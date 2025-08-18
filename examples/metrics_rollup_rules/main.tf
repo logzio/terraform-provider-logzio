@@ -30,18 +30,18 @@ variable "account_id" {
 resource "logzio_metrics_rollup_rules" "cpu_usage_rollup" {
   account_id               = var.account_id
   metric_name              = "cpu_usage"
-  metric_type              = "gauge"
-  rollup_function          = "last"
-  labels_elimination_method = "exclude_by"
+  metric_type              = "GAUGE"
+  rollup_function          = "LAST"
+  labels_elimination_method = "EXCLUDE_BY"
   labels                   = ["instance_id", "process_id"]
 }
 
 resource "logzio_metrics_rollup_rules" "request_count_rollup" {
   account_id               = var.account_id
   metric_name              = "http_requests_total"
-  metric_type              = "counter"
-  rollup_function          = "sum"
-  labels_elimination_method = "exclude_by"
+  metric_type              = "COUNTER"
+  rollup_function          = "SUM"
+  labels_elimination_method = "EXCLUDE_BY"
   labels                   = ["path", "user_agent"]
 }
 
