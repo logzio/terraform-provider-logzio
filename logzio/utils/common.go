@@ -1,13 +1,15 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -53,4 +55,46 @@ func InterfaceToMapOfStrings(original interface{}) map[string]string {
 		res[k] = v.(string)
 	}
 	return res
+}
+
+// MakeKibanaObjectDataUnique modifies JSON data to include unique IDs for testing
+func MakeKibanaObjectDataUnique(jsonData string) string {
+	uniqueSuffix := strconv.FormatInt(time.Now().UnixNano(), 10)
+
+	var dataObj map[string]interface{}
+	err := json.Unmarshal([]byte(jsonData), &dataObj)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Update _id field
+	if id, ok := dataObj["_id"].(string); ok {
+		dataObj["_id"] = id + "-" + uniqueSuffix
+	}
+
+	// Update _source.id field
+	if source, ok := dataObj["_source"].(map[string]interface{}); ok {
+		if id, ok := source["id"].(string); ok {
+			source["id"] = id + "-" + uniqueSuffix
+		}
+
+		// Update type-specific id and title fields
+		if sourceType, ok := source["type"].(string); ok {
+			if typeObj, ok := source[sourceType].(map[string]interface{}); ok {
+				if id, ok := typeObj["id"].(string); ok {
+					typeObj["id"] = id + "-" + uniqueSuffix
+				}
+				if title, ok := typeObj["title"].(string); ok {
+					typeObj["title"] = title + " " + uniqueSuffix
+				}
+			}
+		}
+	}
+
+	result, err := json.Marshal(dataObj)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return string(result)
 }
