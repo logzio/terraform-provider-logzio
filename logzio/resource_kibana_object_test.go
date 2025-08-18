@@ -3,13 +3,14 @@ package logzio
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/logzio/logzio_terraform_client/kibana_objects"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
-	"log"
-	"os"
-	"testing"
 )
 
 func TestAccLogzioKibanaObject_CreateUpdateSearch(t *testing.T) {

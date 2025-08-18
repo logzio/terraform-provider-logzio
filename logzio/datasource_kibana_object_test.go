@@ -1,10 +1,11 @@
 package logzio
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 )
 
 func TestAccDataSourceKibanaObject(t *testing.T) {

@@ -2,12 +2,13 @@ package logzio
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"regexp"
 	"strconv"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 )
 
 const (
