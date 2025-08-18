@@ -39,7 +39,7 @@ jobs:
         group: [ 0, 1, 2, 3]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Go
         uses: actions/setup-go@v5
