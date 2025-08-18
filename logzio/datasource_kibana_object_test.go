@@ -1,11 +1,7 @@
 package logzio
 
 import (
-	"fmt"
-	"log"
-	"os"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -28,7 +24,7 @@ func TestAccDataSourceKibanaObject(t *testing.T) {
 				PreventPostDestroyRefresh: true,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.logzio_kibana_object.ds_kb", kibanaObjectKibanaVersionField, "7.2.1"),
-					resource.TestMatchOutput("output_id", regexp.MustCompile("search:tf-provider-datasource-test-search-[0-9]+")),
+					resource.TestMatchOutput("output_id", regexp.MustCompile("search:tf-provider-datasource-test-search")),
 				),
 			},
 		},
@@ -36,18 +32,9 @@ func TestAccDataSourceKibanaObject(t *testing.T) {
 }
 
 func getResourceConfigKibanaObject() string {
-	// Load and make unique the JSON data
-	jsonContent, err := os.ReadFile("testdata/fixtures/kibana_objects/create_search_for_datasource.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	uniqueJsonData := utils.MakeKibanaObjectDataUnique(string(jsonContent))
-	escapedJson := strings.ReplaceAll(uniqueJsonData, `"`, `\"`)
-
-	return fmt.Sprintf(`resource "logzio_kibana_object" "test_kb_for_datasource" {
+	return `resource "logzio_kibana_object" "test_kb_for_datasource" {
   kibana_version = "7.2.1"
-  data = "%s"
+  data = file("./testdata/fixtures/kibana_objects/create_search_for_datasource.json")
 }
-`, escapedJson)
+`
 }

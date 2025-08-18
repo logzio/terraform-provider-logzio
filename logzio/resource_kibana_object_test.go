@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -26,16 +25,16 @@ func TestAccLogzioKibanaObject_CreateUpdateSearch(t *testing.T) {
 				Config: resourceTestKibanaObject(kibana_objects.ExportTypeSearch, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, kibanaObjectKibanaVersionField, "7.2.1"),
-					testCheckKibanaObjectIdContains(resourceName, "search:tf-provider-test-search"),
-					testCheckKibanaObjectTitleContains(resourceName, "tf provider test create search"),
+					resource.TestCheckResourceAttr(resourceName, "id", "search:tf-provider-test-search"),
+					testCheckKibanaObjectTitle(resourceName, "tf provider test create search"),
 				),
 			},
 			{
 				Config: resourceTestKibanaObject(kibana_objects.ExportTypeSearch, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, kibanaObjectKibanaVersionField, "7.2.1"),
-					testCheckKibanaObjectIdContains(resourceName, "search:tf-provider-test-search"),
-					testCheckKibanaObjectTitleContains(resourceName, "tf provider test update search"),
+					resource.TestCheckResourceAttr(resourceName, "id", "search:tf-provider-test-search"),
+					testCheckKibanaObjectTitle(resourceName, "tf provider test update search"),
 				),
 			},
 		},
@@ -54,16 +53,16 @@ func TestAccLogzioKibanaObject_CreateUpdateVisualization(t *testing.T) {
 				Config: resourceTestKibanaObject(kibana_objects.ExportTypeVisualization, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, kibanaObjectKibanaVersionField, "7.2.1"),
-					testCheckKibanaObjectIdContains(resourceName, "visualization:tf-provider-test-visualization"),
-					testCheckKibanaObjectTitleContains(resourceName, "tf provider test create visualization"),
+					resource.TestCheckResourceAttr(resourceName, "id", "visualization:tf-provider-test-visualization"),
+					testCheckKibanaObjectTitle(resourceName, "tf provider test create visualization"),
 				),
 			},
 			{
 				Config: resourceTestKibanaObject(kibana_objects.ExportTypeVisualization, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, kibanaObjectKibanaVersionField, "7.2.1"),
-					testCheckKibanaObjectIdContains(resourceName, "visualization:tf-provider-test-visualization"),
-					testCheckKibanaObjectTitleContains(resourceName, "tf provider test update visualization"),
+					resource.TestCheckResourceAttr(resourceName, "id", "visualization:tf-provider-test-visualization"),
+					testCheckKibanaObjectTitle(resourceName, "tf provider test update visualization"),
 				),
 			},
 		},
@@ -82,16 +81,16 @@ func TestAccLogzioKibanaObject_CreateUpdateDashboard(t *testing.T) {
 				Config: resourceTestKibanaObject(kibana_objects.ExportTypeDashboard, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, kibanaObjectKibanaVersionField, "7.2.1"),
-					testCheckKibanaObjectIdContains(resourceName, "dashboard:tf-provider-test-dashboard"),
-					testCheckKibanaObjectTitleContains(resourceName, "tf provider test create dashboard"),
+					resource.TestCheckResourceAttr(resourceName, "id", "dashboard:tf-provider-test-dashboard"),
+					testCheckKibanaObjectTitle(resourceName, "tf provider test create dashboard"),
 				),
 			},
 			{
 				Config: resourceTestKibanaObject(kibana_objects.ExportTypeDashboard, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, kibanaObjectKibanaVersionField, "7.2.1"),
-					testCheckKibanaObjectIdContains(resourceName, "dashboard:tf-provider-test-dashboard"),
-					testCheckKibanaObjectTitleContains(resourceName, "tf provider test update dashboard"),
+					resource.TestCheckResourceAttr(resourceName, "id", "dashboard:tf-provider-test-dashboard"),
+					testCheckKibanaObjectTitle(resourceName, "tf provider test update dashboard"),
 				),
 			},
 		},
@@ -127,43 +126,7 @@ func getKibanaObjectResourceConfig(path string) string {
 		log.Fatal(err)
 	}
 
-	configStr := fmt.Sprintf("%s", content)
-
-	// For configs that reference JSON files directly, we need to replace them with inline data
-	if strings.Contains(configStr, "file(\"./testdata/fixtures/kibana_objects/") {
-		var jsonPath string
-		if strings.Contains(path, "search") {
-			jsonPath = "testdata/fixtures/kibana_objects/create_search.json"
-		} else if strings.Contains(path, "visualization") {
-			jsonPath = "testdata/fixtures/kibana_objects/create_visualization.json"
-		} else if strings.Contains(path, "dashboard") {
-			jsonPath = "testdata/fixtures/kibana_objects/create_dashboard.json"
-		}
-
-		if jsonPath != "" {
-			jsonContent, err := os.ReadFile(jsonPath)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			uniqueJsonData := utils.MakeKibanaObjectDataUnique(string(jsonContent))
-			// Escape the JSON for Terraform string
-			escapedJson := strings.ReplaceAll(uniqueJsonData, `"`, `\"`)
-
-			// Replace file() reference with inline data
-			configStr = strings.ReplaceAll(configStr,
-				"file(\"./testdata/fixtures/kibana_objects/create_search.json\")",
-				fmt.Sprintf(`"%s"`, escapedJson))
-			configStr = strings.ReplaceAll(configStr,
-				"file(\"./testdata/fixtures/kibana_objects/create_visualization.json\")",
-				fmt.Sprintf(`"%s"`, escapedJson))
-			configStr = strings.ReplaceAll(configStr,
-				"file(\"./testdata/fixtures/kibana_objects/create_dashboard.json\")",
-				fmt.Sprintf(`"%s"`, escapedJson))
-		}
-	}
-
-	return configStr
+	return fmt.Sprintf("%s", content)
 }
 
 func testCheckKibanaObjectTitle(name, expectedTitle string) resource.TestCheckFunc {
@@ -182,46 +145,6 @@ func testCheckKibanaObjectTitle(name, expectedTitle string) resource.TestCheckFu
 		title := dataObj["_source"].(map[string]interface{})[objType].(map[string]interface{})["title"].(string)
 		if title != expectedTitle {
 			return fmt.Errorf("expected %s but got %s", expectedTitle, title)
-		}
-		return nil
-	}
-}
-
-// testCheckKibanaObjectIdContains checks if the object ID contains the expected base ID
-func testCheckKibanaObjectIdContains(name, expectedBaseId string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[name]
-		if !ok {
-			return fmt.Errorf("Not found: %s", name)
-		}
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No object ID is set")
-		}
-
-		if !strings.Contains(rs.Primary.ID, expectedBaseId) {
-			return fmt.Errorf("expected ID to contain %s but got %s", expectedBaseId, rs.Primary.ID)
-		}
-		return nil
-	}
-}
-
-// testCheckKibanaObjectTitleContains checks if the object title contains the expected base title
-func testCheckKibanaObjectTitleContains(name, expectedBaseTitle string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[name]
-		if !ok {
-			return fmt.Errorf("Not found: %s", name)
-		}
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No object ID is set")
-		}
-
-		var dataObj map[string]interface{}
-		json.Unmarshal([]byte(rs.Primary.Attributes[kibanaObjectDataField]), &dataObj)
-		objType := dataObj["_source"].(map[string]interface{})["type"].(string)
-		title := dataObj["_source"].(map[string]interface{})[objType].(map[string]interface{})["title"].(string)
-		if !strings.Contains(title, expectedBaseTitle) {
-			return fmt.Errorf("expected title to contain %s but got %s", expectedBaseTitle, title)
 		}
 		return nil
 	}
