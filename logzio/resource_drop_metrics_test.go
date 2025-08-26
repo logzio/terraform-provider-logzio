@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -338,7 +337,7 @@ func TestAccLogzioDropMetric_CreateDropMetricWithName(t *testing.T) {
 }
 
 func TestAccLogzioDropMetric_CreateDropMetricNameTooLong(t *testing.T) {
-	filterName := strings.Repeat("a", 300)
+	filterName := "test_create_drop_metrics_name_too_long"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
 	defer utils.SleepAfterTest()
