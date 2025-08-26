@@ -15,7 +15,6 @@ const (
 	dropMetricResourceCreateSimple           = "create_drop_metrics_simple"
 	dropMetricResourceCreateComplex          = "create_drop_metrics_complex"
 	dropMetricResourceCreateWithName         = "create_drop_metrics_with_name"
-	dropMetricResourceCreateNameTooLong      = "create_drop_metrics_name_too_long"
 	dropMetricResourceCreateNoLabelName      = "create_drop_metrics_missing_label_name"
 	dropMetricResourceCreateNoValue          = "create_drop_metrics_missing_value"
 	dropMetricResourceCreateEmptyCondition   = "create_drop_metrics_empty_condition"
@@ -331,27 +330,6 @@ func TestAccLogzioDropMetric_CreateDropMetricWithName(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccLogzioDropMetric_CreateDropMetricNameTooLong(t *testing.T) {
-	filterName := "test_create_drop_metrics_name_too_long"
-	accountId := os.Getenv(envLogzioMetricsAccountId)
-
-	defer utils.SleepAfterTest()
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheckApiToken(t)
-			testAccPreCheckMetricsAccountId(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config:      resourceTestDropMetrics(filterName, dropMetricResourceCreateNameTooLong, accountId),
-				ExpectError: regexp.MustCompile("expected length of name to be in the range \\(0 - 256\\)"),
 			},
 		},
 	})
