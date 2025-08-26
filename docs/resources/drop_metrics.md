@@ -34,7 +34,7 @@ resource "logzio_drop_metrics" "test_filter" {
 ## Argument Reference
 * `account_id` - (Required) The Logz.io metrics account ID to which the drop filter applies.
 * `active` - (Optional) If true, the drop filter is active and metrics that match the filter are dropped before indexing. If false, the drop filter is disabled. Defaults to true.
-* `name` - (Optional) name for the drop metric
+* `name` - (Optional) name for the drop metric.
 * `filter` - (Required) The filter object that defines the drop filter criteria. See below for nested schema.
   * `name` - (Required) The name of the metric label to filter on.
   * `value` - (Required) The value of the metric label to match against.
