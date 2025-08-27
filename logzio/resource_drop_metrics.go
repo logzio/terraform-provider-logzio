@@ -3,6 +3,9 @@ package logzio
 import (
 	"context"
 	"fmt"
+	"reflect"
+	"strconv"
+
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -10,13 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/logzio/logzio_terraform_client/drop_metrics"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
-	"reflect"
-	"strconv"
 )
 
 const (
 	dropMetricsIdField              = "drop_metric_id"
 	dropMetricsAccountId            = "account_id"
+	dropMetricsName                 = "name"
 	dropMetricsActive               = "active"
 	dropMetricsFilters              = "filters"
 	dropMetricsFilterOperator       = "operator"
@@ -78,6 +80,11 @@ func resourceDropMetrics() *schema.Resource {
 			dropMetricsAccountId: {
 				Type:     schema.TypeInt,
 				Required: true,
+			},
+			dropMetricsName: {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(0, 256),
 			},
 			dropMetricsActive: {
 				Type:     schema.TypeBool,
@@ -202,6 +209,7 @@ func createCreateUpdateDropMetricsFromSchema(d *schema.ResourceData) drop_metric
 
 	return drop_metrics.CreateUpdateDropMetric{
 		AccountId: int64Attr(d, dropMetricsAccountId),
+		Name:      d.Get(dropMetricsName).(string),
 		Active:    activePtr,
 		Filter: drop_metrics.FilterObject{
 			Operator:   d.Get(dropMetricsFilterOperator).(string),
@@ -214,6 +222,7 @@ func createCreateUpdateDropMetricsFromSchema(d *schema.ResourceData) drop_metric
 func setDropMetrics(d *schema.ResourceData, dropMetric *drop_metrics.DropMetric) {
 	d.Set(dropMetricsIdField, int(dropMetric.Id))
 	d.Set(dropMetricsAccountId, int(dropMetric.AccountId))
+	d.Set(dropMetricsName, dropMetric.Name)
 	d.Set(dropMetricsActive, dropMetric.Active)
 	d.Set(dropMetricsCreatedAt, dropMetric.CreatedAt)
 	d.Set(dropMetricsCreatedBy, dropMetric.CreatedBy)

@@ -2,11 +2,12 @@ package logzio
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 )
 
 func TestAccDataSourceDropMetric(t *testing.T) {
@@ -268,6 +269,77 @@ data "logzio_drop_metrics" "%s" {
     name = "some_label"
     value = "some_value"
     condition = "NOT_EQ"
+  }
+}
+`, datasourceFilterName, accountId)
+}
+
+func TestAccDataSourceDropMetricWithName(t *testing.T) {
+	resourceFilterName := "datasource_test_resource_drop_metric_with_name"
+	datasourceFilterName := "datasource_test_find_drop_metric_with_name"
+	resourceName := "logzio_drop_metrics." + resourceFilterName
+	datasourceName := "data.logzio_drop_metrics." + datasourceFilterName
+	accountId := os.Getenv(envLogzioMetricsAccountId)
+
+	resourceConfig := datasourceResourceTestDropMetricsWithName(resourceFilterName, accountId)
+
+	defer utils.SleepAfterTest()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckApiToken(t)
+			testAccPreCheckMetricsAccountId(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: resourceConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, dropMetricsAccountId, accountId),
+					resource.TestCheckResourceAttr(resourceName, dropMetricsName, "test-datasource-drop-metrics"),
+					resource.TestCheckResourceAttr(resourceName, dropMetricsFilters+".#", "1"),
+					resource.TestCheckResourceAttr(resourceName, dropMetricsFilterOperator, "AND"),
+					resource.TestCheckResourceAttr(resourceName, dropMetricsActive, "true"),
+				),
+			},
+			{
+				Config: resourceConfig +
+					datasourceDropMetricMatchingResourceWithName(datasourceFilterName, accountId),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(datasourceName, dropMetricsAccountId, accountId),
+					resource.TestCheckResourceAttr(datasourceName, dropMetricsName, "test-datasource-drop-metrics"),
+					resource.TestCheckResourceAttr(datasourceName, dropMetricsFilters+".#", "1"),
+					resource.TestCheckResourceAttr(datasourceName, dropMetricsFilterOperator, "AND"),
+					resource.TestCheckResourceAttr(datasourceName, dropMetricsActive, "true"),
+				),
+			},
+		},
+	})
+}
+
+func datasourceResourceTestDropMetricsWithName(resourceFilterName, accountId string) string {
+	return fmt.Sprintf(`resource "logzio_drop_metrics" "%s" {
+  account_id = %s
+  name = "test-datasource-drop-metrics"
+
+  filters {
+    name = "__name__"
+    value = "my_metric"
+    condition = "EQ"
+  }
+}
+`, resourceFilterName, accountId)
+}
+
+func datasourceDropMetricMatchingResourceWithName(datasourceFilterName, accountId string) string {
+	return fmt.Sprintf(`
+data "logzio_drop_metrics" "%s" {
+  account_id = "%s"
+
+  filters {
+    name = "__name__"
+    value = "my_metric"
+    condition = "EQ"
   }
 }
 `, datasourceFilterName, accountId)
