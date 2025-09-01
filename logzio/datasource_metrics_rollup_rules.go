@@ -19,6 +19,10 @@ func dataSourceMetricsRollupRules() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			metricsRollupRulesName: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			metricsRollupRulesMetricName: {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -41,6 +45,65 @@ func dataSourceMetricsRollupRules() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			metricsRollupRulesNewMetricNameTemplate: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			metricsRollupRulesDropOriginalMetric: {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			metricsRollupRulesFilter: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"expression": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"comparison": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"name": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"value": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			metricsRollupRulesNamespaces: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			metricsRollupRulesClusterId: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			metricsRollupRulesIsDeleted: {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			metricsRollupRulesDropPolicyRuleId: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			metricsRollupRulesVersion: {
+				Type:     schema.TypeInt,
+				Computed: true,
 			},
 		},
 	}

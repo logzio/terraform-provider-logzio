@@ -17,14 +17,48 @@ import (
 const (
 	metricsRollupRulesId                      string = "id"
 	metricsRollupRulesAccountId               string = "account_id"
+	metricsRollupRulesName                    string = "name"
 	metricsRollupRulesMetricName              string = "metric_name"
 	metricsRollupRulesMetricType              string = "metric_type"
 	metricsRollupRulesRollupFunction          string = "rollup_function"
 	metricsRollupRulesLabelsEliminationMethod string = "labels_elimination_method"
 	metricsRollupRulesLabels                  string = "labels"
+	metricsRollupRulesNewMetricNameTemplate   string = "new_metric_name_template"
+	metricsRollupRulesDropOriginalMetric      string = "drop_original_metric"
+	metricsRollupRulesFilter                  string = "filter"
+	metricsRollupRulesNamespaces              string = "namespaces"
+	metricsRollupRulesClusterId               string = "cluster_id"
+	metricsRollupRulesIsDeleted               string = "is_deleted"
+	metricsRollupRulesDropPolicyRuleId        string = "drop_policy_rule_id"
+	metricsRollupRulesVersion                 string = "version"
 
 	metricsRollupRulesRetryAttempts = 8
 )
+
+// Helper functions to convert client enums to string slices for validation
+func convertMetricTypesToStrings(types []metrics_rollup_rules.MetricType) []string {
+	result := make([]string, len(types))
+	for i, t := range types {
+		result[i] = string(t)
+	}
+	return result
+}
+
+func convertAggregationFunctionsToStrings(funcs []metrics_rollup_rules.AggregationFunction) []string {
+	result := make([]string, len(funcs))
+	for i, f := range funcs {
+		result[i] = string(f)
+	}
+	return result
+}
+
+func convertLabelsRemovalMethodsToStrings(methods []metrics_rollup_rules.LabelsRemovalMethod) []string {
+	result := make([]string, len(methods))
+	for i, m := range methods {
+		result[i] = string(m)
+	}
+	return result
+}
 
 // Returns the metrics rollup rules client with the api token from the provider
 func metricsRollupRulesClient(m interface{}) *metrics_rollup_rules.MetricsRollupRulesClient {
@@ -42,6 +76,27 @@ func resourceMetricsRollupRules() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+			// Validate MEASUREMENT metric type only allows specific aggregation functions
+			metricType := d.Get(metricsRollupRulesMetricType).(string)
+			rollupFunction := d.Get(metricsRollupRulesRollupFunction).(string)
+
+			if metricType == string(metrics_rollup_rules.MetricTypeMeasurement) {
+				allowedForMeasurement := map[string]bool{
+					string(metrics_rollup_rules.AggSum):   true,
+					string(metrics_rollup_rules.AggMin):   true,
+					string(metrics_rollup_rules.AggMax):   true,
+					string(metrics_rollup_rules.AggCount): true,
+					string(metrics_rollup_rules.AggSumSq): true,
+					string(metrics_rollup_rules.AggMean):  true,
+					string(metrics_rollup_rules.AggLast):  true,
+				}
+				if !allowedForMeasurement[rollupFunction] {
+					return fmt.Errorf("invalid aggregation function %q for MEASUREMENT metric type. Allowed functions: SUM, MIN, MAX, COUNT, SUMSQ, MEAN, LAST", rollupFunction)
+				}
+			}
+			return nil
+		},
 		Schema: map[string]*schema.Schema{
 			metricsRollupRulesId: {
 				Type:     schema.TypeString,
@@ -51,39 +106,34 @@ func resourceMetricsRollupRules() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
+			metricsRollupRulesName: {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(0, 256),
+			},
 			metricsRollupRulesMetricName: {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(1, 255),
+				ExactlyOneOf: []string{metricsRollupRulesMetricName, metricsRollupRulesFilter},
 			},
 			metricsRollupRulesMetricType: {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.StringInSlice(
-					[]string{
-						string(metrics_rollup_rules.MetricTypeGauge),
-						string(metrics_rollup_rules.MetricTypeCounter),
-					}, false),
+					convertMetricTypesToStrings(metrics_rollup_rules.GetValidMetricType()), false),
 			},
 			metricsRollupRulesRollupFunction: {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.StringInSlice(
-					[]string{
-						string(metrics_rollup_rules.AggSum),
-						string(metrics_rollup_rules.AggMin),
-						string(metrics_rollup_rules.AggMax),
-						string(metrics_rollup_rules.AggCount),
-						string(metrics_rollup_rules.AggLast),
-					}, false),
+					convertAggregationFunctionsToStrings(metrics_rollup_rules.GetValidAggregationFunctions()), false),
 			},
 			metricsRollupRulesLabelsEliminationMethod: {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.StringInSlice(
-					[]string{
-						string(metrics_rollup_rules.LabelsExcludeBy),
-					}, false),
+					convertLabelsRemovalMethodsToStrings(metrics_rollup_rules.GetValidLabelsRemovalMethods()), false),
 			},
 			metricsRollupRulesLabels: {
 				Type:     schema.TypeList,
@@ -92,6 +142,71 @@ func resourceMetricsRollupRules() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			metricsRollupRulesNewMetricNameTemplate: {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			metricsRollupRulesDropOriginalMetric: {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			metricsRollupRulesFilter: {
+				Type:         schema.TypeList,
+				Optional:     true,
+				MaxItems:     1,
+				ExactlyOneOf: []string{metricsRollupRulesMetricName, metricsRollupRulesFilter},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"expression": {
+							Type:     schema.TypeList,
+							Required: true,
+							MinItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"comparison": {
+										Type:     schema.TypeString,
+										Required: true,
+										ValidateFunc: validation.StringInSlice(
+											[]string{"EQ", "NOT_EQ", "REGEX_MATCH", "REGEX_NO_MATCH"}, false),
+									},
+									"name": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"value": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			// Computed-only fields
+			metricsRollupRulesNamespaces: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			metricsRollupRulesClusterId: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			metricsRollupRulesIsDeleted: {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			metricsRollupRulesDropPolicyRuleId: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			metricsRollupRulesVersion: {
+				Type:     schema.TypeInt,
+				Computed: true,
 			},
 		},
 	}
@@ -163,10 +278,31 @@ func resourceMetricsRollupRulesDelete(ctx context.Context, d *schema.ResourceDat
 // createCreateUpdateMetricsRollupRuleFromSchema creates a CreateUpdateRollupRule object from the schema
 func createCreateUpdateMetricsRollupRuleFromSchema(d *schema.ResourceData) metrics_rollup_rules.CreateUpdateRollupRule {
 	accountId := int64(d.Get(metricsRollupRulesAccountId).(int))
-	metricName := d.Get(metricsRollupRulesMetricName).(string)
 	metricType := metrics_rollup_rules.MetricType(d.Get(metricsRollupRulesMetricType).(string))
 	rollupFunction := d.Get(metricsRollupRulesRollupFunction).(string)
 	labelsEliminationMethod := d.Get(metricsRollupRulesLabelsEliminationMethod).(string)
+
+	var name string
+	if v, ok := d.GetOk(metricsRollupRulesName); ok {
+		name = v.(string)
+	}
+
+	var metricName string
+	if v, ok := d.GetOk(metricsRollupRulesMetricName); ok {
+		metricName = v.(string)
+	}
+
+	var newMetricNameTemplate *string
+	if v, ok := d.GetOk(metricsRollupRulesNewMetricNameTemplate); ok {
+		s := v.(string)
+		newMetricNameTemplate = &s
+	}
+
+	var dropOriginalMetric *bool
+	if v, ok := d.GetOkExists(metricsRollupRulesDropOriginalMetric); ok {
+		b := v.(bool)
+		dropOriginalMetric = &b
+	}
 
 	labels := []string{}
 	if labelsInterface, ok := d.GetOk(metricsRollupRulesLabels); ok {
@@ -176,24 +312,87 @@ func createCreateUpdateMetricsRollupRuleFromSchema(d *schema.ResourceData) metri
 		}
 	}
 
+	var filter *metrics_rollup_rules.ComplexFilter
+	if f, ok := d.GetOk(metricsRollupRulesFilter); ok {
+		filterList := f.([]interface{})
+		if len(filterList) > 0 && filterList[0] != nil {
+			filterMap := filterList[0].(map[string]interface{})
+			expressionInterface := filterMap["expression"].([]interface{})
+			var expressions []metrics_rollup_rules.SingleFilter
+			for _, e := range expressionInterface {
+				expressionMap := e.(map[string]interface{})
+				expressions = append(expressions, metrics_rollup_rules.SingleFilter{
+					Comparison: metrics_rollup_rules.Comparison(expressionMap["comparison"].(string)),
+					Name:       expressionMap["name"].(string),
+					Value:      expressionMap["value"].(string),
+				})
+			}
+			filter = &metrics_rollup_rules.ComplexFilter{Expression: expressions}
+		}
+	}
+
 	return metrics_rollup_rules.CreateUpdateRollupRule{
 		AccountId:               accountId,
+		Name:                    name,
 		MetricName:              metricName,
 		MetricType:              metricType,
 		RollupFunction:          metrics_rollup_rules.AggregationFunction(rollupFunction),
 		LabelsEliminationMethod: metrics_rollup_rules.LabelsRemovalMethod(labelsEliminationMethod),
 		Labels:                  labels,
+		Filter:                  filter,
+		NewMetricNameTemplate:   newMetricNameTemplate,
+		DropOriginalMetric:      dropOriginalMetric,
 	}
 }
 
 // setMetricsRollupRule sets the resource data from a RollupRule object
 func setMetricsRollupRule(d *schema.ResourceData, rollupRule *metrics_rollup_rules.RollupRule) {
 	d.Set(metricsRollupRulesAccountId, rollupRule.AccountId)
+	d.Set(metricsRollupRulesName, rollupRule.Name)
 	d.Set(metricsRollupRulesMetricName, rollupRule.MetricName)
 	d.Set(metricsRollupRulesMetricType, string(rollupRule.MetricType))
 	d.Set(metricsRollupRulesRollupFunction, rollupRule.RollupFunction)
 	d.Set(metricsRollupRulesLabelsEliminationMethod, rollupRule.LabelsEliminationMethod)
 	d.Set(metricsRollupRulesLabels, rollupRule.Labels)
+	d.Set(metricsRollupRulesNamespaces, rollupRule.Namespaces)
+	d.Set(metricsRollupRulesClusterId, rollupRule.ClusterId)
+	d.Set(metricsRollupRulesIsDeleted, rollupRule.IsDeleted)
+	d.Set(metricsRollupRulesVersion, rollupRule.Version)
+	d.Set(metricsRollupRulesDropOriginalMetric, rollupRule.DropOriginalMetric)
+
+	if rollupRule.DropPolicyRuleId != nil {
+		d.Set(metricsRollupRulesDropPolicyRuleId, *rollupRule.DropPolicyRuleId)
+	} else {
+		d.Set(metricsRollupRulesDropPolicyRuleId, "")
+	}
+
+	if rollupRule.NewMetricNameTemplate != nil {
+		d.Set(metricsRollupRulesNewMetricNameTemplate, *rollupRule.NewMetricNameTemplate)
+	} else {
+		d.Set(metricsRollupRulesNewMetricNameTemplate, "")
+	}
+
+	// Set filter if present
+	if rollupRule.Filter != nil {
+		filterList := []interface{}{
+			map[string]interface{}{
+				"expression": func() []interface{} {
+					expressions := make([]interface{}, len(rollupRule.Filter.Expression))
+					for i, expr := range rollupRule.Filter.Expression {
+						expressions[i] = map[string]interface{}{
+							"comparison": string(expr.Comparison),
+							"name":       expr.Name,
+							"value":      expr.Value,
+						}
+					}
+					return expressions
+				}(),
+			},
+		}
+		d.Set(metricsRollupRulesFilter, filterList)
+	} else {
+		d.Set(metricsRollupRulesFilter, nil)
+	}
 }
 
 // readMetricsRollupRuleUntilConsistent retries reading until the resource state is consistent
