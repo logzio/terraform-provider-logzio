@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-cty/cty/gocty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/logzio/logzio_terraform_client/drop_metrics"
-	"strings"
 )
 
 const (
@@ -55,6 +56,11 @@ func dataSourceDropMetrics() *schema.Resource {
 			},
 			dropMetricsAccountId: {
 				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+			dropMetricsName: {
+				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},

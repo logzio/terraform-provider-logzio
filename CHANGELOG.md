@@ -1,6 +1,9 @@
 # Changes by Version
 
 <!-- next version -->
+## v1.20.1
+- Add `name` field support for [Metrics drop filters](./docs/resources/drop_metrics.md).
+
 ## v1.20.0
 - Upgrade `logzio_client_terraform` to `1.25.0`.
 - Add `gb_threshold` support for [drop filters API](./docs/resources/drop_filter.md).

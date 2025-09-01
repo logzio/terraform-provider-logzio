@@ -24,6 +24,7 @@ provider "logzio" {
 # Simple drop metrics example - drop specific metric by name
 resource "logzio_drop_metrics" "simple_metric_drop" {
   account_id = var.account_id
+  name       = "Drop CPU Usage Metrics"
   
   filters {
     name      = "__name__"
@@ -35,6 +36,7 @@ resource "logzio_drop_metrics" "simple_metric_drop" {
 # Complex drop metrics example - drop metrics based on multiple conditions
 resource "logzio_drop_metrics" "complex_metric_drop" {
   account_id = var.account_id
+  name       = "Drop Staging HTTP Requests with 2xx Status"
   active     = true
   operator   = "AND"
   
@@ -60,6 +62,7 @@ resource "logzio_drop_metrics" "complex_metric_drop" {
 # Drop metrics using regex pattern matching
 resource "logzio_drop_metrics" "regex_metric_drop" {
   account_id = var.account_id
+  name       = "Drop Test Metrics"
   
   filters {
     name      = "__name__"
