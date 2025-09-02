@@ -12,18 +12,19 @@ import (
 )
 
 const (
-	metricsRollupRulesResourceCreateSimple                    = "create_metrics_rollup_rules_simple"
-	metricsRollupRulesResourceCreateComplex                   = "create_metrics_rollup_rules_complex"
-	metricsRollupRulesResourceCreateInvalidMetricType         = "create_metrics_rollup_rules_invalid_metric_type"
-	metricsRollupRulesResourceCreateInvalidRollupFunction     = "create_metrics_rollup_rules_invalid_rollup_function"
-	metricsRollupRulesResourceCreateInvalidEliminationMethod  = "create_metrics_rollup_rules_invalid_elimination_method"
-	metricsRollupRulesResourceCreateEmptyMetricName           = "create_metrics_rollup_rules_empty_metric_name"
-	metricsRollupRulesResourceCreateEmptyLabels               = "create_metrics_rollup_rules_empty_labels"
-	metricsRollupRulesResourceUpdate                          = "update_metrics_rollup_rules"
-	metricsRollupRulesResourceCreateWithFilter                = "create_metrics_rollup_rules_with_filter"
-	metricsRollupRulesResourceCreateMeasurement               = "create_metrics_rollup_rules_measurement"
-	metricsRollupRulesResourceCreateMeasurementInvalid        = "create_metrics_rollup_rules_measurement_invalid"
-	metricsRollupRulesResourceCreateCounterWithRollupFunction = "create_metrics_rollup_rules_counter_with_rollup_function"
+	metricsRollupRulesResourceCreateSimple                       = "create_metrics_rollup_rules_simple"
+	metricsRollupRulesResourceCreateComplex                      = "create_metrics_rollup_rules_complex"
+	metricsRollupRulesResourceCreateInvalidMetricType            = "create_metrics_rollup_rules_invalid_metric_type"
+	metricsRollupRulesResourceCreateInvalidRollupFunction        = "create_metrics_rollup_rules_invalid_rollup_function"
+	metricsRollupRulesResourceCreateInvalidEliminationMethod     = "create_metrics_rollup_rules_invalid_elimination_method"
+	metricsRollupRulesResourceCreateEmptyMetricName              = "create_metrics_rollup_rules_empty_metric_name"
+	metricsRollupRulesResourceCreateEmptyLabels                  = "create_metrics_rollup_rules_empty_labels"
+	metricsRollupRulesResourceUpdate                             = "update_metrics_rollup_rules"
+	metricsRollupRulesResourceCreateWithFilter                   = "create_metrics_rollup_rules_with_filter"
+	metricsRollupRulesResourceCreateMeasurement                  = "create_metrics_rollup_rules_measurement"
+	metricsRollupRulesResourceCreateMeasurementInvalid           = "create_metrics_rollup_rules_measurement_invalid"
+	metricsRollupRulesResourceCreateCounterWithRollupFunction    = "create_metrics_rollup_rules_counter_with_rollup_function"
+	metricsRollupRulesResourceCreateCounterMissingRollupFunction = "create_metrics_rollup_rules_counter_missing_rollup_function"
 )
 
 func TestAccLogzioMetricsRollupRules_CreateSimple(t *testing.T) {
@@ -82,6 +83,7 @@ func TestAccLogzioMetricsRollupRules_CreateComplex(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesAccountId, accountId),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricName, "http_requests_total"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricType, "COUNTER"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesRollupFunction, "SUM"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabelsEliminationMethod, "EXCLUDE_BY"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabels+".#", "3"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabels+".0", "path"),
@@ -267,6 +269,7 @@ func TestAccLogzioMetricsRollupRules_CreateWithFilter(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesAccountId, accountId),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesName, "frontend_metrics_rollup"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricType, "COUNTER"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesRollupFunction, "SUM"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabelsEliminationMethod, "GROUP_BY"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesNewMetricNameTemplate, "rollup.frontend.${metric_name}"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesDropOriginalMetric, "true"),
@@ -342,7 +345,28 @@ func TestAccLogzioMetricsRollupRules_CreateCounterWithRollupFunction(t *testing.
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateCounterWithRollupFunction, accountId),
-				ExpectError: regexp.MustCompile("rollup_function is supported only for GAUGE and MEASUREMENT metrics"),
+				ExpectError: regexp.MustCompile("for COUNTER metrics, rollup_function must be SUM"),
+			},
+		},
+	})
+}
+
+func TestAccLogzioMetricsRollupRules_CreateCounterMissingRollupFunction(t *testing.T) {
+	resourceName := "test_create_metrics_rollup_rules_counter_missing_rollup_function"
+	accountId := os.Getenv(envLogzioMetricsAccountId)
+
+	defer utils.SleepAfterTest()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckApiToken(t)
+			testAccPreCheckMetricsAccountId(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateCounterMissingRollupFunction, accountId),
+				ExpectError: regexp.MustCompile("rollup_function must be set for COUNTER metrics"),
 			},
 		},
 	})

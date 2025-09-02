@@ -1,6 +1,7 @@
 resource "logzio_metrics_rollup_rules" "%s" {
   account_id = %s
   metric_type = "COUNTER"
+  rollup_function = "SUM"
   labels_elimination_method = "GROUP_BY"
   labels = ["service", "region"]
   

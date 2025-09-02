@@ -105,8 +105,11 @@ func resourceMetricsRollupRules() *schema.Resource {
 			case string(metrics_rollup_rules.MetricTypeCounter),
 				string(metrics_rollup_rules.MetricTypeDeltaCounter),
 				string(metrics_rollup_rules.MetricTypeCumulativeCounter):
-				if rollupFunction != "" {
-					return fmt.Errorf("rollup_function is supported only for GAUGE and MEASUREMENT metrics")
+				if rollupFunction == "" {
+					return fmt.Errorf("rollup_function must be set for %s metrics", metricType)
+				}
+				if rollupFunction != string(metrics_rollup_rules.AggSum) {
+					return fmt.Errorf("for %s metrics, rollup_function must be SUM", metricType)
 				}
 			}
 			return nil
