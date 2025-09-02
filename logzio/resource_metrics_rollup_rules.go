@@ -77,11 +77,19 @@ func resourceMetricsRollupRules() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-			// Validate MEASUREMENT metric type only allows specific aggregation functions
 			metricType := d.Get(metricsRollupRulesMetricType).(string)
 			rollupFunction := d.Get(metricsRollupRulesRollupFunction).(string)
 
-			if metricType == string(metrics_rollup_rules.MetricTypeMeasurement) {
+			switch metricType {
+			case string(metrics_rollup_rules.MetricTypeGauge):
+				if rollupFunction == "" {
+					return fmt.Errorf("rollup_function must be set for GAUGE metrics")
+				}
+			case string(metrics_rollup_rules.MetricTypeMeasurement):
+				if rollupFunction == "" {
+					return fmt.Errorf("rollup_function must be set for MEASUREMENT metrics")
+				}
+				// Validate MEASUREMENT allows only specific aggregation functions
 				allowedForMeasurement := map[string]bool{
 					string(metrics_rollup_rules.AggSum):   true,
 					string(metrics_rollup_rules.AggMin):   true,
@@ -94,6 +102,12 @@ func resourceMetricsRollupRules() *schema.Resource {
 				if !allowedForMeasurement[rollupFunction] {
 					return fmt.Errorf("invalid aggregation function %q for MEASUREMENT metric type. Allowed functions: SUM, MIN, MAX, COUNT, SUMSQ, MEAN, LAST", rollupFunction)
 				}
+			case string(metrics_rollup_rules.MetricTypeCounter),
+				string(metrics_rollup_rules.MetricTypeDeltaCounter),
+				string(metrics_rollup_rules.MetricTypeCumulativeCounter):
+				if rollupFunction != "" {
+					return fmt.Errorf("rollup_function is supported only for GAUGE and MEASUREMENT metrics")
+				}
 			}
 			return nil
 		},
@@ -101,20 +115,19 @@ func resourceMetricsRollupRules() *schema.Resource {
 			metricsRollupRulesId: {
 				Type:     schema.TypeString,
 				Computed: true,
+				ForceNew: true,
 			},
 			metricsRollupRulesAccountId: {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
 			metricsRollupRulesName: {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(0, 256),
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			metricsRollupRulesMetricName: {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(1, 255),
 				ExactlyOneOf: []string{metricsRollupRulesMetricName, metricsRollupRulesFilter},
 			},
 			metricsRollupRulesMetricType: {
@@ -125,7 +138,7 @@ func resourceMetricsRollupRules() *schema.Resource {
 			},
 			metricsRollupRulesRollupFunction: {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ValidateFunc: validation.StringInSlice(
 					convertAggregationFunctionsToStrings(metrics_rollup_rules.GetValidAggregationFunctions()), false),
 			},
@@ -279,8 +292,12 @@ func resourceMetricsRollupRulesDelete(ctx context.Context, d *schema.ResourceDat
 func createCreateUpdateMetricsRollupRuleFromSchema(d *schema.ResourceData) metrics_rollup_rules.CreateUpdateRollupRule {
 	accountId := int64(d.Get(metricsRollupRulesAccountId).(int))
 	metricType := metrics_rollup_rules.MetricType(d.Get(metricsRollupRulesMetricType).(string))
-	rollupFunction := d.Get(metricsRollupRulesRollupFunction).(string)
 	labelsEliminationMethod := d.Get(metricsRollupRulesLabelsEliminationMethod).(string)
+
+	var rollupFunction metrics_rollup_rules.AggregationFunction
+	if v, ok := d.GetOk(metricsRollupRulesRollupFunction); ok {
+		rollupFunction = metrics_rollup_rules.AggregationFunction(v.(string))
+	}
 
 	var name string
 	if v, ok := d.GetOk(metricsRollupRulesName); ok {
@@ -336,7 +353,7 @@ func createCreateUpdateMetricsRollupRuleFromSchema(d *schema.ResourceData) metri
 		Name:                    name,
 		MetricName:              metricName,
 		MetricType:              metricType,
-		RollupFunction:          metrics_rollup_rules.AggregationFunction(rollupFunction),
+		RollupFunction:          rollupFunction,
 		LabelsEliminationMethod: metrics_rollup_rules.LabelsRemovalMethod(labelsEliminationMethod),
 		Labels:                  labels,
 		Filter:                  filter,
