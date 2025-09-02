@@ -44,6 +44,7 @@ resource "logzio_metrics_rollup_rules" "request_count_rollup" {
   name                      = "HTTP Requests Rollup"
   metric_name               = "http_requests_total"
   metric_type               = "COUNTER"
+  rollup_function           = "SUM"
   labels_elimination_method = "EXCLUDE_BY"
   labels                    = ["path", "user_agent"]
 }
@@ -53,6 +54,7 @@ resource "logzio_metrics_rollup_rules" "frontend_service_rollup" {
   account_id                = var.account_id
   name                      = "Frontend Service Metrics"
   metric_type               = "COUNTER"
+  rollup_function           = "SUM"
   labels_elimination_method = "GROUP_BY"
   labels                    = ["service", "region", "environment"]
   
@@ -90,6 +92,7 @@ resource "logzio_metrics_rollup_rules" "error_rate_rollup" {
   name                      = "Error Rate Rollup"
   metric_name               = "errors_delta"
   metric_type               = "DELTA_COUNTER"
+  rollup_function           = "SUM"
   labels_elimination_method = "GROUP_BY"
   labels                    = ["service", "region"]
 }
