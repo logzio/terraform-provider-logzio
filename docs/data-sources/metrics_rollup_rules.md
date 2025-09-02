@@ -43,7 +43,7 @@ The following attributes are exported:
 * `name` - The human-readable name of the rollup rule.
 * `metric_name` - The name of the metric (if rule is metric name-based).
 * `metric_type` - The type of the metric (GAUGE, COUNTER, DELTA_COUNTER, CUMULATIVE_COUNTER, or MEASUREMENT).
-* `rollup_function` - The aggregation function used for rolling up the metric.
+* `rollup_function` - The aggregation function used for rolling up the metric. Empty for COUNTER, DELTA_COUNTER, and CUMULATIVE_COUNTER types.
 * `labels_elimination_method` - The method for eliminating labels (EXCLUDE_BY or GROUP_BY).
 * `labels` - The list of label names being eliminated from the metric.
 * `new_metric_name_template` - The template for generating new metric names.

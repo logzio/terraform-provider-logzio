@@ -24,7 +24,6 @@ resource "logzio_metrics_rollup_rules" "frontend_metrics_rollup" {
   account_id                = 123456
   name                      = "Frontend Service Metrics"
   metric_type               = "COUNTER"
-  rollup_function           = "SUM"
   labels_elimination_method = "GROUP_BY"
   labels                    = ["service", "region"]
   
@@ -66,10 +65,10 @@ The following arguments are supported:
 * `account_id` - (Required) The metrics account ID for the metrics rollup rule.
 * `metric_name` - (Optional) The name of the metric for which to create the rollup rule. Either `metric_name` or `filter` must be specified, but not both.
 * `metric_type` - (Required) The type of the metric. Valid values are `GAUGE`, `COUNTER`, `DELTA_COUNTER`, `CUMULATIVE_COUNTER`, and `MEASUREMENT`.
-* `rollup_function` - (Required) The aggregation function to use for rolling up the metric. Valid values include `SUM`, `MIN`, `MAX`, `COUNT`, `LAST`, `MEAN`, `MEDIAN`, `STDEV`, `SUMSQ`, and percentiles (`P10`, `P20`, `P25`, `P30`, `P40`, `P50`, `P60`, `P70`, `P75`, `P80`, `P90`, `P95`, `P99`, `P999`, `P9999`). Note: For `MEASUREMENT` metric type, only `SUM`, `MIN`, `MAX`, `COUNT`, `SUMSQ`, `MEAN`, and `LAST` are allowed.
+* `rollup_function` - (Optional) The aggregation function to use for rolling up the metric. Required for `GAUGE` and `MEASUREMENT` metric types, not allowed for `COUNTER`, `DELTA_COUNTER`, and `CUMULATIVE_COUNTER` types. Valid values include `SUM`, `MIN`, `MAX`, `COUNT`, `LAST`, `MEAN`, `MEDIAN`, `STDEV`, `SUMSQ`, and percentiles (`P10`, `P20`, `P25`, `P30`, `P40`, `P50`, `P60`, `P70`, `P75`, `P80`, `P90`, `P95`, `P99`, `P999`, `P9999`). Note: For `MEASUREMENT` metric type, only `SUM`, `MIN`, `MAX`, `COUNT`, `SUMSQ`, `MEAN`, and `LAST` are allowed.
 * `labels_elimination_method` - (Required) The method for eliminating labels. Valid values are `EXCLUDE_BY` and `GROUP_BY`.
 * `labels` - (Required) A list of label names to be eliminated from the metric.
-* `name` - (Optional) A human-readable name for the rollup rule (max 256 characters).
+* `name` - (Optional) A human-readable name for the rollup rule.
 * `filter` - (Optional) A filter block to match metrics by label values. Either `metric_name` or `filter` must be specified, but not both.
   * `expression` - (Required) A list of filter expressions.
     * `comparison` - (Required) The comparison operator. Valid values are `EQ`, `NOT_EQ`, `REGEX_MATCH`, and `REGEX_NO_MATCH`.
