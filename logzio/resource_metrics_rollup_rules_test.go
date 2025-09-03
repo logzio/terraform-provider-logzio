@@ -137,7 +137,7 @@ func TestAccLogzioMetricsRollupRules_CreateInvalidRollupFunction(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateInvalidRollupFunction, accountId),
-				ExpectError: regexp.MustCompile("*"),
+				ExpectError: regexp.MustCompile(".*"),
 			},
 		},
 	})
@@ -158,7 +158,7 @@ func TestAccLogzioMetricsRollupRules_CreateInvalidEliminationMethod(t *testing.T
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateInvalidEliminationMethod, accountId),
-				ExpectError: regexp.MustCompile("*"),
+				ExpectError: regexp.MustCompile(".*"),
 			},
 		},
 	})
@@ -179,7 +179,7 @@ func TestAccLogzioMetricsRollupRules_CreateEmptyMetricName(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateEmptyMetricName, accountId),
-				ExpectError: regexp.MustCompile("*"),
+				ExpectError: regexp.MustCompile(".*"),
 			},
 		},
 	})
@@ -200,7 +200,7 @@ func TestAccLogzioMetricsRollupRules_CreateEmptyLabels(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateEmptyLabels, accountId),
-				ExpectError: regexp.MustCompile("*"),
+				ExpectError: regexp.MustCompile(".*"),
 			},
 		},
 	})
@@ -324,7 +324,7 @@ func TestAccLogzioMetricsRollupRules_CreateMeasurementInvalid(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateMeasurementInvalid, accountId),
-				ExpectError: regexp.MustCompile("*"),
+				ExpectError: regexp.MustCompile(".*"),
 			},
 		},
 	})
@@ -345,7 +345,7 @@ func TestAccLogzioMetricsRollupRules_CreateCounterWithRollupFunction(t *testing.
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateCounterWithRollupFunction, accountId),
-				ExpectError: regexp.MustCompile("*"),
+				ExpectError: regexp.MustCompile(".*"),
 			},
 		},
 	})
@@ -366,7 +366,7 @@ func TestAccLogzioMetricsRollupRules_CreateCounterMissingRollupFunction(t *testi
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateCounterMissingRollupFunction, accountId),
-				ExpectError: regexp.MustCompile("*"),
+				ExpectError: regexp.MustCompile(".*"),
 			},
 		},
 	})
