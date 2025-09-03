@@ -2,7 +2,7 @@
 
 <!-- next version -->
 ## v1.21.0
-- Upgrade `logzio_client_terraform` to `1.27.1`.
+- Upgrade `logzio_client_terraform` to `1.27.2`.
 -  Add support for [Metrics Rollup Rules](./docs/resources/metrics_rollup_rules.md)
 
 ## v1.20.1
