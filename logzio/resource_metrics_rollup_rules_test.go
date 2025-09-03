@@ -116,7 +116,7 @@ func TestAccLogzioMetricsRollupRules_CreateInvalidMetricType(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateInvalidMetricType, accountId),
-				ExpectError: regexp.MustCompile("expected metric_type to be one of \\[\"GAUGE\" \"COUNTER\"\\]"),
+				ExpectError: regexp.MustCompile("invalid metric type.*must be one of"),
 			},
 		},
 	})
@@ -137,7 +137,7 @@ func TestAccLogzioMetricsRollupRules_CreateInvalidRollupFunction(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateInvalidRollupFunction, accountId),
-				ExpectError: regexp.MustCompile("expected rollup_function to be one of \\[\"SUM\" \"MIN\" \"MAX\" \"COUNT\" \"LAST\"\\]"),
+				ExpectError: regexp.MustCompile("invalid aggregation function.*must be one of"),
 			},
 		},
 	})
@@ -158,7 +158,7 @@ func TestAccLogzioMetricsRollupRules_CreateInvalidEliminationMethod(t *testing.T
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateInvalidEliminationMethod, accountId),
-				ExpectError: regexp.MustCompile("expected labels_elimination_method to be one of \\[\"EXCLUDE_BY\"\\]"),
+				ExpectError: regexp.MustCompile("invalid labels elimination method.*must be one of"),
 			},
 		},
 	})
@@ -179,7 +179,7 @@ func TestAccLogzioMetricsRollupRules_CreateEmptyMetricName(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateEmptyMetricName, accountId),
-				ExpectError: regexp.MustCompile("\"metric_name\": one of `metric_name,filter` must be specified"),
+				ExpectError: regexp.MustCompile("either 'metricName' or 'filter' must be provided"),
 			},
 		},
 	})
@@ -324,7 +324,7 @@ func TestAccLogzioMetricsRollupRules_CreateMeasurementInvalid(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateMeasurementInvalid, accountId),
-				ExpectError: regexp.MustCompile("invalid aggregation function \"P99\" for MEASUREMENT metric type"),
+				ExpectError: regexp.MustCompile("invalid aggregation function for MEASUREMENT metric type.*must be one of"),
 			},
 		},
 	})
