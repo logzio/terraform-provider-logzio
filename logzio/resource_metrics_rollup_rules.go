@@ -32,6 +32,21 @@ const (
 	metricsRollupRulesDropPolicyRuleId        string = "drop_policy_rule_id"
 	metricsRollupRulesVersion                 string = "version"
 
+	metricsRollupRulesFilterExpression string = "expression"
+	metricsRollupRulesFilterComparison string = "comparison"
+	metricsRollupRulesFilterName       string = "name"
+	metricsRollupRulesFilterValue      string = "value"
+
+	comparisonEq           = "EQ"
+	comparisonNotEq        = "NOT_EQ"
+	comparisonRegexMatch   = "REGEX_MATCH"
+	comparisonRegexNoMatch = "REGEX_NO_MATCH"
+
+	errorIdMustBeSpecified     = "id must be specified for data source"
+	errorNoMatchingRollupRules = "couldn't find metrics rollup rule with specified attributes"
+	errorMultipleMatchingRules = "found multiple (%d) metrics rollup rules matching the criteria, please specify an id or add more search criteria"
+	errorRollupRuleNotFound    = "could not find metrics rollup rule with id %s"
+
 	metricsRollupRulesRetryAttempts = 8
 )
 
@@ -123,6 +138,7 @@ func resourceMetricsRollupRules() *schema.Resource {
 			metricsRollupRulesAccountId: {
 				Type:     schema.TypeInt,
 				Required: true,
+				ForceNew: true,
 			},
 			metricsRollupRulesName: {
 				Type:     schema.TypeString,
@@ -131,6 +147,7 @@ func resourceMetricsRollupRules() *schema.Resource {
 			metricsRollupRulesMetricName: {
 				Type:         schema.TypeString,
 				Optional:     true,
+				ForceNew:     true,
 				ExactlyOneOf: []string{metricsRollupRulesMetricName, metricsRollupRulesFilter},
 			},
 			metricsRollupRulesMetricType: {
@@ -174,23 +191,23 @@ func resourceMetricsRollupRules() *schema.Resource {
 				ExactlyOneOf: []string{metricsRollupRulesMetricName, metricsRollupRulesFilter},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"expression": {
+						metricsRollupRulesFilterExpression: {
 							Type:     schema.TypeList,
 							Required: true,
 							MinItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"comparison": {
+									metricsRollupRulesFilterComparison: {
 										Type:     schema.TypeString,
 										Required: true,
 										ValidateFunc: validation.StringInSlice(
-											[]string{"EQ", "NOT_EQ", "REGEX_MATCH", "REGEX_NO_MATCH"}, false),
+											[]string{comparisonEq, comparisonNotEq, comparisonRegexMatch, comparisonRegexNoMatch}, false),
 									},
-									"name": {
+									metricsRollupRulesFilterName: {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"value": {
+									metricsRollupRulesFilterValue: {
 										Type:     schema.TypeString,
 										Required: true,
 									},
@@ -337,14 +354,14 @@ func createCreateUpdateMetricsRollupRuleFromSchema(d *schema.ResourceData) metri
 		filterList := f.([]interface{})
 		if len(filterList) > 0 && filterList[0] != nil {
 			filterMap := filterList[0].(map[string]interface{})
-			expressionInterface := filterMap["expression"].([]interface{})
+			expressionInterface := filterMap[metricsRollupRulesFilterExpression].([]interface{})
 			var expressions []metrics_rollup_rules.SingleFilter
 			for _, e := range expressionInterface {
 				expressionMap := e.(map[string]interface{})
 				expressions = append(expressions, metrics_rollup_rules.SingleFilter{
-					Comparison: metrics_rollup_rules.Comparison(expressionMap["comparison"].(string)),
-					Name:       expressionMap["name"].(string),
-					Value:      expressionMap["value"].(string),
+					Comparison: metrics_rollup_rules.Comparison(expressionMap[metricsRollupRulesFilterComparison].(string)),
+					Name:       expressionMap[metricsRollupRulesFilterName].(string),
+					Value:      expressionMap[metricsRollupRulesFilterValue].(string),
 				})
 			}
 			filter = &metrics_rollup_rules.ComplexFilter{Expression: expressions}
@@ -396,13 +413,13 @@ func setMetricsRollupRule(d *schema.ResourceData, rollupRule *metrics_rollup_rul
 	if rollupRule.Filter != nil {
 		filterList := []interface{}{
 			map[string]interface{}{
-				"expression": func() []interface{} {
+				metricsRollupRulesFilterExpression: func() []interface{} {
 					expressions := make([]interface{}, len(rollupRule.Filter.Expression))
 					for i, expr := range rollupRule.Filter.Expression {
 						expressions[i] = map[string]interface{}{
-							"comparison": string(expr.Comparison),
-							"name":       expr.Name,
-							"value":      expr.Value,
+							metricsRollupRulesFilterComparison: string(expr.Comparison),
+							metricsRollupRulesFilterName:       expr.Name,
+							metricsRollupRulesFilterValue:      expr.Value,
 						}
 					}
 					return expressions
