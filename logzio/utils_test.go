@@ -1,9 +1,12 @@
 package logzio
 
 import (
+	"math/rand"
+	"strconv"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"time"
 )
 
 func awaitApply(sec int) resource.TestCheckFunc {
@@ -11,4 +14,9 @@ func awaitApply(sec int) resource.TestCheckFunc {
 		time.Sleep(time.Duration(sec) * time.Second)
 		return nil
 	}
+}
+
+func getRandomId() string {
+	rand.New(rand.NewSource(time.Now().UnixNano()))
+	return strconv.Itoa(rand.Intn(10000))
 }
