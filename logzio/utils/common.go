@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -8,6 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -54,4 +58,46 @@ func InterfaceToMapOfStrings(original interface{}) map[string]string {
 		res[k] = v.(string)
 	}
 	return res
+}
+
+func ConvertToStrings[T ~string](items []T) []string {
+	result := make([]string, len(items))
+	for i, v := range items {
+		result[i] = string(v)
+	}
+	return result
+}
+
+// ReadUntilConsistent retries the readFunc until the isConsistent function returns true or the retryAttempts is exhausted.
+func ReadUntilConsistent(
+	ctx context.Context,
+	d *schema.ResourceData,
+	m interface{},
+	retryAttempts int,
+	operation string,
+	readFunc func(context.Context, *schema.ResourceData, interface{}) diag.Diagnostics,
+	isConsistent func() bool) diag.Diagnostics {
+	err := retry.Do(
+		func() error {
+			diags := readFunc(ctx, d, m)
+			if diags != nil && len(diags) > 0 {
+				return fmt.Errorf("failed to read after %s: %v", operation, diags)
+			}
+			if !isConsistent() {
+				return fmt.Errorf("resource state not consistent after %s", operation)
+			}
+			return nil
+		},
+		retry.RetryIf(func(err error) bool {
+			return err != nil
+		}),
+		retry.Attempts(uint(retryAttempts)),
+		retry.DelayType(retry.BackOffDelay),
+	)
+
+	if err != nil {
+		tflog.Warn(ctx, fmt.Sprintf("Failed to achieve consistency after %s: %v", operation, err))
+	}
+
+	return nil
 }

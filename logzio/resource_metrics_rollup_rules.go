@@ -6,12 +6,12 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/logzio/logzio_terraform_client/metrics_rollup_rules"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 )
 
 const (
@@ -91,44 +91,7 @@ func resourceMetricsRollupRules() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-			metricType := d.Get(metricsRollupRulesMetricType).(string)
-			rollupFunction := d.Get(metricsRollupRulesRollupFunction).(string)
-
-			switch metricType {
-			case string(metrics_rollup_rules.MetricTypeGauge):
-				if rollupFunction == "" {
-					return fmt.Errorf("rollup_function must be set for GAUGE metrics")
-				}
-			case string(metrics_rollup_rules.MetricTypeMeasurement):
-				if rollupFunction == "" {
-					return fmt.Errorf("rollup_function must be set for MEASUREMENT metrics")
-				}
-				// Validate MEASUREMENT allows only specific aggregation functions
-				allowedForMeasurement := map[string]bool{
-					string(metrics_rollup_rules.AggSum):   true,
-					string(metrics_rollup_rules.AggMin):   true,
-					string(metrics_rollup_rules.AggMax):   true,
-					string(metrics_rollup_rules.AggCount): true,
-					string(metrics_rollup_rules.AggSumSq): true,
-					string(metrics_rollup_rules.AggMean):  true,
-					string(metrics_rollup_rules.AggLast):  true,
-				}
-				if !allowedForMeasurement[rollupFunction] {
-					return fmt.Errorf("invalid aggregation function %q for MEASUREMENT metric type. Allowed functions: SUM, MIN, MAX, COUNT, SUMSQ, MEAN, LAST", rollupFunction)
-				}
-			case string(metrics_rollup_rules.MetricTypeCounter),
-				string(metrics_rollup_rules.MetricTypeDeltaCounter),
-				string(metrics_rollup_rules.MetricTypeCumulativeCounter):
-				if rollupFunction == "" {
-					return fmt.Errorf("rollup_function must be set for %s metrics", metricType)
-				}
-				if rollupFunction != string(metrics_rollup_rules.AggSum) {
-					return fmt.Errorf("for %s metrics, rollup_function must be SUM", metricType)
-				}
-			}
-			return nil
-		},
+		CustomizeDiff: validateRollup,
 		Schema: map[string]*schema.Schema{
 			metricsRollupRulesId: {
 				Type:     schema.TypeString,
@@ -154,19 +117,19 @@ func resourceMetricsRollupRules() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.StringInSlice(
-					convertMetricTypesToStrings(metrics_rollup_rules.GetValidMetricType()), false),
+					utils.ConvertToStrings(metrics_rollup_rules.GetValidMetricType()), false),
 			},
 			metricsRollupRulesRollupFunction: {
 				Type:     schema.TypeString,
 				Optional: true,
 				ValidateFunc: validation.StringInSlice(
-					convertAggregationFunctionsToStrings(metrics_rollup_rules.GetValidAggregationFunctions()), false),
+					utils.ConvertToStrings(metrics_rollup_rules.GetValidAggregationFunctions()), false),
 			},
 			metricsRollupRulesLabelsEliminationMethod: {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.StringInSlice(
-					convertLabelsRemovalMethodsToStrings(metrics_rollup_rules.GetValidLabelsRemovalMethods()), false),
+					utils.ConvertToStrings(metrics_rollup_rules.GetValidLabelsRemovalMethods()), false),
 			},
 			metricsRollupRulesLabels: {
 				Type:     schema.TypeList,
@@ -245,6 +208,46 @@ func resourceMetricsRollupRules() *schema.Resource {
 	}
 }
 
+// validateRollup validates the rollup rule configuration based on metric type and aggregation function
+func validateRollup(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+	metricType := d.Get(metricsRollupRulesMetricType).(string)
+	rollupFunction := d.Get(metricsRollupRulesRollupFunction).(string)
+
+	switch metricType {
+	case string(metrics_rollup_rules.MetricTypeGauge):
+		if rollupFunction == "" {
+			return fmt.Errorf("rollup_function must be set for GAUGE metrics")
+		}
+	case string(metrics_rollup_rules.MetricTypeMeasurement):
+		if rollupFunction == "" {
+			return fmt.Errorf("rollup_function must be set for MEASUREMENT metrics")
+		}
+		// Validate MEASUREMENT allows only specific aggregation functions
+		allowedForMeasurement := map[string]bool{
+			string(metrics_rollup_rules.AggSum):   true,
+			string(metrics_rollup_rules.AggMin):   true,
+			string(metrics_rollup_rules.AggMax):   true,
+			string(metrics_rollup_rules.AggCount): true,
+			string(metrics_rollup_rules.AggSumSq): true,
+			string(metrics_rollup_rules.AggMean):  true,
+			string(metrics_rollup_rules.AggLast):  true,
+		}
+		if !allowedForMeasurement[rollupFunction] {
+			return fmt.Errorf("invalid aggregation function %q for MEASUREMENT metric type. Allowed functions: SUM, MIN, MAX, COUNT, SUMSQ, MEAN, LAST", rollupFunction)
+		}
+	case string(metrics_rollup_rules.MetricTypeCounter),
+		string(metrics_rollup_rules.MetricTypeDeltaCounter),
+		string(metrics_rollup_rules.MetricTypeCumulativeCounter):
+		if rollupFunction == "" {
+			return fmt.Errorf("rollup_function must be set for %s metrics", metricType)
+		}
+		if rollupFunction != string(metrics_rollup_rules.AggSum) {
+			return fmt.Errorf("for %s metrics, rollup_function must be SUM", metricType)
+		}
+	}
+	return nil
+}
+
 // resourceMetricsRollupRulesCreate creates a new metrics rollup rule in logzio
 func resourceMetricsRollupRulesCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	createRollupRule := createCreateUpdateMetricsRollupRuleFromSchema(d)
@@ -288,7 +291,7 @@ func resourceMetricsRollupRulesUpdate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	diags := readMetricsRollupRuleUntilConsistent(ctx, d, m, metricsRollupRulesRetryAttempts, "update rollup rule", func() bool {
+	diags := utils.ReadUntilConsistent(ctx, d, m, metricsRollupRulesRetryAttempts, "update rollup rule", resourceMetricsRollupRulesRead, func() bool {
 		createRule := createCreateUpdateMetricsRollupRuleFromSchema(d)
 		return reflect.DeepEqual(createRule, updateRule)
 	})
@@ -430,31 +433,4 @@ func setMetricsRollupRule(d *schema.ResourceData, rollupRule *metrics_rollup_rul
 	} else {
 		d.Set(metricsRollupRulesFilter, nil)
 	}
-}
-
-// readMetricsRollupRuleUntilConsistent retries reading until the resource state is consistent
-func readMetricsRollupRuleUntilConsistent(ctx context.Context, d *schema.ResourceData, m interface{}, retryAttempts int, operation string, isConsistent func() bool) diag.Diagnostics {
-	err := retry.Do(
-		func() error {
-			err := resourceMetricsRollupRulesRead(ctx, d, m)
-			if err != nil && len(err) > 0 {
-				return fmt.Errorf("failed to read after %s: %v", operation, err)
-			}
-			if !isConsistent() {
-				return fmt.Errorf("resource state not consistent after %s", operation)
-			}
-			return nil
-		},
-		retry.RetryIf(func(err error) bool {
-			return err != nil
-		}),
-		retry.Attempts(uint(retryAttempts)),
-		retry.DelayType(retry.BackOffDelay),
-	)
-
-	if err != nil {
-		tflog.Warn(ctx, fmt.Sprintf("Failed to achieve consistency after %s: %v", operation, err))
-	}
-
-	return nil
 }

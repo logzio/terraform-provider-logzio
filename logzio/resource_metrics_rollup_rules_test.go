@@ -271,7 +271,7 @@ func TestAccLogzioMetricsRollupRules_CreateWithFilter(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesMetricType, "COUNTER"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesRollupFunction, "SUM"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesLabelsEliminationMethod, "GROUP_BY"),
-					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesNewMetricNameTemplate, "rollup.frontend.${metric_name}"),
+					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesNewMetricNameTemplate, "rollup.frontend.{{metricName}}"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesDropOriginalMetric, "true"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesFilter+".#", "1"),
 					resource.TestCheckResourceAttr(resourceFullName, metricsRollupRulesFilter+".0.expression.#", "2"),
