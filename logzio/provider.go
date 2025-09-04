@@ -3,6 +3,7 @@ package logzio
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -31,6 +32,7 @@ const (
 	resourceGrafanaAlertRuleType          = "logzio_grafana_alert_rule"
 	resourceGrafanaNotificationPolicyType = "logzio_grafana_notification_policy"
 	resourceGrafanaContactPointType       = "logzio_grafana_contact_point"
+	resourceMetricsRollupRulesType        = "logzio_metrics_rollup_rules"
 
 	envLogzioApiToken     = "LOGZIO_API_TOKEN"
 	envLogzioRegion       = "LOGZIO_REGION"
@@ -83,6 +85,7 @@ func ProviderWithEnvVar(apiTokenEnvVar string) *schema.Provider {
 			resourceS3FetcherType:            dataSourceS3Fetcher(),
 			resourceGrafanaDashboardType:     dataSourceGrafanaDashboard(),
 			resourceGrafanaFolderType:        dataSourceGrafanaFolder(),
+			resourceMetricsRollupRulesType:   dataSourceMetricsRollupRules(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			resourceEndpointType:                  resourceEndpoint(),
@@ -103,6 +106,7 @@ func ProviderWithEnvVar(apiTokenEnvVar string) *schema.Provider {
 			resourceGrafanaAlertRuleType:          resourceGrafanaAlertRule(),
 			resourceGrafanaNotificationPolicyType: resourceGrafanaNotificationPolicy(),
 			resourceGrafanaContactPointType:       resourceGrafanaContactPoint(),
+			resourceMetricsRollupRulesType:        resourceMetricsRollupRules(),
 		},
 		ConfigureContextFunc: providerConfigureWrapper,
 	}

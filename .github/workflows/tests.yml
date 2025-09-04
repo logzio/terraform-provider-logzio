@@ -54,4 +54,4 @@ jobs:
         run: |
           TEST_NAMES=$(cat ../.github/test-groups/group_${{ matrix.group }}.txt | tr '\n' '|' | sed 's/|$//')
           go clean -testcache
-          go test -v -race -covermode=atomic -coverprofile=coverage.out -timeout 0 -run "^(${TEST_NAMES})$"
+          go test -failfast -v -race -covermode=atomic -coverprofile=coverage.out -timeout 0 -run "^(${TEST_NAMES})$"
