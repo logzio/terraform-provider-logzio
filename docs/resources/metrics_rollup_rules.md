@@ -27,7 +27,7 @@ resource "logzio_metrics_rollup_rules" "frontend_metrics_rollup" {
   rollup_function           = "SUM"
   labels_elimination_method = "GROUP_BY"
   labels                    = ["service", "region"]
-  
+
   filter {
     expression {
       comparison = "EQ"
@@ -40,8 +40,8 @@ resource "logzio_metrics_rollup_rules" "frontend_metrics_rollup" {
       value      = "us-.*"
     }
   }
-  
-  new_metric_name_template = "rollup.frontend.${metric_name}"
+
+  new_metric_name_template = "rollup.frontend.{{metricName}}"
   drop_original_metric     = true
 }
 ```
@@ -53,7 +53,7 @@ resource "logzio_metrics_rollup_rules" "response_time_rollup" {
   account_id                = 123456
   metric_name               = "http_response_time"
   metric_type               = "MEASUREMENT"
-  rollup_function           = "P95"
+  rollup_function           = "SUM"
   labels_elimination_method = "EXCLUDE_BY"
   labels                    = ["endpoint", "method"]
 }
@@ -75,7 +75,7 @@ The following arguments are supported:
     * `comparison` - (Required) The comparison operator. Valid values are `EQ`, `NOT_EQ`, `REGEX_MATCH`, and `REGEX_NO_MATCH`.
     * `name` - (Required) The label name to match against.
     * `value` - (Required) The value to match.
-* `new_metric_name_template` - (Optional) A template for generating new metric names. Use `${metric_name}` to reference the original metric name.
+* `new_metric_name_template` - (Optional) A template for generating new metric names. Use `{{metricName}}` to reference the original metric name.
 * `drop_original_metric` - (Optional) Whether to drop the original metric after creating the rollup. Defaults to `false`.
 
 ## Attributes Reference
