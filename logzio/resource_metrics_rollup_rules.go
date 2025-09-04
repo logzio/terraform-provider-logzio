@@ -50,31 +50,6 @@ const (
 	metricsRollupRulesRetryAttempts = 8
 )
 
-// Helper functions to convert client enums to string slices for validation
-func convertMetricTypesToStrings(types []metrics_rollup_rules.MetricType) []string {
-	result := make([]string, len(types))
-	for i, t := range types {
-		result[i] = string(t)
-	}
-	return result
-}
-
-func convertAggregationFunctionsToStrings(funcs []metrics_rollup_rules.AggregationFunction) []string {
-	result := make([]string, len(funcs))
-	for i, f := range funcs {
-		result[i] = string(f)
-	}
-	return result
-}
-
-func convertLabelsRemovalMethodsToStrings(methods []metrics_rollup_rules.LabelsRemovalMethod) []string {
-	result := make([]string, len(methods))
-	for i, m := range methods {
-		result[i] = string(m)
-	}
-	return result
-}
-
 // Returns the metrics rollup rules client with the api token from the provider
 func metricsRollupRulesClient(m interface{}) *metrics_rollup_rules.MetricsRollupRulesClient {
 	var client *metrics_rollup_rules.MetricsRollupRulesClient
