@@ -71,7 +71,7 @@ resource "logzio_metrics_rollup_rules" "frontend_service_rollup" {
     }
   }
   
-  new_metric_name_template = "rollup.frontend.${metric_name}"
+  new_metric_name_template = "rollup.frontend.$${metric_name}"
   drop_original_metric     = true
 }
 
