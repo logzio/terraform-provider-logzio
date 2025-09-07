@@ -66,7 +66,7 @@ The following arguments are supported:
 * `account_id` - (Required) The metrics account ID for the metrics rollup rule.
 * `metric_name` - (Optional) The name of the metric for which to create the rollup rule. Either `metric_name` or `filter` must be specified, but not both.
 * `metric_type` - (Required) The type of the metric. Valid values are `GAUGE`, `COUNTER`, `DELTA_COUNTER`, `CUMULATIVE_COUNTER`, and `MEASUREMENT`.
-* `rollup_function` - The aggregation function to use for rolling up the metric. Required for all metric types. For `COUNTER`, `DELTA_COUNTER`, and `CUMULATIVE_COUNTER` types, must be `SUM`. For `MEASUREMENT` metric type, only `SUM`, `MIN`, `MAX`, `COUNT`, `SUMSQ`, `MEAN`, and `LAST` are allowed. For `GAUGE` type, any valid aggregation function is allowed. Valid values include `SUM`, `MIN`, `MAX`, `COUNT`, `LAST`, `MEAN`, `MEDIAN`, `STDEV`, `SUMSQ`, and percentiles (`P10`, `P20`, `P25`, `P30`, `P40`, `P50`, `P60`, `P70`, `P75`, `P80`, `P90`, `P95`, `P99`, `P999`, `P9999`).
+* `rollup_function` - The aggregation function to use for rolling up the metric. Required for all metric types. For `COUNTER`, `DELTA_COUNTER`, and `CUMULATIVE_COUNTER` types, must be `SUM`. For `MEASUREMENT` and `GAUGE` metric types, any valid aggregation function is allowed. Valid values include `SUM`, `MIN`, `MAX`, `COUNT`, `LAST`, `MEAN`, `MEDIAN`, `STDEV`, `SUMSQ`, and percentiles (`P10`, `P20`, `P25`, `P30`, `P40`, `P50`, `P60`, `P70`, `P75`, `P80`, `P90`, `P95`, `P99`, `P999`, `P9999`).
 * `labels_elimination_method` - (Required) The method for eliminating labels. Valid values are `EXCLUDE_BY` and `GROUP_BY`.
 * `labels` - (Required) A list of label names to be eliminated from the metric.
 * `name` - (Optional) A human-readable name for the rollup rule.
