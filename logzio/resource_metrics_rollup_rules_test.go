@@ -22,7 +22,7 @@ const (
 	metricsRollupRulesResourceUpdate                             = "update_metrics_rollup_rules"
 	metricsRollupRulesResourceCreateWithFilter                   = "create_metrics_rollup_rules_with_filter"
 	metricsRollupRulesResourceCreateMeasurement                  = "create_metrics_rollup_rules_measurement"
-	metricsRollupRulesResourceCreateMeasurementInvalid           = "create_metrics_rollup_rules_measurement_invalid"
+	metricsRollupRulesResourceCreateMeasurementP99               = "create_metrics_rollup_rules_measurement_p99"
 	metricsRollupRulesResourceCreateCounterWithRollupFunction    = "create_metrics_rollup_rules_counter_with_rollup_function"
 	metricsRollupRulesResourceCreateCounterMissingRollupFunction = "create_metrics_rollup_rules_counter_missing_rollup_function"
 )
@@ -309,27 +309,6 @@ func TestAccLogzioMetricsRollupRules_CreateMeasurement(t *testing.T) {
 	})
 }
 
-func TestAccLogzioMetricsRollupRules_CreateMeasurementInvalid(t *testing.T) {
-	resourceName := "test_create_metrics_rollup_rules_measurement_invalid"
-	accountId := os.Getenv(envLogzioMetricsAccountId)
-
-	defer utils.SleepAfterTest()
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheckApiToken(t)
-			testAccPreCheckMetricsAccountId(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateMeasurementInvalid, accountId),
-				ExpectError: regexp.MustCompile("invalid aggregation function \"P99\" for MEASUREMENT metric type"),
-			},
-		},
-	})
-}
-
 func TestAccLogzioMetricsRollupRules_CreateCounterWithRollupFunction(t *testing.T) {
 	resourceName := "test_create_metrics_rollup_rules_counter_with_rollup_function"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
@@ -367,6 +346,31 @@ func TestAccLogzioMetricsRollupRules_CreateCounterMissingRollupFunction(t *testi
 			{
 				Config:      resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateCounterMissingRollupFunction, accountId),
 				ExpectError: regexp.MustCompile("rollup_function must be set for COUNTER metrics"),
+			},
+		},
+	})
+}
+
+func TestAccLogzioMetricsRollupRules_CreateMeasurementWithP99(t *testing.T) {
+	resourceName := "test_create_metrics_rollup_rules_measurement_p99"
+	accountId := os.Getenv(envLogzioMetricsAccountId)
+
+	defer utils.SleepAfterTest()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckApiToken(t)
+			testAccPreCheckMetricsAccountId(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: resourceTestMetricsRollupRules(resourceName, metricsRollupRulesResourceCreateMeasurementP99, accountId),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("logzio_metrics_rollup_rules."+resourceName, metricsRollupRulesMetricType, "MEASUREMENT"),
+					resource.TestCheckResourceAttr("logzio_metrics_rollup_rules."+resourceName, metricsRollupRulesRollupFunction, "P99"),
+					resource.TestCheckResourceAttr("logzio_metrics_rollup_rules."+resourceName, metricsRollupRulesMetricName, "response_time"),
+				),
 			},
 		},
 	})
