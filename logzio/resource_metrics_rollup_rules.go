@@ -197,19 +197,6 @@ func validateRollup(ctx context.Context, d *schema.ResourceDiff, m interface{}) 
 		if rollupFunction == "" {
 			return fmt.Errorf("rollup_function must be set for MEASUREMENT metrics")
 		}
-		// Validate MEASUREMENT allows only specific aggregation functions
-		allowedForMeasurement := map[string]bool{
-			string(metrics_rollup_rules.AggSum):   true,
-			string(metrics_rollup_rules.AggMin):   true,
-			string(metrics_rollup_rules.AggMax):   true,
-			string(metrics_rollup_rules.AggCount): true,
-			string(metrics_rollup_rules.AggSumSq): true,
-			string(metrics_rollup_rules.AggMean):  true,
-			string(metrics_rollup_rules.AggLast):  true,
-		}
-		if !allowedForMeasurement[rollupFunction] {
-			return fmt.Errorf("invalid aggregation function %q for MEASUREMENT metric type. Allowed functions: SUM, MIN, MAX, COUNT, SUMSQ, MEAN, LAST", rollupFunction)
-		}
 	case string(metrics_rollup_rules.MetricTypeCounter),
 		string(metrics_rollup_rules.MetricTypeDeltaCounter),
 		string(metrics_rollup_rules.MetricTypeCumulativeCounter):
