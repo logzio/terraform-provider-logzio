@@ -69,6 +69,14 @@ func dataSourceDropMetrics() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			dropMetricsDropPolicy: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice(
+					[]string{drop_metrics.DropPolicyBeforeProcessing, drop_metrics.DropPolicyBeforeStoring},
+					false),
+			},
 			dropMetricsFilters: {
 				Type:     schema.TypeSet,
 				Optional: true,

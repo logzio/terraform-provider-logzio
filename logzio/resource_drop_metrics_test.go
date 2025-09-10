@@ -15,6 +15,7 @@ const (
 	dropMetricResourceCreateSimple           = "create_drop_metrics_simple"
 	dropMetricResourceCreateComplex          = "create_drop_metrics_complex"
 	dropMetricResourceCreateWithName         = "create_drop_metrics_with_name"
+	dropMetricResourceCreateWithDropPolicy   = "create_drop_metrics_with_drop_policy"
 	dropMetricResourceCreateNoLabelName      = "create_drop_metrics_missing_label_name"
 	dropMetricResourceCreateNoValue          = "create_drop_metrics_missing_value"
 	dropMetricResourceCreateEmptyCondition   = "create_drop_metrics_empty_condition"
@@ -43,6 +44,7 @@ func TestAccLogzioDropMetric_CreateDropMetricSimple(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, dropMetricsAccountId, accountId),
 					resource.TestCheckResourceAttr(resourceName, dropMetricsName, ""),
+					resource.TestCheckResourceAttr(resourceName, dropMetricsDropPolicy, "DROP_BEFORE_PROCESSING"),
 					resource.TestCheckResourceAttr(resourceName, dropMetricsFilters+".#", "1"),
 					resource.TestCheckResourceAttr(resourceName, dropMetricsFilterOperator, "AND"),
 					resource.TestCheckResourceAttr(resourceName, dropMetricsActive, "true"),
@@ -367,6 +369,41 @@ func TestAccLogzioDropMetric_UpdateDropMetricsWithName(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, dropMetricsFilterOperator, "AND"),
 					resource.TestCheckResourceAttr(resourceName, dropMetricsActive, "false"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccLogzioDropMetric_CreateDropMetricWithDropPolicy(t *testing.T) {
+	filterName := "test_create_drop_metrics_with_drop_policy"
+	resourceName := "logzio_drop_metrics." + filterName
+	accountId := os.Getenv(envLogzioMetricsAccountId)
+
+	defer utils.SleepAfterTest()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckApiToken(t)
+			testAccPreCheckMetricsAccountId(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: resourceTestDropMetrics(filterName, dropMetricResourceCreateWithDropPolicy, accountId),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, dropMetricsAccountId, accountId),
+					resource.TestCheckResourceAttr(resourceName, dropMetricsName, "test-drop-metrics-with-policy"),
+					resource.TestCheckResourceAttr(resourceName, dropMetricsDropPolicy, "DROP_BEFORE_STORING"),
+					resource.TestCheckResourceAttr(resourceName, dropMetricsFilters+".#", "1"),
+					resource.TestCheckResourceAttr(resourceName, dropMetricsFilterOperator, "AND"),
+					resource.TestCheckResourceAttr(resourceName, dropMetricsActive, "true"),
+				),
+			},
+			{
+				Config:            resourceTestDropMetrics(filterName, dropMetricResourceCreateWithDropPolicy, accountId),
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
