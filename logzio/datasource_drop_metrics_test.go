@@ -42,6 +42,7 @@ func TestAccDataSourceDropMetric(t *testing.T) {
 					datasourceDropMetricMatchingResource(datasourceFilterName, accountId),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, dropMetricsAccountId, accountId),
+					resource.TestCheckResourceAttr(datasourceName, dropMetricsDropPolicy, "DROP_BEFORE_PROCESSING"),
 					resource.TestCheckResourceAttr(datasourceName, dropMetricsFilters+".#", "2"),
 					resource.TestCheckResourceAttr(datasourceName, dropMetricsFilterOperator, "AND"),
 					resource.TestCheckResourceAttr(datasourceName, dropMetricsActive, "true"),

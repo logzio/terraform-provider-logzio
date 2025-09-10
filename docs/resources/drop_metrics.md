@@ -18,6 +18,7 @@ provider "logzio" {
 resource "logzio_drop_metrics" "test_filter" {
   name = test_filter
   account_id = 1234
+  drop_policy = "DROP_BEFORE_STORING"
   filters {
     name = "__name__"
     value = "my_metric_name"
@@ -34,7 +35,8 @@ resource "logzio_drop_metrics" "test_filter" {
 ## Argument Reference
 * `account_id` - (Required) The Logz.io metrics account ID to which the drop filter applies.
 * `active` - (Optional) If true, the drop filter is active and metrics that match the filter are dropped before indexing. If false, the drop filter is disabled. Defaults to true.
-* `name` - (Optional) name for the drop metric.
+* `name` - (Optional) Name for the drop metric filter.
+* `drop_policy` - (Optional) When to drop the metrics. Valid values are `DROP_BEFORE_PROCESSING` (default) and `DROP_BEFORE_STORING`. `DROP_BEFORE_PROCESSING` drops metrics before any processing, while `DROP_BEFORE_STORING` drops metrics after processing but before storage.
 * `filter` - (Required) The filter object that defines the drop filter criteria. See below for nested schema.
   * `name` - (Required) The name of the metric label to filter on.
   * `value` - (Required) The value of the metric label to match against.

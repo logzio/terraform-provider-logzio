@@ -20,6 +20,7 @@ const (
 	dropMetricsAccountId            = "account_id"
 	dropMetricsName                 = "name"
 	dropMetricsActive               = "active"
+	dropMetricsDropPolicy           = "drop_policy"
 	dropMetricsFilters              = "filters"
 	dropMetricsFilterOperator       = "operator"
 	dropMetricsExpressionLabelName  = "name"
@@ -82,14 +83,21 @@ func resourceDropMetrics() *schema.Resource {
 				Required: true,
 			},
 			dropMetricsName: {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(0, 256),
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			dropMetricsActive: {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
+			},
+			dropMetricsDropPolicy: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  drop_metrics.DropPolicyBeforeProcessing,
+				ValidateFunc: validation.StringInSlice(
+					[]string{drop_metrics.DropPolicyBeforeProcessing, drop_metrics.DropPolicyBeforeStoring},
+					false),
 			},
 			dropMetricsFilters: {
 				Type:     schema.TypeSet,
@@ -208,9 +216,10 @@ func createCreateUpdateDropMetricsFromSchema(d *schema.ResourceData) drop_metric
 	activePtr := &activeVal
 
 	return drop_metrics.CreateUpdateDropMetric{
-		AccountId: int64Attr(d, dropMetricsAccountId),
-		Name:      d.Get(dropMetricsName).(string),
-		Active:    activePtr,
+		AccountId:  int64Attr(d, dropMetricsAccountId),
+		Name:       d.Get(dropMetricsName).(string),
+		Active:     activePtr,
+		DropPolicy: d.Get(dropMetricsDropPolicy).(string),
 		Filter: drop_metrics.FilterObject{
 			Operator:   d.Get(dropMetricsFilterOperator).(string),
 			Expression: schemaToDropMetricsFilterExpression(d),
@@ -224,6 +233,7 @@ func setDropMetrics(d *schema.ResourceData, dropMetric *drop_metrics.DropMetric)
 	d.Set(dropMetricsAccountId, int(dropMetric.AccountId))
 	d.Set(dropMetricsName, dropMetric.Name)
 	d.Set(dropMetricsActive, dropMetric.Active)
+	d.Set(dropMetricsDropPolicy, dropMetric.DropPolicy)
 	d.Set(dropMetricsCreatedAt, dropMetric.CreatedAt)
 	d.Set(dropMetricsCreatedBy, dropMetric.CreatedBy)
 	d.Set(dropMetricsModifiedAt, dropMetric.ModifiedAt)

@@ -1,7 +1,12 @@
 # Changes by Version
 
 <!-- next version -->
-## v1.21.1
+## v1.23.0
+- Upgrade `logzio_client_terraform` to `1.27.4`.
+- Metrics Drop Filters: Add optional `drop_policy` field with values `DROP_BEFORE_PROCESSING` (default) and `DROP_BEFORE_STORING`.
+- Metrics Drop Filters: Remove name length validation - the name field no longer has a 256-character limit.
+
+## v1.22.0
 - Upgrade `logzio_client_terraform` to `1.27.3`.
 - Metrics Rollup Rules: Support all aggregation types for `MEASUREMENT`
 

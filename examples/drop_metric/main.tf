@@ -35,10 +35,11 @@ resource "logzio_drop_metrics" "simple_metric_drop" {
 
 # Complex drop metrics example - drop metrics based on multiple conditions
 resource "logzio_drop_metrics" "complex_metric_drop" {
-  account_id = var.account_id
-  name       = "Drop Staging HTTP Requests with 2xx Status"
-  active     = true
-  operator   = "AND"
+  account_id  = var.account_id
+  name        = "Drop Staging HTTP Requests with 2xx Status"
+  active      = true
+  drop_policy = "DROP_BEFORE_STORING"
+  operator    = "AND"
   
   filters {
     name      = "__name__"
