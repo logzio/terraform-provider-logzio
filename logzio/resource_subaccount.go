@@ -10,11 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/sub_accounts"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
-	"reflect"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const (
@@ -37,6 +32,7 @@ const (
 	subAccountsSharedGb                             string = "shared_gb"
 	subAccountsTotalTimeBasedDailyGb                string = "total_time_based_daily_gb"
 	subAccountIsOwner                               string = "is_owner"
+	subAccountSoftLimitGB                           string = "soft_limit_gb"
 
 	delayGetSubAccount      = 2 * time.Second
 	subAccountRetryAttempts = 8
@@ -136,6 +132,10 @@ func resourceSubAccount() *schema.Resource {
 			subAccountIsOwner: {
 				Type:     schema.TypeBool,
 				Computed: true,
+			},
+			subAccountSoftLimitGB: {
+				Type:     schema.TypeFloat,
+				Optional: true,
 			},
 		},
 	}
@@ -268,6 +268,7 @@ func setSubAccount(d *schema.ResourceData, subAccount *sub_accounts.SubAccount) 
 	d.Set(subAccountsSharedGb, subAccount.SharedGB)
 	d.Set(subAccountsTotalTimeBasedDailyGb, subAccount.TotalTimeBasedDailyGB)
 	d.Set(subAccountIsOwner, subAccount.IsOwner)
+	d.Set(subAccountSoftLimitGB, subAccount.SoftLimitGB)
 
 	sharingObjectAccounts := make([]int32, 0)
 	for _, account := range subAccount.SharingObjectsAccounts {
@@ -302,15 +303,22 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 	flexible := d.Get(subAccountFlexible).(bool)
 	maxDailyGbVal := float32(d.Get(subAccountMaxDailyGB).(float64))
 	reservedDailyGbVal := float32(d.Get(subAccountReservedDailyGb).(float64))
-	var maxDailyGb, reservedDailyGb *float32
-	if !flexible || (flexible && maxDailyGbVal > 0) {
+	softLimitGBVal := float32(d.Get(subAccountSoftLimitGB).(float64))
+	var maxDailyGb, reservedDailyGb, softLimitGB *float32
+	if !flexible {
 		maxDailyGb = new(float32)
 		*maxDailyGb = maxDailyGbVal
+		softLimitGB = new(float32)
+		*softLimitGB = softLimitGBVal
 	}
 
 	if flexible {
 		reservedDailyGb = new(float32)
 		*reservedDailyGb = reservedDailyGbVal
+		if maxDailyGbVal > 0 {
+			maxDailyGb = new(float32)
+			*maxDailyGb = maxDailyGbVal
+		}
 	}
 
 	createSubAccount := sub_accounts.CreateOrUpdateSubAccount{
@@ -329,6 +337,7 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 			UtilizationEnabled: strconv.FormatBool(d.Get(subAccountUtilizationSettingsUtilizationEnabled).(bool)),
 		},
 		SnapSearchRetentionDays: getOptionalInt32Pointer(d, subAccountsSnapSearchRetentionDays),
+		SoftLimitGB:             softLimitGB,
 	}
 
 	return createSubAccount

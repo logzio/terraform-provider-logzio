@@ -8,21 +8,23 @@ import (
 )
 
 const (
-	envLogzioAccountId          = "LOGZIO_ACCOUNT_ID"
-	envLogzioWarmAccountId      = "LOGZIO_WARM_ACCOUNT_ID"
-	envLogzioMetricsAccountId   = "LOGZIO_METRICS_ACCOUNT_ID"
-	envLogzioS3Path             = "S3_PATH"
-	envLogzioAwsAccessKey       = "AWS_ACCESS_KEY"
-	envLogzioAwsSecretKey       = "AWS_SECRET_KEY"
-	envLogzioAwsArn             = "AWS_ARN"
-	envLogzioAwsArnS3Fetcher    = "AWS_ARN_S3_FETCHER"
-	envLogzioAzureAccountName   = "AZURE_ACCOUNT_NAME"
-	envLogzioAzureClientId      = "AZURE_CLIENT_ID"
-	envLogzioAzureClientSecret  = "AZURE_CLIENT_SECRET"
-	envLogzioAzureContainerName = "AZURE_CONTAINER_NAME"
-	envLogzioAzureTenantId      = "AZURE_TENANT_ID"
-	envLogzioAzurePath          = "BLOB_PATH"
-	envLogzioApiTokenWarm       = "LOGZIO_WARM_API_TOKEN"
+	envLogzioAccountId            = "LOGZIO_ACCOUNT_ID"
+	envLogzioWarmAccountId        = "LOGZIO_WARM_ACCOUNT_ID"
+	envLogzioMetricsAccountId     = "LOGZIO_METRICS_ACCOUNT_ID"
+	envLogzioS3Path               = "S3_PATH"
+	envLogzioAwsAccessKey         = "AWS_ACCESS_KEY"
+	envLogzioAwsSecretKey         = "AWS_SECRET_KEY"
+	envLogzioAwsArn               = "AWS_ARN"
+	envLogzioAwsArnS3Fetcher      = "AWS_ARN_S3_FETCHER"
+	envLogzioAzureAccountName     = "AZURE_ACCOUNT_NAME"
+	envLogzioAzureClientId        = "AZURE_CLIENT_ID"
+	envLogzioAzureClientSecret    = "AZURE_CLIENT_SECRET"
+	envLogzioAzureContainerName   = "AZURE_CONTAINER_NAME"
+	envLogzioAzureTenantId        = "AZURE_TENANT_ID"
+	envLogzioAzurePath            = "BLOB_PATH"
+	envLogzioApiTokenWarm         = "LOGZIO_WARM_API_TOKEN"
+	envLogzioApiTokenConsumption  = "ֿLOGZIO_CONSUMPTION_API_TOKEN"
+	envLogzioConsumptionAccountId = "ֿLOGZIO_CONSUMPTION_ACCOUNT_ID"
 )
 
 var (
@@ -38,6 +40,11 @@ var (
 			return ProviderWithEnvVar(envLogzioApiTokenWarm), nil
 		},
 	}
+	testAccConsumptionProviderFactories = map[string]func() (*schema.Provider, error){
+		"logzio": func() (*schema.Provider, error) {
+			return ProviderWithEnvVar(envLogzioApiTokenConsumption), nil
+		},
+	}
 	testAccProvider *schema.Provider
 )
 
@@ -51,6 +58,11 @@ func init() {
 	testAccWarmProviderFactories = map[string]func() (*schema.Provider, error){
 		"logzio": func() (*schema.Provider, error) {
 			return ProviderWithEnvVar(envLogzioApiTokenWarm), nil
+		},
+	}
+	testAccConsumptionProviderFactories = map[string]func() (*schema.Provider, error){
+		"logzio": func() (*schema.Provider, error) {
+			return ProviderWithEnvVar(envLogzioApiTokenConsumption), nil
 		},
 	}
 }
@@ -135,6 +147,9 @@ func testAccPreCheckApiToken(t *testing.T) {
 }
 func testAccPreCheckApiTokenWarm(t *testing.T) {
 	testAccPreCheckEnv(t, envLogzioApiTokenWarm)
+}
+func testAccPreCheckApiTokenConsumption(t *testing.T) {
+	testAccPreCheckEnv(t, envLogzioApiTokenConsumption)
 }
 func testAccPreCheckAccountId(t *testing.T) {
 	testAccPreCheckEnv(t, envLogzioAccountId)

@@ -7,9 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/logzio/logzio_terraform_client/sub_accounts"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func dataSourceSubAccount() *schema.Resource {
@@ -93,6 +90,10 @@ func dataSourceSubAccount() *schema.Resource {
 			},
 			subAccountIsOwner: {
 				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			subAccountSoftLimitGB: {
+				Type:     schema.TypeFloat,
 				Computed: true,
 			},
 		},
