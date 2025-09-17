@@ -2,11 +2,12 @@ package logzio
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 )
 
 func TestAccLogzioSubaccount_CreateSubaccount(t *testing.T) {
@@ -149,7 +150,7 @@ func TestAccLogzioSubaccount_CreateSubaccountWarmRetention(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckApiTokenWarm(t)
-			testAccPreCheckAccountId(t)
+			testAccPreCheckWarmAccountId(t)
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccWarmProviderFactories,
@@ -187,7 +188,7 @@ func TestAccLogzioSubaccount_CreateSubaccountWarmRetentionIssues(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckApiToken(t)
-			testAccPreCheckAccountId(t)
+			testAccPreCheckWarmAccountId(t)
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccWarmProviderFactories,
@@ -202,7 +203,73 @@ func TestAccLogzioSubaccount_CreateSubaccountWarmRetentionIssues(t *testing.T) {
 			},
 		},
 	})
+}
 
+func TestAccLogzioSubaccount_CreateSubaccountConsumption(t *testing.T) {
+	accountId := os.Getenv(envLogzioConsumptionAccountId)
+	email := os.Getenv(envLogzioEmail)
+	accountName := "test_create_subaccount_consumption"
+	isFlexible := "false"
+	softLimit := float32(1)
+	terraformPlan := testAccCheckLogzioConsumptionSubaccountConfig(email, accountName, accountId, isFlexible, softLimit)
+	defer utils.SleepAfterTest()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckApiTokenConsumption(t)
+			testAccPreCheckConsumptionAccountId(t)
+			testAccPreCheckEmail(t)
+		},
+		ProviderFactories: testAccConsumptionProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: terraformPlan,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"logzio_subaccount.test_subaccount_consumption", "email", email),
+					resource.TestCheckResourceAttr("logzio_subaccount.test_subaccount_consumption", "soft_limit_gb", fmt.Sprintf("%.0f", softLimit)),
+				),
+			},
+			{
+				Config:                  terraformPlan,
+				ResourceName:            "logzio_subaccount.test_subaccount_consumption",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{subAccountEmail},
+			},
+		},
+	})
+
+}
+
+func TestAccLogzioSubaccount_CreateSubaccountConsumptionIssues(t *testing.T) {
+	accountId := os.Getenv(envLogzioConsumptionAccountId)
+	email := os.Getenv(envLogzioEmail)
+	accountName := "test_invalid_snap_retention"
+	softLimit := float32(1)
+	softLimitInvalid := float32(0)
+	terraformPlanSoftLimitOnFlexible := testAccCheckLogzioConsumptionSubaccountConfig(email, accountName, accountId, "true", softLimit)
+	terraformPlanInvalidSoftLimit := testAccCheckLogzioConsumptionSubaccountConfig(email, accountName, accountId, "false", softLimitInvalid)
+	defer utils.SleepAfterTest()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckApiTokenConsumption(t)
+			testAccPreCheckConsumptionAccountId(t)
+			testAccPreCheckEmail(t)
+		},
+		ProviderFactories: testAccConsumptionProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      terraformPlanSoftLimitOnFlexible,
+				ExpectError: regexp.MustCompile("when isFlexible=true SoftLimitGB should be empty or omitted"),
+			},
+			{
+				Config:      terraformPlanInvalidSoftLimit,
+				ExpectError: regexp.MustCompile("SoftLimitGB should be > 0 when set"),
+			},
+		},
+	})
 }
 
 func TestAccLogzioSubaccount_UpdateSubaccount(t *testing.T) {
@@ -277,4 +344,22 @@ resource "logzio_subaccount" "test_subaccount" {
   snap_search_retention_days = %d
 }
 `, email, accountName, retention, accountId, snapRetention)
+}
+
+func testAccCheckLogzioConsumptionSubaccountConfig(email, accountName, accountId, isFlexible string, softLimitGb float32) string {
+	return fmt.Sprintf(`
+resource "logzio_subaccount" "test_subaccount_consumption" {
+  email = "%s"
+  account_name = "%s"
+  retention_days = 2
+  frequency_minutes = 3
+  utilization_enabled = "true"
+  max_daily_gb = 1
+  sharing_objects_accounts = [
+    %s
+  ]
+  flexible = %s
+  soft_limit_gb = %f
+}
+`, email, accountName, accountId, isFlexible, softLimitGb)
 }

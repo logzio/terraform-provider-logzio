@@ -3,8 +3,13 @@ package logzio
 import (
 	"context"
 	"fmt"
+	"reflect"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/avast/retry-go"
-	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -71,6 +76,7 @@ func resourceSubAccount() *schema.Resource {
 			subAccountFlexible: {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			subAccountReservedDailyGb: {
 				Type:     schema.TypeFloat,
@@ -302,23 +308,13 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 
 	flexible := d.Get(subAccountFlexible).(bool)
 	maxDailyGbVal := float32(d.Get(subAccountMaxDailyGB).(float64))
-	reservedDailyGbVal := float32(d.Get(subAccountReservedDailyGb).(float64))
-	softLimitGBVal := float32(d.Get(subAccountSoftLimitGB).(float64))
-	var maxDailyGb, reservedDailyGb, softLimitGB *float32
-	if !flexible {
-		maxDailyGb = new(float32)
-		*maxDailyGb = maxDailyGbVal
-		softLimitGB = new(float32)
-		*softLimitGB = softLimitGBVal
+	var maxDailyGb, reservedDailyGb *float32
+	if !flexible || maxDailyGbVal > 0 {
+		maxDailyGb = utils.GetOptionalFloat32Pointer(d, subAccountMaxDailyGB)
 	}
 
 	if flexible {
-		reservedDailyGb = new(float32)
-		*reservedDailyGb = reservedDailyGbVal
-		if maxDailyGbVal > 0 {
-			maxDailyGb = new(float32)
-			*maxDailyGb = maxDailyGbVal
-		}
+		reservedDailyGb = utils.GetOptionalFloat32Pointer(d, subAccountReservedDailyGb)
 	}
 
 	createSubAccount := sub_accounts.CreateOrUpdateSubAccount{
@@ -336,8 +332,8 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 			FrequencyMinutes:   int32(d.Get(subAccountUtilizationSettingsFrequencyMinutes).(int)),
 			UtilizationEnabled: strconv.FormatBool(d.Get(subAccountUtilizationSettingsUtilizationEnabled).(bool)),
 		},
-		SnapSearchRetentionDays: getOptionalInt32Pointer(d, subAccountsSnapSearchRetentionDays),
-		SoftLimitGB:             softLimitGB,
+		SnapSearchRetentionDays: utils.GetOptionalInt32Pointer(d, subAccountsSnapSearchRetentionDays),
+		SoftLimitGB:             utils.GetOptionalFloat32Pointer(d, subAccountSoftLimitGB),
 	}
 
 	return createSubAccount
@@ -377,18 +373,4 @@ func insertAccountTokenAndId(d *schema.ResourceData, m interface{}, id int64) er
 			}),
 		retry.Delay(delayGetSubAccount),
 	)
-}
-
-// getOptionalInt32Pointer returns a pointer to the numeric value from the config, or nil if it was not set.
-// We don't use d.Get since it returns 0 for nil, when the field is unset.
-// And we don't use d.GetOk because it returns false for 0, even if it's explicitly set.
-func getOptionalInt32Pointer(d *schema.ResourceData, key string) *int32 {
-	val, diags := d.GetRawConfigAt(cty.GetAttrPath(key))
-	if diags.HasError() || val.IsNull() {
-		return nil
-	} else {
-		int64Val, _ := val.AsBigFloat().Int64()
-		int32Val := int32(int64Val)
-		return &int32Val
-	}
 }

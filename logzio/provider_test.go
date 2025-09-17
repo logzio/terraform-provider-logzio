@@ -11,6 +11,7 @@ const (
 	envLogzioAccountId            = "LOGZIO_ACCOUNT_ID"
 	envLogzioWarmAccountId        = "LOGZIO_WARM_ACCOUNT_ID"
 	envLogzioMetricsAccountId     = "LOGZIO_METRICS_ACCOUNT_ID"
+	envLogzioConsumptionAccountId = "ֿLOGZIO_CONSUMPTION_ACCOUNT_ID"
 	envLogzioS3Path               = "S3_PATH"
 	envLogzioAwsAccessKey         = "AWS_ACCESS_KEY"
 	envLogzioAwsSecretKey         = "AWS_SECRET_KEY"
@@ -24,7 +25,6 @@ const (
 	envLogzioAzurePath            = "BLOB_PATH"
 	envLogzioApiTokenWarm         = "LOGZIO_WARM_API_TOKEN"
 	envLogzioApiTokenConsumption  = "ֿLOGZIO_CONSUMPTION_API_TOKEN"
-	envLogzioConsumptionAccountId = "ֿLOGZIO_CONSUMPTION_ACCOUNT_ID"
 )
 
 var (
@@ -153,6 +153,12 @@ func testAccPreCheckApiTokenConsumption(t *testing.T) {
 }
 func testAccPreCheckAccountId(t *testing.T) {
 	testAccPreCheckEnv(t, envLogzioAccountId)
+}
+func testAccPreCheckWarmAccountId(t *testing.T) {
+	testAccPreCheckEnv(t, envLogzioWarmAccountId)
+}
+func testAccPreCheckConsumptionAccountId(t *testing.T) {
+	testAccPreCheckEnv(t, envLogzioConsumptionAccountId)
 }
 func testAccPreCheckEmail(t *testing.T) {
 	testAccPreCheckEnv(t, envLogzioEmail)

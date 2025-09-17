@@ -47,6 +47,7 @@ resource "logzio_subaccount" "my_subaccount" {
 * `flexible` - (Boolean) Defaults to false. Whether the sub account that created is flexible or not. Can be set to flexible only if the main account is flexible.
 * `reserved_daily_gb` - (Float) The maximum volume of data that an account can index per calendar day. Depends on `flexible`. For further info see [the docs](https://docs.logz.io/api/#operation/createTimeBasedAccount).
 * `snap_search_retention_days` - (Int) Number of days to retain data in the warm tier. Minimum value is 1. (Requires Logz.io Log account with warm tier enabled)
+* `soft_limit_gb` - (Float) Indicates the account's soft cap in GB. If Subscription account, this value is always null. Can be set only if flexible is false.
 
 ##  Attribute Reference
 

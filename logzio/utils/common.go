@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/avast/retry-go"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -100,4 +101,27 @@ func ReadUntilConsistent(
 	}
 
 	return nil
+}
+
+// GetOptionalInt32Pointer returns a pointer to the numeric value from the config, or nil if it was not set.
+// We don't use d.Get since it returns 0 for nil, when the field is unset.
+// And we don't use d.GetOk because it returns false for 0, even if it's explicitly set.
+func GetOptionalInt32Pointer(d *schema.ResourceData, key string) *int32 {
+	val, diags := d.GetRawConfigAt(cty.GetAttrPath(key))
+	if diags.HasError() || val.IsNull() {
+		return nil
+	} else {
+		int64Val, _ := val.AsBigFloat().Int64()
+		int32Val := int32(int64Val)
+		return &int32Val
+	}
+}
+
+func GetOptionalFloat32Pointer(d *schema.ResourceData, key string) *float32 {
+	val, diags := d.GetRawConfigAt(cty.GetAttrPath(key))
+	if diags.HasError() || val.IsNull() {
+		return nil
+	}
+	floatVal, _ := val.AsBigFloat().Float32()
+	return &floatVal
 }

@@ -28,4 +28,4 @@ Use this data source to access information about existing Logz.io Log Monitoring
 * `shared_gb` - (Float) If `flexible` is `true`, determines the sharable volume in GB. Otherwise, `null`.
 * `total_time_based_daily_gb` - (Float) If `flexible` is `true`, determines the account's plan volume in GB. Otherwise, `null`.
 * `is_owner` - (Boolean) Indicates whether the account is the main account.
-* `soft_limit_gb` - (Float) Indicates the account's soft cap in GB. If Subscription account, this value is always null.
+* `soft_limit_gb` - (Float) Indicates the account's soft cap in GB. If Subscription account, this value is always null. Can be set only if flexible is false.

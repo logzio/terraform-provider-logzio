@@ -103,7 +103,7 @@ func TestAccDataSourceSubaccountWarm(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheckApiTokenWarm(t)
 			testAccPreCheckEmail(t)
-			testAccPreCheckAccountId(t)
+			testAccPreCheckWarmAccountId(t)
 		},
 		ProviderFactories: testAccWarmProviderFactories,
 		Steps: []resource.TestStep{
@@ -130,6 +130,41 @@ func TestAccDataSourceSubaccountWarm(t *testing.T) {
 					resource.TestCheckResourceAttr(dataSourceName, "shared_gb", "9"),
 					resource.TestCheckResourceAttr(dataSourceName, "total_time_based_daily_gb", "10"),
 					resource.TestCheckResourceAttr(dataSourceName, "is_owner", "false"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceSubaccountConsumption(t *testing.T) {
+	resourceName := "logzio_subaccount.subaccount_datasource"
+	dataSourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
+	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioConsumptionAccountId), utils.BASE_10, utils.BITSIZE_64)
+	email := os.Getenv(envLogzioEmail)
+	accountName := "test_datasource_create"
+	defer utils.SleepAfterTest()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckApiTokenConsumption(t)
+			testAccPreCheckEmail(t)
+			testAccPreCheckConsumptionAccountId(t)
+		},
+		ProviderFactories: testAccConsumptionProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSubAccountConsumptionDataSourceResource(email, accountId, accountName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "account_name", accountName),
+					resource.TestCheckResourceAttr(resourceName, "soft_limit_gb", "1"),
+				),
+			},
+			{
+				Config: testAccSubAccountConsumptionDataSourceResource(email, accountId, accountName) +
+					testAccCheckLogzioSubaccountDatasourceConfig(),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(dataSourceName, "account_name", accountName),
+					resource.TestCheckResourceAttr(dataSourceName, "soft_limit_gb", "1"),
 				),
 			},
 		},
@@ -196,6 +231,20 @@ func testAccSubAccountWarmDataSourceResource(email string, accountId int64, acco
   ]
   flexible = "true"
   snap_search_retention_days = 2
+}
+`, email, accountName, accountId)
+}
+
+func testAccSubAccountConsumptionDataSourceResource(email string, accountId int64, accountName string) string {
+	return fmt.Sprintf(`resource "logzio_subaccount" "subaccount_datasource" {
+  email = "%s"
+  account_name = "%s"
+  retention_days = 4
+  max_daily_gb = 1
+  sharing_objects_accounts = [
+    %d
+  ]
+  soft_limit_gb = 1
 }
 `, email, accountName, accountId)
 }

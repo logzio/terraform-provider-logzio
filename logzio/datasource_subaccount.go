@@ -3,6 +3,10 @@ package logzio
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -32,6 +36,7 @@ func dataSourceSubAccount() *schema.Resource {
 			subAccountFlexible: {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			subAccountReservedDailyGb: {
 				Type:     schema.TypeFloat,
