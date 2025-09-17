@@ -3,18 +3,18 @@ package logzio
 import (
 	"context"
 	"fmt"
-	"github.com/avast/retry-go"
-	"github.com/hashicorp/go-cty/cty"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/logzio/logzio_terraform_client/sub_accounts"
-	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/avast/retry-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/logzio/logzio_terraform_client/sub_accounts"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 )
 
 const (
@@ -37,6 +37,7 @@ const (
 	subAccountsSharedGb                             string = "shared_gb"
 	subAccountsTotalTimeBasedDailyGb                string = "total_time_based_daily_gb"
 	subAccountIsOwner                               string = "is_owner"
+	subAccountSoftLimitGB                           string = "soft_limit_gb"
 
 	delayGetSubAccount      = 2 * time.Second
 	subAccountRetryAttempts = 8
@@ -75,6 +76,7 @@ func resourceSubAccount() *schema.Resource {
 			subAccountFlexible: {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			subAccountReservedDailyGb: {
 				Type:     schema.TypeFloat,
@@ -136,6 +138,10 @@ func resourceSubAccount() *schema.Resource {
 			subAccountIsOwner: {
 				Type:     schema.TypeBool,
 				Computed: true,
+			},
+			subAccountSoftLimitGB: {
+				Type:     schema.TypeFloat,
+				Optional: true,
 			},
 		},
 	}
@@ -268,6 +274,7 @@ func setSubAccount(d *schema.ResourceData, subAccount *sub_accounts.SubAccount) 
 	d.Set(subAccountsSharedGb, subAccount.SharedGB)
 	d.Set(subAccountsTotalTimeBasedDailyGb, subAccount.TotalTimeBasedDailyGB)
 	d.Set(subAccountIsOwner, subAccount.IsOwner)
+	d.Set(subAccountSoftLimitGB, subAccount.SoftLimitGB)
 
 	sharingObjectAccounts := make([]int32, 0)
 	for _, account := range subAccount.SharingObjectsAccounts {
@@ -301,16 +308,13 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 
 	flexible := d.Get(subAccountFlexible).(bool)
 	maxDailyGbVal := float32(d.Get(subAccountMaxDailyGB).(float64))
-	reservedDailyGbVal := float32(d.Get(subAccountReservedDailyGb).(float64))
 	var maxDailyGb, reservedDailyGb *float32
-	if !flexible || (flexible && maxDailyGbVal > 0) {
-		maxDailyGb = new(float32)
-		*maxDailyGb = maxDailyGbVal
+	if !flexible || maxDailyGbVal > 0 {
+		maxDailyGb = utils.GetOptionalFloat32Pointer(d, subAccountMaxDailyGB)
 	}
 
 	if flexible {
-		reservedDailyGb = new(float32)
-		*reservedDailyGb = reservedDailyGbVal
+		reservedDailyGb = utils.GetOptionalFloat32Pointer(d, subAccountReservedDailyGb)
 	}
 
 	createSubAccount := sub_accounts.CreateOrUpdateSubAccount{
@@ -328,7 +332,8 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 			FrequencyMinutes:   int32(d.Get(subAccountUtilizationSettingsFrequencyMinutes).(int)),
 			UtilizationEnabled: strconv.FormatBool(d.Get(subAccountUtilizationSettingsUtilizationEnabled).(bool)),
 		},
-		SnapSearchRetentionDays: getOptionalInt32Pointer(d, subAccountsSnapSearchRetentionDays),
+		SnapSearchRetentionDays: utils.GetOptionalInt32Pointer(d, subAccountsSnapSearchRetentionDays),
+		SoftLimitGB:             utils.GetOptionalFloat32Pointer(d, subAccountSoftLimitGB),
 	}
 
 	return createSubAccount
@@ -368,18 +373,4 @@ func insertAccountTokenAndId(d *schema.ResourceData, m interface{}, id int64) er
 			}),
 		retry.Delay(delayGetSubAccount),
 	)
-}
-
-// getOptionalInt32Pointer returns a pointer to the numeric value from the config, or nil if it was not set.
-// We don't use d.Get since it returns 0 for nil, when the field is unset.
-// And we don't use d.GetOk because it returns false for 0, even if it's explicitly set.
-func getOptionalInt32Pointer(d *schema.ResourceData, key string) *int32 {
-	val, diags := d.GetRawConfigAt(cty.GetAttrPath(key))
-	if diags.HasError() || val.IsNull() {
-		return nil
-	} else {
-		int64Val, _ := val.AsBigFloat().Int64()
-		int32Val := int32(int64Val)
-		return &int32Val
-	}
 }
