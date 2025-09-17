@@ -2,7 +2,7 @@
 
 <!-- next version -->
 ## v1.24.0
-- Upgrade `logzio_client_terraform` to `1.24.1`.
+- Upgrade `logzio_client_terraform` to `1.28.1`.
 - Support Consumption plan in `sub_accounts`.
   - Add `SoftLimitGB`
 - Mark `sub_accounts.flexible` field as `Computed` (since it cannot be edited).

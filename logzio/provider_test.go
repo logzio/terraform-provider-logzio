@@ -11,7 +11,7 @@ const (
 	envLogzioAccountId            = "LOGZIO_ACCOUNT_ID"
 	envLogzioWarmAccountId        = "LOGZIO_WARM_ACCOUNT_ID"
 	envLogzioMetricsAccountId     = "LOGZIO_METRICS_ACCOUNT_ID"
-	envLogzioConsumptionAccountId = "ֿLOGZIO_CONSUMPTION_ACCOUNT_ID"
+	envLogzioConsumptionAccountId = "LOGZIO_CONSUMPTION_ACCOUNT_ID"
 	envLogzioS3Path               = "S3_PATH"
 	envLogzioAwsAccessKey         = "AWS_ACCESS_KEY"
 	envLogzioAwsSecretKey         = "AWS_SECRET_KEY"
@@ -24,7 +24,7 @@ const (
 	envLogzioAzureTenantId        = "AZURE_TENANT_ID"
 	envLogzioAzurePath            = "BLOB_PATH"
 	envLogzioApiTokenWarm         = "LOGZIO_WARM_API_TOKEN"
-	envLogzioApiTokenConsumption  = "ֿLOGZIO_CONSUMPTION_API_TOKEN"
+	envLogzioApiTokenConsumption  = "LOGZIO_CONSUMPTION_API_TOKEN"
 )
 
 var (
