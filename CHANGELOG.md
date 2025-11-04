@@ -2,6 +2,7 @@
 
 <!-- next version -->
 ## v1.26.0
+- Upgrade `logzio_client_terraform` to `1.29.0`.
 - Add Unified Alerts Resource and datasource.
   - Support for both log-based and metric-based alerts through a unified interface
 ## v1.25.0
