@@ -248,6 +248,7 @@ func resourceLogAlertConfig() *schema.Resource {
 						logAlertOutputSuppressNotificationsMinutes: {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Computed: true,
 						},
 						logAlertOutputRecipients: {
 							Type:     schema.TypeList,
@@ -267,12 +268,14 @@ func resourceLogAlertConfig() *schema.Resource {
 			logAlertCorrelations: {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						correlationsCorrelationOperators: {
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -280,6 +283,7 @@ func resourceLogAlertConfig() *schema.Resource {
 						correlationsJoins: {
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeMap,
 								Elem: &schema.Schema{
@@ -325,6 +329,7 @@ func resourceRecipients() *schema.Resource {
 			recipientsNotificationEndpointIds: {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
@@ -354,6 +359,7 @@ func resourceSubComponent() *schema.Resource {
 						queryDefinitionGroupBy: {
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -388,6 +394,7 @@ func resourceSubComponent() *schema.Resource {
 						queryDefinitionAccountIdsToQueryOn: {
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeInt,
 							},
@@ -957,9 +964,12 @@ func setLogAlert(d *schema.ResourceData, logAlert *unified_alerts.LogAlertConfig
 	}
 
 	// Set recipients
-	recipientsMap := map[string]interface{}{
-		recipientsEmails:                  logAlert.Output.Recipients.Emails,
-		recipientsNotificationEndpointIds: logAlert.Output.Recipients.NotificationEndpointIds,
+	recipientsMap := map[string]interface{}{}
+	if len(logAlert.Output.Recipients.Emails) > 0 {
+		recipientsMap[recipientsEmails] = logAlert.Output.Recipients.Emails
+	}
+	if len(logAlert.Output.Recipients.NotificationEndpointIds) > 0 {
+		recipientsMap[recipientsNotificationEndpointIds] = logAlert.Output.Recipients.NotificationEndpointIds
 	}
 	outputMap[logAlertOutputRecipients] = []interface{}{recipientsMap}
 	logAlertMap[logAlertOutput] = []interface{}{outputMap}
@@ -972,9 +982,13 @@ func setLogAlert(d *schema.ResourceData, logAlert *unified_alerts.LogAlertConfig
 		// Set query definition
 		queryDefMap := map[string]interface{}{
 			queryDefinitionQuery:                    sc.QueryDefinition.Query,
-			queryDefinitionGroupBy:                  sc.QueryDefinition.GroupBy,
 			queryDefinitionShouldQueryOnAllAccounts: sc.QueryDefinition.ShouldQueryOnAllAccounts,
-			queryDefinitionAccountIdsToQueryOn:      sc.QueryDefinition.AccountIdsToQueryOn,
+		}
+		if len(sc.QueryDefinition.GroupBy) > 0 {
+			queryDefMap[queryDefinitionGroupBy] = sc.QueryDefinition.GroupBy
+		}
+		if len(sc.QueryDefinition.AccountIdsToQueryOn) > 0 {
+			queryDefMap[queryDefinitionAccountIdsToQueryOn] = sc.QueryDefinition.AccountIdsToQueryOn
 		}
 
 		// Set filters if present
