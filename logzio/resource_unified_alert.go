@@ -150,6 +150,7 @@ func resourceUnifiedAlert() *schema.Resource {
 			unifiedAlertType: {
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"LOG_ALERT", "METRIC_ALERT"}, false),
 			},
 			unifiedAlertDescription: {
