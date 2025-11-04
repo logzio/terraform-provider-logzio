@@ -17,6 +17,7 @@ The following Logz.io API endpoints are supported by this provider:
 * [Log-based alerts](https://github.com/logzio/public-api/tree/master/alerts)
 * [Sub accounts](https://api-docs.logz.io/docs/logz/manage-time-based-log-accounts)
 * [Alerts(v2)](https://api-docs.logz.io/docs/logz/alerts)
+* [Unified Alerts](./docs/resources/unified_alert.md) (POC - supports both log and metric alerts)
 * [Log shipping token](https://api-docs.logz.io/docs/logz/manage-log-shipping-tokens)
 * [Drop filters](https://api-docs.logz.io/docs/logz/drop-filters)
 * [Archive logs](https://api-docs.logz.io/docs/logz/archive-logs)

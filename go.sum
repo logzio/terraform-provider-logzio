@@ -124,8 +124,8 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/logzio/logzio_terraform_client v1.28.1 h1:wr3aaTD9bynDS9fIsQ9iO4B5dDI+cXPChHIcqQvjUwE=
-github.com/logzio/logzio_terraform_client v1.28.1/go.mod h1:pzXrr7gGIi6tU1mk2vTtg8dr6ttKMlt03kz6asC53o4=
+github.com/logzio/logzio_terraform_client v1.29.0 h1:zBwR7XvLw4s3dgNbAx1ZnHAhvHNUfryaPPvMd3VrLUg=
+github.com/logzio/logzio_terraform_client v1.29.0/go.mod h1:pzXrr7gGIi6tU1mk2vTtg8dr6ttKMlt03kz6asC53o4=
 github.com/mattn/go-colorable v0.1.9/go.mod h1:u6P/XSegPjTcexA+o6vUJrdnUu04hMope9wVRipJSqc=
 github.com/mattn/go-colorable v0.1.12/go.mod h1:u5H1YNBxpqRaxsYJYSkiCWKzEfiAb1Gb520KVy5xxl4=
 github.com/mattn/go-colorable v0.1.13 h1:fFA4WZxdEF4tXPZVKMLwD8oUnCTTo08duU7wxecdEvA=
