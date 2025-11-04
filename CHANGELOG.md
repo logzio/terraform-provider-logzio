@@ -1,6 +1,9 @@
 # Changes by Version
 
 <!-- next version -->
+## v1.26.0
+- Add Unified Alerts API (POC endpoint).
+  - Support for both log-based and metric-based alerts through a unified interface
 ## v1.25.0
 - Upgrade `logzio_client_terraform` to `1.28.1`.
 - Support Consumption plan in `sub_accounts`.
