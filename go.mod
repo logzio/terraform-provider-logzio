@@ -1,11 +1,11 @@
 module github.com/logzio/logzio_terraform_provider
 
-go 1.24
+go 1.24.0
 
 require (
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/hashicorp/go-cty v1.5.0
-	github.com/hashicorp/terraform-plugin-log v0.9.0
+	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.37.0
 	github.com/logzio/logzio_terraform_client v1.29.0
 	github.com/stoewer/go-strcase v1.3.1
