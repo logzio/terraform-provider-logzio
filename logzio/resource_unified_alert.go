@@ -268,9 +268,9 @@ func resourceAlertConfiguration() *schema.Resource {
 				Computed: true,
 			},
 			alertConfigAlertOutputTemplateType: {
-				Type:         schema.TypeString,
-				Optional:     true,
-				// API accepts "JSON" and "TABLE". Client constant OutputTypeText is "TEXT" which is incorrect.
+				Type:     schema.TypeString,
+				Optional: true,
+				// API accepts "JSON" and "TABLE".
 				ValidateFunc: validation.StringInSlice([]string{unified_alerts.OutputTypeJson, "TABLE"}, false),
 			},
 			alertConfigSearchTimeFrameMinutes: {
@@ -387,6 +387,11 @@ func resourceSubComponent() *schema.Resource {
 										Type:         schema.TypeString,
 										Required:     true,
 										ValidateFunc: validation.StringInSlice([]string{unified_alerts.AggregationTypeSum, unified_alerts.AggregationTypeMin, unified_alerts.AggregationTypeMax, unified_alerts.AggregationTypeAvg, unified_alerts.AggregationTypeCount, unified_alerts.AggregationTypeUniqueCount, unified_alerts.AggregationTypeNone, unified_alerts.AggregationTypePercentage, unified_alerts.AggregationTypePercentile}, false),
+										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+											// API converts NONE to COUNT silently
+											return (old == unified_alerts.AggregationTypeCount && new == unified_alerts.AggregationTypeNone) ||
+												(old == unified_alerts.AggregationTypeNone && new == unified_alerts.AggregationTypeCount)
+										},
 									},
 									aggregationFieldToAggregateOn: {
 										Type:     schema.TypeString,
@@ -427,7 +432,7 @@ func resourceSubComponent() *schema.Resource {
 							ValidateFunc: validation.StringInSlice([]string{unified_alerts.OperatorLessThan, unified_alerts.OperatorGreaterThan, unified_alerts.OperatorLessThanOrEquals, unified_alerts.OperatorGreaterThanOrEquals, unified_alerts.OperatorEquals, unified_alerts.OperatorNotEquals}, false),
 						},
 						triggerSeverityThresholdTiers: {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Required: true,
 							MinItems: 1,
 							Elem: &schema.Resource{
@@ -456,7 +461,7 @@ func resourceSubComponent() *schema.Resource {
 						subComponentOutputShouldUseAllFields: {
 							Type:     schema.TypeBool,
 							Optional: true,
-							Default:  false,
+							Default:  true,
 						},
 						subComponentOutputColumns: {
 							Type:     schema.TypeList,
@@ -474,6 +479,7 @@ func resourceSubComponent() *schema.Resource {
 									columnConfigSort: {
 										Type:         schema.TypeString,
 										Optional:     true,
+										Computed:     true,
 										ValidateFunc: validation.StringInSlice([]string{unified_alerts.SortAsc, unified_alerts.SortDesc}, false),
 									},
 								},
@@ -556,8 +562,6 @@ func resourceMetricQuery() *schema.Resource {
 		},
 	}
 }
-
-// CRUD operations
 
 func resourceUnifiedAlertCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	createAlert, err := buildCreateUnifiedAlert(d)
@@ -662,8 +666,6 @@ func resourceUnifiedAlertDelete(ctx context.Context, d *schema.ResourceData, m i
 	return nil
 }
 
-// Import
-
 func resourceUnifiedAlertImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	compositeId := d.Id()
 	urlType, alertId, err := parseUnifiedAlertCompositeId(compositeId)
@@ -680,8 +682,6 @@ func resourceUnifiedAlertImport(ctx context.Context, d *schema.ResourceData, m i
 
 	return []*schema.ResourceData{d}, nil
 }
-
-// Helper functions
 
 func parseUnifiedAlertCompositeId(id string) (urlType string, alertId string, err error) {
 	parts := strings.SplitN(id, ":", 2)
@@ -713,8 +713,6 @@ func float64Ptr(v float64) *float64 {
 	return &v
 }
 
-// Build functions (Terraform state -> API request)
-
 func buildCreateUnifiedAlert(d *schema.ResourceData) (unified_alerts.CreateUnifiedAlert, error) {
 	enabled := d.Get(unifiedAlertEnabled).(bool)
 
@@ -729,7 +727,6 @@ func buildCreateUnifiedAlert(d *schema.ResourceData) (unified_alerts.CreateUnifi
 		UseAlertNotificationEndpointsForRca: d.Get(unifiedAlertUseAlertNotificationEndpointsForRca).(bool),
 	}
 
-	// Build LinkedPanel
 	linkedPanelList := d.Get(unifiedAlertLinkedPanel).([]interface{})
 	if len(linkedPanelList) > 0 && linkedPanelList[0] != nil {
 		lpMap := linkedPanelList[0].(map[string]interface{})
@@ -740,7 +737,6 @@ func buildCreateUnifiedAlert(d *schema.ResourceData) (unified_alerts.CreateUnifi
 		}
 	}
 
-	// Build Recipients
 	recipientsList := d.Get(unifiedAlertRecipients).([]interface{})
 	if len(recipientsList) > 0 && recipientsList[0] != nil {
 		recipientsMap := recipientsList[0].(map[string]interface{})
@@ -750,7 +746,6 @@ func buildCreateUnifiedAlert(d *schema.ResourceData) (unified_alerts.CreateUnifi
 		}
 	}
 
-	// Build AlertConfiguration
 	alertConfig, err := buildAlertConfiguration(d)
 	if err != nil {
 		return alert, err
@@ -785,13 +780,11 @@ func buildAlertConfiguration(d *schema.ResourceData) (*unified_alerts.AlertConfi
 		config.SubComponents = subComponents
 	}
 
-	// Build correlations
 	correlationsList := configMap[alertConfigCorrelations].([]interface{})
 	if len(correlationsList) > 0 && correlationsList[0] != nil {
 		config.Correlations = buildCorrelations(correlationsList)
 	}
 
-	// Build schedule
 	scheduleList := configMap[alertConfigSchedule].([]interface{})
 	if len(scheduleList) > 0 && scheduleList[0] != nil {
 		config.Schedule = buildSchedule(scheduleList)
@@ -863,8 +856,8 @@ func buildSubComponents(subComponentsList []interface{}) ([]unified_alerts.SubCo
 				SeverityThresholdTiers: make(map[string]float32),
 			}
 
-			tiersList := triggerMap[triggerSeverityThresholdTiers].([]interface{})
-			for _, tierItem := range tiersList {
+			tiersSet := triggerMap[triggerSeverityThresholdTiers].(*schema.Set)
+			for _, tierItem := range tiersSet.List() {
 				tierMap := tierItem.(map[string]interface{})
 				severity := tierMap[severityThresholdTierSeverity].(string)
 				threshold := float32(tierMap[severityThresholdTierThreshold].(float64))
@@ -1055,8 +1048,8 @@ func setAlertConfiguration(d *schema.ResourceData, config *unified_alerts.AlertC
 		configMap[alertConfigCorrelations] = flattenCorrelations(config.Correlations)
 	}
 
-	// Set schedule
-	if config.Schedule != nil {
+	// Set schedule - only if user configured one (API returns default {timezone:"UTC"} even when not set)
+	if config.Schedule != nil && config.Schedule.CronExpression != "" {
 		configMap[alertConfigSchedule] = flattenSchedule(config.Schedule)
 	}
 
@@ -1133,11 +1126,19 @@ func flattenSubComponents(subComponents []unified_alerts.SubComponent) []interfa
 			if len(sc.Output.Columns) > 0 {
 				columnsList := make([]interface{}, len(sc.Output.Columns))
 				for j, col := range sc.Output.Columns {
-					columnsList[j] = map[string]interface{}{
-						columnConfigFieldName: col.FieldName,
-						columnConfigRegex:     col.Regex,
-						columnConfigSort:      col.Sort,
+					sortVal := col.Sort
+					if sortVal == "" {
+						sortVal = "ASC"
 					}
+
+					colMap := map[string]interface{}{
+						columnConfigFieldName: col.FieldName,
+						columnConfigSort:      sortVal,
+					}
+					if col.Regex != "" {
+						colMap[columnConfigRegex] = col.Regex
+					}
+					columnsList[j] = colMap
 				}
 				outputMap[subComponentOutputColumns] = columnsList
 			}
