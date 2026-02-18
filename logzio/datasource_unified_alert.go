@@ -10,10 +10,6 @@ import (
 	"github.com/logzio/logzio_terraform_client/unified_alerts"
 )
 
-const (
-	unifiedAlertDsType = "type"
-)
-
 func dataSourceUnifiedAlert() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceUnifiedAlertRead,
@@ -22,7 +18,7 @@ func dataSourceUnifiedAlert() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			unifiedAlertDsType: {
+			alertConfigType: {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{unified_alerts.TypeLogAlert, unified_alerts.TypeMetricAlert}, false),
@@ -117,7 +113,7 @@ func dataSourceUnifiedAlert() *schema.Resource {
 
 func dataSourceUnifiedAlertRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := unifiedAlertClient(m)
-	configType := d.Get(unifiedAlertDsType).(string)
+	configType := d.Get(alertConfigType).(string)
 	alertId := d.Get(unifiedAlertId).(string)
 
 	urlType := configTypeToUrlType(configType)
