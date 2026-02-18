@@ -190,7 +190,7 @@ resource "logzio_unified_alert" "test_log_alert" {
   alert_configuration {
     type                           = "LOG_ALERT"
     search_timeframe_minutes       = 10
-    alert_output_template_type     = "TEXT"
+    alert_output_template_type     = "TABLE"
 
     sub_components {
       query_definition {
