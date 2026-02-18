@@ -115,6 +115,9 @@ const (
 	metricQueryDefinitionPromqlQuery = "promql_query"
 
 	unifiedAlertRetryAttempts = 8
+
+	// Default values
+	TABLE_OUTPUT_TYPE = "TABLE"
 )
 
 func unifiedAlertClient(m interface{}) *unified_alerts.UnifiedAlertsClient {
@@ -270,7 +273,7 @@ func resourceAlertConfiguration() *schema.Resource {
 			alertConfigAlertOutputTemplateType: {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{unified_alerts.OutputTypeJson, "TABLE"}, false),
+				ValidateFunc: validation.StringInSlice([]string{unified_alerts.OutputTypeJson, TABLE_OUTPUT_TYPE}, false),
 			},
 			alertConfigSearchTimeFrameMinutes: {
 				Type:     schema.TypeInt,
@@ -975,8 +978,6 @@ func buildMetricQueries(queriesList []interface{}) []unified_alerts.MetricQuery 
 	}
 	return queries
 }
-
-
 
 func setUnifiedAlert(d *schema.ResourceData, alert *unified_alerts.UnifiedAlert) diag.Diagnostics {
 	d.Set(unifiedAlertId, alert.Id)
