@@ -1,6 +1,9 @@
 # Changes by Version
 
 <!-- next version -->
+## v1.27.0
+- Upgrade `logzio_client_terraform` to `1.30.0`.
+- **Breakiung change**: Update Unified Alerts Resource and datasource to latest spec (v2 endpoint)
 ## v1.26.0
 - Upgrade `logzio_client_terraform` to `1.29.0`.
 - Add Unified Alerts Resource and datasource.

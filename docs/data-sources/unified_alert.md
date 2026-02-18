@@ -41,7 +41,7 @@ See the [Unified Alert Resource](../resources/unified_alert.md) for details on a
 * `alert_id` - The unique alert identifier.
 * `title` - Alert name.
 * `description` - Alert description.
-* `tags` - List of tags.
+* `tags` - Set of tags.
 * `enabled` - Whether the alert is enabled.
 * `created_at` - Unix timestamp of creation.
 * `updated_at` - Unix timestamp of last update.

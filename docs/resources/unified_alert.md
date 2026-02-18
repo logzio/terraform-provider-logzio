@@ -91,7 +91,7 @@ resource "logzio_unified_alert" "log_alert_example" {
     }
 
     schedule {
-      cron_expression = "*/1 * * * *"
+      cron_expression = "0 0/1 * * * ?"
       timezone        = "UTC"
     }
   }
@@ -137,6 +137,7 @@ resource "logzio_unified_alert" "metric_alert_example" {
       ref_id = "A"
 
       query_definition {
+        account_id   = 12345
         promql_query = "sum(rate(http_requests_total{status=~\"5..\"}[5m]))"
       }
     }
@@ -170,6 +171,7 @@ resource "logzio_unified_alert" "metric_math_alert" {
     queries {
       ref_id = "A"
       query_definition {
+        account_id   = 12345
         promql_query = "sum(rate(http_requests_total{status=~\"5..\"}[5m]))"
       }
     }
@@ -177,6 +179,7 @@ resource "logzio_unified_alert" "metric_math_alert" {
     queries {
       ref_id = "B"
       query_definition {
+        account_id   = 12345
         promql_query = "sum(rate(http_requests_total[5m]))"
       }
     }
@@ -194,7 +197,7 @@ resource "logzio_unified_alert" "metric_math_alert" {
 ### Optional Arguments
 
 * `description` - (String) Explanation of alert purpose and firing conditions.
-* `tags` - (List of String) Labels for grouping and searching alerts.
+* `tags` - (Set of String) Labels for grouping and searching alerts.
 * `linked_panel` - (Block, Max: 1) Dashboard panel link. See [Linked Panel](#linked-panel) below.
 * `runbook` - (String) Operational instructions for responders; also used as RCA instruction text when RCA is enabled.
 * `enabled` - (Boolean) Alert activation status. Default: `true`.
@@ -224,14 +227,14 @@ The `alert_configuration` block supports both log alert and metric alert fields.
 
 * `type` - (Required, String, ForceNew) Alert type. Must be `LOG_ALERT` or `METRIC_ALERT`. Changing this forces a new resource.
 * `suppress_notifications_minutes` - (Optional, Integer) Mute period after alert fires (log alerts).
-* `alert_output_template_type` - (Optional, String) Output format for log alerts. Must be `JSON` or `TEXT`.
+* `alert_output_template_type` - (Optional, String) Output format for log alerts. Must be `JSON` or `TABLE`.
 * `search_timeframe_minutes` - (Optional, Integer) Time window in minutes for log evaluation.
-* `severity` - (Optional, String) Alert severity for metric alerts. Valid values: `INFO`, `LOW`, `MEDIUM`, `HIGH`, `SEVERE`.
-* `sub_components` - (Optional, List of Block) Detection rules for log alerts. See [Sub Component](#sub-component) below.
+* `severity` - (Optional, String) Alert severity. Valid values: `INFO`, `LOW`, `MEDIUM`, `HIGH`, `SEVERE`. **Required for metric alerts.**
+* `sub_components` - (Optional, List of Block) Detection rules. See [Sub Component](#sub-component) below. **Required for log alerts** (at least 1).
 * `correlations` - (Optional, Block) Correlation logic between sub-components (log alerts). See [Correlations](#correlations) below.
 * `schedule` - (Optional, Block) Cron-based evaluation schedule (log alerts). See [Schedule](#schedule) below.
-* `trigger` - (Optional, Block) Trigger configuration for metric alerts. See [Metric Trigger](#metric-trigger) below.
-* `queries` - (Optional, List of Block) Metric queries for metric alerts. See [Metric Query](#metric-query) below.
+* `trigger` - (Optional, Block) Trigger configuration. See [Metric Trigger](#metric-trigger) below. **Required for metric alerts.**
+* `queries` - (Optional, List of Block) Metric queries. See [Metric Query](#metric-query) below. **Required for metric alerts.**
 
 #### Sub Component
 
@@ -267,7 +270,7 @@ The `query_definition` block supports:
 
 The `aggregation` block supports:
 
-* `aggregation_type` - (Required, String) Type of aggregation. Valid values: `SUM`, `MIN`, `MAX`, `AVG`, `COUNT`, `UNIQUE_COUNT`, `NONE`, `PERCENTAGE`, `PERCENTILE`.
+* `aggregation_type` - (Required, String) Type of aggregation. Valid values: `SUM`, `MIN`, `MAX`, `AVG`, `COUNT`, `UNIQUE_COUNT`, `NONE`, `PERCENTAGE`, `PERCENTILE`. **Note:** The API treats `NONE` as equivalent to `COUNT`.
 * `field_to_aggregate_on` - (Optional, String) Field to aggregate on.
 * `value_to_aggregate_on` - (Optional, String) Value to aggregate on.
 
@@ -276,7 +279,7 @@ The `aggregation` block supports:
 The `trigger` block supports:
 
 * `operator` - (Required, String) Comparison operator. Valid values: `LESS_THAN`, `GREATER_THAN`, `LESS_THAN_OR_EQUALS`, `GREATER_THAN_OR_EQUALS`, `EQUALS`, `NOT_EQUALS`.
-* `severity_threshold_tiers` - (Required, List of Block) Severity thresholds. At least one required. See [Severity Threshold Tier](#severity-threshold-tier) below.
+* `severity_threshold_tiers` - (Required, Set of Block) Severity thresholds. At least one required. See [Severity Threshold Tier](#severity-threshold-tier) below.
 
 #### Severity Threshold Tier
 
@@ -294,7 +297,7 @@ The `severity_threshold_tiers` block supports:
 
 The `output` block supports:
 
-* `should_use_all_fields` - (Optional, Boolean) Whether to use all fields in output. Default: `false`.
+* `should_use_all_fields` - (Optional, Boolean) Whether to use all fields in output. Default: `true`.
 * `columns` - (Optional, List of Block) Column configurations. See [Column Config](#column-config) below.
 
 **Important:** Custom `columns` are **only valid when `aggregation_type = "NONE"`**.
@@ -308,13 +311,13 @@ The `columns` block supports:
 
 * `field_name` - (Required, String) Field name.
 * `regex` - (Optional, String) Regular expression for field extraction.
-* `sort` - (Optional, String) Sort direction. Valid values: `ASC`, `DESC`.
+* `sort` - (Optional, String) Sort direction. Valid values: `ASC`, `DESC`. Defaults to `ASC` if not specified.
 
 #### Schedule
 
 The `schedule` block supports:
 
-* `cron_expression` - (Required, String) Standard cron expression (e.g., `"*/5 * * * *"` = every 5 minutes).
+* `cron_expression` - (Required, String) Six-part cron expression with seconds (e.g., `"0 0/5 * * * ?"` = every 5 minutes).
 * `timezone` - (Optional, String) Timezone for the cron expression. Default: `UTC`.
 
 #### Correlations
@@ -336,10 +339,8 @@ The `trigger` block (inside `alert_configuration`, for metric alerts) supports:
 
 The `condition` block supports:
 
-* `operator_type` - (Required, String) Comparison operator. Valid values: `above`, `below`, `within_range`, `outside_range`.
+* `operator_type` - (Required, String) Comparison operator. Valid values: `above`, `below`.
 * `threshold` - (Optional, Float) Threshold value. Used with `above` and `below`.
-* `from` - (Optional, Float) Range start. Used with `within_range` and `outside_range`.
-* `to` - (Optional, Float) Range end. Used with `within_range` and `outside_range`.
 
 ### Metric Query
 
@@ -352,7 +353,7 @@ The `queries` block supports:
 
 The `query_definition` block supports:
 
-* `account_id` - (Optional, Integer) The account ID for the metrics data source.
+* `account_id` - (Optional, Integer) The account ID for the metrics data source. Required by the API for metric alerts.
 * `promql_query` - (Required, String) PromQL query string (e.g., `"rate(http_requests_total[5m])"`).
 
 ## Attributes Reference
