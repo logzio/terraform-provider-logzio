@@ -21,7 +21,7 @@ func TestAccDataSourceUnifiedAlert_LogAlert(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.logzio_unified_alert.test_log_alert_ds", "alert_id"),
 					resource.TestCheckResourceAttr("data.logzio_unified_alert.test_log_alert_ds", "title", "Test Log Alert for DS"),
-					resource.TestCheckResourceAttr("data.logzio_unified_alert.test_log_alert_ds", "alert_type", "logs"),
+					resource.TestCheckResourceAttr("data.logzio_unified_alert.test_log_alert_ds", "type", "LOG_ALERT"),
 					resource.TestCheckResourceAttr("data.logzio_unified_alert.test_log_alert_ds", "enabled", "true"),
 					resource.TestCheckResourceAttr("data.logzio_unified_alert.test_log_alert_ds", "alert_configuration.0.type", "LOG_ALERT"),
 				),
@@ -73,8 +73,8 @@ resource "logzio_unified_alert" "test_log_alert_resource" {
 }
 
 data "logzio_unified_alert" "test_log_alert_ds" {
-  alert_type = "logs"
-  alert_id   = logzio_unified_alert.test_log_alert_resource.alert_id
+  type     = "LOG_ALERT"
+  alert_id = logzio_unified_alert.test_log_alert_resource.alert_id
 
   depends_on = [logzio_unified_alert.test_log_alert_resource]
 }

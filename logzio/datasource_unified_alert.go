@@ -11,8 +11,7 @@ import (
 )
 
 const (
-	// Datasource-only lookup field (URL type for API call)
-	unifiedAlertDsAlertType = "alert_type"
+	unifiedAlertDsType = "type"
 )
 
 func dataSourceUnifiedAlert() *schema.Resource {
@@ -23,10 +22,10 @@ func dataSourceUnifiedAlert() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			unifiedAlertDsAlertType: {
+			unifiedAlertDsType: {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{unified_alerts.UrlTypeLogs, unified_alerts.UrlTypeMetrics}, false),
+				ValidateFunc: validation.StringInSlice([]string{unified_alerts.TypeLogAlert, unified_alerts.TypeMetricAlert}, false),
 			},
 			unifiedAlertTitle: {
 				Type:     schema.TypeString,
@@ -118,14 +117,15 @@ func dataSourceUnifiedAlert() *schema.Resource {
 
 func dataSourceUnifiedAlertRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := unifiedAlertClient(m)
-	alertType := d.Get(unifiedAlertDsAlertType).(string)
+	configType := d.Get(unifiedAlertDsType).(string)
 	alertId := d.Get(unifiedAlertId).(string)
 
-	alert, err := client.GetUnifiedAlert(alertType, alertId)
+	urlType := configTypeToUrlType(configType)
+	alert, err := client.GetUnifiedAlert(urlType, alertId)
 	if err != nil {
 		return diag.Errorf("failed to get unified alert by ID: %v", err)
 	}
 
-	d.SetId(fmt.Sprintf("%s:%s", alertType, alert.Id))
+	d.SetId(fmt.Sprintf("%s:%s", urlType, alert.Id))
 	return setUnifiedAlert(d, alert)
 }

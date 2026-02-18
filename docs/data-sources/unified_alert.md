@@ -7,14 +7,14 @@ Use this data source to access information about an existing Logz.io unified ale
 ```hcl
 # Lookup log alert by ID
 data "logzio_unified_alert" "log_alert_by_id" {
-  alert_type = "logs"
-  alert_id   = "alert-123"
+  type     = "LOG_ALERT"
+  alert_id = "alert-123"
 }
 
 # Lookup metric alert by ID
 data "logzio_unified_alert" "metric_alert_by_id" {
-  alert_type = "metrics"
-  alert_id   = "alert-456"
+  type     = "METRIC_ALERT"
+  alert_id = "alert-456"
 }
 
 # Use the data source outputs
@@ -29,7 +29,7 @@ output "alert_enabled" {
 
 ## Argument Reference
 
-* `alert_type` - (Required, String) Alert type for API lookup. Must be `logs` or `metrics`.
+* `type` - (Required, String) Alert type. Must be `LOG_ALERT` or `METRIC_ALERT`.
 * `alert_id` - (Required, String) The unique alert identifier.
 
 ## Attributes Reference

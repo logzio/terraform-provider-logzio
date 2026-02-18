@@ -268,9 +268,8 @@ func resourceAlertConfiguration() *schema.Resource {
 				Computed: true,
 			},
 			alertConfigAlertOutputTemplateType: {
-				Type:     schema.TypeString,
-				Optional: true,
-				// API accepts "JSON" and "TABLE".
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{unified_alerts.OutputTypeJson, "TABLE"}, false),
 			},
 			alertConfigSearchTimeFrameMinutes: {
@@ -691,8 +690,6 @@ func parseUnifiedAlertCompositeId(id string) (urlType string, alertId string, er
 	return parts[0], parts[1], nil
 }
 
-// configTypeToUrlType converts AlertConfiguration.Type to the URL type used in CRUD calls.
-// "LOG_ALERT" -> "logs", "METRIC_ALERT" -> "metrics"
 func configTypeToUrlType(configType string) string {
 	if configType == unified_alerts.TypeLogAlert {
 		return unified_alerts.UrlTypeLogs
@@ -979,7 +976,7 @@ func buildMetricQueries(queriesList []interface{}) []unified_alerts.MetricQuery 
 	return queries
 }
 
-// Set functions (API response -> Terraform state)
+
 
 func setUnifiedAlert(d *schema.ResourceData, alert *unified_alerts.UnifiedAlert) diag.Diagnostics {
 	d.Set(unifiedAlertId, alert.Id)
