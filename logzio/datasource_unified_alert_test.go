@@ -5,9 +5,11 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 )
 
 func TestAccDataSourceUnifiedAlert_LogAlert(t *testing.T) {
+	defer utils.SleepAfterTest()
 	email := "test@logz.io"
 
 	resource.Test(t, resource.TestCase{
@@ -19,8 +21,9 @@ func TestAccDataSourceUnifiedAlert_LogAlert(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.logzio_unified_alert.test_log_alert_ds", "alert_id"),
 					resource.TestCheckResourceAttr("data.logzio_unified_alert.test_log_alert_ds", "title", "Test Log Alert for DS"),
-					resource.TestCheckResourceAttr("data.logzio_unified_alert.test_log_alert_ds", "type", "LOG_ALERT"),
+					resource.TestCheckResourceAttr("data.logzio_unified_alert.test_log_alert_ds", "alert_type", "logs"),
 					resource.TestCheckResourceAttr("data.logzio_unified_alert.test_log_alert_ds", "enabled", "true"),
+					resource.TestCheckResourceAttr("data.logzio_unified_alert.test_log_alert_ds", "alert_configuration.0.type", "LOG_ALERT"),
 				),
 			},
 		},
@@ -31,20 +34,17 @@ func getUnifiedLogAlertDataSourceConfig(email string) string {
 	return fmt.Sprintf(`
 resource "logzio_unified_alert" "test_log_alert_resource" {
   title       = "Test Log Alert for DS"
-  type        = "LOG_ALERT"
   description = "Test log alert for data source"
   enabled     = true
 
-  log_alert {
-    search_timeframe_minutes = 5
+  recipients {
+    emails = ["%s"]
+  }
 
-    output {
-      type = "JSON"
-
-      recipients {
-        emails = ["%s"]
-      }
-    }
+  alert_configuration {
+    type                           = "LOG_ALERT"
+    search_timeframe_minutes       = 5
+    alert_output_template_type     = "JSON"
 
     sub_components {
       query_definition {
@@ -73,11 +73,10 @@ resource "logzio_unified_alert" "test_log_alert_resource" {
 }
 
 data "logzio_unified_alert" "test_log_alert_ds" {
-  type     = "LOG_ALERT"
-  alert_id = logzio_unified_alert.test_log_alert_resource.alert_id
+  alert_type = "logs"
+  alert_id   = logzio_unified_alert.test_log_alert_resource.alert_id
 
   depends_on = [logzio_unified_alert.test_log_alert_resource]
 }
 `, email)
 }
-

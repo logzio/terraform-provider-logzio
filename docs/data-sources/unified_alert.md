@@ -7,14 +7,14 @@ Use this data source to access information about an existing Logz.io unified ale
 ```hcl
 # Lookup log alert by ID
 data "logzio_unified_alert" "log_alert_by_id" {
-  type     = "LOG_ALERT"
-  alert_id = "alert-123"
+  alert_type = "logs"
+  alert_id   = "alert-123"
 }
 
 # Lookup metric alert by ID
 data "logzio_unified_alert" "metric_alert_by_id" {
-  type     = "METRIC_ALERT"
-  alert_id = "alert-456"
+  alert_type = "metrics"
+  alert_id   = "alert-456"
 }
 
 # Use the data source outputs
@@ -29,10 +29,8 @@ output "alert_enabled" {
 
 ## Argument Reference
 
-* `type` - (Required, String) Alert type. Must be either `LOG_ALERT` or `METRIC_ALERT`.
+* `alert_type` - (Required, String) Alert type for API lookup. Must be `logs` or `metrics`.
 * `alert_id` - (Required, String) The unique alert identifier.
-
-**Note:** Lookup by `title` is not currently supported. Use `alert_id` to retrieve specific alerts.
 
 ## Attributes Reference
 
@@ -42,29 +40,17 @@ See the [Unified Alert Resource](../resources/unified_alert.md) for details on a
 
 * `alert_id` - The unique alert identifier.
 * `title` - Alert name.
-* `type` - Alert type (`LOG_ALERT` or `METRIC_ALERT`).
 * `description` - Alert description.
 * `tags` - List of tags.
 * `enabled` - Whether the alert is enabled.
 * `created_at` - Unix timestamp of creation.
 * `updated_at` - Unix timestamp of last update.
-* `folder_id` - Folder UID.
-* `dashboard_id` - Dashboard UID.
-* `panel_id` - Panel ID.
+* `created_by` - Email of the user who created the alert.
+* `updated_by` - Email of the user who last updated the alert.
+* `linked_panel` - Dashboard panel link with `folder_id`, `dashboard_id`, `panel_id`.
 * `runbook` - Runbook text.
 * `rca` - Whether RCA is enabled.
 * `rca_notification_endpoint_ids` - RCA notification endpoint IDs.
 * `use_alert_notification_endpoints_for_rca` - Whether to use alert endpoints for RCA.
-
-### Log Alert Attributes
-
-When `type = "LOG_ALERT"`, the following nested block is available:
-
-* `log_alert` - Log alert configuration with all nested attributes as documented in the resource.
-
-### Metric Alert Attributes
-
-When `type = "METRIC_ALERT"`, the following nested block is available:
-
-* `metric_alert` - Metric alert configuration with all nested attributes as documented in the resource.
-
+* `recipients` - Notification recipients with `emails` and `notification_endpoint_ids`.
+* `alert_configuration` - The alert configuration block. See the resource documentation for full details.
