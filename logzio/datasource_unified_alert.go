@@ -2,9 +2,17 @@ package logzio
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/logzio/logzio_terraform_client/unified_alerts"
+)
+
+const (
+	// Datasource-only lookup field (URL type for API call)
+	unifiedAlertDsAlertType = "alert_type"
 )
 
 func dataSourceUnifiedAlert() *schema.Resource {
@@ -13,38 +21,47 @@ func dataSourceUnifiedAlert() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			unifiedAlertId: {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
+			},
+			unifiedAlertDsAlertType: {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{unified_alerts.UrlTypeLogs, unified_alerts.UrlTypeMetrics}, false),
 			},
 			unifiedAlertTitle: {
 				Type:     schema.TypeString,
-				Optional: true,
-			},
-			unifiedAlertType: {
-				Type:     schema.TypeString,
-				Required: true,
+				Computed: true,
 			},
 			unifiedAlertDescription: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 			unifiedAlertTags: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			unifiedAlertFolderId: {
-				Type:     schema.TypeString,
+			unifiedAlertLinkedPanel: {
+				Type:     schema.TypeList,
 				Computed: true,
-			},
-			unifiedAlertDashboardId: {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			unifiedAlertPanelId: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						linkedPanelFolderId: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						linkedPanelDashboardId: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						linkedPanelPanelId: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
 			},
 			unifiedAlertRunbook: {
 				Type:     schema.TypeString,
@@ -69,6 +86,16 @@ func dataSourceUnifiedAlert() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			unifiedAlertRecipients: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     resourceRecipients(),
+			},
+			unifiedAlertAlertConfiguration: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     resourceAlertConfiguration(),
+			},
 			unifiedAlertCreatedAt: {
 				Type:     schema.TypeFloat,
 				Computed: true,
@@ -77,15 +104,13 @@ func dataSourceUnifiedAlert() *schema.Resource {
 				Type:     schema.TypeFloat,
 				Computed: true,
 			},
-			unifiedAlertLogAlert: {
-				Type:     schema.TypeList,
+			unifiedAlertCreatedBy: {
+				Type:     schema.TypeString,
 				Computed: true,
-				Elem:     resourceLogAlertConfig(),
 			},
-			unifiedAlertMetricAlert: {
-				Type:     schema.TypeList,
+			unifiedAlertUpdatedBy: {
+				Type:     schema.TypeString,
 				Computed: true,
-				Elem:     resourceMetricAlertConfig(),
 			},
 		},
 	}
@@ -93,29 +118,14 @@ func dataSourceUnifiedAlert() *schema.Resource {
 
 func dataSourceUnifiedAlertRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := unifiedAlertClient(m)
-	alertType := d.Get(unifiedAlertType).(string)
-	urlType := getUrlTypeFromAlertType(alertType)
+	alertType := d.Get(unifiedAlertDsAlertType).(string)
+	alertId := d.Get(unifiedAlertId).(string)
 
-	alertId, alertIdOk := d.GetOk(unifiedAlertId)
-	_, alertTitleOk := d.GetOk(unifiedAlertTitle)
-
-	if !alertIdOk && !alertTitleOk {
-		return diag.Errorf("either alert_id or title must be specified")
+	alert, err := client.GetUnifiedAlert(alertType, alertId)
+	if err != nil {
+		return diag.Errorf("failed to get unified alert by ID: %v", err)
 	}
 
-	if alertIdOk {
-		// Lookup by ID
-		alert, err := client.GetUnifiedAlert(urlType, alertId.(string))
-		if err != nil {
-			return diag.Errorf("failed to get unified alert by ID: %v", err)
-		}
-
-		d.SetId(alert.Id)
-		return setUnifiedAlert(d, alert)
-	}
-
-	// Lookup by title not directly supported by API
-	// This would require listing all alerts and filtering, which is not ideal
-	// For now, return error directing users to use ID
-	return diag.Errorf("lookup by title is not supported for unified alerts, please use alert_id instead")
+	d.SetId(fmt.Sprintf("%s:%s", alertType, alert.Id))
+	return setUnifiedAlert(d, alert)
 }
