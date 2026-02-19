@@ -21,7 +21,7 @@ const (
 	authGroupGroup      = "group"
 	authGroupUserRole   = "user_role"
 
-	authGroupRetryAttempts = 8
+	authGroupRetryAttempts = 4
 )
 
 func resourceAuthenticationGroups() *schema.Resource {

@@ -71,7 +71,7 @@ func dataSourceMetricsAccountReadWrapper(ctx context.Context, d *schema.Resource
 				return false
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(4),
 	)
 
 	if readErr != nil {

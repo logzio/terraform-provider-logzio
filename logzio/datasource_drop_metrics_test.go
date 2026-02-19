@@ -11,6 +11,8 @@ import (
 )
 
 func TestAccDataSourceDropMetric(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceFilterName := "datasource_test_resource_drop_metric_find"
 	datasourceFilterName := "datasource_test_find_drop_metric_by_id"
 	resourceName := "logzio_drop_metrics." + resourceFilterName
@@ -19,7 +21,6 @@ func TestAccDataSourceDropMetric(t *testing.T) {
 
 	resourceConfig := datasourceResourceTestDropMetrics(resourceFilterName, accountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -53,6 +54,8 @@ func TestAccDataSourceDropMetric(t *testing.T) {
 }
 
 func TestAccDataSourceDropMetricById(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceFilterName := "datasource_test_resource_drop_metric_find_by_id"
 	datasourceFilterName := "datasource_test_drop_metric_find_by_id"
 	resourceName := "logzio_drop_metrics." + resourceFilterName
@@ -62,7 +65,6 @@ func TestAccDataSourceDropMetricById(t *testing.T) {
 
 	resourceConfig := datasourceResourceTestDropMetrics(resourceFilterName, accountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -95,9 +97,10 @@ func TestAccDataSourceDropMetricById(t *testing.T) {
 }
 
 func TestAccDataSourceDropMetricNotFoundAndNotEnoughCriteriaToSearch(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	datasourceFilterName := "datasource_test_drop_metric_not_existing_and_no_search_criteria"
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -115,10 +118,11 @@ func TestAccDataSourceDropMetricNotFoundAndNotEnoughCriteriaToSearch(t *testing.
 }
 
 func TestAccDataSourceDropMetricNotFoundSearch(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	datasourceFilterName := "datasource_test_drop_metric_not_existing"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -136,6 +140,8 @@ func TestAccDataSourceDropMetricNotFoundSearch(t *testing.T) {
 }
 
 func TestAccDataSourceDropMetricTooManyMatches(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceFilterName := "datasource_test_resource_drop_metric_too_many_matches"
 	datasourceFilterName := "datasource_test_drop_metric_too_many_matches"
 	resourceName := "logzio_drop_metrics." + resourceFilterName
@@ -144,7 +150,6 @@ func TestAccDataSourceDropMetricTooManyMatches(t *testing.T) {
 	resourceConfig := datasourceResourceTestDropMetrics(resourceFilterName, accountId)
 	resourceConfig2 := datasourceResourceTestDropMetrics(fmt.Sprintf("%s_second", resourceFilterName), accountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -171,6 +176,8 @@ func TestAccDataSourceDropMetricTooManyMatches(t *testing.T) {
 }
 
 func TestAccDataSourceDropMetricNotFoundSearchWithResults(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceFilterName := "datasource_test_resource_drop_metric_no_match_found_search"
 	datasourceFilterName := "datasource_test_drop_metric_no_match_found_search"
 	resourceName := "logzio_drop_metrics." + resourceFilterName
@@ -179,7 +186,6 @@ func TestAccDataSourceDropMetricNotFoundSearchWithResults(t *testing.T) {
 	resourceConfig := datasourceResourceTestDropMetrics(resourceFilterName, accountId)
 	resourceConfig2 := datasourceResourceTestDropMetrics(fmt.Sprintf("%s_second", resourceFilterName), accountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -276,6 +282,8 @@ data "logzio_drop_metrics" "%s" {
 }
 
 func TestAccDataSourceDropMetricWithName(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceFilterName := "datasource_test_resource_drop_metric_with_name"
 	datasourceFilterName := "datasource_test_find_drop_metric_with_name"
 	resourceName := "logzio_drop_metrics." + resourceFilterName
@@ -284,7 +292,6 @@ func TestAccDataSourceDropMetricWithName(t *testing.T) {
 
 	resourceConfig := datasourceResourceTestDropMetricsWithName(resourceFilterName, accountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

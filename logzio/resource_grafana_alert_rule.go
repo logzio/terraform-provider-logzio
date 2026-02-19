@@ -39,7 +39,7 @@ const (
 	grafanaAlertRuleTitle                     = "title"
 	grafanaAlertRuleUid                       = "uid"
 
-	grafanaAlertRuleRetryAttempts = 8
+	grafanaAlertRuleRetryAttempts = 4
 )
 
 func resourceGrafanaAlertRule() *schema.Resource {

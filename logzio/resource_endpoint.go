@@ -36,7 +36,7 @@ const (
 
 	endpointTypeMicrosoftTeamsFromApi = "microsoft teams"
 
-	endpointRetryAttempts = 8
+	endpointRetryAttempts = 4
 )
 
 /**

@@ -7,8 +7,9 @@ import (
 )
 
 func TestAccDataSourceLogShippingToken(t *testing.T) {
-	resourceName := "data.logzio_log_shipping_token.my_log_shipping_token_datasource"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "data.logzio_log_shipping_token.my_log_shipping_token_datasource"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },

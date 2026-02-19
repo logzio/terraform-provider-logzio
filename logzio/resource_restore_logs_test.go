@@ -11,12 +11,13 @@ import (
 )
 
 func TestAccLogzioRestoreLogs_InitiateRestore(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	path := os.Getenv(envLogzioS3Path)
 	arn := os.Getenv(envLogzioAwsArn)
 	archiveName := "archive_for_restore_initiate"
 	restoreName := "tf_test_restore_initiate"
 	fullRestoreName := "logzio_restore_logs." + restoreName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -58,8 +59,9 @@ func TestAccLogzioRestoreLogs_InitiateRestore(t *testing.T) {
 }
 
 func TestAccLogzioRestoreLogs_InitiateRestoreEmptyStartTime(t *testing.T) {
-	restoreName := "tf_test_empty_start_time"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	restoreName := "tf_test_empty_start_time"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -74,8 +76,9 @@ func TestAccLogzioRestoreLogs_InitiateRestoreEmptyStartTime(t *testing.T) {
 }
 
 func TestAccLogzioRestoreLogs_InitiateRestoreEmptyEndTime(t *testing.T) {
-	restoreName := "tf_test_empty_start_time"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	restoreName := "tf_test_empty_start_time"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -90,8 +93,9 @@ func TestAccLogzioRestoreLogs_InitiateRestoreEmptyEndTime(t *testing.T) {
 }
 
 func TestAccLogzioRestoreLogs_InitiateRestoreEmptyUsername(t *testing.T) {
-	restoreName := "tf_test_empty_username"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	restoreName := "tf_test_empty_username"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },

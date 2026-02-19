@@ -20,7 +20,7 @@ const (
 	dropFilterValue           = "value"
 	dropFilterThresholdInGB   = "gb_threshold"
 
-	dropFilterRetryAttempts = 8
+	dropFilterRetryAttempts = 4
 )
 
 // Returns the drop filters client with the api token from the provider

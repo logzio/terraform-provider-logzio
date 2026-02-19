@@ -23,7 +23,7 @@ const (
 	userRole      string = "role"
 	userActive    string = "active"
 
-	userRetryAttempts = 8
+	userRetryAttempts = 4
 )
 
 /**

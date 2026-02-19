@@ -114,7 +114,7 @@ const (
 	metricQueryDefinitionAccountId   = "account_id"
 	metricQueryDefinitionPromqlQuery = "promql_query"
 
-	unifiedAlertRetryAttempts = 8
+	unifiedAlertRetryAttempts = 4
 
 )
 

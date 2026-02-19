@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccDataSourceGrafanaFolder(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	title := "my_title"
 	resourceType := "logzio_grafana_folder"
@@ -23,7 +24,6 @@ func TestAccDataSourceGrafanaFolder(t *testing.T) {
 			{
 				Config: getGrafanaFolderConfig(title),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(25),
 					resource.TestCheckResourceAttr(fullResourceName, grafanaFolderTitle, title),
 					resource.TestCheckResourceAttrSet(fullResourceName, grafanaFolderUid),
 					resource.TestCheckResourceAttrSet(fullResourceName, grafanaFolderId),
@@ -37,7 +37,6 @@ func TestAccDataSourceGrafanaFolder(t *testing.T) {
 				},
 				Config: getGrafanaFolderConfig(title) + getDataSourceGrafanaFolder(title),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(25),
 					resource.TestCheckResourceAttr(fullDs, grafanaFolderTitle, title),
 					resource.TestCheckResourceAttrSet(fullDs, grafanaFolderUid),
 					resource.TestCheckResourceAttrSet(fullDs, grafanaFolderId),

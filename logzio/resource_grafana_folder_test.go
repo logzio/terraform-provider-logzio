@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccLogzioGrafanaFolder_GrafanaFolder(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	randomSuffix := getRandomId()
 	title := fmt.Sprintf("tf_provider_test_%s", randomSuffix)
@@ -22,7 +23,6 @@ func TestAccLogzioGrafanaFolder_GrafanaFolder(t *testing.T) {
 			{
 				Config: getGrafanaFolderConfig(title),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(30),
 					resource.TestCheckResourceAttr(fullResourceName, grafanaFolderTitle, title),
 					resource.TestCheckResourceAttrSet(fullResourceName, grafanaFolderUid),
 					resource.TestCheckResourceAttrSet(fullResourceName, grafanaFolderId),
@@ -33,7 +33,6 @@ func TestAccLogzioGrafanaFolder_GrafanaFolder(t *testing.T) {
 			{
 				Config: getGrafanaFolderConfig(newTitle),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(30),
 					resource.TestCheckResourceAttr(fullResourceName, grafanaFolderTitle, newTitle),
 					resource.TestCheckResourceAttrSet(fullResourceName, grafanaFolderUid),
 					resource.TestCheckResourceAttrSet(fullResourceName, grafanaFolderId),

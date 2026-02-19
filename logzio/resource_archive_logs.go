@@ -31,7 +31,7 @@ const (
 	archiveLogsBlobContainerName   = "azure_container_name"
 	archiveLogsBlobPath            = "azure_blob_path"
 
-	archiveRetryAttempts = 8
+	archiveRetryAttempts = 4
 )
 
 // archiveLogsClient returns the archive logs client with the api token from the provider

@@ -13,6 +13,7 @@ const (
 )
 
 func TestAccLogzioGrafanaNotificationPolicy_ManageGrafanaNotificationPolicy(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	resourceFullName := "logzio_grafana_notification_policy.test_np"
 	resource.Test(t, resource.TestCase{
@@ -107,6 +108,7 @@ func TestAccLogzioGrafanaNotificationPolicy_ManageGrafanaNotificationPolicy(t *t
 }
 
 func TestAccLogzioGrafanaNotificationPolicy_InvalidMatchType(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

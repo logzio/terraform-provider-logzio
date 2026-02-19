@@ -25,7 +25,7 @@ const (
 	restoreLogsFinishedAt       = "finished_at"
 	restoreLogsExpiresAt        = "expires_at"
 
-	restoreLogsRetryAttempts = 8
+	restoreLogsRetryAttempts = 4
 )
 
 // restoreLogsClient returns the restore logs client with the api token from the provider

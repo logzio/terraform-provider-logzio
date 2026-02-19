@@ -7,12 +7,14 @@ import (
 )
 
 func TestValidUrl(t *testing.T) {
+	t.Parallel()
 	str := "https://some.url"
 	_, errors := ValidateUrl(str, "url")
 	assert.Len(t, errors, 0)
 }
 
 func TestValidateOutputTypes(t *testing.T) {
+	t.Parallel()
 	validOptions := []string{
 		alerts_v2.OutputTypeJson,
 		alerts_v2.OutputTypeTable,
@@ -35,6 +37,7 @@ func TestValidateOutputTypes(t *testing.T) {
 }
 
 func TestValidateSortTypes(t *testing.T) {
+	t.Parallel()
 	validTypes := []string{
 		alerts_v2.SortAsc,
 		alerts_v2.SortDesc,

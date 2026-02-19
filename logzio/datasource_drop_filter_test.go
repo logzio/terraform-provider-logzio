@@ -8,6 +8,8 @@ import (
 )
 
 func TestAccDataSourceDropFilter(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "logzio_drop_filter.test_create_drop_filter_for_ds"
 	dataSourceName := "data.logzio_drop_filter.my_drop_filter_datasource"
 	resourceConfig := fmt.Sprintf(`resource "logzio_drop_filter" "test_create_drop_filter_for_ds" {
@@ -23,7 +25,6 @@ func TestAccDataSourceDropFilter(t *testing.T) {
   }
 }
 `)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },

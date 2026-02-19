@@ -17,7 +17,7 @@ const (
 	kibanaObjectKibanaVersionField = "kibana_version"
 	kibanaObjectDataField          = "data"
 
-	kibanaObjectRetryAttempts = 8
+	kibanaObjectRetryAttempts = 4
 )
 
 // kibanaObjectClient returns the kibana object client with the api token from the provider

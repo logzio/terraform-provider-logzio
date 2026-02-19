@@ -68,16 +68,19 @@ func init() {
 }
 
 func TestProvider(t *testing.T) {
+	t.Parallel()
 	if err := Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
 func TestProviderImpl(t *testing.T) {
+	t.Parallel()
 	var _ *schema.Provider = Provider()
 }
 
 func TestProvider_BaseUrlResolution(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name            string
 		region          string

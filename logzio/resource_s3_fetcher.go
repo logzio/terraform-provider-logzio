@@ -26,7 +26,7 @@ const (
 	s3FetcherRegion                   = "aws_region"
 	s3FetcherLogsType                 = "logs_type"
 
-	s3FetcherRetryAttempts = 8
+	s3FetcherRetryAttempts = 4
 )
 
 func resourceS3Fetcher() *schema.Resource {

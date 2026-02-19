@@ -13,11 +13,12 @@ import (
 )
 
 func TestAccLogzioSubaccount_CreateSubaccount(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	accountId := os.Getenv(envLogzioAccountId)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_create_subaccount_" + getRandomId()
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, accountId)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -47,10 +48,11 @@ func TestAccLogzioSubaccount_CreateSubaccount(t *testing.T) {
 }
 
 func TestAccLogzioSubaccount_CreateSubaccountEmptySharingObject(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_empty_sharing_" + getRandomId()
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, "")
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -79,10 +81,11 @@ func TestAccLogzioSubaccount_CreateSubaccountEmptySharingObject(t *testing.T) {
 }
 
 func TestAccLogzioSubaccount_CreateSubaccountNoEmail(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	email := ""
 	accountName := "test_no_email"
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, "")
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -99,10 +102,11 @@ func TestAccLogzioSubaccount_CreateSubaccountNoEmail(t *testing.T) {
 }
 
 func TestAccLogzioSubaccount_CreateSubaccountInvalidEmail(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	email := "some@invalid.mail"
 	accountName := "test_invalid_email"
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, "")
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -120,11 +124,12 @@ func TestAccLogzioSubaccount_CreateSubaccountInvalidEmail(t *testing.T) {
 }
 
 func TestAccLogzioSubaccount_CreateSubaccountNoName(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	accountId := os.Getenv(envLogzioAccountId)
 	email := os.Getenv(envLogzioEmail)
 	accountName := ""
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, accountId)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -143,13 +148,14 @@ func TestAccLogzioSubaccount_CreateSubaccountNoName(t *testing.T) {
 }
 
 func TestAccLogzioSubaccount_CreateSubaccountWarmRetention(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	accountId := os.Getenv(envLogzioWarmAccountId)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_subaccount_warm_" + getRandomId()
 	retention := 4
 	snapRetention := 2
 	terraformPlan := testAccCheckLogzioWarmSubaccountConfig(email, accountName, accountId, retention, snapRetention)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -181,6 +187,8 @@ func TestAccLogzioSubaccount_CreateSubaccountWarmRetention(t *testing.T) {
 }
 
 func TestAccLogzioSubaccount_CreateSubaccountWarmRetentionIssues(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	accountId := os.Getenv(envLogzioWarmAccountId)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_invalid_snap_retention"
@@ -188,7 +196,6 @@ func TestAccLogzioSubaccount_CreateSubaccountWarmRetentionIssues(t *testing.T) {
 	snapRetention := 2
 	terraformPlanLowRetention := testAccCheckLogzioWarmSubaccountConfig(email, accountName, accountId, 2, snapRetention)
 	terraformPlanInvalidSnapRetention := testAccCheckLogzioWarmSubaccountConfig(email, accountName, accountId, retention, 0)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -211,13 +218,14 @@ func TestAccLogzioSubaccount_CreateSubaccountWarmRetentionIssues(t *testing.T) {
 }
 
 func TestAccLogzioSubaccount_CreateSubaccountConsumption(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	accountId := os.Getenv(envLogzioConsumptionAccountId)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_subaccount_consumption_" + getRandomId()
 	isFlexible := "false"
 	softLimit := float32(1)
 	terraformPlan := testAccCheckLogzioConsumptionSubaccountConfig(email, accountName, accountId, isFlexible, softLimit)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -249,6 +257,8 @@ func TestAccLogzioSubaccount_CreateSubaccountConsumption(t *testing.T) {
 }
 
 func TestAccLogzioSubaccount_CreateSubaccountConsumptionIssues(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	accountId := os.Getenv(envLogzioConsumptionAccountId)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_invalid_snap_retention"
@@ -256,7 +266,6 @@ func TestAccLogzioSubaccount_CreateSubaccountConsumptionIssues(t *testing.T) {
 	softLimitInvalid := float32(0)
 	terraformPlanSoftLimitOnFlexible := testAccCheckLogzioConsumptionSubaccountConfig(email, accountName, accountId, "true", softLimit)
 	terraformPlanInvalidSoftLimit := testAccCheckLogzioConsumptionSubaccountConfig(email, accountName, accountId, "false", softLimitInvalid)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -279,6 +288,8 @@ func TestAccLogzioSubaccount_CreateSubaccountConsumptionIssues(t *testing.T) {
 }
 
 func TestAccLogzioSubaccount_UpdateSubaccount(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	accountId := os.Getenv(envLogzioAccountId)
 	email := os.Getenv(envLogzioEmail)
 	suffix := getRandomId()
@@ -287,7 +298,6 @@ func TestAccLogzioSubaccount_UpdateSubaccount(t *testing.T) {
 	resourceName := "logzio_subaccount.test_subaccount"
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, accountId)
 	terraformPlanUpdate := testAccCheckLogzioSubaccountConfig(email, accountNameUpdate, accountId)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

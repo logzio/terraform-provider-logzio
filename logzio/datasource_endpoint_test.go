@@ -8,6 +8,7 @@ import (
 )
 
 func TestAccDataSourceEndpoint(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{

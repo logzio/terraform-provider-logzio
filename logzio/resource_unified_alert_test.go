@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccLogzioUnifiedAlert_LogAlert(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	email := "test@logz.io"
 
@@ -44,6 +45,7 @@ func TestAccLogzioUnifiedAlert_LogAlert(t *testing.T) {
 }
 
 func TestAccLogzioUnifiedAlert_MetricAlert(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	email := "test@logz.io"
 	metricsAccountId := os.Getenv(envLogzioMetricsAccountId)
@@ -71,6 +73,7 @@ func TestAccLogzioUnifiedAlert_MetricAlert(t *testing.T) {
 }
 
 func TestAccLogzioUnifiedAlert_MetricAlertMathExpression(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	email := "test@logz.io"
 	metricsAccountId := os.Getenv(envLogzioMetricsAccountId)
@@ -97,6 +100,7 @@ func TestAccLogzioUnifiedAlert_MetricAlertMathExpression(t *testing.T) {
 }
 
 func TestAccLogzioUnifiedAlert_Import(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	email := "test@logz.io"
 

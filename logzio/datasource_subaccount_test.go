@@ -16,12 +16,13 @@ const (
 )
 
 func TestAccDataSourceSubaccount(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "logzio_subaccount.subaccount_datasource"
 	dataSourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_datasource_create"
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -34,7 +35,6 @@ func TestAccDataSourceSubaccount(t *testing.T) {
 			{
 				Config: testAccSubAccountDataSourceResource(email, accountId, accountName),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "account_name", accountName),
 					resource.TestCheckResourceAttr(resourceName, "retention_days", "2"),
 					resource.TestCheckResourceAttr(resourceName, "max_daily_gb", "1"),
@@ -44,7 +44,6 @@ func TestAccDataSourceSubaccount(t *testing.T) {
 				Config: testAccSubAccountDataSourceResource(email, accountId, accountName) +
 					testAccCheckLogzioSubaccountDatasourceConfig(),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(dataSourceName, "account_name", accountName),
 					resource.TestCheckResourceAttr(dataSourceName, "retention_days", "2"),
 					resource.TestCheckResourceAttr(dataSourceName, "max_daily_gb", "1"),
@@ -55,12 +54,13 @@ func TestAccDataSourceSubaccount(t *testing.T) {
 }
 
 func TestAccDataSourceSubaccountByAccountName(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "logzio_subaccount.subaccount_datasource"
 	dataSourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_datasource_account_name"
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -92,12 +92,13 @@ func TestAccDataSourceSubaccountByAccountName(t *testing.T) {
 }
 
 func TestAccDataSourceSubaccountWarm(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "logzio_subaccount.subaccount_datasource"
 	dataSourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioWarmAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_datasource_create"
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -110,7 +111,6 @@ func TestAccDataSourceSubaccountWarm(t *testing.T) {
 			{
 				Config: testAccSubAccountWarmDataSourceResource(email, accountId, accountName),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "account_name", accountName),
 					resource.TestCheckResourceAttr(resourceName, "snap_search_retention_days", "2"),
 					resource.TestCheckResourceAttr(resourceName, "is_capped", "true"),
@@ -123,7 +123,6 @@ func TestAccDataSourceSubaccountWarm(t *testing.T) {
 				Config: testAccSubAccountWarmDataSourceResource(email, accountId, accountName) +
 					testAccCheckLogzioSubaccountDatasourceConfig(),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(dataSourceName, "account_name", accountName),
 					resource.TestCheckResourceAttr(dataSourceName, "snap_search_retention_days", "2"),
 					resource.TestCheckResourceAttr(dataSourceName, "is_capped", "true"),
@@ -137,12 +136,13 @@ func TestAccDataSourceSubaccountWarm(t *testing.T) {
 }
 
 func TestAccDataSourceSubaccountConsumption(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "logzio_subaccount.subaccount_datasource"
 	dataSourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioConsumptionAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_datasource_create"
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -172,6 +172,7 @@ func TestAccDataSourceSubaccountConsumption(t *testing.T) {
 }
 
 func TestAccDataSourceSubaccountNotExists(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{

@@ -11,12 +11,13 @@ import (
 )
 
 func TestAccDataSourceMetricsAccount(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "logzio_metrics_account.metrics_account_datasource"
 	dataSourceName := "data.logzio_metrics_account.metrics_account_datasource_by_id"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_datasource_create"
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -46,12 +47,13 @@ func TestAccDataSourceMetricsAccount(t *testing.T) {
 }
 
 func TestAccDataSourceMetricsAccountByAccountName(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "logzio_metrics_account.metrics_account_datasource"
 	dataSourceName := "data.logzio_metrics_account.metrics_account_datasource_by_id"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_datasource_account_name"
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -81,6 +83,7 @@ func TestAccDataSourceMetricsAccountByAccountName(t *testing.T) {
 }
 
 func TestAccDataSourceMetricsAccountNotExists(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{

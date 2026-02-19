@@ -89,7 +89,7 @@ const (
 	grafanaTemplatePrefix                    = "{{"
 	grafanaTemplateSuffix                    = "}}"
 
-	grafanaContactPointRetryAttempts = 8
+	grafanaContactPointRetryAttempts = 4
 )
 
 var notifiers = []grafanaContactPointNotifier{
