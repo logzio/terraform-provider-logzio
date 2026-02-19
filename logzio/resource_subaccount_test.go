@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 )
 
 func TestAccLogzioSubaccount_CreateSubaccount(t *testing.T) {
 	accountId := os.Getenv(envLogzioAccountId)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_create_subaccount"
+	accountName := "test_create_subaccount_" + getRandomId()
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, accountId)
 	defer utils.SleepAfterTest()
 
@@ -24,6 +26,7 @@ func TestAccLogzioSubaccount_CreateSubaccount(t *testing.T) {
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckSubaccountDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -45,7 +48,7 @@ func TestAccLogzioSubaccount_CreateSubaccount(t *testing.T) {
 
 func TestAccLogzioSubaccount_CreateSubaccountEmptySharingObject(t *testing.T) {
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_empty_sharing_object"
+	accountName := "test_empty_sharing_" + getRandomId()
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, "")
 	defer utils.SleepAfterTest()
 
@@ -55,6 +58,7 @@ func TestAccLogzioSubaccount_CreateSubaccountEmptySharingObject(t *testing.T) {
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckSubaccountDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -141,7 +145,7 @@ func TestAccLogzioSubaccount_CreateSubaccountNoName(t *testing.T) {
 func TestAccLogzioSubaccount_CreateSubaccountWarmRetention(t *testing.T) {
 	accountId := os.Getenv(envLogzioWarmAccountId)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_create_subaccountwarm"
+	accountName := "test_subaccount_warm_" + getRandomId()
 	retention := 4
 	snapRetention := 2
 	terraformPlan := testAccCheckLogzioWarmSubaccountConfig(email, accountName, accountId, retention, snapRetention)
@@ -154,6 +158,7 @@ func TestAccLogzioSubaccount_CreateSubaccountWarmRetention(t *testing.T) {
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccWarmProviderFactories,
+		CheckDestroy:      testAccCheckSubaccountDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -208,7 +213,7 @@ func TestAccLogzioSubaccount_CreateSubaccountWarmRetentionIssues(t *testing.T) {
 func TestAccLogzioSubaccount_CreateSubaccountConsumption(t *testing.T) {
 	accountId := os.Getenv(envLogzioConsumptionAccountId)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_create_subaccount_consumption"
+	accountName := "test_subaccount_consumption_" + getRandomId()
 	isFlexible := "false"
 	softLimit := float32(1)
 	terraformPlan := testAccCheckLogzioConsumptionSubaccountConfig(email, accountName, accountId, isFlexible, softLimit)
@@ -221,6 +226,7 @@ func TestAccLogzioSubaccount_CreateSubaccountConsumption(t *testing.T) {
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccConsumptionProviderFactories,
+		CheckDestroy:      testAccCheckSubaccountDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -275,8 +281,9 @@ func TestAccLogzioSubaccount_CreateSubaccountConsumptionIssues(t *testing.T) {
 func TestAccLogzioSubaccount_UpdateSubaccount(t *testing.T) {
 	accountId := os.Getenv(envLogzioAccountId)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_update_before"
-	accountNameUpdate := "test_update_after"
+	suffix := getRandomId()
+	accountName := "test_update_before_" + suffix
+	accountNameUpdate := "test_update_after_" + suffix
 	resourceName := "logzio_subaccount.test_subaccount"
 	terraformPlan := testAccCheckLogzioSubaccountConfig(email, accountName, accountId)
 	terraformPlanUpdate := testAccCheckLogzioSubaccountConfig(email, accountNameUpdate, accountId)
@@ -289,6 +296,7 @@ func TestAccLogzioSubaccount_UpdateSubaccount(t *testing.T) {
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckSubaccountDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -310,6 +318,27 @@ func TestAccLogzioSubaccount_UpdateSubaccount(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccCheckSubaccountDestroy(s *terraform.State) error {
+	if testAccProvider.Meta() == nil {
+		return nil
+	}
+	client := subAccountClient(testAccProvider.Meta())
+	for _, r := range s.RootModule().Resources {
+		if r.Type != "logzio_subaccount" {
+			continue
+		}
+		id, err := strconv.ParseInt(r.Primary.ID, 10, 64)
+		if err != nil {
+			return err
+		}
+		_, err = client.GetSubAccount(id)
+		if err == nil {
+			return fmt.Errorf("subaccount %s still exists", r.Primary.ID)
+		}
+	}
+	return nil
 }
 
 func testAccCheckLogzioSubaccountConfig(email string, accountName string, accountId string) string {

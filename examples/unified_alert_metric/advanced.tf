@@ -19,10 +19,9 @@ variable "notification_email" {
   default     = "test@example.com"
 }
 
-variable "datasource_uid" {
-  type        = string
-  description = "Prometheus datasource UID in Logz.io"
-  default     = "prometheus"
+variable "metrics_account_id" {
+  type        = number
+  description = "Logz.io Metrics account ID"
 }
 
 variable "notification_endpoint_id" {
@@ -42,9 +41,10 @@ variable "dashboard_id" {
   description = "Dashboard UID for alert context"
   default     = ""
 }
+
 variable "panel_id" {
   type        = string
-  description = "panel UID for alert context"
+  description = "Panel UID for alert context"
   default     = ""
 }
 
@@ -61,22 +61,19 @@ provider "logzio" {
 # Basic log alert example for testing
 resource "logzio_unified_alert" "test_log_alert" {
   title       = "Test High Error Rate"
-  type        = "LOG_ALERT"
   description = "Test alert for local provider testing"
   tags        = ["test", "local"]
   enabled     = true
 
-  log_alert {
-    search_timeframe_minutes = 15
+  recipients {
+    emails = [var.notification_email]
+  }
 
-    output {
-      type                          = "JSON"
-      suppress_notifications_minutes = 30
-
-      recipients {
-        emails = [var.notification_email]
-      }
-    }
+  alert_configuration {
+    type                           = "LOG_ALERT"
+    search_timeframe_minutes       = 15
+    suppress_notifications_minutes = 30
+    alert_output_template_type     = "JSON"
 
     sub_components {
       query_definition {
@@ -122,38 +119,45 @@ resource "logzio_unified_alert" "test_log_alert" {
 # Simple threshold alert with single query
 resource "logzio_unified_alert" "metric_one_query_no_ai" {
   title       = "Test: One Query No AI - High CPU"
-  type        = "METRIC_ALERT"
   description = "Alert when CPU usage exceeds threshold - single query, no RCA"
   tags        = ["test", "metrics", "cpu", "no-ai"]
   enabled     = true
 
   # Optional dashboard linking
-  dashboard_id = var.dashboard_id != "" ? var.dashboard_id : null
-  folder_id    = var.folder_id != "" ? var.folder_id : null
-  panel_id = var.folder_id
+  dynamic "linked_panel" {
+    for_each = var.dashboard_id != "" ? [1] : []
+    content {
+      folder_id    = var.folder_id
+      dashboard_id = var.dashboard_id
+      panel_id     = var.panel_id
+    }
+  }
 
-  metric_alert {
+  recipients {
+    emails                    = [var.notification_email]
+    notification_endpoint_ids = var.notification_endpoint_id != null ? [var.notification_endpoint_id] : null
+  }
+
+  alert_configuration {
+    type     = "METRIC_ALERT"
     severity = "HIGH"
 
     trigger {
-      trigger_type             = "THRESHOLD"
-      metric_operator          = "ABOVE"
-      min_threshold            = 80.0
-      search_timeframe_minutes = 5
+      type = "threshold"
+
+      condition {
+        operator_type = "above"
+        threshold     = 80.0
+      }
     }
 
     queries {
       ref_id = "A"
 
       query_definition {
-        datasource_uid = var.datasource_uid
-        promql_query   = "avg(rate(node_cpu_seconds_total{mode=\"user\"}[5m])) * 100"
+        account_id   = var.metrics_account_id
+        promql_query = "avg(rate(node_cpu_seconds_total{mode=\"user\"}[5m])) * 100"
       }
-    }
-
-    recipients {
-      emails                    = [var.notification_email]
-      notification_endpoint_ids = var.notification_endpoint_id != null ? [var.notification_endpoint_id] : null
     }
   }
 }
@@ -162,33 +166,39 @@ resource "logzio_unified_alert" "metric_one_query_no_ai" {
 # Math expression comparing two queries
 resource "logzio_unified_alert" "metric_two_queries_no_ai" {
   title       = "Test: Two Queries No AI - A > B Comparison"
-  type        = "METRIC_ALERT"
   description = "Alert when query A exceeds query B using math expression - no RCA"
   tags        = ["test", "metrics", "math", "comparison", "no-ai"]
   enabled     = true
 
-  dashboard_id = var.dashboard_id != "" ? var.dashboard_id : null
-  folder_id    = var.folder_id != "" ? var.folder_id : null
-  panel_id = var.folder_id
+  dynamic "linked_panel" {
+    for_each = var.dashboard_id != "" ? [1] : []
+    content {
+      folder_id    = var.folder_id
+      dashboard_id = var.dashboard_id
+      panel_id     = var.panel_id
+    }
+  }
 
+  recipients {
+    emails                    = [var.notification_email]
+    notification_endpoint_ids = var.notification_endpoint_id != null ? [var.notification_endpoint_id] : null
+  }
 
-  metric_alert {
+  alert_configuration {
+    type     = "METRIC_ALERT"
     severity = "MEDIUM"
 
     trigger {
-      trigger_type             = "MATH"
-      math_expression          = "$A - $B"
-      metric_operator          = "ABOVE"
-      min_threshold            = 0
-      search_timeframe_minutes = 5
+      type       = "math"
+      expression = "$A - $B"
     }
 
     queries {
       ref_id = "A"
 
       query_definition {
-        datasource_uid = var.datasource_uid
-        promql_query   = "sum(rate(http_requests_total{status=\"200\"}[5m]))"
+        account_id   = var.metrics_account_id
+        promql_query = "sum(rate(http_requests_total{status=\"200\"}[5m]))"
       }
     }
 
@@ -196,14 +206,9 @@ resource "logzio_unified_alert" "metric_two_queries_no_ai" {
       ref_id = "B"
 
       query_definition {
-        datasource_uid = var.datasource_uid
-        promql_query   = "sum(rate(http_requests_total{status=\"500\"}[5m]))"
+        account_id   = var.metrics_account_id
+        promql_query = "sum(rate(http_requests_total{status=\"500\"}[5m]))"
       }
-    }
-
-    recipients {
-      emails                    = [var.notification_email]
-      notification_endpoint_ids = var.notification_endpoint_id != null ? [var.notification_endpoint_id] : null
     }
   }
 }
@@ -212,42 +217,49 @@ resource "logzio_unified_alert" "metric_two_queries_no_ai" {
 # Single query with RCA enabled, using alert notification endpoints for RCA
 resource "logzio_unified_alert" "metric_one_query_with_ai" {
   title       = "Test: One Query With AI - High Memory"
-  type        = "METRIC_ALERT"
   description = "Alert on high memory usage with RCA enabled - same notification endpoints"
   tags        = ["test", "metrics", "memory", "ai", "rca"]
   enabled     = true
 
-  dashboard_id = var.dashboard_id != "" ? var.dashboard_id : null
-  folder_id    = var.folder_id != "" ? var.folder_id : null
-  panel_id = var.folder_id
+  dynamic "linked_panel" {
+    for_each = var.dashboard_id != "" ? [1] : []
+    content {
+      folder_id    = var.folder_id
+      dashboard_id = var.dashboard_id
+      panel_id     = var.panel_id
+    }
+  }
 
   # RCA (AI) configuration - use same endpoints as alert
   rca                                      = true
   use_alert_notification_endpoints_for_rca = true
   runbook                                  = "1. Check memory usage trends\n2. Identify top consumers\n3. Review recent deployments\n4. Scale resources if needed"
 
-  metric_alert {
+  recipients {
+    emails                    = [var.notification_email]
+    notification_endpoint_ids = var.notification_endpoint_id != null ? [var.notification_endpoint_id] : null
+  }
+
+  alert_configuration {
+    type     = "METRIC_ALERT"
     severity = "HIGH"
 
     trigger {
-      trigger_type             = "THRESHOLD"
-      metric_operator          = "ABOVE"
-      min_threshold            = 85.0
-      search_timeframe_minutes = 10
+      type = "threshold"
+
+      condition {
+        operator_type = "above"
+        threshold     = 85.0
+      }
     }
 
     queries {
       ref_id = "A"
 
       query_definition {
-        datasource_uid = var.datasource_uid
-        promql_query   = "avg(node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100"
+        account_id   = var.metrics_account_id
+        promql_query = "avg(node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100"
       }
-    }
-
-    recipients {
-      emails                    = [var.notification_email]
-      notification_endpoint_ids = var.notification_endpoint_id != null ? [var.notification_endpoint_id] : null
     }
   }
 }
@@ -256,37 +268,44 @@ resource "logzio_unified_alert" "metric_one_query_with_ai" {
 # Math expression with RCA enabled, using alert notification endpoints
 resource "logzio_unified_alert" "metric_two_queries_with_ai" {
   title       = "Test: Two Queries With AI - Error Rate Percentage"
-  type        = "METRIC_ALERT"
   description = "Alert when error rate exceeds threshold using math - RCA enabled with same endpoints"
   tags        = ["test", "metrics", "errors", "math", "ai", "rca"]
   enabled     = true
 
-  dashboard_id = var.dashboard_id != "" ? var.dashboard_id : null
-  folder_id    = var.folder_id != "" ? var.folder_id : null
-  panel_id = var.folder_id
+  dynamic "linked_panel" {
+    for_each = var.dashboard_id != "" ? [1] : []
+    content {
+      folder_id    = var.folder_id
+      dashboard_id = var.dashboard_id
+      panel_id     = var.panel_id
+    }
+  }
 
   # RCA configuration - use same endpoints as alert
   rca                                      = true
   use_alert_notification_endpoints_for_rca = true
   runbook                                  = "1. Check error logs for details\n2. Review affected endpoints\n3. Compare with baseline\n4. Initiate incident response if sustained"
 
-  metric_alert {
+  recipients {
+    emails                    = [var.notification_email]
+    notification_endpoint_ids = var.notification_endpoint_id != null ? [var.notification_endpoint_id] : null
+  }
+
+  alert_configuration {
+    type     = "METRIC_ALERT"
     severity = "SEVERE"
 
     trigger {
-      trigger_type             = "MATH"
-      math_expression          = "($A / $B) * 100"
-      metric_operator          = "ABOVE"
-      min_threshold            = 5.0
-      search_timeframe_minutes = 5
+      type       = "math"
+      expression = "($A / $B) * 100"
     }
 
     queries {
       ref_id = "A"
 
       query_definition {
-        datasource_uid = var.datasource_uid
-        promql_query   = "sum(rate(http_requests_total{status=~\"5..\"}[5m]))"
+        account_id   = var.metrics_account_id
+        promql_query = "sum(rate(http_requests_total{status=~\"5..\"}[5m]))"
       }
     }
 
@@ -294,14 +313,9 @@ resource "logzio_unified_alert" "metric_two_queries_with_ai" {
       ref_id = "B"
 
       query_definition {
-        datasource_uid = var.datasource_uid
-        promql_query   = "sum(rate(http_requests_total[5m]))"
+        account_id   = var.metrics_account_id
+        promql_query = "sum(rate(http_requests_total[5m]))"
       }
-    }
-
-    recipients {
-      emails                    = [var.notification_email]
-      notification_endpoint_ids = var.notification_endpoint_id != null ? [var.notification_endpoint_id] : null
     }
   }
 }
@@ -314,14 +328,18 @@ resource "logzio_unified_alert" "metric_two_queries_with_ai" {
 # Single query with RCA using separate notification endpoints
 resource "logzio_unified_alert" "metric_one_query_ai_separate_endpoints" {
   title       = "Test: One Query AI Separate Endpoints - Disk Usage"
-  type        = "METRIC_ALERT"
   description = "Alert on high disk usage with RCA using separate notification endpoints"
   tags        = ["test", "metrics", "disk", "ai", "rca", "separate-endpoints"]
   enabled     = true
 
-  dashboard_id = var.dashboard_id != "" ? var.dashboard_id : null
-  folder_id    = var.folder_id != "" ? var.folder_id : null
-  panel_id = var.folder_id
+  dynamic "linked_panel" {
+    for_each = var.dashboard_id != "" ? [1] : []
+    content {
+      folder_id    = var.folder_id
+      dashboard_id = var.dashboard_id
+      panel_id     = var.panel_id
+    }
+  }
 
   # RCA configuration - use different endpoints for RCA
   rca                                      = true
@@ -329,28 +347,31 @@ resource "logzio_unified_alert" "metric_one_query_ai_separate_endpoints" {
   rca_notification_endpoint_ids            = var.rca_notification_endpoint_id != null ? [var.rca_notification_endpoint_id] : null
   runbook                                  = "1. Check disk usage by mount point\n2. Identify large files/directories\n3. Clean up temporary files\n4. Expand storage if needed"
 
-  metric_alert {
+  recipients {
+    emails                    = [var.notification_email]
+    notification_endpoint_ids = var.notification_endpoint_id != null ? [var.notification_endpoint_id] : null
+  }
+
+  alert_configuration {
+    type     = "METRIC_ALERT"
     severity = "MEDIUM"
 
     trigger {
-      trigger_type             = "THRESHOLD"
-      metric_operator          = "ABOVE"
-      min_threshold            = 90.0
-      search_timeframe_minutes = 5
+      type = "threshold"
+
+      condition {
+        operator_type = "above"
+        threshold     = 90.0
+      }
     }
 
     queries {
       ref_id = "A"
 
       query_definition {
-        datasource_uid = var.datasource_uid
-        promql_query   = "avg(node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}) * 100"
+        account_id   = var.metrics_account_id
+        promql_query = "avg(node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}) * 100"
       }
-    }
-
-    recipients {
-      emails                    = [var.notification_email]
-      notification_endpoint_ids = var.notification_endpoint_id != null ? [var.notification_endpoint_id] : null
     }
   }
 }
@@ -359,15 +380,18 @@ resource "logzio_unified_alert" "metric_one_query_ai_separate_endpoints" {
 # Math expression with RCA using separate notification endpoints
 resource "logzio_unified_alert" "metric_two_queries_ai_separate_endpoints" {
   title       = "Test: Two Queries AI Separate Endpoints - Latency vs Baseline"
-  type        = "METRIC_ALERT"
   description = "Alert when latency deviation exceeds baseline - RCA with separate endpoints"
   tags        = ["test", "metrics", "latency", "math", "ai", "rca", "separate-endpoints"]
   enabled     = true
 
-  dashboard_id = var.dashboard_id != "" ? var.dashboard_id : null
-  folder_id    = var.folder_id != "" ? var.folder_id : null
-  panel_id = var.folder_id
-
+  dynamic "linked_panel" {
+    for_each = var.dashboard_id != "" ? [1] : []
+    content {
+      folder_id    = var.folder_id
+      dashboard_id = var.dashboard_id
+      panel_id     = var.panel_id
+    }
+  }
 
   # RCA configuration - use different endpoints for RCA
   rca                                      = true
@@ -375,23 +399,26 @@ resource "logzio_unified_alert" "metric_two_queries_ai_separate_endpoints" {
   rca_notification_endpoint_ids            = var.rca_notification_endpoint_id != null ? [var.rca_notification_endpoint_id] : null
   runbook                                  = "1. Review latency trends\n2. Check for degraded services\n3. Compare with historical baselines\n4. Investigate dependencies"
 
-  metric_alert {
+  recipients {
+    emails                    = [var.notification_email]
+    notification_endpoint_ids = var.notification_endpoint_id != null ? [var.notification_endpoint_id] : null
+  }
+
+  alert_configuration {
+    type     = "METRIC_ALERT"
     severity = "HIGH"
 
     trigger {
-      trigger_type             = "MATH"
-      math_expression          = "(($A - $B) / $B) * 100"
-      metric_operator          = "ABOVE"
-      min_threshold            = 50.0
-      search_timeframe_minutes = 10
+      type       = "math"
+      expression = "(($A - $B) / $B) * 100"
     }
 
     queries {
       ref_id = "A"
 
       query_definition {
-        datasource_uid = var.datasource_uid
-        promql_query   = "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))"
+        account_id   = var.metrics_account_id
+        promql_query = "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))"
       }
     }
 
@@ -399,14 +426,9 @@ resource "logzio_unified_alert" "metric_two_queries_ai_separate_endpoints" {
       ref_id = "B"
 
       query_definition {
-        datasource_uid = var.datasource_uid
-        promql_query   = "avg_over_time(http_request_duration_seconds[1h])"
+        account_id   = var.metrics_account_id
+        promql_query = "avg_over_time(http_request_duration_seconds[1h])"
       }
-    }
-
-    recipients {
-      emails                    = [var.notification_email]
-      notification_endpoint_ids = var.notification_endpoint_id != null ? [var.notification_endpoint_id] : null
     }
   }
 }
@@ -490,4 +512,3 @@ output "test_summary" {
   }
   description = "Summary of all created test alerts"
 }
-

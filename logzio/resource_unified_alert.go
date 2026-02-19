@@ -18,12 +18,8 @@ const (
 	// Top-level fields
 	unifiedAlertId                                  = "alert_id"
 	unifiedAlertTitle                               = "title"
-	unifiedAlertType                                = "type"
 	unifiedAlertDescription                         = "description"
 	unifiedAlertTags                                = "tags"
-	unifiedAlertFolderId                            = "folder_id"
-	unifiedAlertDashboardId                         = "dashboard_id"
-	unifiedAlertPanelId                             = "panel_id"
 	unifiedAlertRunbook                             = "runbook"
 	unifiedAlertEnabled                             = "enabled"
 	unifiedAlertRca                                 = "rca"
@@ -31,21 +27,30 @@ const (
 	unifiedAlertUseAlertNotificationEndpointsForRca = "use_alert_notification_endpoints_for_rca"
 	unifiedAlertCreatedAt                           = "created_at"
 	unifiedAlertUpdatedAt                           = "updated_at"
+	unifiedAlertCreatedBy                           = "created_by"
+	unifiedAlertUpdatedBy                           = "updated_by"
 
-	// Log alert fields
-	unifiedAlertLogAlert                       = "log_alert"
-	logAlertOutput                             = "output"
-	logAlertSearchTimeFrameMinutes             = "search_timeframe_minutes"
-	logAlertSubComponents                      = "sub_components"
-	logAlertCorrelations                       = "correlations"
-	logAlertSchedule                           = "schedule"
-	logAlertOutputRecipients                   = "recipients"
-	logAlertOutputSuppressNotificationsMinutes = "suppress_notifications_minutes"
-	logAlertOutputType                         = "type"
+	// LinkedPanel fields
+	unifiedAlertLinkedPanel = "linked_panel"
+	linkedPanelFolderId     = "folder_id"
+	linkedPanelDashboardId  = "dashboard_id"
+	linkedPanelPanelId      = "panel_id"
 
-	// Recipients fields
+	// Recipients (top-level)
+	unifiedAlertRecipients            = "recipients"
 	recipientsEmails                  = "emails"
 	recipientsNotificationEndpointIds = "notification_endpoint_ids"
+
+	// AlertConfiguration fields
+	unifiedAlertAlertConfiguration          = "alert_configuration"
+	alertConfigType                         = "type"
+	alertConfigSuppressNotificationsMinutes = "suppress_notifications_minutes"
+	alertConfigAlertOutputTemplateType      = "alert_output_template_type"
+	alertConfigSearchTimeFrameMinutes       = "search_timeframe_minutes"
+	alertConfigSeverity                     = "severity"
+
+	// Sub-component fields (log alerts, inside alert_configuration)
+	alertConfigSubComponents = "sub_components"
 
 	// SubComponent fields
 	subComponentQueryDefinition = "query_definition"
@@ -59,12 +64,6 @@ const (
 	queryDefinitionAggregation              = "aggregation"
 	queryDefinitionShouldQueryOnAllAccounts = "should_query_on_all_accounts"
 	queryDefinitionAccountIdsToQueryOn      = "account_ids_to_query_on"
-
-	// BoolFilter fields
-	boolFilterMust    = "must"
-	boolFilterShould  = "should"
-	boolFilterFilter  = "filter"
-	boolFilterMustNot = "must_not"
 
 	// Aggregation fields
 	aggregationAggregationType    = "aggregation_type"
@@ -88,41 +87,37 @@ const (
 	columnConfigRegex     = "regex"
 	columnConfigSort      = "sort"
 
-	// Schedule fields
-	scheduleCronExpression = "cron_expression"
-	scheduleTimezone       = "timezone"
-
-	// Correlations fields
+	// Correlations fields (inside alert_configuration)
+	alertConfigCorrelations          = "correlations"
 	correlationsCorrelationOperators = "correlation_operators"
 	correlationsJoins                = "joins"
 
-	// Metric alert fields
-	unifiedAlertMetricAlert = "metric_alert"
-	metricAlertSeverity     = "severity"
-	metricAlertTrigger      = "trigger"
-	metricAlertQueries      = "queries"
-	metricAlertRecipients   = "recipients"
+	// Schedule fields (inside alert_configuration)
+	alertConfigSchedule    = "schedule"
+	scheduleCronExpression = "cron_expression"
+	scheduleTimezone       = "timezone"
 
-	// MetricTrigger fields
-	metricTriggerTriggerType            = "trigger_type"
-	metricTriggerMetricOperator         = "metric_operator"
-	metricTriggerMinThreshold           = "min_threshold"
-	metricTriggerMaxThreshold           = "max_threshold"
-	metricTriggerMathExpression         = "math_expression"
-	metricTriggerSearchTimeFrameMinutes = "search_timeframe_minutes"
+	// Metric trigger fields (inside alert_configuration)
+	alertConfigTrigger           = "trigger"
+	metricTriggerType            = "type"
+	metricTriggerCondition       = "condition"
+	metricTriggerExpression      = "expression"
+	triggerConditionOperatorType = "operator_type"
+	triggerConditionThreshold    = "threshold"
+	triggerConditionFrom         = "from"
+	triggerConditionTo           = "to"
 
-	// MetricQuery fields
-	metricQueryRefId           = "ref_id"
-	metricQueryQueryDefinition = "query_definition"
-
-	// MetricQueryDefinition fields
-	metricQueryDefinitionDatasourceUid = "datasource_uid"
-	metricQueryDefinitionPromqlQuery   = "promql_query"
+	// Metric queries fields (inside alert_configuration)
+	alertConfigQueries               = "queries"
+	metricQueryRefId                 = "ref_id"
+	metricQueryQueryDefinition       = "query_definition"
+	metricQueryDefinitionAccountId   = "account_id"
+	metricQueryDefinitionPromqlQuery = "promql_query"
 
 	unifiedAlertRetryAttempts = 8
+
 )
 
-// unifiedAlertClient returns the unified alert client with the api token from the provider
 func unifiedAlertClient(m interface{}) *unified_alerts.UnifiedAlertsClient {
 	var client *unified_alerts.UnifiedAlertsClient
 	client, _ = unified_alerts.New(m.(Config).apiToken, m.(Config).baseUrl)
@@ -136,7 +131,7 @@ func resourceUnifiedAlert() *schema.Resource {
 		UpdateContext: resourceUnifiedAlertUpdate,
 		DeleteContext: resourceUnifiedAlertDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceUnifiedAlertImport,
 		},
 		Schema: map[string]*schema.Schema{
 			unifiedAlertId: {
@@ -147,34 +142,37 @@ func resourceUnifiedAlert() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			unifiedAlertType: {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"LOG_ALERT", "METRIC_ALERT"}, false),
-			},
 			unifiedAlertDescription: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			unifiedAlertTags: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			unifiedAlertFolderId: {
-				Type:     schema.TypeString,
+			unifiedAlertLinkedPanel: {
+				Type:     schema.TypeList,
 				Optional: true,
-			},
-			unifiedAlertDashboardId: {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			unifiedAlertPanelId: {
-				Type:     schema.TypeString,
-				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						linkedPanelFolderId: {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						linkedPanelDashboardId: {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						linkedPanelPanelId: {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
 			},
 			unifiedAlertRunbook: {
 				Type:     schema.TypeString,
@@ -202,6 +200,18 @@ func resourceUnifiedAlert() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			unifiedAlertRecipients: {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem:     resourceRecipients(),
+			},
+			unifiedAlertAlertConfiguration: {
+				Type:     schema.TypeList,
+				Required: true,
+				MaxItems: 1,
+				Elem:     resourceAlertConfiguration(),
+			},
 			unifiedAlertCreatedAt: {
 				Type:     schema.TypeFloat,
 				Computed: true,
@@ -210,63 +220,75 @@ func resourceUnifiedAlert() *schema.Resource {
 				Type:     schema.TypeFloat,
 				Computed: true,
 			},
-			unifiedAlertLogAlert: {
-				Type:          schema.TypeList,
-				Optional:      true,
-				MaxItems:      1,
-				ConflictsWith: []string{unifiedAlertMetricAlert},
-				Elem:          resourceLogAlertConfig(),
+			unifiedAlertCreatedBy: {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
-			unifiedAlertMetricAlert: {
-				Type:          schema.TypeList,
-				Optional:      true,
-				MaxItems:      1,
-				ConflictsWith: []string{unifiedAlertLogAlert},
-				Elem:          resourceMetricAlertConfig(),
+			unifiedAlertUpdatedBy: {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
 }
 
-func resourceLogAlertConfig() *schema.Resource {
+func resourceRecipients() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			logAlertSearchTimeFrameMinutes: {
-				Type:     schema.TypeInt,
-				Required: true,
-			},
-			logAlertOutput: {
+			recipientsEmails: {
 				Type:     schema.TypeList,
-				Required: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						logAlertOutputType: {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"JSON", "TABLE"}, false),
-						},
-						logAlertOutputSuppressNotificationsMinutes: {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Computed: true,
-						},
-						logAlertOutputRecipients: {
-							Type:     schema.TypeList,
-							Required: true,
-							MaxItems: 1,
-							Elem:     resourceRecipients(),
-						},
-					},
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
 				},
 			},
-			logAlertSubComponents: {
+			recipientsNotificationEndpointIds: {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeInt,
+				},
+			},
+		},
+	}
+}
+
+func resourceAlertConfiguration() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			alertConfigType: {
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{unified_alerts.TypeLogAlert, unified_alerts.TypeMetricAlert}, false),
+			},
+			alertConfigSuppressNotificationsMinutes: {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+			alertConfigAlertOutputTemplateType: {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{unified_alerts.OutputTypeJson, unified_alerts.OutputTypeTable}, false),
+			},
+			alertConfigSearchTimeFrameMinutes: {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			alertConfigSeverity: {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{unified_alerts.SeverityInfo, unified_alerts.SeverityLow, unified_alerts.SeverityMedium, unified_alerts.SeverityHigh, unified_alerts.SeveritySevere}, false),
+			},
+			alertConfigSubComponents: {
+				Type:     schema.TypeList,
+				Optional: true,
 				MinItems: 1,
 				Elem:     resourceSubComponent(),
 			},
-			logAlertCorrelations: {
+			alertConfigCorrelations: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
@@ -295,7 +317,7 @@ func resourceLogAlertConfig() *schema.Resource {
 					},
 				},
 			},
-			logAlertSchedule: {
+			alertConfigSchedule: {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
@@ -313,27 +335,17 @@ func resourceLogAlertConfig() *schema.Resource {
 					},
 				},
 			},
-		},
-	}
-}
-
-func resourceRecipients() *schema.Resource {
-	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			recipientsEmails: {
+			alertConfigTrigger: {
 				Type:     schema.TypeList,
 				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
+				MaxItems: 1,
+				Elem:     resourceMetricAlertTrigger(),
 			},
-			recipientsNotificationEndpointIds: {
+			alertConfigQueries: {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeInt,
-				},
+				MinItems: 1,
+				Elem:     resourceMetricQuery(),
 			},
 		},
 	}
@@ -368,13 +380,19 @@ func resourceSubComponent() *schema.Resource {
 						queryDefinitionAggregation: {
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									aggregationAggregationType: {
 										Type:         schema.TypeString,
 										Required:     true,
-										ValidateFunc: validation.StringInSlice([]string{"SUM", "MIN", "MAX", "AVG", "COUNT", "UNIQUE_COUNT", "NONE"}, false),
+										ValidateFunc: validation.StringInSlice([]string{unified_alerts.AggregationTypeSum, unified_alerts.AggregationTypeMin, unified_alerts.AggregationTypeMax, unified_alerts.AggregationTypeAvg, unified_alerts.AggregationTypeCount, unified_alerts.AggregationTypeUniqueCount, unified_alerts.AggregationTypeNone, unified_alerts.AggregationTypePercentage, unified_alerts.AggregationTypePercentile}, false),
+										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+											// API converts NONE to COUNT silently
+											return (old == unified_alerts.AggregationTypeCount && new == unified_alerts.AggregationTypeNone) ||
+												(old == unified_alerts.AggregationTypeNone && new == unified_alerts.AggregationTypeCount)
+										},
 									},
 									aggregationFieldToAggregateOn: {
 										Type:     schema.TypeString,
@@ -412,10 +430,10 @@ func resourceSubComponent() *schema.Resource {
 						triggerOperator: {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"LESS_THAN", "GREATER_THAN", "LESS_THAN_OR_EQUALS", "GREATER_THAN_OR_EQUALS", "EQUALS", "NOT_EQUALS"}, false),
+							ValidateFunc: validation.StringInSlice([]string{unified_alerts.OperatorLessThan, unified_alerts.OperatorGreaterThan, unified_alerts.OperatorLessThanOrEquals, unified_alerts.OperatorGreaterThanOrEquals, unified_alerts.OperatorEquals, unified_alerts.OperatorNotEquals}, false),
 						},
 						triggerSeverityThresholdTiers: {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Required: true,
 							MinItems: 1,
 							Elem: &schema.Resource{
@@ -423,7 +441,7 @@ func resourceSubComponent() *schema.Resource {
 									severityThresholdTierSeverity: {
 										Type:         schema.TypeString,
 										Required:     true,
-										ValidateFunc: validation.StringInSlice([]string{"INFO", "LOW", "MEDIUM", "HIGH", "SEVERE"}, false),
+										ValidateFunc: validation.StringInSlice([]string{unified_alerts.SeverityInfo, unified_alerts.SeverityLow, unified_alerts.SeverityMedium, unified_alerts.SeverityHigh, unified_alerts.SeveritySevere}, false),
 									},
 									severityThresholdTierThreshold: {
 										Type:     schema.TypeFloat,
@@ -444,7 +462,7 @@ func resourceSubComponent() *schema.Resource {
 						subComponentOutputShouldUseAllFields: {
 							Type:     schema.TypeBool,
 							Optional: true,
-							Default:  false,
+							Default:  true,
 						},
 						subComponentOutputColumns: {
 							Type:     schema.TypeList,
@@ -462,7 +480,8 @@ func resourceSubComponent() *schema.Resource {
 									columnConfigSort: {
 										Type:         schema.TypeString,
 										Optional:     true,
-										ValidateFunc: validation.StringInSlice([]string{"ASC", "DESC"}, false),
+										Computed:     true,
+										ValidateFunc: validation.StringInSlice([]string{unified_alerts.SortAsc, unified_alerts.SortDesc}, false),
 									},
 								},
 							},
@@ -474,96 +493,84 @@ func resourceSubComponent() *schema.Resource {
 	}
 }
 
-func resourceMetricAlertConfig() *schema.Resource {
+func resourceMetricAlertTrigger() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			metricAlertSeverity: {
+			metricTriggerType: {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"INFO", "LOW", "MEDIUM", "HIGH", "SEVERE"}, false),
+				ValidateFunc: validation.StringInSlice([]string{unified_alerts.TriggerTypeThreshold, unified_alerts.TriggerTypeMath}, false),
 			},
-			metricAlertTrigger: {
+			metricTriggerCondition: {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						metricTriggerTriggerType: {
+						triggerConditionOperatorType: {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"THRESHOLD", "MATH"}, false),
+							ValidateFunc: validation.StringInSlice([]string{unified_alerts.OperatorTypeAbove, unified_alerts.OperatorTypeBelow, unified_alerts.OperatorTypeWithinRange, unified_alerts.OperatorTypeOutsideRange}, false),
 						},
-						metricTriggerMetricOperator: {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"ABOVE", "BELOW", "WITHIN_RANGE", "OUTSIDE_RANGE"}, false),
-						},
-						metricTriggerMinThreshold: {
+						triggerConditionThreshold: {
 							Type:     schema.TypeFloat,
 							Optional: true,
 						},
-						metricTriggerMaxThreshold: {
+						triggerConditionFrom: {
 							Type:     schema.TypeFloat,
 							Optional: true,
 						},
-						metricTriggerMathExpression: {
-							Type:     schema.TypeString,
+						triggerConditionTo: {
+							Type:     schema.TypeFloat,
 							Optional: true,
-						},
-						metricTriggerSearchTimeFrameMinutes: {
-							Type:     schema.TypeInt,
-							Required: true,
 						},
 					},
 				},
 			},
-			metricAlertQueries: {
-				Type:     schema.TypeList,
-				Required: true,
-				MinItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						metricQueryRefId: {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						metricQueryQueryDefinition: {
-							Type:     schema.TypeList,
-							Required: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									metricQueryDefinitionDatasourceUid: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									metricQueryDefinitionPromqlQuery: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			metricAlertRecipients: {
-				Type:     schema.TypeList,
-				Required: true,
-				MaxItems: 1,
-				Elem:     resourceRecipients(),
+			metricTriggerExpression: {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 	}
 }
 
-// resourceUnifiedAlertCreate creates a new unified alert in logzio
+func resourceMetricQuery() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			metricQueryRefId: {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			metricQueryQueryDefinition: {
+				Type:     schema.TypeList,
+				Required: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						metricQueryDefinitionAccountId: {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Computed: true,
+						},
+						metricQueryDefinitionPromqlQuery: {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func resourceUnifiedAlertCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	alertType := d.Get(unifiedAlertType).(string)
-	createAlert, urlType, err := buildCreateUnifiedAlert(d)
+	createAlert, err := buildCreateUnifiedAlert(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	urlType := configTypeToUrlType(createAlert.AlertConfiguration.Type)
 
 	jsonBytes, _ := json.Marshal(createAlert)
 	tflog.Debug(ctx, fmt.Sprintf("Creating unified alert: %s", string(jsonBytes)))
@@ -574,24 +581,23 @@ func resourceUnifiedAlertCreate(ctx context.Context, d *schema.ResourceData, m i
 		return diag.Errorf("failed to create unified alert: %v", err)
 	}
 
-	d.SetId(alert.Id)
-	tflog.Info(ctx, fmt.Sprintf("Created unified alert with ID: %s, Type: %s", alert.Id, alertType))
+	d.SetId(fmt.Sprintf("%s:%s", urlType, alert.Id))
+	tflog.Info(ctx, fmt.Sprintf("Created unified alert with ID: %s, Type: %s", alert.Id, urlType))
 
 	return resourceUnifiedAlertRead(ctx, d, m)
 }
 
-// resourceUnifiedAlertRead reads a unified alert from logzio
 func resourceUnifiedAlertRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	alertId := d.Id()
-	alertType := d.Get(unifiedAlertType).(string)
-	urlType := getUrlTypeFromAlertType(alertType)
+	urlType, alertId, err := parseUnifiedAlertCompositeId(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	client := unifiedAlertClient(m)
 	alert, err := client.GetUnifiedAlert(urlType, alertId)
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("Failed to get unified alert: %v", err))
 		if strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "not found") {
-			// If we were not able to find the resource - delete from state
 			d.SetId("")
 			return diag.Diagnostics{}
 		}
@@ -601,11 +607,13 @@ func resourceUnifiedAlertRead(ctx context.Context, d *schema.ResourceData, m int
 	return setUnifiedAlert(d, alert)
 }
 
-// resourceUnifiedAlertUpdate updates an existing unified alert in logzio
 func resourceUnifiedAlertUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	alertId := d.Id()
-	alertType := d.Get(unifiedAlertType).(string)
-	createAlert, urlType, err := buildCreateUnifiedAlert(d)
+	urlType, alertId, err := parseUnifiedAlertCompositeId(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	createAlert, err := buildCreateUnifiedAlert(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -639,49 +647,78 @@ func resourceUnifiedAlertUpdate(ctx context.Context, d *schema.ResourceData, m i
 		tflog.Warn(ctx, fmt.Sprintf("Failed to read unified alert after update: %v", readErr))
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Updated unified alert with ID: %s, Type: %s", alertId, alertType))
+	tflog.Info(ctx, fmt.Sprintf("Updated unified alert with ID: %s, Type: %s", alertId, urlType))
 	return diagRet
 }
 
-// resourceUnifiedAlertDelete deletes a unified alert from logzio
 func resourceUnifiedAlertDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	alertId := d.Id()
-	alertType := d.Get(unifiedAlertType).(string)
-	urlType := getUrlTypeFromAlertType(alertType)
+	urlType, alertId, err := parseUnifiedAlertCompositeId(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	client := unifiedAlertClient(m)
-	_, err := client.DeleteUnifiedAlert(urlType, alertId)
+	_, err = client.DeleteUnifiedAlert(urlType, alertId)
 	if err != nil {
 		return diag.Errorf("failed to delete unified alert: %v", err)
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Deleted unified alert with ID: %s, Type: %s", alertId, alertType))
+	tflog.Info(ctx, fmt.Sprintf("Deleted unified alert with ID: %s, Type: %s", alertId, urlType))
 	return nil
 }
 
-// Helper functions
+func resourceUnifiedAlertImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	compositeId := d.Id()
+	urlType, alertId, err := parseUnifiedAlertCompositeId(compositeId)
+	if err != nil {
+		return nil, fmt.Errorf("invalid import ID format. Expected 'alertType:alertId' (e.g., 'logs:abc-123'), got: %s", compositeId)
+	}
 
-func getUrlTypeFromAlertType(alertType string) string {
-	if alertType == unified_alerts.TypeLogAlert {
+	if urlType != unified_alerts.UrlTypeLogs && urlType != unified_alerts.UrlTypeMetrics {
+		return nil, fmt.Errorf("invalid alert type '%s'. Must be '%s' or '%s'", urlType, unified_alerts.UrlTypeLogs, unified_alerts.UrlTypeMetrics)
+	}
+
+	d.SetId(compositeId)
+	d.Set(unifiedAlertId, alertId)
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func parseUnifiedAlertCompositeId(id string) (urlType string, alertId string, err error) {
+	parts := strings.SplitN(id, ":", 2)
+	if len(parts) != 2 {
+		return "", "", fmt.Errorf("invalid composite ID format: %s. Expected 'alertType:alertId'", id)
+	}
+	return parts[0], parts[1], nil
+}
+
+func configTypeToUrlType(configType string) string {
+	if configType == unified_alerts.TypeLogAlert {
 		return unified_alerts.UrlTypeLogs
 	}
 	return unified_alerts.UrlTypeMetrics
 }
 
-func buildCreateUnifiedAlert(d *schema.ResourceData) (unified_alerts.CreateUnifiedAlert, string, error) {
-	alertType := d.Get(unifiedAlertType).(string)
-	urlType := getUrlTypeFromAlertType(alertType)
+// urlTypeToConfigType converts URL type to AlertConfiguration.Type.
+// "logs" -> "LOG_ALERT", "metrics" -> "METRIC_ALERT"
+func urlTypeToConfigType(urlType string) string {
+	if urlType == unified_alerts.UrlTypeLogs {
+		return unified_alerts.TypeLogAlert
+	}
+	return unified_alerts.TypeMetricAlert
+}
 
+func float64Ptr(v float64) *float64 {
+	return &v
+}
+
+func buildCreateUnifiedAlert(d *schema.ResourceData) (unified_alerts.CreateUnifiedAlert, error) {
 	enabled := d.Get(unifiedAlertEnabled).(bool)
 
 	alert := unified_alerts.CreateUnifiedAlert{
 		Title:                               d.Get(unifiedAlertTitle).(string),
-		Type:                                alertType,
 		Description:                         d.Get(unifiedAlertDescription).(string),
-		Tags:                                interfaceSliceToStringSlice(d.Get(unifiedAlertTags).([]interface{})),
-		FolderId:                            d.Get(unifiedAlertFolderId).(string),
-		DashboardId:                         d.Get(unifiedAlertDashboardId).(string),
-		PanelId:                             d.Get(unifiedAlertPanelId).(string),
+		Tags:                                setToStringSlice(d.Get(unifiedAlertTags).(*schema.Set)),
 		Runbook:                             d.Get(unifiedAlertRunbook).(string),
 		Enabled:                             &enabled,
 		Rca:                                 d.Get(unifiedAlertRca).(bool),
@@ -689,66 +726,97 @@ func buildCreateUnifiedAlert(d *schema.ResourceData) (unified_alerts.CreateUnifi
 		UseAlertNotificationEndpointsForRca: d.Get(unifiedAlertUseAlertNotificationEndpointsForRca).(bool),
 	}
 
-	if alertType == unified_alerts.TypeLogAlert {
-		logAlert, err := buildLogAlertConfig(d)
-		if err != nil {
-			return alert, urlType, err
+	linkedPanelList := d.Get(unifiedAlertLinkedPanel).([]interface{})
+	if len(linkedPanelList) > 0 && linkedPanelList[0] != nil {
+		lpMap := linkedPanelList[0].(map[string]interface{})
+		alert.LinkedPanel = &unified_alerts.LinkedPanel{
+			FolderId:    lpMap[linkedPanelFolderId].(string),
+			DashboardId: lpMap[linkedPanelDashboardId].(string),
+			PanelId:     lpMap[linkedPanelPanelId].(string),
 		}
-		alert.LogAlert = logAlert
-	} else if alertType == unified_alerts.TypeMetricAlert {
-		metricAlert, err := buildMetricAlertConfig(d)
-		if err != nil {
-			return alert, urlType, err
-		}
-		alert.MetricAlert = metricAlert
 	}
 
-	return alert, urlType, nil
+	recipientsList := d.Get(unifiedAlertRecipients).([]interface{})
+	if len(recipientsList) > 0 && recipientsList[0] != nil {
+		recipientsMap := recipientsList[0].(map[string]interface{})
+		alert.Recipients = &unified_alerts.Recipients{
+			Emails:                  interfaceSliceToStringSlice(recipientsMap[recipientsEmails].([]interface{})),
+			NotificationEndpointIds: interfaceSliceToIntSlice(recipientsMap[recipientsNotificationEndpointIds].([]interface{})),
+		}
+	}
+
+	alertConfig, err := buildAlertConfiguration(d)
+	if err != nil {
+		return alert, err
+	}
+	alert.AlertConfiguration = alertConfig
+
+	return alert, nil
 }
 
-func buildLogAlertConfig(d *schema.ResourceData) (*unified_alerts.LogAlertConfig, error) {
-	logAlertList := d.Get(unifiedAlertLogAlert).([]interface{})
-	if len(logAlertList) == 0 {
-		return nil, fmt.Errorf("log_alert configuration is required for LOG_ALERT type")
+func buildAlertConfiguration(d *schema.ResourceData) (*unified_alerts.AlertConfiguration, error) {
+	configList := d.Get(unifiedAlertAlertConfiguration).([]interface{})
+	if len(configList) == 0 || configList[0] == nil {
+		return nil, fmt.Errorf("alert_configuration is required")
+	}
+	configMap := configList[0].(map[string]interface{})
+
+	config := &unified_alerts.AlertConfiguration{
+		Type:                         configMap[alertConfigType].(string),
+		SuppressNotificationsMinutes: configMap[alertConfigSuppressNotificationsMinutes].(int),
+		AlertOutputTemplateType:      configMap[alertConfigAlertOutputTemplateType].(string),
+		SearchTimeFrameMinutes:       configMap[alertConfigSearchTimeFrameMinutes].(int),
+		Severity:                     configMap[alertConfigSeverity].(string),
 	}
 
-	logAlertMap := logAlertList[0].(map[string]interface{})
-
-	config := &unified_alerts.LogAlertConfig{
-		SearchTimeFrameMinutes: logAlertMap[logAlertSearchTimeFrameMinutes].(int),
-	}
-
-	// Parse output
-	outputList := logAlertMap[logAlertOutput].([]interface{})
-	if len(outputList) > 0 {
-		outputMap := outputList[0].(map[string]interface{})
-		config.Output = unified_alerts.LogAlertOutput{
-			Type:                         outputMap[logAlertOutputType].(string),
-			SuppressNotificationsMinutes: outputMap[logAlertOutputSuppressNotificationsMinutes].(int),
+	// Build sub_components (log alerts)
+	subComponentsList := configMap[alertConfigSubComponents].([]interface{})
+	if len(subComponentsList) > 0 {
+		subComponents, err := buildSubComponents(subComponentsList)
+		if err != nil {
+			return nil, err
 		}
-
-		// Parse recipients
-		recipientsList := outputMap[logAlertOutputRecipients].([]interface{})
-		if len(recipientsList) > 0 {
-			recipientsMap := recipientsList[0].(map[string]interface{})
-			config.Output.Recipients = unified_alerts.Recipients{
-				Emails:                  interfaceSliceToStringSlice(recipientsMap[recipientsEmails].([]interface{})),
-				NotificationEndpointIds: interfaceSliceToIntSlice(recipientsMap[recipientsNotificationEndpointIds].([]interface{})),
-			}
-		}
+		config.SubComponents = subComponents
 	}
 
-	// Parse sub components
-	subComponentsList := logAlertMap[logAlertSubComponents].([]interface{})
-	config.SubComponents = make([]unified_alerts.SubComponent, len(subComponentsList))
+	correlationsList := configMap[alertConfigCorrelations].([]interface{})
+	if len(correlationsList) > 0 && correlationsList[0] != nil {
+		config.Correlations = buildCorrelations(correlationsList)
+	}
+
+	scheduleList := configMap[alertConfigSchedule].([]interface{})
+	if len(scheduleList) > 0 && scheduleList[0] != nil {
+		config.Schedule = buildSchedule(scheduleList)
+	}
+
+	// Build metric trigger
+	triggerList := configMap[alertConfigTrigger].([]interface{})
+	if len(triggerList) > 0 && triggerList[0] != nil {
+		trigger, err := buildMetricAlertTrigger(triggerList)
+		if err != nil {
+			return nil, err
+		}
+		config.Trigger = trigger
+	}
+
+	// Build metric queries
+	queriesList := configMap[alertConfigQueries].([]interface{})
+	if len(queriesList) > 0 {
+		config.Queries = buildMetricQueries(queriesList)
+	}
+
+	return config, nil
+}
+
+func buildSubComponents(subComponentsList []interface{}) ([]unified_alerts.SubComponent, error) {
+	subComponents := make([]unified_alerts.SubComponent, len(subComponentsList))
 	for i, scItem := range subComponentsList {
 		scMap := scItem.(map[string]interface{})
-
 		subComp := unified_alerts.SubComponent{}
 
 		// Parse query definition
 		queryDefList := scMap[subComponentQueryDefinition].([]interface{})
-		if len(queryDefList) > 0 {
+		if len(queryDefList) > 0 && queryDefList[0] != nil {
 			queryDefMap := queryDefList[0].(map[string]interface{})
 			subComp.QueryDefinition = unified_alerts.QueryDefinition{
 				Query:                    queryDefMap[queryDefinitionQuery].(string),
@@ -768,7 +836,7 @@ func buildLogAlertConfig(d *schema.ResourceData) (*unified_alerts.LogAlertConfig
 
 			// Parse aggregation if present
 			aggregationList := queryDefMap[queryDefinitionAggregation].([]interface{})
-			if len(aggregationList) > 0 {
+			if len(aggregationList) > 0 && aggregationList[0] != nil {
 				aggMap := aggregationList[0].(map[string]interface{})
 				subComp.QueryDefinition.Aggregation = unified_alerts.Aggregation{
 					AggregationType:    aggMap[aggregationAggregationType].(string),
@@ -780,16 +848,15 @@ func buildLogAlertConfig(d *schema.ResourceData) (*unified_alerts.LogAlertConfig
 
 		// Parse trigger
 		triggerList := scMap[subComponentTrigger].([]interface{})
-		if len(triggerList) > 0 {
+		if len(triggerList) > 0 && triggerList[0] != nil {
 			triggerMap := triggerList[0].(map[string]interface{})
 			subComp.Trigger = unified_alerts.SubComponentTrigger{
 				Operator:               triggerMap[triggerOperator].(string),
 				SeverityThresholdTiers: make(map[string]float32),
 			}
 
-			// Parse severity threshold tiers
-			tiersList := triggerMap[triggerSeverityThresholdTiers].([]interface{})
-			for _, tierItem := range tiersList {
+			tiersSet := triggerMap[triggerSeverityThresholdTiers].(*schema.Set)
+			for _, tierItem := range tiersSet.List() {
 				tierMap := tierItem.(map[string]interface{})
 				severity := tierMap[severityThresholdTierSeverity].(string)
 				threshold := float32(tierMap[severityThresholdTierThreshold].(float64))
@@ -799,13 +866,12 @@ func buildLogAlertConfig(d *schema.ResourceData) (*unified_alerts.LogAlertConfig
 
 		// Parse output if present
 		outputList := scMap[subComponentOutput].([]interface{})
-		if len(outputList) > 0 {
+		if len(outputList) > 0 && outputList[0] != nil {
 			outputMap := outputList[0].(map[string]interface{})
 			subComp.Output = unified_alerts.SubComponentOutput{
 				ShouldUseAllFields: outputMap[subComponentOutputShouldUseAllFields].(bool),
 			}
 
-			// Parse columns if present
 			columnsList := outputMap[subComponentOutputColumns].([]interface{})
 			if len(columnsList) > 0 {
 				subComp.Output.Columns = make([]unified_alerts.ColumnConfig, len(columnsList))
@@ -820,116 +886,103 @@ func buildLogAlertConfig(d *schema.ResourceData) (*unified_alerts.LogAlertConfig
 			}
 		}
 
-		config.SubComponents[i] = subComp
+		subComponents[i] = subComp
 	}
-
-	// Parse correlations if present
-	correlationsList := logAlertMap[logAlertCorrelations].([]interface{})
-	if len(correlationsList) > 0 {
-		correlationsMap := correlationsList[0].(map[string]interface{})
-		config.Correlations = unified_alerts.Correlations{
-			CorrelationOperators: interfaceSliceToStringSlice(correlationsMap[correlationsCorrelationOperators].([]interface{})),
-		}
-
-		// Parse joins if present
-		joinsList := correlationsMap[correlationsJoins].([]interface{})
-		if len(joinsList) > 0 {
-			config.Correlations.Joins = make([]map[string]string, len(joinsList))
-			for i, joinItem := range joinsList {
-				joinMapInterface := joinItem.(map[string]interface{})
-				joinMap := make(map[string]string)
-				for k, v := range joinMapInterface {
-					joinMap[k] = v.(string)
-				}
-				config.Correlations.Joins[i] = joinMap
-			}
-		}
-	}
-
-	// Parse schedule if present
-	scheduleList := logAlertMap[logAlertSchedule].([]interface{})
-	if len(scheduleList) > 0 {
-		scheduleMap := scheduleList[0].(map[string]interface{})
-		config.Schedule = unified_alerts.Schedule{
-			CronExpression: scheduleMap[scheduleCronExpression].(string),
-			Timezone:       scheduleMap[scheduleTimezone].(string),
-		}
-	}
-
-	return config, nil
+	return subComponents, nil
 }
 
-func buildMetricAlertConfig(d *schema.ResourceData) (*unified_alerts.MetricAlertConfig, error) {
-	metricAlertList := d.Get(unifiedAlertMetricAlert).([]interface{})
-	if len(metricAlertList) == 0 {
-		return nil, fmt.Errorf("metric_alert configuration is required for METRIC_ALERT type")
+func buildCorrelations(correlationsList []interface{}) *unified_alerts.Correlations {
+	correlationsMap := correlationsList[0].(map[string]interface{})
+	correlations := &unified_alerts.Correlations{
+		CorrelationOperators: interfaceSliceToStringSlice(correlationsMap[correlationsCorrelationOperators].([]interface{})),
 	}
 
-	metricAlertMap := metricAlertList[0].(map[string]interface{})
-
-	config := &unified_alerts.MetricAlertConfig{
-		Severity: metricAlertMap[metricAlertSeverity].(string),
-	}
-
-	// Parse trigger
-	triggerList := metricAlertMap[metricAlertTrigger].([]interface{})
-	if len(triggerList) > 0 {
-		triggerMap := triggerList[0].(map[string]interface{})
-		config.Trigger = unified_alerts.MetricTrigger{
-			TriggerType:            triggerMap[metricTriggerTriggerType].(string),
-			MetricOperator:         triggerMap[metricTriggerMetricOperator].(string),
-			MinThreshold:           triggerMap[metricTriggerMinThreshold].(float64),
-			MaxThreshold:           triggerMap[metricTriggerMaxThreshold].(float64),
-			MathExpression:         triggerMap[metricTriggerMathExpression].(string),
-			SearchTimeFrameMinutes: triggerMap[metricTriggerSearchTimeFrameMinutes].(int),
+	joinsList := correlationsMap[correlationsJoins].([]interface{})
+	if len(joinsList) > 0 {
+		correlations.Joins = make([]map[string]string, len(joinsList))
+		for i, joinItem := range joinsList {
+			joinMapInterface := joinItem.(map[string]interface{})
+			joinMap := make(map[string]string)
+			for k, v := range joinMapInterface {
+				joinMap[k] = v.(string)
+			}
+			correlations.Joins[i] = joinMap
 		}
 	}
 
-	// Parse queries
-	queriesList := metricAlertMap[metricAlertQueries].([]interface{})
-	config.Queries = make([]unified_alerts.MetricQuery, len(queriesList))
+	return correlations
+}
+
+func buildSchedule(scheduleList []interface{}) *unified_alerts.Schedule {
+	scheduleMap := scheduleList[0].(map[string]interface{})
+	return &unified_alerts.Schedule{
+		CronExpression: scheduleMap[scheduleCronExpression].(string),
+		Timezone:       scheduleMap[scheduleTimezone].(string),
+	}
+}
+
+func buildMetricAlertTrigger(triggerList []interface{}) (*unified_alerts.MetricAlertTrigger, error) {
+	triggerMap := triggerList[0].(map[string]interface{})
+
+	trigger := &unified_alerts.MetricAlertTrigger{
+		Type:       triggerMap[metricTriggerType].(string),
+		Expression: triggerMap[metricTriggerExpression].(string),
+	}
+
+	conditionList := triggerMap[metricTriggerCondition].([]interface{})
+	if len(conditionList) > 0 && conditionList[0] != nil {
+		condMap := conditionList[0].(map[string]interface{})
+		operatorType := condMap[triggerConditionOperatorType].(string)
+		condition := &unified_alerts.TriggerCondition{
+			OperatorType: operatorType,
+		}
+
+		// Set pointer fields based on operator type to avoid sending zero-value pointers
+		// for irrelevant fields (e.g., from/to for "above"/"below" operators)
+		switch operatorType {
+		case unified_alerts.OperatorTypeAbove, unified_alerts.OperatorTypeBelow:
+			threshold := condMap[triggerConditionThreshold].(float64)
+			condition.Threshold = float64Ptr(threshold)
+		case unified_alerts.OperatorTypeWithinRange, unified_alerts.OperatorTypeOutsideRange:
+			from := condMap[triggerConditionFrom].(float64)
+			to := condMap[triggerConditionTo].(float64)
+			condition.From = float64Ptr(from)
+			condition.To = float64Ptr(to)
+		}
+
+		trigger.Condition = condition
+	}
+
+	return trigger, nil
+}
+
+func buildMetricQueries(queriesList []interface{}) []unified_alerts.MetricQuery {
+	queries := make([]unified_alerts.MetricQuery, len(queriesList))
 	for i, queryItem := range queriesList {
 		queryMap := queryItem.(map[string]interface{})
-
 		metricQuery := unified_alerts.MetricQuery{
 			RefId: queryMap[metricQueryRefId].(string),
 		}
 
-		// Parse query definition
 		queryDefList := queryMap[metricQueryQueryDefinition].([]interface{})
-		if len(queryDefList) > 0 {
+		if len(queryDefList) > 0 && queryDefList[0] != nil {
 			queryDefMap := queryDefList[0].(map[string]interface{})
 			metricQuery.QueryDefinition = unified_alerts.MetricQueryDefinition{
-				DatasourceUid: queryDefMap[metricQueryDefinitionDatasourceUid].(string),
-				PromqlQuery:   queryDefMap[metricQueryDefinitionPromqlQuery].(string),
+				AccountId:   int32(queryDefMap[metricQueryDefinitionAccountId].(int)),
+				PromqlQuery: queryDefMap[metricQueryDefinitionPromqlQuery].(string),
 			}
 		}
 
-		config.Queries[i] = metricQuery
+		queries[i] = metricQuery
 	}
-
-	// Parse recipients
-	recipientsList := metricAlertMap[metricAlertRecipients].([]interface{})
-	if len(recipientsList) > 0 {
-		recipientsMap := recipientsList[0].(map[string]interface{})
-		config.Recipients = unified_alerts.Recipients{
-			Emails:                  interfaceSliceToStringSlice(recipientsMap[recipientsEmails].([]interface{})),
-			NotificationEndpointIds: interfaceSliceToIntSlice(recipientsMap[recipientsNotificationEndpointIds].([]interface{})),
-		}
-	}
-
-	return config, nil
+	return queries
 }
 
 func setUnifiedAlert(d *schema.ResourceData, alert *unified_alerts.UnifiedAlert) diag.Diagnostics {
 	d.Set(unifiedAlertId, alert.Id)
 	d.Set(unifiedAlertTitle, alert.Title)
-	d.Set(unifiedAlertType, alert.Type)
 	d.Set(unifiedAlertDescription, alert.Description)
 	d.Set(unifiedAlertTags, alert.Tags)
-	d.Set(unifiedAlertFolderId, alert.FolderId)
-	d.Set(unifiedAlertDashboardId, alert.DashboardId)
-	d.Set(unifiedAlertPanelId, alert.PanelId)
 	d.Set(unifiedAlertRunbook, alert.Runbook)
 	d.Set(unifiedAlertEnabled, alert.Enabled)
 	d.Set(unifiedAlertRca, alert.Rca)
@@ -937,15 +990,35 @@ func setUnifiedAlert(d *schema.ResourceData, alert *unified_alerts.UnifiedAlert)
 	d.Set(unifiedAlertUseAlertNotificationEndpointsForRca, alert.UseAlertNotificationEndpointsForRca)
 	d.Set(unifiedAlertCreatedAt, alert.CreatedAt)
 	d.Set(unifiedAlertUpdatedAt, alert.UpdatedAt)
+	d.Set(unifiedAlertCreatedBy, alert.CreatedBy)
+	d.Set(unifiedAlertUpdatedBy, alert.UpdatedBy)
 
-	if alert.Type == unified_alerts.TypeLogAlert && alert.LogAlert != nil {
-		if err := setLogAlert(d, alert.LogAlert); err != nil {
-			return diag.FromErr(err)
-		}
+	// Set LinkedPanel
+	if alert.LinkedPanel != nil {
+		d.Set(unifiedAlertLinkedPanel, []interface{}{
+			map[string]interface{}{
+				linkedPanelFolderId:    alert.LinkedPanel.FolderId,
+				linkedPanelDashboardId: alert.LinkedPanel.DashboardId,
+				linkedPanelPanelId:     alert.LinkedPanel.PanelId,
+			},
+		})
 	}
 
-	if alert.Type == unified_alerts.TypeMetricAlert && alert.MetricAlert != nil {
-		if err := setMetricAlert(d, alert.MetricAlert); err != nil {
+	// Set Recipients
+	if alert.Recipients != nil {
+		recipientsMap := map[string]interface{}{}
+		if len(alert.Recipients.Emails) > 0 {
+			recipientsMap[recipientsEmails] = alert.Recipients.Emails
+		}
+		if len(alert.Recipients.NotificationEndpointIds) > 0 {
+			recipientsMap[recipientsNotificationEndpointIds] = alert.Recipients.NotificationEndpointIds
+		}
+		d.Set(unifiedAlertRecipients, []interface{}{recipientsMap})
+	}
+
+	// Set AlertConfiguration
+	if alert.AlertConfiguration != nil {
+		if err := setAlertConfiguration(d, alert.AlertConfiguration); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -953,31 +1026,46 @@ func setUnifiedAlert(d *schema.ResourceData, alert *unified_alerts.UnifiedAlert)
 	return nil
 }
 
-func setLogAlert(d *schema.ResourceData, logAlert *unified_alerts.LogAlertConfig) error {
-	logAlertMap := make(map[string]interface{})
+func setAlertConfiguration(d *schema.ResourceData, config *unified_alerts.AlertConfiguration) error {
+	configMap := make(map[string]interface{})
 
-	logAlertMap[logAlertSearchTimeFrameMinutes] = logAlert.SearchTimeFrameMinutes
+	configMap[alertConfigType] = config.Type
+	configMap[alertConfigSuppressNotificationsMinutes] = config.SuppressNotificationsMinutes
+	configMap[alertConfigAlertOutputTemplateType] = config.AlertOutputTemplateType
+	configMap[alertConfigSearchTimeFrameMinutes] = config.SearchTimeFrameMinutes
+	configMap[alertConfigSeverity] = config.Severity
 
-	// Set output
-	outputMap := map[string]interface{}{
-		logAlertOutputType:                         logAlert.Output.Type,
-		logAlertOutputSuppressNotificationsMinutes: logAlert.Output.SuppressNotificationsMinutes,
+	// Set sub_components
+	if len(config.SubComponents) > 0 {
+		configMap[alertConfigSubComponents] = flattenSubComponents(config.SubComponents)
 	}
 
-	// Set recipients
-	recipientsMap := map[string]interface{}{}
-	if len(logAlert.Output.Recipients.Emails) > 0 {
-		recipientsMap[recipientsEmails] = logAlert.Output.Recipients.Emails
+	// Set correlations
+	if config.Correlations != nil {
+		configMap[alertConfigCorrelations] = flattenCorrelations(config.Correlations)
 	}
-	if len(logAlert.Output.Recipients.NotificationEndpointIds) > 0 {
-		recipientsMap[recipientsNotificationEndpointIds] = logAlert.Output.Recipients.NotificationEndpointIds
-	}
-	outputMap[logAlertOutputRecipients] = []interface{}{recipientsMap}
-	logAlertMap[logAlertOutput] = []interface{}{outputMap}
 
-	// Set sub components
-	subComponents := make([]interface{}, len(logAlert.SubComponents))
-	for i, sc := range logAlert.SubComponents {
+	// Set schedule - only if user configured one (API returns default {timezone:"UTC"} even when not set)
+	if config.Schedule != nil && config.Schedule.CronExpression != "" {
+		configMap[alertConfigSchedule] = flattenSchedule(config.Schedule)
+	}
+
+	// Set metric trigger
+	if config.Trigger != nil {
+		configMap[alertConfigTrigger] = flattenMetricAlertTrigger(config.Trigger)
+	}
+
+	// Set metric queries
+	if len(config.Queries) > 0 {
+		configMap[alertConfigQueries] = flattenMetricQueries(config.Queries)
+	}
+
+	return d.Set(unifiedAlertAlertConfiguration, []interface{}{configMap})
+}
+
+func flattenSubComponents(subComponents []unified_alerts.SubComponent) []interface{} {
+	result := make([]interface{}, len(subComponents))
+	for i, sc := range subComponents {
 		scMap := make(map[string]interface{})
 
 		// Set query definition
@@ -1016,7 +1104,7 @@ func setLogAlert(d *schema.ResourceData, logAlert *unified_alerts.LogAlertConfig
 		for severity, threshold := range sc.Trigger.SeverityThresholdTiers {
 			tiersList = append(tiersList, map[string]interface{}{
 				severityThresholdTierSeverity:  severity,
-				severityThresholdTierThreshold: threshold,
+				severityThresholdTierThreshold: float64(threshold),
 			})
 		}
 
@@ -1035,11 +1123,19 @@ func setLogAlert(d *schema.ResourceData, logAlert *unified_alerts.LogAlertConfig
 			if len(sc.Output.Columns) > 0 {
 				columnsList := make([]interface{}, len(sc.Output.Columns))
 				for j, col := range sc.Output.Columns {
-					columnsList[j] = map[string]interface{}{
-						columnConfigFieldName: col.FieldName,
-						columnConfigRegex:     col.Regex,
-						columnConfigSort:      col.Sort,
+					sortVal := col.Sort
+					if sortVal == "" {
+						sortVal = "ASC"
 					}
+
+					colMap := map[string]interface{}{
+						columnConfigFieldName: col.FieldName,
+						columnConfigSort:      sortVal,
+					}
+					if col.Regex != "" {
+						colMap[columnConfigRegex] = col.Regex
+					}
+					columnsList[j] = colMap
 				}
 				outputMap[subComponentOutputColumns] = columnsList
 			}
@@ -1047,85 +1143,91 @@ func setLogAlert(d *schema.ResourceData, logAlert *unified_alerts.LogAlertConfig
 			scMap[subComponentOutput] = []interface{}{outputMap}
 		}
 
-		subComponents[i] = scMap
+		result[i] = scMap
 	}
-	logAlertMap[logAlertSubComponents] = subComponents
-
-	// Set correlations if present
-	if len(logAlert.Correlations.CorrelationOperators) > 0 || len(logAlert.Correlations.Joins) > 0 {
-		correlationsMap := map[string]interface{}{
-			correlationsCorrelationOperators: logAlert.Correlations.CorrelationOperators,
-		}
-
-		if len(logAlert.Correlations.Joins) > 0 {
-			joinsList := make([]interface{}, len(logAlert.Correlations.Joins))
-			for i, join := range logAlert.Correlations.Joins {
-				joinMapInterface := make(map[string]interface{})
-				for k, v := range join {
-					joinMapInterface[k] = v
-				}
-				joinsList[i] = joinMapInterface
-			}
-			correlationsMap[correlationsJoins] = joinsList
-		}
-
-		logAlertMap[logAlertCorrelations] = []interface{}{correlationsMap}
-	}
-
-	// Set schedule if present
-	if logAlert.Schedule.CronExpression != "" {
-		scheduleMap := map[string]interface{}{
-			scheduleCronExpression: logAlert.Schedule.CronExpression,
-			scheduleTimezone:       logAlert.Schedule.Timezone,
-		}
-		logAlertMap[logAlertSchedule] = []interface{}{scheduleMap}
-	}
-
-	return d.Set(unifiedAlertLogAlert, []interface{}{logAlertMap})
+	return result
 }
 
-func setMetricAlert(d *schema.ResourceData, metricAlert *unified_alerts.MetricAlertConfig) error {
-	metricAlertMap := make(map[string]interface{})
-
-	metricAlertMap[metricAlertSeverity] = metricAlert.Severity
-
-	// Set trigger
-	triggerMap := map[string]interface{}{
-		metricTriggerTriggerType:            metricAlert.Trigger.TriggerType,
-		metricTriggerMetricOperator:         metricAlert.Trigger.MetricOperator,
-		metricTriggerMinThreshold:           metricAlert.Trigger.MinThreshold,
-		metricTriggerMaxThreshold:           metricAlert.Trigger.MaxThreshold,
-		metricTriggerMathExpression:         metricAlert.Trigger.MathExpression,
-		metricTriggerSearchTimeFrameMinutes: metricAlert.Trigger.SearchTimeFrameMinutes,
+func flattenCorrelations(correlations *unified_alerts.Correlations) []interface{} {
+	correlationsMap := map[string]interface{}{
+		correlationsCorrelationOperators: correlations.CorrelationOperators,
 	}
-	metricAlertMap[metricAlertTrigger] = []interface{}{triggerMap}
 
-	// Set queries
-	queries := make([]interface{}, len(metricAlert.Queries))
-	for i, query := range metricAlert.Queries {
+	if len(correlations.Joins) > 0 {
+		joinsList := make([]interface{}, len(correlations.Joins))
+		for i, join := range correlations.Joins {
+			joinMapInterface := make(map[string]interface{})
+			for k, v := range join {
+				joinMapInterface[k] = v
+			}
+			joinsList[i] = joinMapInterface
+		}
+		correlationsMap[correlationsJoins] = joinsList
+	}
+
+	return []interface{}{correlationsMap}
+}
+
+func flattenSchedule(schedule *unified_alerts.Schedule) []interface{} {
+	return []interface{}{
+		map[string]interface{}{
+			scheduleCronExpression: schedule.CronExpression,
+			scheduleTimezone:       schedule.Timezone,
+		},
+	}
+}
+
+func flattenMetricAlertTrigger(trigger *unified_alerts.MetricAlertTrigger) []interface{} {
+	triggerMap := map[string]interface{}{
+		metricTriggerType:       trigger.Type,
+		metricTriggerExpression: trigger.Expression,
+	}
+
+	if trigger.Condition != nil {
+		condMap := map[string]interface{}{
+			triggerConditionOperatorType: trigger.Condition.OperatorType,
+		}
+		if trigger.Condition.Threshold != nil {
+			condMap[triggerConditionThreshold] = *trigger.Condition.Threshold
+		}
+		if trigger.Condition.From != nil {
+			condMap[triggerConditionFrom] = *trigger.Condition.From
+		}
+		if trigger.Condition.To != nil {
+			condMap[triggerConditionTo] = *trigger.Condition.To
+		}
+		triggerMap[metricTriggerCondition] = []interface{}{condMap}
+	}
+
+	return []interface{}{triggerMap}
+}
+
+func flattenMetricQueries(queries []unified_alerts.MetricQuery) []interface{} {
+	result := make([]interface{}, len(queries))
+	for i, query := range queries {
 		queryDefMap := map[string]interface{}{
-			metricQueryDefinitionDatasourceUid: query.QueryDefinition.DatasourceUid,
-			metricQueryDefinitionPromqlQuery:   query.QueryDefinition.PromqlQuery,
+			metricQueryDefinitionAccountId:   int(query.QueryDefinition.AccountId),
+			metricQueryDefinitionPromqlQuery: query.QueryDefinition.PromqlQuery,
 		}
 
-		queries[i] = map[string]interface{}{
+		result[i] = map[string]interface{}{
 			metricQueryRefId:           query.RefId,
 			metricQueryQueryDefinition: []interface{}{queryDefMap},
 		}
 	}
-	metricAlertMap[metricAlertQueries] = queries
-
-	// Set recipients
-	recipientsMap := map[string]interface{}{
-		recipientsEmails:                  metricAlert.Recipients.Emails,
-		recipientsNotificationEndpointIds: metricAlert.Recipients.NotificationEndpointIds,
-	}
-	metricAlertMap[metricAlertRecipients] = []interface{}{recipientsMap}
-
-	return d.Set(unifiedAlertMetricAlert, []interface{}{metricAlertMap})
+	return result
 }
 
 // Utility functions
+
+func setToStringSlice(set *schema.Set) []string {
+	list := set.List()
+	result := make([]string, len(list))
+	for i, v := range list {
+		result[i] = v.(string)
+	}
+	return result
+}
 
 func interfaceSliceToStringSlice(slice []interface{}) []string {
 	if slice == nil {
