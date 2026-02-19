@@ -2,6 +2,7 @@ package logzio
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -45,14 +46,18 @@ func TestAccLogzioUnifiedAlert_LogAlert(t *testing.T) {
 func TestAccLogzioUnifiedAlert_MetricAlert(t *testing.T) {
 	defer utils.SleepAfterTest()
 	email := "test@logz.io"
+	metricsAccountId := os.Getenv(envLogzioMetricsAccountId)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		PreCheck: func() {
+			testAccPreCheckApiToken(t)
+			testAccPreCheckMetricsAccountId(t)
+		},
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testCheckUnifiedAlertDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getUnifiedMetricAlertConfig(email),
+				Config: getUnifiedMetricAlertConfig(email, metricsAccountId),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("logzio_unified_alert.test_metric_alert", "alert_id"),
 					resource.TestCheckResourceAttr("logzio_unified_alert.test_metric_alert", "title", "Test Metric Alert"),
@@ -68,14 +73,18 @@ func TestAccLogzioUnifiedAlert_MetricAlert(t *testing.T) {
 func TestAccLogzioUnifiedAlert_MetricAlertMathExpression(t *testing.T) {
 	defer utils.SleepAfterTest()
 	email := "test@logz.io"
+	metricsAccountId := os.Getenv(envLogzioMetricsAccountId)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheckApiToken(t) },
+		PreCheck: func() {
+			testAccPreCheckApiToken(t)
+			testAccPreCheckMetricsAccountId(t)
+		},
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testCheckUnifiedAlertDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getUnifiedMetricAlertMathConfig(email),
+				Config: getUnifiedMetricAlertMathConfig(email, metricsAccountId),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("logzio_unified_alert.test_metric_math_alert", "alert_id"),
 					resource.TestCheckResourceAttr("logzio_unified_alert.test_metric_math_alert", "title", "Test Math Expression Alert"),
@@ -230,7 +239,7 @@ resource "logzio_unified_alert" "test_log_alert" {
 `, email)
 }
 
-func getUnifiedMetricAlertConfig(email string) string {
+func getUnifiedMetricAlertConfig(email string, metricsAccountId string) string {
 	return fmt.Sprintf(`
 resource "logzio_unified_alert" "test_metric_alert" {
   title       = "Test Metric Alert"
@@ -259,15 +268,16 @@ resource "logzio_unified_alert" "test_metric_alert" {
       ref_id = "A"
 
       query_definition {
+        account_id   = %s
         promql_query = "avg(cpu_usage)"
       }
     }
   }
 }
-`, email)
+`, email, metricsAccountId)
 }
 
-func getUnifiedMetricAlertMathConfig(email string) string {
+func getUnifiedMetricAlertMathConfig(email string, metricsAccountId string) string {
 	return fmt.Sprintf(`
 resource "logzio_unified_alert" "test_metric_math_alert" {
   title       = "Test Math Expression Alert"
@@ -292,6 +302,7 @@ resource "logzio_unified_alert" "test_metric_math_alert" {
       ref_id = "A"
 
       query_definition {
+        account_id   = %s
         promql_query = "sum(errors)"
       }
     }
@@ -300,10 +311,11 @@ resource "logzio_unified_alert" "test_metric_math_alert" {
       ref_id = "B"
 
       query_definition {
+        account_id   = %s
         promql_query = "sum(requests)"
       }
     }
   }
 }
-`, email)
+`, email, metricsAccountId, metricsAccountId)
 }
