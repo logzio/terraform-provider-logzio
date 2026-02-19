@@ -10,7 +10,7 @@ import (
 
 func TestAccLogzioGrafanaFolder_GrafanaFolder(t *testing.T) {
 	defer utils.SleepAfterTest()
-	randomSuffix := utils.RandomString(6)
+	randomSuffix := getRandomId()
 	title := fmt.Sprintf("tf_provider_test_%s", randomSuffix)
 	resourceType := "logzio_grafana_folder"
 	resourceName := "test_folder"
