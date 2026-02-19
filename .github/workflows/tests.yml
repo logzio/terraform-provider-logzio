@@ -6,6 +6,7 @@ on:
       - 'logzio/*'
       - 'go.sum'
       - 'go.mod'
+      - '.github/workflows/tests.yml'
 
 env:
   LOGZIO_API_TOKEN: ${{ secrets.LOGZIO_API_TOKEN }}
@@ -32,28 +33,54 @@ env:
   LOGZIO_METRICS_ACCOUNT_ID: ${{ secrets.LOGZIO_METRICS_ACCOUNT_ID }}
 
 jobs:
+  discover:
+    name: Discover test groups
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - id: matrix
+        run: |
+          matrix=$(bash scripts/generate-test-matrix.sh)
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
   test:
-    name: Test group
+    name: "test: ${{ matrix.resource }}"
+    needs: discover
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
-      matrix:
-        group: [ 0, 1, 2, 3]
-
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
-          go-version: 1.24
+          go-version: "1.24"
 
-      - name: Verify that all test files are grouped
-        run: bash scripts/check_test_group_coverage.sh
+      - name: Install gotestsum
+        run: go install gotest.tools/gotestsum@latest
 
-      - name: Test
+      - name: Run tests
         working-directory: logzio
         run: |
-          TEST_NAMES=$(cat ../.github/test-groups/group_${{ matrix.group }}.txt | tr '\n' '|' | sed 's/|$//')
           go clean -testcache
-          go test -failfast -v -race -covermode=atomic -coverprofile=coverage.out -timeout 0 -run "^(${TEST_NAMES})$"
+          gotestsum \
+            --format short-verbose \
+            --junitfile test-results.xml \
+            --rerun-fails \
+            --rerun-fails-max-failures 3 \
+            --packages ./... \
+            -- -race -covermode=atomic -coverprofile=coverage.out \
+               -timeout 45m \
+               -run "^(${{ matrix.tests }})$"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-results-${{ matrix.resource }}
+          path: logzio/test-results.xml
