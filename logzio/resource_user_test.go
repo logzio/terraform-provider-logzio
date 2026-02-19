@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func TestAccLogzioUser_CreateUser(t *testing.T) {
@@ -33,9 +34,9 @@ func TestAccLogzioUser_CreateUser(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLogzioUserConfig(username, fullNameUpdate, accountId),
+				PreConfig: func() { time.Sleep(15 * time.Second) },
+				Config:    testAccCheckLogzioUserConfig(username, fullNameUpdate, accountId),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(
 						resourceName, userUsername, username),
 					resource.TestCheckResourceAttr(resourceName, userFullName, fullNameUpdate),

@@ -35,6 +35,7 @@ func TestAccLogzioUnifiedAlert_LogAlert(t *testing.T) {
 					resource.TestCheckResourceAttr("logzio_unified_alert.test_log_alert", "title", "Test Log Alert Updated"),
 					resource.TestCheckResourceAttr("logzio_unified_alert.test_log_alert", "enabled", "false"),
 					resource.TestCheckResourceAttr("logzio_unified_alert.test_log_alert", "alert_configuration.0.search_timeframe_minutes", "10"),
+					resource.TestCheckResourceAttr("logzio_unified_alert.test_log_alert", "alert_configuration.0.alert_output_template_type", "TABLE"),
 				),
 			},
 		},
@@ -200,9 +201,6 @@ resource "logzio_unified_alert" "test_log_alert" {
         query                        = "level:ERROR OR level:WARN"
         should_query_on_all_accounts = true
 
-        aggregation {
-          aggregation_type = "COUNT"
-        }
       }
 
       trigger {
@@ -215,7 +213,16 @@ resource "logzio_unified_alert" "test_log_alert" {
       }
 
       output {
-        should_use_all_fields = true
+        should_use_all_fields = false
+
+        columns {
+          field_name = "@timestamp"
+          sort       = "DESC"
+        }
+
+        columns {
+          field_name = "message"
+        }
       }
     }
   }

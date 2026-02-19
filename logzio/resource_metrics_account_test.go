@@ -14,7 +14,7 @@ import (
 func TestAccLogzioMetricsAccount_CreateMetricsAccount(t *testing.T) {
 	accountId := os.Getenv(envLogzioAccountId)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_create_subaccount"
+	accountName := "test_create_metrics_" + getRandomId()
 	terraformPlan := testAccCheckLogzioMetricsAccountConfig(email, accountName, accountId)
 	defer utils.SleepAfterTest()
 
@@ -47,7 +47,7 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccount(t *testing.T) {
 
 func TestAccLogzioMetricsAccount_CreateMetricsAccountEmptyAuthorizedAccounts(t *testing.T) {
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_empty_sharing_object"
+	accountName := "test_metrics_empty_sharing_" + getRandomId()
 	terraformPlan := testAccCheckLogzioMetricsAccountConfig(email, accountName, "")
 	defer utils.SleepAfterTest()
 
@@ -149,8 +149,9 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccountNoName(t *testing.T) {
 func TestAccLogzioMetricsAccount_UpdateMetricsAccount(t *testing.T) {
 	accountId := os.Getenv(envLogzioAccountId)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_update_before"
-	accountNameUpdate := "test_update_after"
+	suffix := getRandomId()
+	accountName := "test_metrics_update_before_" + suffix
+	accountNameUpdate := "test_metrics_update_after_" + suffix
 	resourceName := "logzio_metrics_account.test_subaccount"
 	terraformPlan := testAccCheckLogzioMetricsAccountConfig(email, accountName, accountId)
 	terraformPlanUpdate := testAccCheckLogzioMetricsAccountConfig(email, accountNameUpdate, accountId)
