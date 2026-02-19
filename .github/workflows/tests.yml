@@ -1,4 +1,4 @@
-name: Tests
+name: Integration Tests
 
 on:
   pull_request:
@@ -7,6 +7,9 @@ on:
       - 'go.sum'
       - 'go.mod'
       - '.github/workflows/tests.yml'
+
+permissions:
+  contents: read
 
 jobs:
   discover:
@@ -23,7 +26,7 @@ jobs:
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 
   test:
-    name: "test: ${{ matrix.resource }}"
+    name: "${{ matrix.resource }}"
     needs: discover
     runs-on: ubuntu-24.04
     env:
@@ -69,6 +72,7 @@ jobs:
           go clean -testcache
           gotestsum \
             --format short-verbose \
+            --jsonfile test-events.jsonl \
             --junitfile test-results.xml \
             --rerun-fails \
             --rerun-fails-max-failures 3 \
@@ -77,9 +81,19 @@ jobs:
                -timeout 45m \
                -run "^(${{ matrix.tests }})$"
 
-      - name: Upload test results
+      - name: Test summary
         if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: test-results-${{ matrix.resource }}
-          path: logzio/test-results.xml
+        working-directory: logzio
+        run: |
+          {
+            echo "### ${{ matrix.resource }}"
+            echo ""
+            echo "| Status | Test | Duration |"
+            echo "|--------|------|----------|"
+            jq -rs '
+              [.[] | select(.Test and (.Action == "pass" or .Action == "fail"))] |
+              group_by(.Test) | map(last) | sort_by(.Action) |
+              .[] | (if .Action == "pass" then ":white_check_mark:" else ":x:" end) as $s |
+              "| \($s) | \(.Test) | \(.Elapsed // 0)s |"
+            ' test-events.jsonl
+          } >> "$GITHUB_STEP_SUMMARY"
