@@ -8,30 +8,6 @@ on:
       - 'go.mod'
       - '.github/workflows/tests.yml'
 
-env:
-  LOGZIO_API_TOKEN: ${{ secrets.LOGZIO_API_TOKEN }}
-  LOGZIO_WARM_API_TOKEN: ${{ secrets.LOGZIO_WARM_API_TOKEN }}
-  LOGZIO_CONSUMPTION_API_TOKEN: ${{ secrets.LOGZIO_CONSUMPTION_API_TOKEN }}
-  TF_ACC: true
-  LOGZIO_EMAIL: ${{ secrets.LOGZIO_EMAIL }}
-  LOGZIO_ACCOUNT_ID: ${{ secrets.LOGZIO_ACCOUNT_ID }}
-  LOGZIO_WARM_ACCOUNT_ID: ${{ secrets.LOGZIO_WARM_ACCOUNT_ID }}
-  LOGZIO_CONSUMPTION_ACCOUNT_ID: ${{ secrets.LOGZIO_CONSUMPTION_ACCOUNT_ID }}
-  S3_PATH: ${{ secrets.S3_PATH }}
-  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-  AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-  AZURE_ACCOUNT_NAME: ${{ secrets.AZURE_ACCOUNT_NAME }}
-  AZURE_CONTAINER_NAME: ${{ secrets.AZURE_CONTAINER_NAME }}
-  AWS_ARN: ${{ secrets.AWS_ARN }}
-  AWS_ARN_S3_FETCHER: ${{ secrets.AWS_ARN_S3_FETCHER }}
-  AWS_ACCESS_KEY_UPDATE: ${{ secrets.AWS_ACCESS_KEY_UPDATE }}
-  AWS_SECRET_KEY_UPDATE: ${{ secrets.AWS_SECRET_KEY_UPDATE }}
-  GRAFANA_FOLDER_UID: ${{ secrets.GRAFANA_FOLDER_UID }}
-  LOGZIO_METRICS_ACCOUNT_ID: ${{ secrets.LOGZIO_METRICS_ACCOUNT_ID }}
-
 jobs:
   discover:
     name: Discover test groups
@@ -50,6 +26,29 @@ jobs:
     name: "test: ${{ matrix.resource }}"
     needs: discover
     runs-on: ubuntu-24.04
+    env:
+      LOGZIO_API_TOKEN: ${{ secrets.LOGZIO_API_TOKEN }}
+      LOGZIO_WARM_API_TOKEN: ${{ secrets.LOGZIO_WARM_API_TOKEN }}
+      LOGZIO_CONSUMPTION_API_TOKEN: ${{ secrets.LOGZIO_CONSUMPTION_API_TOKEN }}
+      TF_ACC: true
+      LOGZIO_EMAIL: ${{ secrets.LOGZIO_EMAIL }}
+      LOGZIO_ACCOUNT_ID: ${{ secrets.LOGZIO_ACCOUNT_ID }}
+      LOGZIO_WARM_ACCOUNT_ID: ${{ secrets.LOGZIO_WARM_ACCOUNT_ID }}
+      LOGZIO_CONSUMPTION_ACCOUNT_ID: ${{ secrets.LOGZIO_CONSUMPTION_ACCOUNT_ID }}
+      S3_PATH: ${{ secrets.S3_PATH }}
+      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_ACCOUNT_NAME: ${{ secrets.AZURE_ACCOUNT_NAME }}
+      AZURE_CONTAINER_NAME: ${{ secrets.AZURE_CONTAINER_NAME }}
+      AWS_ARN: ${{ secrets.AWS_ARN }}
+      AWS_ARN_S3_FETCHER: ${{ secrets.AWS_ARN_S3_FETCHER }}
+      AWS_ACCESS_KEY_UPDATE: ${{ secrets.AWS_ACCESS_KEY_UPDATE }}
+      AWS_SECRET_KEY_UPDATE: ${{ secrets.AWS_SECRET_KEY_UPDATE }}
+      GRAFANA_FOLDER_UID: ${{ secrets.GRAFANA_FOLDER_UID }}
+      LOGZIO_METRICS_ACCOUNT_ID: ${{ secrets.LOGZIO_METRICS_ACCOUNT_ID }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
