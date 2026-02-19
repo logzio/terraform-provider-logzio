@@ -3,9 +3,11 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"regexp"
+	"strconv"
 	"testing"
 )
 
@@ -23,6 +25,7 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccount(t *testing.T) {
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMetricsAccountDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -54,6 +57,7 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccountEmptyAuthorizedAccounts(t *
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMetricsAccountDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -128,6 +132,7 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccountNoName(t *testing.T) {
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMetricsAccountDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -158,6 +163,7 @@ func TestAccLogzioMetricsAccount_UpdateMetricsAccount(t *testing.T) {
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMetricsAccountDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -179,6 +185,30 @@ func TestAccLogzioMetricsAccount_UpdateMetricsAccount(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccCheckMetricsAccountDestroy(s *terraform.State) error {
+	if testAccProvider.Meta() == nil {
+		return nil
+	}
+	client, err := MetricsAccountClient(testAccProvider.Meta())
+	if err != nil {
+		return err
+	}
+	for _, r := range s.RootModule().Resources {
+		if r.Type != "logzio_metrics_account" {
+			continue
+		}
+		id, err := strconv.ParseInt(r.Primary.ID, 10, 64)
+		if err != nil {
+			return err
+		}
+		_, err = client.GetMetricsAccount(id)
+		if err == nil {
+			return fmt.Errorf("metrics account %s still exists", r.Primary.ID)
+		}
+	}
+	return nil
 }
 
 func testAccCheckLogzioMetricsAccountConfig(email string, accountName string, accountId string) string {

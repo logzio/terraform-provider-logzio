@@ -3,6 +3,7 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"strconv"
@@ -20,6 +21,7 @@ func TestAccLogzioUser_CreateUser(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckUserDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLogzioUserConfig(username, fullName, accountId),
@@ -47,6 +49,27 @@ func TestAccLogzioUser_CreateUser(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccCheckUserDestroy(s *terraform.State) error {
+	if testAccProvider.Meta() == nil {
+		return nil
+	}
+	client := usersClient(testAccProvider.Meta())
+	for _, r := range s.RootModule().Resources {
+		if r.Type != "logzio_user" {
+			continue
+		}
+		id, err := strconv.ParseInt(r.Primary.ID, 10, 64)
+		if err != nil {
+			return err
+		}
+		_, err = client.GetUser(int32(id))
+		if err == nil {
+			return fmt.Errorf("user %s still exists", r.Primary.ID)
+		}
+	}
+	return nil
 }
 
 func testAccCheckLogzioUserConfig(username string, fullname string, accountId int64) string {
