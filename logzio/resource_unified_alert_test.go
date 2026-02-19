@@ -108,6 +108,9 @@ func TestAccLogzioUnifiedAlert_Import(t *testing.T) {
 }
 
 func testCheckUnifiedAlertDestroy(s *terraform.State) error {
+	if testAccProvider.Meta() == nil {
+		return nil
+	}
 	client := unifiedAlertClient(testAccProvider.Meta())
 
 	for _, r := range s.RootModule().Resources {

@@ -98,6 +98,68 @@ resource "logzio_unified_alert" "log_alert_example" {
 }
 ```
 
+## Example Usage - Log Alert with TABLE Output
+
+When using `alert_output_template_type = "TABLE"`, you **must** define `output.columns` in every `sub_components` block. Each column specifies a field to include in the alert notification table, with an optional sort direction.
+
+```hcl
+resource "logzio_unified_alert" "log_alert_table_example" {
+  title       = "Error log table alert"
+  description = "Fires when errors exceed threshold, notification includes a table of matching log fields."
+  tags        = ["production"]
+  enabled     = true
+
+  recipients {
+    emails = ["devops@company.com"]
+  }
+
+  alert_configuration {
+    type                           = "LOG_ALERT"
+    search_timeframe_minutes       = 10
+    alert_output_template_type     = "TABLE"
+
+    sub_components {
+      query_definition {
+        query = "level:ERROR"
+
+        aggregation {
+          aggregation_type = "NONE"
+        }
+
+        should_query_on_all_accounts = true
+      }
+
+      trigger {
+        operator = "GREATER_THAN"
+
+        severity_threshold_tiers {
+          severity  = "HIGH"
+          threshold = 5
+        }
+      }
+
+      output {
+        should_use_all_fields = false
+
+        columns {
+          field_name = "@timestamp"
+          sort       = "DESC"
+        }
+
+        columns {
+          field_name = "message"
+        }
+
+        columns {
+          field_name = "service"
+          sort       = "ASC"
+        }
+      }
+    }
+  }
+}
+```
+
 ## Example Usage - Metric Alert (threshold)
 
 ```hcl
@@ -227,7 +289,7 @@ The `alert_configuration` block supports both log alert and metric alert fields.
 
 * `type` - (Required, String, ForceNew) Alert type. Must be `LOG_ALERT` or `METRIC_ALERT`. Changing this forces a new resource.
 * `suppress_notifications_minutes` - (Optional, Integer) Mute period after alert fires (log alerts).
-* `alert_output_template_type` - (Optional, String) Output format for log alerts. Must be `JSON` or `TABLE`.
+* `alert_output_template_type` - (Optional, String) Output format for log alerts. Must be `JSON` or `TABLE`. **When set to `TABLE`**, each `sub_components` block **must** define `output.columns` with at least one column (see [Sub Component Output](#sub-component-output) and the [TABLE output example](#example-usage---log-alert-with-table-output) below).
 * `search_timeframe_minutes` - (Optional, Integer) Time window in minutes for log evaluation.
 * `severity` - (Optional, String) Alert severity. Valid values: `INFO`, `LOW`, `MEDIUM`, `HIGH`, `SEVERE`. **Required for metric alerts.**
 * `sub_components` - (Optional, List of Block) Detection rules. See [Sub Component](#sub-component) below. **Required for log alerts** (at least 1).
@@ -300,8 +362,10 @@ The `output` block supports:
 * `should_use_all_fields` - (Optional, Boolean) Whether to use all fields in output. Default: `true`.
 * `columns` - (Optional, List of Block) Column configurations. See [Column Config](#column-config) below.
 
-**Important:** Custom `columns` are **only valid when `aggregation_type = "NONE"`**.
+**Important constraints on `columns`:**
 
+- **When `alert_output_template_type = "TABLE"`:** `columns` **must** be defined with at least one column in every sub-component. Set `should_use_all_fields = false` and specify the columns to include in the table.
+- Custom `columns` are **only valid when `aggregation_type = "NONE"`**.
 - If using any aggregation (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`, `UNIQUE_COUNT`): **Must set** `should_use_all_fields = true` and **cannot specify** `columns`.
 - If using `aggregation_type = "NONE"`: Can set `should_use_all_fields = false` and specify custom `columns`.
 

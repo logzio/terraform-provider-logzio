@@ -116,8 +116,6 @@ const (
 
 	unifiedAlertRetryAttempts = 8
 
-	// Default values
-	TABLE_OUTPUT_TYPE = "TABLE"
 )
 
 func unifiedAlertClient(m interface{}) *unified_alerts.UnifiedAlertsClient {
@@ -273,7 +271,7 @@ func resourceAlertConfiguration() *schema.Resource {
 			alertConfigAlertOutputTemplateType: {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{unified_alerts.OutputTypeJson, TABLE_OUTPUT_TYPE}, false),
+				ValidateFunc: validation.StringInSlice([]string{unified_alerts.OutputTypeJson, unified_alerts.OutputTypeTable}, false),
 			},
 			alertConfigSearchTimeFrameMinutes: {
 				Type:     schema.TypeInt,
