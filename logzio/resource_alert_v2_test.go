@@ -3,9 +3,11 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"log"
 	"os"
+	"strconv"
 	"testing"
 )
 
@@ -25,6 +27,7 @@ func TestAccLogzioAlertV2_CreateAlert(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAlertV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: resourceTestAlertV2(alertName, alertsV2ResourceCreateAlert),
@@ -58,6 +61,7 @@ func TestAccLogzioAlertV2_UpdateAlert(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAlertV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: resourceTestAlertV2(alertName, alertsV2ResourceCreateAlert),
@@ -91,6 +95,7 @@ func TestAccLogzioAlertV2_ScheduleTests(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAlertV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: resourceTestAlertV2(alertName, alertsV2ResourceScheduleCreate),
@@ -142,6 +147,27 @@ func TestAccLogzioAlertV2_ScheduleTests(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccCheckAlertV2Destroy(s *terraform.State) error {
+	if testAccProvider.Meta() == nil {
+		return nil
+	}
+	client := alertV2Client(testAccProvider.Meta())
+	for _, r := range s.RootModule().Resources {
+		if r.Type != "logzio_alert_v2" {
+			continue
+		}
+		id, err := strconv.ParseInt(r.Primary.ID, 10, 64)
+		if err != nil {
+			return err
+		}
+		_, err = client.GetAlert(id)
+		if err == nil {
+			return fmt.Errorf("alert v2 %s still exists", r.Primary.ID)
+		}
+	}
+	return nil
 }
 
 func resourceTestAlertV2(name string, path string) string {

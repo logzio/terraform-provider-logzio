@@ -2,19 +2,20 @@ package logzio
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
-	"testing"
 )
 
 func TestAccLogzioGrafanaFolder_GrafanaFolder(t *testing.T) {
 	defer utils.SleepAfterTest()
-
-	title := "tf_provider_test"
+	randomSuffix := getRandomId()
+	title := fmt.Sprintf("tf_provider_test_%s", randomSuffix)
 	resourceType := "logzio_grafana_folder"
 	resourceName := "test_folder"
 	fullResourceName := fmt.Sprintf("%s.%s", resourceType, resourceName)
-	newTitle := "tf_provider_updated"
+	newTitle := fmt.Sprintf("tf_provider_updated_%s", randomSuffix)
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{

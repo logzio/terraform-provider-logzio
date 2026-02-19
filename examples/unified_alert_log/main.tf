@@ -22,25 +22,22 @@ provider "logzio" {
   api_token = var.api_token
 }
 
-# Example 1: Basic log alert with COUNT aggregation
+# Example 1: Basic log alert with COUNT aggregation and JSON output
 resource "logzio_unified_alert" "basic_log_alert" {
   title       = "High Error Rate"
-  type        = "LOG_ALERT"
   description = "Triggers when error logs exceed threshold"
   tags        = ["production", "errors"]
   enabled     = true
 
-  log_alert {
-    search_timeframe_minutes = 15
+  recipients {
+    emails = [var.notification_email]
+  }
 
-    output {
-      type                          = "JSON"
-      suppress_notifications_minutes = 30
-
-      recipients {
-        emails = [var.notification_email]
-      }
-    }
+  alert_configuration {
+    type                           = "LOG_ALERT"
+    search_timeframe_minutes       = 15
+    suppress_notifications_minutes = 30
+    alert_output_template_type     = "JSON"
 
     sub_components {
       query_definition {
@@ -78,30 +75,29 @@ resource "logzio_unified_alert" "basic_log_alert" {
   }
 }
 
-# Example 2: Advanced log alert with specific accounts and custom columns
-resource "logzio_unified_alert" "advanced_log_alert" {
+# Example 2: Log alert with TABLE output and custom columns
+# TABLE output requires aggregation_type = "NONE", should_use_all_fields = false,
+# and at least one column defined.
+resource "logzio_unified_alert" "table_log_alert" {
   title       = "Critical Service Errors"
-  type        = "LOG_ALERT"
-  description = "Alert on critical errors in payment service"
+  description = "Alert on critical errors in payment service with table output"
   tags        = ["critical", "payment", "service"]
   enabled     = true
 
   # RCA configuration
-  rca = true
+  rca                                      = true
   use_alert_notification_endpoints_for_rca = true
   runbook = "1. Check payment gateway status\n2. Review recent deployments\n3. Contact on-call engineer"
 
-  log_alert {
-    search_timeframe_minutes = 10
+  recipients {
+    emails = [var.notification_email, "oncall@example.com"]
+  }
 
-    output {
-      type                          = "TABLE"
-      suppress_notifications_minutes = 60
-
-      recipients {
-        emails = [var.notification_email, "oncall@example.com"]
-      }
-    }
+  alert_configuration {
+    type                           = "LOG_ALERT"
+    search_timeframe_minutes       = 10
+    suppress_notifications_minutes = 60
+    alert_output_template_type     = "TABLE"
 
     sub_components {
       query_definition {
@@ -110,8 +106,7 @@ resource "logzio_unified_alert" "advanced_log_alert" {
         account_ids_to_query_on      = [12345]
 
         aggregation {
-          aggregation_type    = "SUM"
-          field_to_aggregate_on = "error_count"
+          aggregation_type = "NONE"
         }
 
         group_by = ["service", "error_type"]
@@ -135,7 +130,7 @@ resource "logzio_unified_alert" "advanced_log_alert" {
         should_use_all_fields = false
 
         columns {
-          field_name = "timestamp"
+          field_name = "@timestamp"
           sort       = "DESC"
         }
 
@@ -153,9 +148,9 @@ resource "logzio_unified_alert" "advanced_log_alert" {
       }
     }
 
-    # Custom schedule - check every 5 minutes during business hours
+    # Custom schedule - check every 5 minutes
     schedule {
-      cron_expression = "*/5 9-17 * * 1-5"
+      cron_expression = "0 0/5 * * * ?"
       timezone        = "America/New_York"
     }
   }
@@ -164,21 +159,18 @@ resource "logzio_unified_alert" "advanced_log_alert" {
 # Example 3: Log alert with multiple sub-components and correlation
 resource "logzio_unified_alert" "correlated_log_alert" {
   title       = "Database Connection Issues"
-  type        = "LOG_ALERT"
   description = "Alert when both connection errors and timeouts occur"
   tags        = ["database", "connections"]
   enabled     = true
 
-  log_alert {
-    search_timeframe_minutes = 5
+  recipients {
+    emails = [var.notification_email]
+  }
 
-    output {
-      type = "JSON"
-
-      recipients {
-        emails = [var.notification_email]
-      }
-    }
+  alert_configuration {
+    type                       = "LOG_ALERT"
+    search_timeframe_minutes   = 5
+    alert_output_template_type = "JSON"
 
     sub_components {
       query_definition {
@@ -254,4 +246,3 @@ output "existing_alert_title" {
   value       = data.logzio_unified_alert.existing_alert.title
   description = "Title of the retrieved alert"
 }
-

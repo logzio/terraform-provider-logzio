@@ -3,16 +3,18 @@ package logzio
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"os"
 	"regexp"
+	"strconv"
 	"testing"
 )
 
 func TestAccLogzioMetricsAccount_CreateMetricsAccount(t *testing.T) {
 	accountId := os.Getenv(envLogzioAccountId)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_create_subaccount"
+	accountName := "test_create_metrics_" + getRandomId()
 	terraformPlan := testAccCheckLogzioMetricsAccountConfig(email, accountName, accountId)
 	defer utils.SleepAfterTest()
 
@@ -23,6 +25,7 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccount(t *testing.T) {
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMetricsAccountDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -44,7 +47,7 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccount(t *testing.T) {
 
 func TestAccLogzioMetricsAccount_CreateMetricsAccountEmptyAuthorizedAccounts(t *testing.T) {
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_empty_sharing_object"
+	accountName := "test_metrics_empty_sharing_" + getRandomId()
 	terraformPlan := testAccCheckLogzioMetricsAccountConfig(email, accountName, "")
 	defer utils.SleepAfterTest()
 
@@ -54,6 +57,7 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccountEmptyAuthorizedAccounts(t *
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMetricsAccountDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -128,6 +132,7 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccountNoName(t *testing.T) {
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMetricsAccountDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -144,8 +149,9 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccountNoName(t *testing.T) {
 func TestAccLogzioMetricsAccount_UpdateMetricsAccount(t *testing.T) {
 	accountId := os.Getenv(envLogzioAccountId)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_update_before"
-	accountNameUpdate := "test_update_after"
+	suffix := getRandomId()
+	accountName := "test_metrics_update_before_" + suffix
+	accountNameUpdate := "test_metrics_update_after_" + suffix
 	resourceName := "logzio_metrics_account.test_subaccount"
 	terraformPlan := testAccCheckLogzioMetricsAccountConfig(email, accountName, accountId)
 	terraformPlanUpdate := testAccCheckLogzioMetricsAccountConfig(email, accountNameUpdate, accountId)
@@ -158,6 +164,7 @@ func TestAccLogzioMetricsAccount_UpdateMetricsAccount(t *testing.T) {
 			testAccPreCheckEmail(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMetricsAccountDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: terraformPlan,
@@ -179,6 +186,30 @@ func TestAccLogzioMetricsAccount_UpdateMetricsAccount(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccCheckMetricsAccountDestroy(s *terraform.State) error {
+	if testAccProvider.Meta() == nil {
+		return nil
+	}
+	client, err := MetricsAccountClient(testAccProvider.Meta())
+	if err != nil {
+		return err
+	}
+	for _, r := range s.RootModule().Resources {
+		if r.Type != "logzio_metrics_account" {
+			continue
+		}
+		id, err := strconv.ParseInt(r.Primary.ID, 10, 64)
+		if err != nil {
+			return err
+		}
+		_, err = client.GetMetricsAccount(id)
+		if err == nil {
+			return fmt.Errorf("metrics account %s still exists", r.Primary.ID)
+		}
+	}
+	return nil
 }
 
 func testAccCheckLogzioMetricsAccountConfig(email string, accountName string, accountId string) string {
