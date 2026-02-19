@@ -17,6 +17,14 @@ data "logzio_unified_alert" "metric_alert_by_id" {
   alert_id = "alert-456"
 }
 
+# Reference from a managed resource
+data "logzio_unified_alert" "from_resource" {
+  type     = "LOG_ALERT"
+  alert_id = logzio_unified_alert.my_log_alert.alert_id
+
+  depends_on = [logzio_unified_alert.my_log_alert]
+}
+
 # Use the data source outputs
 output "alert_title" {
   value = data.logzio_unified_alert.log_alert_by_id.title
@@ -24,6 +32,10 @@ output "alert_title" {
 
 output "alert_enabled" {
   value = data.logzio_unified_alert.log_alert_by_id.enabled
+}
+
+output "metric_severity" {
+  value = data.logzio_unified_alert.metric_alert_by_id.alert_configuration[0].severity
 }
 ```
 

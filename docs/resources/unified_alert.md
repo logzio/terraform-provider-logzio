@@ -6,7 +6,7 @@ The alert type is determined by the `type` field inside `alert_configuration`:
 - When `type = "LOG_ALERT"`, configure log-alert fields (`sub_components`, `correlations`, `schedule`).
 - When `type = "METRIC_ALERT"`, configure metric-alert fields (`trigger`, `queries`, `severity`).
 
-## Example Usage - Log Alert
+## Example Usage - Log Alert (JSON Output)
 
 ```hcl
 resource "logzio_unified_alert" "log_alert_example" {
@@ -42,15 +42,6 @@ resource "logzio_unified_alert" "log_alert_example" {
       query_definition {
         query = "kubernetes.container_name:checkout AND level:error"
 
-        filters = jsonencode({
-          bool = {
-            must     = []
-            should   = []
-            filter   = []
-            must_not = []
-          }
-        })
-
         group_by = ["kubernetes.pod_name"]
 
         aggregation {
@@ -77,12 +68,7 @@ resource "logzio_unified_alert" "log_alert_example" {
       }
 
       output {
-        should_use_all_fields = false
-
-        columns {
-          field_name = "kubernetes.pod_name"
-          sort       = "DESC"
-        }
+        should_use_all_fields = true
       }
     }
 
@@ -100,7 +86,7 @@ resource "logzio_unified_alert" "log_alert_example" {
 
 ## Example Usage - Log Alert with TABLE Output
 
-When using `alert_output_template_type = "TABLE"`, you **must** define `output.columns` in every `sub_components` block. Each column specifies a field to include in the alert notification table, with an optional sort direction.
+When using `alert_output_template_type = "TABLE"`, you **must** define `output.columns` in every `sub_components` block and set `should_use_all_fields = false`. TABLE output requires `aggregation_type = "NONE"` (or no aggregation block).
 
 ```hcl
 resource "logzio_unified_alert" "log_alert_table_example" {
@@ -160,7 +146,7 @@ resource "logzio_unified_alert" "log_alert_table_example" {
 }
 ```
 
-## Example Usage - Metric Alert (threshold)
+## Example Usage - Metric Alert (Threshold)
 
 ```hcl
 resource "logzio_unified_alert" "metric_alert_example" {
@@ -168,14 +154,6 @@ resource "logzio_unified_alert" "metric_alert_example" {
   description = "Fire when 5xx requests exceed 5 req/min over 5 minutes."
   tags        = ["environment:production", "service:checkout"]
   enabled     = true
-
-  linked_panel {
-    folder_id    = "unified-folder-uid"
-    dashboard_id = "unified-dashboard-uid"
-    panel_id     = "A"
-  }
-
-  runbook = "RCA: inspect ingress errors by pod and compare to last deploy."
 
   recipients {
     emails                    = ["devops@company.com"]
@@ -227,11 +205,12 @@ resource "logzio_unified_alert" "metric_math_alert" {
 
     trigger {
       type       = "math"
-      expression = "(A / B) * 100"
+      expression = "($A / $B) * 100"
     }
 
     queries {
       ref_id = "A"
+
       query_definition {
         account_id   = 12345
         promql_query = "sum(rate(http_requests_total{status=~\"5..\"}[5m]))"
@@ -240,6 +219,7 @@ resource "logzio_unified_alert" "metric_math_alert" {
 
     queries {
       ref_id = "B"
+
       query_definition {
         account_id   = 12345
         promql_query = "sum(rate(http_requests_total[5m]))"
@@ -289,7 +269,7 @@ The `alert_configuration` block supports both log alert and metric alert fields.
 
 * `type` - (Required, String, ForceNew) Alert type. Must be `LOG_ALERT` or `METRIC_ALERT`. Changing this forces a new resource.
 * `suppress_notifications_minutes` - (Optional, Integer) Mute period after alert fires (log alerts).
-* `alert_output_template_type` - (Optional, String) Output format for log alerts. Must be `JSON` or `TABLE`. **When set to `TABLE`**, each `sub_components` block **must** define `output.columns` with at least one column (see [Sub Component Output](#sub-component-output) and the [TABLE output example](#example-usage---log-alert-with-table-output) below).
+* `alert_output_template_type` - (Optional, String) Output format for log alerts. Must be `JSON` or `TABLE`. See [Output Format Rules](#output-format-rules) below.
 * `search_timeframe_minutes` - (Optional, Integer) Time window in minutes for log evaluation.
 * `severity` - (Optional, String) Alert severity. Valid values: `INFO`, `LOW`, `MEDIUM`, `HIGH`, `SEVERE`. **Required for metric alerts.**
 * `sub_components` - (Optional, List of Block) Detection rules. See [Sub Component](#sub-component) below. **Required for log alerts** (at least 1).
@@ -324,7 +304,7 @@ The `query_definition` block supports:
 }
 ```
 * `group_by` - (Optional, List of String) Fields to group results by.
-* `aggregation` - (Optional, Block) How to aggregate matching logs. See [Aggregation](#aggregation) below.
+* `aggregation` - (Optional, Block) How to aggregate matching logs. If omitted, the API may populate a default aggregation (typically `COUNT`). See [Aggregation](#aggregation) below.
 * `should_query_on_all_accounts` - (Optional, Boolean) Whether to query all accessible accounts. Default: `true`.
 * `account_ids_to_query_on` - (Optional, List of Integer) Required if `should_query_on_all_accounts = false`.
 
@@ -333,7 +313,7 @@ The `query_definition` block supports:
 The `aggregation` block supports:
 
 * `aggregation_type` - (Required, String) Type of aggregation. Valid values: `SUM`, `MIN`, `MAX`, `AVG`, `COUNT`, `UNIQUE_COUNT`, `NONE`, `PERCENTAGE`, `PERCENTILE`. **Note:** The API treats `NONE` as equivalent to `COUNT`.
-* `field_to_aggregate_on` - (Optional, String) Field to aggregate on.
+* `field_to_aggregate_on` - (Optional, String) Field to aggregate on. Required for `SUM`, `MIN`, `MAX`, `AVG`, `UNIQUE_COUNT`.
 * `value_to_aggregate_on` - (Optional, String) Value to aggregate on.
 
 #### Sub Component Trigger
@@ -362,12 +342,20 @@ The `output` block supports:
 * `should_use_all_fields` - (Optional, Boolean) Whether to use all fields in output. Default: `true`.
 * `columns` - (Optional, List of Block) Column configurations. See [Column Config](#column-config) below.
 
-**Important constraints on `columns`:**
+#### Output Format Rules
 
-- **When `alert_output_template_type = "TABLE"`:** `columns` **must** be defined with at least one column in every sub-component. Set `should_use_all_fields = false` and specify the columns to include in the table.
-- Custom `columns` are **only valid when `aggregation_type = "NONE"`**.
-- If using any aggregation (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`, `UNIQUE_COUNT`): **Must set** `should_use_all_fields = true` and **cannot specify** `columns`.
-- If using `aggregation_type = "NONE"`: Can set `should_use_all_fields = false` and specify custom `columns`.
+The interaction between `alert_output_template_type`, `aggregation_type`, `should_use_all_fields`, and `columns` follows strict rules:
+
+| Output Type | Aggregation Type | `should_use_all_fields` | `columns` |
+|---|---|---|---|
+| `JSON` | Any (`COUNT`, `SUM`, etc.) | Must be `true` | Not allowed |
+| `JSON` | `NONE` | `true` (all fields) or `false` (custom columns) | Optional |
+| `TABLE` | `NONE` | Must be `false` | **Required** (at least one) |
+
+**Key constraints:**
+- When using aggregation types other than `NONE` (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`, `UNIQUE_COUNT`): set `should_use_all_fields = true` and do **not** specify `columns`. The API will enforce this.
+- When using `aggregation_type = "NONE"`: you may set `should_use_all_fields = false` and specify custom `columns`.
+- **TABLE output** requires `aggregation_type = "NONE"`, `should_use_all_fields = false`, and at least one column defined.
 
 #### Column Config
 
@@ -397,14 +385,16 @@ The `trigger` block (inside `alert_configuration`, for metric alerts) supports:
 
 * `type` - (Required, String) Trigger type. Valid values: `threshold`, `math`.
 * `condition` - (Optional, Block) Threshold condition. Required when `type = "threshold"`. See [Trigger Condition](#trigger-condition) below.
-* `expression` - (Optional, String) Math expression. Required when `type = "math"`. Uses query ref_ids (e.g., `"(A / B) * 100"`).
+* `expression` - (Optional, String) Math expression. Required when `type = "math"`. Uses query ref_ids prefixed with `$` (e.g., `"($A / $B) * 100"`).
 
 #### Trigger Condition
 
 The `condition` block supports:
 
-* `operator_type` - (Required, String) Comparison operator. Valid values: `above`, `below`.
-* `threshold` - (Optional, Float) Threshold value. Used with `above` and `below`.
+* `operator_type` - (Required, String) Comparison operator. Valid values: `above`, `below`, `within_range`, `outside_range`.
+* `threshold` - (Optional, Float) Threshold value. Required when `operator_type` is `above` or `below`.
+* `from` - (Optional, Float) Lower bound. Required when `operator_type` is `within_range` or `outside_range`.
+* `to` - (Optional, Float) Upper bound. Required when `operator_type` is `within_range` or `outside_range`.
 
 ### Metric Query
 
@@ -417,7 +407,7 @@ The `queries` block supports:
 
 The `query_definition` block supports:
 
-* `account_id` - (Optional, Integer) The account ID for the metrics data source. Required by the API for metric alerts.
+* `account_id` - (Optional, Integer) The Logz.io Metrics account ID to query. Required by the API for metric alerts.
 * `promql_query` - (Required, String) PromQL query string (e.g., `"rate(http_requests_total[5m])"`).
 
 ## Attributes Reference
