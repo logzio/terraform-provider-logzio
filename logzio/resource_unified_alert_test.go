@@ -222,7 +222,7 @@ resource "logzio_unified_alert" "test_log_alert" {
       }
 
       output {
-        should_use_all_fields = false
+        should_use_all_fields = true
 
         columns {
           field_name = "@timestamp"
