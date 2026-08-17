@@ -18,7 +18,7 @@ provider "logzio" {
 resource "logzio_drop_metrics" "test_filter" {
   name = test_filter
   account_id = 1234
-  drop_policy = "DROP_BEFORE_STORING"
+  drop_policy = "DROP_BEFORE_PROCESSING"
   filters {
     name = "__name__"
     value = "my_metric_name"
@@ -36,7 +36,9 @@ resource "logzio_drop_metrics" "test_filter" {
 * `account_id` - (Required) The Logz.io metrics account ID to which the drop filter applies.
 * `active` - (Optional) If true, the drop filter is active and metrics that match the filter are dropped before indexing. If false, the drop filter is disabled. Defaults to true.
 * `name` - (Optional) Name for the drop metric filter.
-* `drop_policy` - (Optional) When to drop the metrics. Valid values are `DROP_BEFORE_PROCESSING` (default) and `DROP_BEFORE_STORING`. `DROP_BEFORE_PROCESSING` drops metrics before any processing, while `DROP_BEFORE_STORING` drops metrics after processing but before storage.
+* `drop_policy` - (Optional) When to drop the metrics, which also determines whether they still count toward your billed unique time series (UTS). Valid values are `DROP_BEFORE_PROCESSING` (default) and `DROP_BEFORE_STORING`.
+  * `DROP_BEFORE_PROCESSING` (default) - Drops metrics before any processing. They are not stored and **do not count toward your billed UTS**. Use this if your goal is to reduce metrics cost.
+  * `DROP_BEFORE_STORING` - Drops metrics after processing but before storage. They are excluded from storage (so they can't be queried) but are still processed and **still count toward your billed UTS**. Use this when the raw series must feed a downstream step (for example a metrics rollup) but you don't need to store it.
 * `filter` - (Required) The filter object that defines the drop filter criteria. See below for nested schema.
   * `name` - (Required) The name of the metric label to filter on.
   * `value` - (Required) The value of the metric label to match against.
