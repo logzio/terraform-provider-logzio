@@ -34,6 +34,8 @@ const (
 	resourceGrafanaContactPointType       = "logzio_grafana_contact_point"
 	resourceMetricsRollupRulesType        = "logzio_metrics_rollup_rules"
 	resourceUnifiedAlertType              = "logzio_unified_alert"
+	resourceUnifiedDashboardType          = "logzio_unified_dashboard"
+	resourceUnifiedProjectType            = "logzio_unified_project"
 
 	envLogzioApiToken     = "LOGZIO_API_TOKEN"
 	envLogzioRegion       = "LOGZIO_REGION"
@@ -110,6 +112,8 @@ func ProviderWithEnvVar(apiTokenEnvVar string) *schema.Provider {
 			resourceGrafanaContactPointType:       resourceGrafanaContactPoint(),
 			resourceMetricsRollupRulesType:        resourceMetricsRollupRules(),
 			resourceUnifiedAlertType:              resourceUnifiedAlert(),
+			resourceUnifiedDashboardType:          resourceUnifiedDashboard(),
+			resourceUnifiedProjectType:            resourceUnifiedProject(),
 		},
 		ConfigureContextFunc: providerConfigureWrapper,
 	}

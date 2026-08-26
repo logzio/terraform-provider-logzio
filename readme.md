@@ -12,35 +12,40 @@ You can use the Terraform Logz.io Provider to manage users and log accounts in L
 
 The following Logz.io API endpoints are supported by this provider:
 
-* [User management](https://api-docs.logz.io/docs/logz/manage-users)
-* [Notification channels](https://api-docs.logz.io/docs/logz/manage-notification-endpoints)
-* [Log-based alerts](https://github.com/logzio/public-api/tree/master/alerts)
-* [Sub accounts](https://api-docs.logz.io/docs/logz/manage-time-based-log-accounts)
-* [Alerts(v2)](https://api-docs.logz.io/docs/logz/alerts)
-* [Log shipping token](https://api-docs.logz.io/docs/logz/manage-log-shipping-tokens)
-* [Drop filters](https://api-docs.logz.io/docs/logz/drop-filters)
-* [Archive logs](https://api-docs.logz.io/docs/logz/archive-logs)
-* [Restore logs](https://api-docs.logz.io/docs/logz/restore-logs)
-* [Authentication groups](https://api-docs.logz.io/docs/logz/authentication-groups)
-* [Kibana objects](https://api-docs.logz.io/docs/logz/import-or-export-kibana-objects)
-* [S3 Fetcher](https://api-docs.logz.io/docs/logz/connect-to-s-3-buckets)
-* [Grafana Dashboards](https://api-docs.logz.io/docs/logz/create-dashboard)
-* [Grafana folders](https://api-docs.logz.io/docs/logz/get-all-folders)
-* [Grafana Alert Rules](https://api-docs.logz.io/docs/logz/get-alert-rules)
-* [Grafana Contact Point](https://api-docs.logz.io/docs/logz/route-get-contactpoints)
-* [Grafana Notification Policy](https://api-docs.logz.io/docs/logz/route-get-policy-tree)
-* [Metrics Accounts](https://api-docs.logz.io/docs/logz/create-a-new-metrics-account)
-* [Metrics Drop Filters](./docs/resources/drop_metrics.md) <!-- This should be replaced with the proper docs link once released. -->
-* [Metrics Rollup Rules](./docs/resources/metrics_rollup_rules.md)
+- [User management](https://api-docs.logz.io/docs/logz/manage-users)
+- [Notification channels](https://api-docs.logz.io/docs/logz/manage-notification-endpoints)
+- [Log-based alerts](https://github.com/logzio/public-api/tree/master/alerts)
+- [Sub accounts](https://api-docs.logz.io/docs/logz/manage-time-based-log-accounts)
+- [Alerts(v2)](https://api-docs.logz.io/docs/logz/alerts)
+- [Log shipping token](https://api-docs.logz.io/docs/logz/manage-log-shipping-tokens)
+- [Drop filters](https://api-docs.logz.io/docs/logz/drop-filters)
+- [Archive logs](https://api-docs.logz.io/docs/logz/archive-logs)
+- [Restore logs](https://api-docs.logz.io/docs/logz/restore-logs)
+- [Authentication groups](https://api-docs.logz.io/docs/logz/authentication-groups)
+- [Kibana objects](https://api-docs.logz.io/docs/logz/import-or-export-kibana-objects)
+- [S3 Fetcher](https://api-docs.logz.io/docs/logz/connect-to-s-3-buckets)
+- [Grafana Dashboards](https://api-docs.logz.io/docs/logz/create-dashboard)
+- [Unified Dashboards](./docs/resources/unified_dashboard.md)
+- [Grafana folders](https://api-docs.logz.io/docs/logz/get-all-folders)
+- [Grafana Alert Rules](https://api-docs.logz.io/docs/logz/get-alert-rules)
+- [Grafana Contact Point](https://api-docs.logz.io/docs/logz/route-get-contactpoints)
+- [Grafana Notification Policy](https://api-docs.logz.io/docs/logz/route-get-policy-tree)
+- [Metrics Accounts](https://api-docs.logz.io/docs/logz/create-a-new-metrics-account)
+- [Metrics Drop Filters](./docs/resources/drop_metrics.md)
+- [Metrics Rollup Rules](./docs/resources/metrics_rollup_rules.md)
+
+
 
 #### Working with Terraform
 
-<div class="tasklist">
+
 
 **Before you begin, you'll need**:
 
-* [Terraform CLI](https://learn.hashicorp.com/tutorials/terraform/install-cli)
-* [Logz.io API token](/)
+- [Terraform CLI](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+- [Logz.io API token](/)
+
+
 
 #### Get the Terraform Logz.io Provider
 
@@ -59,17 +64,17 @@ terraform {
 This will install the latest Logz.io provider.
 If you wish to use a specific version of the provider, add under `source` the field `version` and specify your preferred version.
 
-
 ##### Configuring the provider
 
 The provider accepts the following arguments:
 
-* **api_token** - (Required) The API token is used for authentication. [Learn more](/user-guide/tokens/api-tokens.html).
-
-* **region** - (Defaults to null) The 2-letter region code identifies where your Logz.io account is hosted.
+- **api_token** - (Required) The API token is used for authentication. [Learn more](/user-guide/tokens/api-tokens.html).
+- **region** - (Defaults to null) The 2-letter region code identifies where your Logz.io account is hosted.
 Defaults to null for accounts hosted in the US East - Northern Virginia region. [Learn more](https://docs.logz.io/user-guide/accounts/account-region.html)
+- **custom_api_url** - (Optional) Custom API URL to override the default Logz.io API endpoint. Useful for routing through internal gateways/proxies. If set, this URL will be used for all API requests instead of the default endpoint.
 
-* **custom_api_url** - (Optional) Custom API URL to override the default Logz.io API endpoint. Useful for routing through internal gateways/proxies. If set, this URL will be used for all API requests instead of the default endpoint.
+
+
 ###### Example
 
 You can pass the variables in a bash command for the arguments:
@@ -80,7 +85,8 @@ provider "logzio" {
   region        = var.your_api_region
 }
 ```
-</div>
+
+
 
 ###### Example: Using custom_api_url
 
@@ -92,6 +98,8 @@ provider "logzio" {
 ```
 
 > **Note:** If `custom_api_url` is set, it takes precedence and will be used for all API requests, regardless of the value of `region`.
+
+
 
 ##### Configuring via Environment Variables
 
@@ -114,6 +122,7 @@ Then your provider block can omit these arguments:
 ```hcl
 provider "logzio" {}
 ```
+
 
 
 ### Example - Create a new alert and a new Slack notification endpoint
@@ -173,6 +182,8 @@ resource "logzio_alert_v2" "my_alert" {
 }
 ```
 
+
+
 ### Example - Create user
 
 This example will create a user in your Logz.io account.
@@ -218,7 +229,7 @@ terraform apply terraform.plan
 ```
 
 Before you run the script, update the arguments to match your details.
-See our [examples](https://github.com/logzio/logzio_terraform_provider/tree/master/examples) for some complete working examples. 
+See our [examples](https://github.com/logzio/logzio_terraform_provider/tree/master/examples) for some complete working examples.
 
 ### Contribute
 
@@ -226,7 +237,7 @@ Found a bug or want to suggest a feature? [Open an issue](https://github.com/log
 Want to do it yourself? We are more than happy to accept external contributions from the community.
 Simply fork the repo, add your changes and [open a PR](https://github.com/logzio/logzio_terraform_provider/pulls).
 
-### Import sub-accounts as resources 
+### Import sub-accounts as resources
 
 You can import multiple sub-accounts as follows:
 
@@ -234,7 +245,8 @@ You can import multiple sub-accounts as follows:
 terraform import logzio_subaccount.my_subaccount <SUBACCOUNT-ID>
 ```
 
+
+
 ### Trademark Disclaimer
 
 Terraform is a trademark of HashiCorp, Inc.
-
