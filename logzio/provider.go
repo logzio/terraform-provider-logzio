@@ -90,6 +90,7 @@ func ProviderWithEnvVar(apiTokenEnvVar string) *schema.Provider {
 			resourceGrafanaFolderType:        dataSourceGrafanaFolder(),
 			resourceMetricsRollupRulesType:   dataSourceMetricsRollupRules(),
 			resourceUnifiedAlertType:         dataSourceUnifiedAlert(),
+			resourceUnifiedProjectType:       dataSourceUnifiedProject(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			resourceEndpointType:                  resourceEndpoint(),
