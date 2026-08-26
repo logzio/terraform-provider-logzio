@@ -2,10 +2,10 @@ package logzio
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -117,21 +117,47 @@ func resourceUnifiedProjectUpdate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	projectName := d.Get(unifiedProjectName).(string)
-	displayName := d.Get(unifiedProjectDisplayName).(string)
-	description := d.Get(unifiedProjectDescription).(string)
+	expectedDisplayName := d.Get(unifiedProjectDisplayName).(string)
+	expectedDescription := d.Get(unifiedProjectDescription).(string)
 
-	// Send update payload to the API
 	_, err = client.UpdateProject(d.Id(), unified_projects.UpdateProjectRequest{
 		Name:        projectName,
-		DisplayName: displayName,
-		Description: description,
+		DisplayName: expectedDisplayName,
+		Description: expectedDescription,
 	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	// Refresh Terraform state with the updated values
-	return resourceUnifiedProjectRead(ctx, d, m)
+	var diagRet diag.Diagnostics
+	readErr := retry.Do(func() error {
+		diagRet = resourceUnifiedProjectRead(ctx, d, m)
+		if diagRet.HasError() {
+			return fmt.Errorf("received error from read unified project")
+		}
+
+		currentDisplayName := d.Get(unifiedProjectDisplayName).(string)
+		currentDescription := d.Get(unifiedProjectDescription).(string)
+
+		if currentDisplayName != expectedDisplayName || currentDescription != expectedDescription {
+			return fmt.Errorf("unified project has not finished updating yet")
+		}
+
+		return nil
+	},
+		retry.RetryIf(func(err error) bool {
+			return err != nil
+		}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(unifiedProjectRetryAttempts),
+	)
+
+	if readErr != nil {
+		tflog.Error(ctx, "could not update unified project schema")
+		return diagRet
+	}
+
+	return nil
 }
 
 func resourceUnifiedProjectDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
@@ -148,26 +174,6 @@ func resourceUnifiedProjectDelete(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func composeUnifiedProjectId(folderId, uid string) string {
-	return folderId + "/" + uid
-}
-
-func parseUnifiedProjectId(id string) (string, string, error) {
-	parts := strings.SplitN(id, "/", 2)
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return "", "", fmt.Errorf("unexpected id format %q, expected folder_id/dashboard_uid", id)
-	}
-	return parts[0], parts[1], nil
-}
-
-// func unifiedProjectDocFromSchema(d *schema.ResourceData) (map[string]any, error) {
-// 	var doc map[string]any
-// 	if err := json.Unmarshal([]byte(d.Get(unifiedProjectJson).(string)), &doc); err != nil {
-// 		return nil, err
-// 	}
-// 	return doc, nil
-// }
-
 func setUnifiedProject(d *schema.ResourceData, result *unified_projects.ProjectSummary) error {
 	d.Set(unifiedProjectFolderId, result.Id)
 	d.Set(unifiedProjectName, result.MetadataName())
@@ -175,41 +181,6 @@ func setUnifiedProject(d *schema.ResourceData, result *unified_projects.ProjectS
 	d.Set(unifiedProjectDescription, getUnifiedProjectDescription(result))
 
 	return nil
-}
-
-// func validateUnifiedProjectJson(config any, k string) ([]string, []error) {
-// 	var doc map[string]any
-// 	if err := json.Unmarshal([]byte(config.(string)), &doc); err != nil {
-// 		return nil, []error{err}
-// 	}
-// 	if kind, _ := doc["kind"].(string); kind != "Project" {
-// 		return nil, []error{fmt.Errorf("%s must be a Perses Project document with kind %q", k, "Project")}
-// 	}
-// 	if unifiedProjectNameFromDoc(doc) == "" {
-// 		return nil, []error{fmt.Errorf("%s metadata.name is required", k)}
-// 	}
-// 	if _, ok := doc["spec"].(map[string]any); !ok {
-// 		return nil, []error{fmt.Errorf("%s spec is required", k)}
-// 	}
-// 	return nil, nil
-// }
-
-func unifiedProjectNameFromDoc(doc map[string]any) string {
-	metadata, ok := doc["metadata"].(map[string]any)
-	if !ok {
-		return ""
-	}
-	name, _ := metadata["name"].(string)
-	return name
-}
-
-func unifiedProjectNameChanged(currentName, dashboardJson string) bool {
-	var doc map[string]any
-	if err := json.Unmarshal([]byte(dashboardJson), &doc); err != nil {
-		return true
-	}
-	name := unifiedProjectNameFromDoc(doc)
-	return name != "" && currentName != "" && name != currentName
 }
 
 func getUnifiedProjectDescription(result *unified_projects.ProjectSummary) string {
