@@ -167,9 +167,9 @@ func TestUnifiedDashboardResourceLifecycle(t *testing.T) {
 			}
 			assert.NoError(t, json.NewDecoder(r.Body).Decode(&request))
 			doc = request.Doc
-			fmt.Fprintf(w, `{"uid":"dashboard-1","version":2,"doc":%s}`, mustMarshalJSON(t, doc))
+			require.NoError(t, json.NewEncoder(w).Encode(map[string]any{"uid": "dashboard-1", "version": 2, "doc": doc}))
 		case http.MethodGet:
-			fmt.Fprintf(w, `{"uid":"dashboard-1","version":2,"doc":%s}`, mustMarshalJSON(t, doc))
+			require.NoError(t, json.NewEncoder(w).Encode(map[string]any{"uid": "dashboard-1", "version": 2, "doc": doc}))
 		case http.MethodDelete:
 			w.WriteHeader(http.StatusNoContent)
 		default:
