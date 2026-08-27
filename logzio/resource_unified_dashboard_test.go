@@ -1,13 +1,19 @@
 package logzio
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"regexp"
 	"testing"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/logzio/logzio_terraform_client/unified_dashboards"
 	"github.com/logzio/logzio_terraform_client/unified_projects"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"github.com/stretchr/testify/assert"
@@ -55,6 +61,17 @@ func TestHandleUnifiedDashboardConfig_StripsServerMetadata(t *testing.T) {
 	assert.Equal(t, `{"kind":"Dashboard","metadata":{"name":"cpu"},"spec":{"duration":"1h","layouts":[],"panels":{}}}`, got)
 }
 
+func TestHandleUnifiedDashboardConfig_InputForms(t *testing.T) {
+	doc := map[string]any{
+		"kind":     "Dashboard",
+		"metadata": map[string]any{"name": "cpu", "project": "project-1"},
+		"spec":     map[string]any{},
+	}
+	assert.JSONEq(t, `{"kind":"Dashboard","metadata":{"name":"cpu"},"spec":{}}`, handleUnifiedDashboardConfig(doc))
+	assert.Equal(t, "not-json", handleUnifiedDashboardConfig("not-json"))
+	assert.Empty(t, handleUnifiedDashboardConfig(42))
+}
+
 func TestUnifiedDashboardNameFromDoc(t *testing.T) {
 	assert.Equal(t, "cpu", unifiedDashboardNameFromDoc(map[string]any{
 		"metadata": map[string]any{"name": "cpu"},
@@ -66,10 +83,13 @@ func TestUnifiedDashboardNameChanged(t *testing.T) {
 	same := `{"kind":"Dashboard","metadata":{"name":"cpu"},"spec":{}}`
 	assert.False(t, unifiedDashboardNameChanged("cpu", same))
 	assert.True(t, unifiedDashboardNameChanged("cpu", `{"kind":"Dashboard","metadata":{"name":"other"},"spec":{}}`))
+	assert.True(t, unifiedDashboardNameChanged("cpu", `not-json`))
+	assert.False(t, unifiedDashboardNameChanged("", same))
 }
 
 func TestUnifiedDashboardResource_Schema(t *testing.T) {
 	r := resourceUnifiedDashboard()
+	require.NoError(t, r.InternalValidate(nil, true))
 	for _, field := range []string{unifiedDashboardJson, unifiedDashboardFolderId, unifiedDashboardUid, unifiedDashboardName, unifiedDashboardVersion} {
 		if _, ok := r.Schema[field]; !ok {
 			t.Fatalf("expected schema field %q", field)
@@ -78,6 +98,119 @@ func TestUnifiedDashboardResource_Schema(t *testing.T) {
 	assert.True(t, r.Schema[unifiedDashboardFolderId].ForceNew)
 	assert.True(t, r.Schema[unifiedDashboardJson].Required)
 	assert.True(t, r.Schema[unifiedDashboardUid].Computed)
+}
+
+func TestUnifiedDashboardExplicitIdentityStateMapping(t *testing.T) {
+	r := resourceUnifiedDashboard()
+	d := schema.TestResourceDataRaw(t, r.Schema, map[string]any{
+		unifiedDashboardFolderId: "project-1",
+		unifiedDashboardJson:     `{"kind":"Dashboard","metadata":{"name":"cpu"},"spec":{"duration":"1h"}}`,
+	})
+
+	doc, err := unifiedDashboardDocFromSchema(d)
+	require.NoError(t, err)
+	assert.Equal(t, "cpu", unifiedDashboardNameFromDoc(doc))
+
+	d.SetId("state-folder/state-dashboard")
+	err = setUnifiedDashboard(d, &unified_dashboards.Dashboard{
+		Uid:     "dashboard-1",
+		Version: 3,
+		Doc: map[string]any{
+			"kind":     "Dashboard",
+			"metadata": map[string]any{"name": "cpu", "project": "project-1", "updatedAt": "server-value"},
+			"spec":     map[string]any{"duration": "6h"},
+		},
+	}, "project-1", "dashboard-1")
+	require.NoError(t, err)
+	assert.Equal(t, "state-folder/state-dashboard", d.Id())
+	assert.Equal(t, "project-1", d.Get(unifiedDashboardFolderId))
+	assert.Equal(t, "dashboard-1", d.Get(unifiedDashboardUid))
+	assert.Equal(t, "cpu", d.Get(unifiedDashboardName))
+	assert.Equal(t, 3, d.Get(unifiedDashboardVersion))
+	assert.JSONEq(t, `{"kind":"Dashboard","metadata":{"name":"cpu"},"spec":{"duration":"6h"}}`, d.Get(unifiedDashboardJson).(string))
+}
+
+func TestSetUnifiedDashboardPropagatesStateErrors(t *testing.T) {
+	d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+		unifiedDashboardFolderId: {
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+	}, map[string]any{})
+
+	err := setUnifiedDashboard(d, &unified_dashboards.Dashboard{}, "project-1", "dashboard-1")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to set folder_id")
+}
+
+func TestUnifiedDashboardResourceLifecycle(t *testing.T) {
+	var methods []string
+	doc := map[string]any{
+		"kind":     "Dashboard",
+		"metadata": map[string]any{"name": "cpu"},
+		"spec":     map[string]any{"duration": "1h"},
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		methods = append(methods, r.Method)
+		if r.Method == http.MethodPost {
+			assert.Equal(t, "/perses-public/api/v1/projects/project-1/dashboards", r.URL.Path)
+		} else {
+			assert.Equal(t, "/perses-public/api/v1/projects/project-1/dashboards/dashboard-1", r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+
+		switch r.Method {
+		case http.MethodPost, http.MethodPut:
+			var request struct {
+				Doc map[string]any `json:"doc"`
+			}
+			assert.NoError(t, json.NewDecoder(r.Body).Decode(&request))
+			doc = request.Doc
+			fmt.Fprintf(w, `{"uid":"dashboard-1","version":2,"doc":%s}`, mustMarshalJSON(t, doc))
+		case http.MethodGet:
+			fmt.Fprintf(w, `{"uid":"dashboard-1","version":2,"doc":%s}`, mustMarshalJSON(t, doc))
+		case http.MethodDelete:
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+		}
+	}))
+	defer server.Close()
+
+	r := resourceUnifiedDashboard()
+	d := schema.TestResourceDataRaw(t, r.Schema, map[string]any{
+		unifiedDashboardFolderId: "project-1",
+		unifiedDashboardJson:     `{"kind":"Dashboard","metadata":{"name":"cpu"},"spec":{"duration":"1h"}}`,
+	})
+	config := Config{apiToken: "token", baseUrl: server.URL}
+
+	diags := resourceUnifiedDashboardCreate(context.Background(), d, config)
+	require.False(t, diags.HasError(), diagnosticsString(diags))
+	assert.Equal(t, "project-1/dashboard-1", d.Id())
+	assert.Equal(t, "cpu", d.Get(unifiedDashboardName))
+
+	require.NoError(t, d.Set(unifiedDashboardJson, `{"kind":"Dashboard","metadata":{"name":"cpu"},"spec":{"duration":"6h"}}`))
+	diags = resourceUnifiedDashboardUpdate(context.Background(), d, config)
+	require.False(t, diags.HasError(), diagnosticsString(diags))
+	assert.JSONEq(t, `{"kind":"Dashboard","metadata":{"name":"cpu"},"spec":{"duration":"6h"}}`, d.Get(unifiedDashboardJson).(string))
+
+	diags = resourceUnifiedDashboardDelete(context.Background(), d, config)
+	require.False(t, diags.HasError(), diagnosticsString(diags))
+	assert.Empty(t, d.Id())
+	assert.Equal(t, []string{http.MethodPost, http.MethodGet, http.MethodPut, http.MethodGet, http.MethodDelete}, methods)
+}
+
+func TestUnifiedDashboardReadClearsMissingResource(t *testing.T) {
+	server := httptest.NewServer(http.NotFoundHandler())
+	defer server.Close()
+
+	d := schema.TestResourceDataRaw(t, resourceUnifiedDashboard().Schema, map[string]any{})
+	d.SetId("project-1/missing")
+	diags := resourceUnifiedDashboardRead(context.Background(), d, Config{apiToken: "token", baseUrl: server.URL})
+
+	assert.False(t, diags.HasError(), diagnosticsString(diags))
+	assert.Empty(t, d.Id())
 }
 
 func TestAccLogzioUnifiedDashboard_CreateUpdateDashboard(t *testing.T) {

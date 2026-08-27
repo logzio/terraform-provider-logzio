@@ -4,6 +4,8 @@
 ## v1.28.0
 - Upgrade `logzio_client_terraform` to `1.31.1`.
 - Add support for [Unified Dashboards](./docs/resources/unified_dashboard.md) resource.
+- Add support for the [Unified Dashboard](./docs/data-sources/unified_dashboard.md) data source.
+- Add support for the [Unified Project](./docs/resources/unified_project.md) resource and [data source](./docs/data-sources/unified_project.md).
   
 ## v1.27.0
 - Upgrade `logzio_client_terraform` to `1.30.0`.

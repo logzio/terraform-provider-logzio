@@ -111,7 +111,10 @@ func resourceUnifiedDashboardRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	if err = setUnifiedDashboard(d, dashboard); err != nil {
+	if err = validateUnifiedDashboardIdentity(dashboard, folderId, uid); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = setUnifiedDashboard(d, dashboard, folderId, uid); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil
@@ -208,17 +211,38 @@ func unifiedDashboardDocFromSchema(d *schema.ResourceData) (map[string]any, erro
 	return doc, nil
 }
 
-func setUnifiedDashboard(d *schema.ResourceData, result *unified_dashboards.Dashboard) error {
-	folderId, uid, err := parseUnifiedDashboardId(d.Id())
-	if err != nil {
-		return err
+func validateUnifiedDashboardIdentity(result *unified_dashboards.Dashboard, folderId, uid string) error {
+	if result == nil {
+		return fmt.Errorf("unified dashboard response was empty")
 	}
+	if result.Uid != "" && result.Uid != uid {
+		return fmt.Errorf("unified dashboard response uid %q does not match requested dashboard_uid %q", result.Uid, uid)
+	}
+	if result.ProjectId != "" && result.ProjectId != folderId {
+		return fmt.Errorf("unified dashboard response project id %q does not match requested folder_id %q", result.ProjectId, folderId)
+	}
+	return nil
+}
 
-	d.Set(unifiedDashboardFolderId, folderId)
-	d.Set(unifiedDashboardUid, uid)
-	d.Set(unifiedDashboardVersion, result.Version)
-	d.Set(unifiedDashboardName, unifiedDashboardNameFromDoc(result.Doc))
-	d.Set(unifiedDashboardJson, handleUnifiedDashboardConfig(result.Doc))
+func setUnifiedDashboard(d *schema.ResourceData, result *unified_dashboards.Dashboard, folderId, uid string) error {
+	if result == nil {
+		return fmt.Errorf("cannot set unified dashboard state from an empty response")
+	}
+	if err := d.Set(unifiedDashboardFolderId, folderId); err != nil {
+		return fmt.Errorf("failed to set %s: %w", unifiedDashboardFolderId, err)
+	}
+	if err := d.Set(unifiedDashboardUid, uid); err != nil {
+		return fmt.Errorf("failed to set %s: %w", unifiedDashboardUid, err)
+	}
+	if err := d.Set(unifiedDashboardVersion, result.Version); err != nil {
+		return fmt.Errorf("failed to set %s: %w", unifiedDashboardVersion, err)
+	}
+	if err := d.Set(unifiedDashboardName, unifiedDashboardNameFromDoc(result.Doc)); err != nil {
+		return fmt.Errorf("failed to set %s: %w", unifiedDashboardName, err)
+	}
+	if err := d.Set(unifiedDashboardJson, handleUnifiedDashboardConfig(result.Doc)); err != nil {
+		return fmt.Errorf("failed to set %s: %w", unifiedDashboardJson, err)
+	}
 	return nil
 }
 

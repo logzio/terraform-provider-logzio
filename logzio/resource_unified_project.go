@@ -70,7 +70,7 @@ func resourceUnifiedProjectCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	projectName := d.Get(unifiedProjectName).(string)
-	displayName := d.Get(unifiedProjectDisplayName).(string)
+	displayName := unifiedProjectDisplayNameForWrite(d)
 	description := d.Get(unifiedProjectDescription).(string)
 
 	result, err := client.CreateProject(unified_projects.CreateProjectRequest{Name: projectName, DisplayName: displayName, Description: description})
@@ -97,16 +97,23 @@ func resourceUnifiedProjectRead(ctx context.Context, d *schema.ResourceData, m a
 	project, err := client.GetProject(id)
 	if err != nil {
 		tflog.Error(ctx, err.Error())
-		if strings.Contains(err.Error(), "missing unified folder") {
+		if strings.Contains(err.Error(), "missing unified project") {
 			d.SetId("") // Unsets state if the remote object was deleted
 			return diag.Diagnostics{}
 		}
 		return diag.FromErr(err)
 	}
 
+	if err = validateUnifiedProjectIdentity(project, id); err != nil {
+		return diag.FromErr(err)
+	}
 	if err = setUnifiedProject(d, project); err != nil {
 		return diag.FromErr(err)
 	}
+	if err = d.Set(unifiedProjectFolderId, project.Id); err != nil {
+		return diag.Errorf("failed to set %s: %s", unifiedProjectFolderId, err)
+	}
+	d.SetId(project.Id)
 	return nil
 }
 
@@ -117,7 +124,7 @@ func resourceUnifiedProjectUpdate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	projectName := d.Get(unifiedProjectName).(string)
-	expectedDisplayName := d.Get(unifiedProjectDisplayName).(string)
+	expectedDisplayName := unifiedProjectDisplayNameForWrite(d)
 	expectedDescription := d.Get(unifiedProjectDescription).(string)
 
 	_, err = client.UpdateProject(d.Id(), unified_projects.UpdateProjectRequest{
@@ -175,11 +182,42 @@ func resourceUnifiedProjectDelete(ctx context.Context, d *schema.ResourceData, m
 }
 
 func setUnifiedProject(d *schema.ResourceData, result *unified_projects.ProjectSummary) error {
-	d.Set(unifiedProjectFolderId, result.Id)
-	d.Set(unifiedProjectName, result.MetadataName())
-	d.Set(unifiedProjectDisplayName, getUnifiedProjectDisplayName(result))
-	d.Set(unifiedProjectDescription, getUnifiedProjectDescription(result))
+	if result == nil {
+		return fmt.Errorf("cannot set unified project state from an empty response")
+	}
+	if err := d.Set(unifiedProjectName, result.MetadataName()); err != nil {
+		return fmt.Errorf("failed to set %s: %w", unifiedProjectName, err)
+	}
+	if err := d.Set(unifiedProjectDisplayName, getUnifiedProjectDisplayName(result)); err != nil {
+		return fmt.Errorf("failed to set %s: %w", unifiedProjectDisplayName, err)
+	}
+	if err := d.Set(unifiedProjectDescription, getUnifiedProjectDescription(result)); err != nil {
+		return fmt.Errorf("failed to set %s: %w", unifiedProjectDescription, err)
+	}
 
+	return nil
+}
+
+func validateUnifiedProject(result *unified_projects.ProjectSummary) error {
+	if result == nil {
+		return fmt.Errorf("unified project response was empty")
+	}
+	if result.Id == "" {
+		return fmt.Errorf("unified project response contained no project id")
+	}
+	if result.MetadataName() == "" {
+		return fmt.Errorf("unified project response contained no Perses metadata.name")
+	}
+	return nil
+}
+
+func validateUnifiedProjectIdentity(result *unified_projects.ProjectSummary, requestedId string) error {
+	if err := validateUnifiedProject(result); err != nil {
+		return err
+	}
+	if result.Id != requestedId {
+		return fmt.Errorf("unified project response id %q does not match requested id %q", result.Id, requestedId)
+	}
 	return nil
 }
 
@@ -211,4 +249,12 @@ func getUnifiedProjectDisplayName(result *unified_projects.ProjectSummary) strin
 		}
 	}
 	return result.Name
+}
+
+func unifiedProjectDisplayNameForWrite(d *schema.ResourceData) string {
+	displayName := d.Get(unifiedProjectDisplayName).(string)
+	if displayName != "" {
+		return displayName
+	}
+	return d.Get(unifiedProjectName).(string)
 }
