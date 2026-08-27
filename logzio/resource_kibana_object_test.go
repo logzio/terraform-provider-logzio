@@ -23,8 +23,9 @@ const (
 )
 
 func TestAccLogzioKibanaObject_CreateUpdateSearch(t *testing.T) {
-	resourceName := "logzio_kibana_object.test_kb_obj_search"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_kibana_object.test_kb_obj_search"
 
 	suffix := getRandomId()
 	resId := fmt.Sprintf("search:tf-provider-test-search-%s", suffix)
@@ -56,8 +57,9 @@ func TestAccLogzioKibanaObject_CreateUpdateSearch(t *testing.T) {
 }
 
 func TestAccLogzioKibanaObject_CreateUpdateVisualization(t *testing.T) {
-	resourceName := "logzio_kibana_object.test_kb_obj_visualization"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_kibana_object.test_kb_obj_visualization"
 
 	suffix := getRandomId()
 	resId := fmt.Sprintf("visualization:tf-provider-test-visualization-%s", suffix)
@@ -89,8 +91,9 @@ func TestAccLogzioKibanaObject_CreateUpdateVisualization(t *testing.T) {
 }
 
 func TestAccLogzioKibanaObject_CreateUpdateDashboard(t *testing.T) {
-	resourceName := "logzio_kibana_object.test_kb_obj_dashboard"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_kibana_object.test_kb_obj_dashboard"
 
 	suffix := getRandomId()
 	resId := fmt.Sprintf("dashboard:tf-provider-test-dashboard-%s", suffix)

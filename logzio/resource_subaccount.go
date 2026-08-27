@@ -40,7 +40,7 @@ const (
 	subAccountSoftLimitGB                           string = "soft_limit_gb"
 
 	delayGetSubAccount      = 2 * time.Second
-	subAccountRetryAttempts = 8
+	subAccountRetryAttempts = 4
 )
 
 // The endpoint resource schema, what terraform uses to parse and read the template

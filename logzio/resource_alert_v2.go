@@ -56,7 +56,7 @@ const (
 
 	groupByMaxItems int = 3
 
-	alertRetryAttempts = 8
+	alertRetryAttempts = 4
 )
 
 // alertV2Client returns the alert v2 client with the api token from the provider

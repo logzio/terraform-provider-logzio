@@ -9,13 +9,14 @@ import (
 )
 
 func TestAccDataSourceRestoreLogs(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	archiveName := "archive_for_restore_datasource"
 	restoreName := "my_restore_resource"
 	restoreDataSourceName := "my_restore_datasource"
 	fullDataSourceName := "data.logzio_restore_logs." + restoreDataSourceName
 	path := os.Getenv(envLogzioS3Path)
 	arn := os.Getenv(envLogzioAwsArn)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },

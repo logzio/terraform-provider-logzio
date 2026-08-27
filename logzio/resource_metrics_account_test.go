@@ -12,11 +12,12 @@ import (
 )
 
 func TestAccLogzioMetricsAccount_CreateMetricsAccount(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	accountId := os.Getenv(envLogzioAccountId)
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_create_metrics_" + getRandomId()
 	terraformPlan := testAccCheckLogzioMetricsAccountConfig(email, accountName, accountId)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -46,10 +47,11 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccount(t *testing.T) {
 }
 
 func TestAccLogzioMetricsAccount_CreateMetricsAccountEmptyAuthorizedAccounts(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_metrics_empty_sharing_" + getRandomId()
 	terraformPlan := testAccCheckLogzioMetricsAccountConfig(email, accountName, "")
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -78,10 +80,11 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccountEmptyAuthorizedAccounts(t *
 }
 
 func TestAccLogzioMetricsAccount_CreateMetricsAccountNoEmail(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	email := ""
 	accountName := "test_no_email"
 	terraformPlan := testAccCheckLogzioMetricsAccountConfig(email, accountName, "")
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -98,10 +101,11 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccountNoEmail(t *testing.T) {
 }
 
 func TestAccLogzioMetricsAccount_CreateMetricsAccountInvalidEmail(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	email := "some@invalid.mail"
 	accountName := "test_invalid_email"
 	terraformPlan := testAccCheckLogzioMetricsAccountConfig(email, accountName, "")
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -119,11 +123,12 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccountInvalidEmail(t *testing.T) 
 }
 
 func TestAccLogzioMetricsAccount_CreateMetricsAccountNoName(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	accountId := os.Getenv(envLogzioAccountId)
 	email := os.Getenv(envLogzioEmail)
 	resourceName := "logzio_metrics_account.test_subaccount"
 	terraformPlan := testAccCheckLogzioMetricsAccountConfigNoName(email, accountId)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -147,6 +152,8 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccountNoName(t *testing.T) {
 }
 
 func TestAccLogzioMetricsAccount_UpdateMetricsAccount(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	accountId := os.Getenv(envLogzioAccountId)
 	email := os.Getenv(envLogzioEmail)
 	suffix := getRandomId()
@@ -155,7 +162,6 @@ func TestAccLogzioMetricsAccount_UpdateMetricsAccount(t *testing.T) {
 	resourceName := "logzio_metrics_account.test_subaccount"
 	terraformPlan := testAccCheckLogzioMetricsAccountConfig(email, accountName, accountId)
 	terraformPlanUpdate := testAccCheckLogzioMetricsAccountConfig(email, accountNameUpdate, accountId)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

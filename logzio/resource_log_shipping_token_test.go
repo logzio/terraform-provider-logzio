@@ -16,9 +16,10 @@ const (
 )
 
 func TestAccLogzioLogShippingToken_CreateLogShippingToken(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	tokenName := "tf_test_create"
 	resourceName := "logzio_log_shipping_token." + tokenName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -41,9 +42,10 @@ func TestAccLogzioLogShippingToken_CreateLogShippingToken(t *testing.T) {
 }
 
 func TestAccLogzioLogShippingToken_UpdateLogShippingToken(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	tokenName := "tf_test_update"
 	resourceName := "logzio_log_shipping_token." + tokenName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -73,8 +75,9 @@ func TestAccLogzioLogShippingToken_UpdateLogShippingToken(t *testing.T) {
 }
 
 func TestAccLogzioLogShippingToken_CreateLogShippingTokenEmptyName(t *testing.T) {
-	tokenName := "tf_test_create_fail_on_name"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	tokenName := "tf_test_create_fail_on_name"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -89,9 +92,10 @@ func TestAccLogzioLogShippingToken_CreateLogShippingTokenEmptyName(t *testing.T)
 }
 
 func TestAccLogzioLogShippingToken_UpdateLogShippingTokenEmptyName(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	tokenName := "tf_test_update_fail_on_name"
 	resourceName := "logzio_log_shipping_token." + tokenName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },

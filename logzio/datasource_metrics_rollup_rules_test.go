@@ -11,6 +11,8 @@ import (
 )
 
 func TestAccDataSourceMetricsRollupRules_Basic(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "datasource_test_resource_metrics_rollup_rules_find"
 	datasourceName := "datasource_test_find_metrics_rollup_rules_by_id"
 	resourceFullName := "logzio_metrics_rollup_rules." + resourceName
@@ -19,7 +21,6 @@ func TestAccDataSourceMetricsRollupRules_Basic(t *testing.T) {
 
 	resourceConfig := datasourceResourceTestMetricsRollupRules(resourceName, accountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -58,9 +59,10 @@ func TestAccDataSourceMetricsRollupRules_Basic(t *testing.T) {
 }
 
 func TestAccDataSourceMetricsRollupRules_NotFound(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	datasourceName := "datasource_test_metrics_rollup_rules_not_existing"
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -78,6 +80,8 @@ func TestAccDataSourceMetricsRollupRules_NotFound(t *testing.T) {
 }
 
 func TestAccDataSourceMetricsRollupRules_SearchByAttributes(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "datasource_test_resource_metrics_rollup_rules_search"
 	datasourceName := "datasource_test_find_metrics_rollup_rules_by_attrs"
 	resourceFullName := "logzio_metrics_rollup_rules." + resourceName
@@ -86,7 +90,6 @@ func TestAccDataSourceMetricsRollupRules_SearchByAttributes(t *testing.T) {
 
 	resourceConfig := datasourceResourceTestMetricsRollupRulesWithName(resourceName, accountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

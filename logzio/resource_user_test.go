@@ -8,16 +8,16 @@ import (
 	"os"
 	"strconv"
 	"testing"
-	"time"
 )
 
 func TestAccLogzioUser_CreateUser(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	username := "test_resource_user@tfacctest.com"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	fullName := "test test"
 	fullNameUpdate := "test test update"
 	resourceName := "logzio_user.test_user"
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -27,15 +27,13 @@ func TestAccLogzioUser_CreateUser(t *testing.T) {
 			{
 				Config: testAccCheckLogzioUserConfig(username, fullName, accountId),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(
 						resourceName, userUsername, username),
 					resource.TestCheckResourceAttr(resourceName, userFullName, fullName),
 				),
 			},
 			{
-				PreConfig: func() { time.Sleep(15 * time.Second) },
-				Config:    testAccCheckLogzioUserConfig(username, fullNameUpdate, accountId),
+		Config:    testAccCheckLogzioUserConfig(username, fullNameUpdate, accountId),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, userUsername, username),

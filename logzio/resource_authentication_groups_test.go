@@ -11,6 +11,8 @@ import (
 )
 
 func TestAccLogzioAuthenticationGroups_AuthenticationGroups(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "tf_create_test"
 	fullResourceName := resourceAuthenticationGroupsType + "." + resourceName
 
@@ -25,7 +27,6 @@ func TestAccLogzioAuthenticationGroups_AuthenticationGroups(t *testing.T) {
 		authentication_groups.AuthGroupsUserRoleRegular,
 		authentication_groups.AuthGroupsUserRoleRegular,
 	}
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },

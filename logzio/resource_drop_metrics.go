@@ -31,7 +31,7 @@ const (
 	dropMetricsModifiedAt           = "modified_at"
 	dropMetricsModifiedBy           = "modified_by"
 
-	dropMetricsRetryAttempts = 8
+	dropMetricsRetryAttempts = 4
 )
 
 // Returns the drop metrics client with the api token from the provider

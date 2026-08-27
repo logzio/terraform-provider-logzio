@@ -25,7 +25,7 @@ const (
 	logShippingTokenCreatedBy = "created_by"
 	logShippingTokenTokenId   = "token_id"
 
-	logShippingTokenRetryAttempts = 8
+	logShippingTokenRetryAttempts = 4
 )
 
 func resourceLogShippingToken() *schema.Resource {

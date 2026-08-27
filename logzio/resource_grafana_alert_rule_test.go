@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccLogzioGrafanaAlertRule_CreateUpdateAlertRule(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	folderUid := os.Getenv(grafanaFolderIdEnv)
 	resourceFullName := "logzio_grafana_alert_rule.test_grafana_alert"

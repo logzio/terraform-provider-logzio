@@ -19,7 +19,7 @@ const (
 	grafanaFolderUrl     = "url"
 	grafanaFolderVersion = "version"
 
-	grafanaFolderRetryAttempts = 8
+	grafanaFolderRetryAttempts = 4
 )
 
 func resourceGrafanaFolder() *schema.Resource {

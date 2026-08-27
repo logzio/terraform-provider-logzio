@@ -20,8 +20,9 @@ const (
 )
 
 func TestAccLogzioEndpoint_SlackCreateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.valid_slack_endpoint"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.valid_slack_endpoint"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -31,7 +32,6 @@ func TestAccLogzioEndpoint_SlackCreateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("valid_slack_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(
 						"logzio_endpoint.valid_slack_endpoint", "title", "valid_slack_endpoint"),
 					testAccCheckOutputExists("logzio_endpoint.valid_slack_endpoint", "test_id"),
@@ -49,6 +49,7 @@ func TestAccLogzioEndpoint_SlackCreateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_SlackCreateInvalidEndpoint(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
@@ -64,9 +65,10 @@ func TestAccLogzioEndpoint_SlackCreateInvalidEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_SlackUpdateEndpoint(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	endpointName := "test_create_slack_endpoint"
 	resourceName := "logzio_endpoint." + endpointName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -76,7 +78,6 @@ func TestAccLogzioEndpoint_SlackUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadResourceFromFile(endpointName, "create_slack_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "slack_endpoint"),
 					resource.TestCheckResourceAttr(resourceName, "slack.0.url", testsUrl),
@@ -85,7 +86,6 @@ func TestAccLogzioEndpoint_SlackUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadResourceFromFile(endpointName, "update_slack_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "updated_slack_endpoint"),
 					resource.TestCheckResourceAttr(resourceName, "slack.0.url", testsUrlUpdate),
@@ -96,8 +96,9 @@ func TestAccLogzioEndpoint_SlackUpdateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_CustomCreateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.custom"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.custom"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -107,7 +108,6 @@ func TestAccLogzioEndpoint_CustomCreateEndpoint(t *testing.T) {
 			{
 				Config: createCustomEndpoint("custom"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_custom_title"),
 				),
 			},
@@ -121,6 +121,8 @@ func TestAccLogzioEndpoint_CustomCreateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_CustomCreateEndpointNoHeaders(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	config := `resource "logzio_endpoint" "custom" {
  title = "my_custom_title_no_headers"
  endpoint_type = "custom"
@@ -135,7 +137,6 @@ func TestAccLogzioEndpoint_CustomCreateEndpointNoHeaders(t *testing.T) {
  }
 }`
 	resourceName := "logzio_endpoint.custom"
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -145,7 +146,6 @@ func TestAccLogzioEndpoint_CustomCreateEndpointNoHeaders(t *testing.T) {
 			{
 				Config: config,
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "my_custom_title_no_headers"),
 					resource.TestCheckResourceAttr(resourceName, "custom.0.headers", ""),
@@ -161,6 +161,8 @@ func TestAccLogzioEndpoint_CustomCreateEndpointNoHeaders(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_CustomCreateEndpointEmptyBodyTemplate(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	config := `resource "logzio_endpoint" "custom" {
  title = "my_custom_title_empty_body_template"
  endpoint_type = "custom"
@@ -172,7 +174,6 @@ func TestAccLogzioEndpoint_CustomCreateEndpointEmptyBodyTemplate(t *testing.T) {
  }
 }`
 	resourceName := "logzio_endpoint.custom"
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -182,7 +183,6 @@ func TestAccLogzioEndpoint_CustomCreateEndpointEmptyBodyTemplate(t *testing.T) {
 			{
 				Config: config,
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "my_custom_title_empty_body_template"),
 					resource.TestCheckResourceAttr(resourceName, "custom.0.body_template", "{}"),
@@ -198,6 +198,8 @@ func TestAccLogzioEndpoint_CustomCreateEndpointEmptyBodyTemplate(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_CustomCreateEndpointInvalidMethod(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	config := `resource "logzio_endpoint" "custom" {
  title = "my_custom_title_invalid_method"
  endpoint_type = "custom"
@@ -211,7 +213,6 @@ func TestAccLogzioEndpoint_CustomCreateEndpointInvalidMethod(t *testing.T) {
     })
  }
 }`
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -226,9 +227,10 @@ func TestAccLogzioEndpoint_CustomCreateEndpointInvalidMethod(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_CustomUpdateEndpoint(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	endpointName := "test_update_custom_endpoint"
 	resourceName := "logzio_endpoint." + endpointName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -238,7 +240,6 @@ func TestAccLogzioEndpoint_CustomUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadResourceFromFile(endpointName, "create_custom_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "my_custom_title"),
 					resource.TestCheckResourceAttr(resourceName, "custom.0.url", testsUrl),
@@ -248,7 +249,6 @@ func TestAccLogzioEndpoint_CustomUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadResourceFromFile(endpointName, "update_custom_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(
 						resourceName, "title", "updated_custom_endpoint"),
 					resource.TestCheckResourceAttr(resourceName, "custom.0.url", testsUrlUpdate),
@@ -262,8 +262,9 @@ func TestAccLogzioEndpoint_CustomUpdateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_PagerDutyCreateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.pagerduty"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.pagerduty"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -273,7 +274,6 @@ func TestAccLogzioEndpoint_PagerDutyCreateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_pagerduty_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_pagerduty_title"),
 					resource.TestCheckResourceAttr(resourceName, "pagerduty.0.service_key", "my_service_key"),
 				),
@@ -288,6 +288,7 @@ func TestAccLogzioEndpoint_PagerDutyCreateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_PagerDutyCreateEndpointEmptyServiceKey(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
@@ -303,8 +304,9 @@ func TestAccLogzioEndpoint_PagerDutyCreateEndpointEmptyServiceKey(t *testing.T) 
 }
 
 func TestAccLogzioEndpoint_PagerDutyUpdateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.pagerduty"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.pagerduty"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -314,7 +316,6 @@ func TestAccLogzioEndpoint_PagerDutyUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_pagerduty_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_pagerduty_title"),
 					resource.TestCheckResourceAttr(resourceName, "pagerduty.0.service_key", "my_service_key"),
 				),
@@ -322,7 +323,6 @@ func TestAccLogzioEndpoint_PagerDutyUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("update_pagerduty_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "pagerduty_title_updated"),
 					resource.TestCheckResourceAttr(resourceName, "pagerduty.0.service_key", "another_service_key"),
 				),
@@ -332,8 +332,9 @@ func TestAccLogzioEndpoint_PagerDutyUpdateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_BigPandaCreateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.bigpanda"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.bigpanda"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -343,7 +344,6 @@ func TestAccLogzioEndpoint_BigPandaCreateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_bigpanda_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_bigpanda_title"),
 					resource.TestCheckResourceAttr(resourceName, "bigpanda.0.api_token", "my_api_token"),
 					resource.TestCheckResourceAttr(resourceName, "bigpanda.0.app_key", "my_app_key"),
@@ -359,6 +359,7 @@ func TestAccLogzioEndpoint_BigPandaCreateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_BigPandaCreateEndpointEmptyApiToken(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
@@ -374,6 +375,7 @@ func TestAccLogzioEndpoint_BigPandaCreateEndpointEmptyApiToken(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_BigPandaCreateEndpointEmptyAppKey(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
@@ -389,8 +391,9 @@ func TestAccLogzioEndpoint_BigPandaCreateEndpointEmptyAppKey(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_BigPandaUpdateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.bigpanda"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.bigpanda"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -399,7 +402,6 @@ func TestAccLogzioEndpoint_BigPandaUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_bigpanda_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_bigpanda_title"),
 					resource.TestCheckResourceAttr(resourceName, "bigpanda.0.api_token", "my_api_token"),
 					resource.TestCheckResourceAttr(resourceName, "bigpanda.0.app_key", "my_app_key"),
@@ -408,7 +410,6 @@ func TestAccLogzioEndpoint_BigPandaUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("update_bigpanda_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "bigpanda_title_updated"),
 					resource.TestCheckResourceAttr(resourceName, "bigpanda.0.api_token", "updated_api_token"),
 					resource.TestCheckResourceAttr(resourceName, "bigpanda.0.app_key", "updated_app_key"),
@@ -419,8 +420,9 @@ func TestAccLogzioEndpoint_BigPandaUpdateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_DataDogCreateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.datadog"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.datadog"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -429,7 +431,6 @@ func TestAccLogzioEndpoint_DataDogCreateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_datadog_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_datadog_title"),
 					resource.TestCheckResourceAttr(resourceName, "datadog.0.api_key", "my_api_key"),
 				),
@@ -444,6 +445,8 @@ func TestAccLogzioEndpoint_DataDogCreateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_DataDogCreateEndpointEmptyApiKey(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -457,8 +460,9 @@ func TestAccLogzioEndpoint_DataDogCreateEndpointEmptyApiKey(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_DataDogUpdateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.datadog"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.datadog"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -467,7 +471,6 @@ func TestAccLogzioEndpoint_DataDogUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_datadog_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_datadog_title"),
 					resource.TestCheckResourceAttr(resourceName, "datadog.0.api_key", "my_api_key"),
 				),
@@ -475,7 +478,6 @@ func TestAccLogzioEndpoint_DataDogUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("update_datadog_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "datadog_title_updated"),
 					resource.TestCheckResourceAttr(resourceName, "datadog.0.api_key", "updated_api_key"),
 				),
@@ -485,8 +487,9 @@ func TestAccLogzioEndpoint_DataDogUpdateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_VictorOpsCreateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.victorops"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.victorops"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -495,7 +498,6 @@ func TestAccLogzioEndpoint_VictorOpsCreateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_victorops_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_victorops_title"),
 					resource.TestCheckResourceAttr(resourceName, "victorops.0.routing_key", "my_routing_key"),
 					resource.TestCheckResourceAttr(resourceName, "victorops.0.message_type", "my_message_type"),
@@ -512,6 +514,8 @@ func TestAccLogzioEndpoint_VictorOpsCreateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_VictorOpsCreateEndpointEmptyRoutingKey(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -525,6 +529,8 @@ func TestAccLogzioEndpoint_VictorOpsCreateEndpointEmptyRoutingKey(t *testing.T) 
 }
 
 func TestAccLogzioEndpoint_VictorOpsCreateEndpointEmptyMessageType(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -538,6 +544,8 @@ func TestAccLogzioEndpoint_VictorOpsCreateEndpointEmptyMessageType(t *testing.T)
 }
 
 func TestAccLogzioEndpoint_VictorOpsCreateEndpointEmptyServiceApiKey(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -551,8 +559,9 @@ func TestAccLogzioEndpoint_VictorOpsCreateEndpointEmptyServiceApiKey(t *testing.
 }
 
 func TestAccLogzioEndpoint_VictorOpsUpdateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.victorops"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.victorops"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -561,7 +570,6 @@ func TestAccLogzioEndpoint_VictorOpsUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_victorops_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_victorops_title"),
 					resource.TestCheckResourceAttr(resourceName, "victorops.0.routing_key", "my_routing_key"),
 					resource.TestCheckResourceAttr(resourceName, "victorops.0.message_type", "my_message_type"),
@@ -571,7 +579,6 @@ func TestAccLogzioEndpoint_VictorOpsUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("update_victorops_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "updated_victorops_title"),
 					resource.TestCheckResourceAttr(resourceName, "victorops.0.routing_key", "updated_routing_key"),
 					resource.TestCheckResourceAttr(resourceName, "victorops.0.message_type", "updated_message_type"),
@@ -583,8 +590,9 @@ func TestAccLogzioEndpoint_VictorOpsUpdateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_OpsGenieCreateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.opsgenie"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.opsgenie"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -593,7 +601,6 @@ func TestAccLogzioEndpoint_OpsGenieCreateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_opsgenie_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_opsgenie_title"),
 					resource.TestCheckResourceAttr(resourceName, "opsgenie.0.api_key", "my_api_key"),
 				),
@@ -608,6 +615,8 @@ func TestAccLogzioEndpoint_OpsGenieCreateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_OpsGenieCreateEndpointEmptyApiKey(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -621,8 +630,9 @@ func TestAccLogzioEndpoint_OpsGenieCreateEndpointEmptyApiKey(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_OpsGenieUpdateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.opsgenie"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.opsgenie"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -631,7 +641,6 @@ func TestAccLogzioEndpoint_OpsGenieUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_opsgenie_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_opsgenie_title"),
 					resource.TestCheckResourceAttr(resourceName, "opsgenie.0.api_key", "my_api_key"),
 				),
@@ -639,7 +648,6 @@ func TestAccLogzioEndpoint_OpsGenieUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("update_opsgenie_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "updated_opsgenie_title"),
 					resource.TestCheckResourceAttr(resourceName, "opsgenie.0.api_key", "updated_api_key"),
 				),
@@ -649,8 +657,9 @@ func TestAccLogzioEndpoint_OpsGenieUpdateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_ServiceNowCreateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.servicenow"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.servicenow"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -659,7 +668,6 @@ func TestAccLogzioEndpoint_ServiceNowCreateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_servicenow_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_servicenow_title"),
 					resource.TestCheckResourceAttr(resourceName, "servicenow.0.username", "my_username"),
 					resource.TestCheckResourceAttr(resourceName, "servicenow.0.password", "my_password"),
@@ -676,6 +684,8 @@ func TestAccLogzioEndpoint_ServiceNowCreateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_ServiceNowCreateEndpointEmptyUsername(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -689,6 +699,8 @@ func TestAccLogzioEndpoint_ServiceNowCreateEndpointEmptyUsername(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_ServiceNowCreateEndpointEmptyPassword(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -702,6 +714,8 @@ func TestAccLogzioEndpoint_ServiceNowCreateEndpointEmptyPassword(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_ServiceNowCreateEndpointEmptyUrl(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -715,8 +729,9 @@ func TestAccLogzioEndpoint_ServiceNowCreateEndpointEmptyUrl(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_ServiceNowUpdateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.servicenow"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.servicenow"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -725,7 +740,6 @@ func TestAccLogzioEndpoint_ServiceNowUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_servicenow_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_servicenow_title"),
 					resource.TestCheckResourceAttr(resourceName, "servicenow.0.username", "my_username"),
 					resource.TestCheckResourceAttr(resourceName, "servicenow.0.password", "my_password"),
@@ -735,7 +749,6 @@ func TestAccLogzioEndpoint_ServiceNowUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("update_servicenow_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "updated_servicenow_title"),
 					resource.TestCheckResourceAttr(resourceName, "servicenow.0.username", "updated_username"),
 					resource.TestCheckResourceAttr(resourceName, "servicenow.0.password", "updated_password"),
@@ -747,8 +760,9 @@ func TestAccLogzioEndpoint_ServiceNowUpdateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_MicrosoftTeamsCreateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.microsoftteams"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.microsoftteams"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -757,7 +771,6 @@ func TestAccLogzioEndpoint_MicrosoftTeamsCreateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_microsoftteams_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_microsoftteams_title"),
 					resource.TestCheckResourceAttr(resourceName, "microsoftteams.0.url", testsUrl),
 				),
@@ -772,6 +785,8 @@ func TestAccLogzioEndpoint_MicrosoftTeamsCreateEndpoint(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_MicrosoftTeamsCreateEndpointEmptyUrl(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -785,8 +800,9 @@ func TestAccLogzioEndpoint_MicrosoftTeamsCreateEndpointEmptyUrl(t *testing.T) {
 }
 
 func TestAccLogzioEndpoint_MicrosoftTeamsUpdateEndpoint(t *testing.T) {
-	resourceName := "logzio_endpoint.microsoftteams"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	resourceName := "logzio_endpoint.microsoftteams"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -795,7 +811,6 @@ func TestAccLogzioEndpoint_MicrosoftTeamsUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("create_microsoftteams_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "my_microsoftteams_title"),
 					resource.TestCheckResourceAttr(resourceName, "microsoftteams.0.url", testsUrl),
 				),
@@ -803,7 +818,6 @@ func TestAccLogzioEndpoint_MicrosoftTeamsUpdateEndpoint(t *testing.T) {
 			{
 				Config: utils.ReadFixtureFromFile("update_microsoftteams_endpoint.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					awaitApply(15),
 					resource.TestCheckResourceAttr(resourceName, "title", "updated_microsoftteams_title"),
 					resource.TestCheckResourceAttr(resourceName, "microsoftteams.0.url", testsUrlUpdate),
 				),

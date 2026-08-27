@@ -47,7 +47,7 @@ const (
 	errorMultipleMatchingRules = "found multiple (%d) metrics rollup rules matching the criteria, please specify an id or add more search criteria"
 	errorRollupRuleNotFound    = "could not find metrics rollup rule with id %s"
 
-	metricsRollupRulesRetryAttempts = 8
+	metricsRollupRulesRetryAttempts = 4
 )
 
 // Returns the metrics rollup rules client with the api token from the provider

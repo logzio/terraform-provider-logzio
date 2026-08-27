@@ -28,11 +28,12 @@ const (
 )
 
 func TestAccLogzioMetricsRollupRules_CreateSimple(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_create_metrics_rollup_rules_simple"
 	resourceFullName := "logzio_metrics_rollup_rules." + resourceName
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -64,11 +65,12 @@ func TestAccLogzioMetricsRollupRules_CreateSimple(t *testing.T) {
 }
 
 func TestAccLogzioMetricsRollupRules_CreateComplex(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_create_metrics_rollup_rules_complex"
 	resourceFullName := "logzio_metrics_rollup_rules." + resourceName
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -102,10 +104,11 @@ func TestAccLogzioMetricsRollupRules_CreateComplex(t *testing.T) {
 }
 
 func TestAccLogzioMetricsRollupRules_CreateInvalidMetricType(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_create_metrics_rollup_rules_invalid_metric_type"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -123,10 +126,11 @@ func TestAccLogzioMetricsRollupRules_CreateInvalidMetricType(t *testing.T) {
 }
 
 func TestAccLogzioMetricsRollupRules_CreateInvalidRollupFunction(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_create_metrics_rollup_rules_invalid_rollup_function"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -144,10 +148,11 @@ func TestAccLogzioMetricsRollupRules_CreateInvalidRollupFunction(t *testing.T) {
 }
 
 func TestAccLogzioMetricsRollupRules_CreateInvalidEliminationMethod(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_create_metrics_rollup_rules_invalid_elimination_method"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -165,10 +170,11 @@ func TestAccLogzioMetricsRollupRules_CreateInvalidEliminationMethod(t *testing.T
 }
 
 func TestAccLogzioMetricsRollupRules_CreateEmptyMetricName(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_create_metrics_rollup_rules_empty_metric_name"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -186,10 +192,11 @@ func TestAccLogzioMetricsRollupRules_CreateEmptyMetricName(t *testing.T) {
 }
 
 func TestAccLogzioMetricsRollupRules_CreateEmptyLabels(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_create_metrics_rollup_rules_empty_labels"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -207,11 +214,12 @@ func TestAccLogzioMetricsRollupRules_CreateEmptyLabels(t *testing.T) {
 }
 
 func TestAccLogzioMetricsRollupRules_Update(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_update_metrics_rollup_rules"
 	resourceFullName := "logzio_metrics_rollup_rules." + resourceName
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -250,11 +258,12 @@ func TestAccLogzioMetricsRollupRules_Update(t *testing.T) {
 }
 
 func TestAccLogzioMetricsRollupRules_CreateWithFilter(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_create_metrics_rollup_rules_with_filter"
 	resourceFullName := fmt.Sprintf("logzio_metrics_rollup_rules.%s", resourceName)
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -282,11 +291,12 @@ func TestAccLogzioMetricsRollupRules_CreateWithFilter(t *testing.T) {
 }
 
 func TestAccLogzioMetricsRollupRules_CreateMeasurement(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_create_metrics_rollup_rules_measurement"
 	resourceFullName := fmt.Sprintf("logzio_metrics_rollup_rules.%s", resourceName)
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -310,10 +320,11 @@ func TestAccLogzioMetricsRollupRules_CreateMeasurement(t *testing.T) {
 }
 
 func TestAccLogzioMetricsRollupRules_CreateCounterWithRollupFunction(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_create_metrics_rollup_rules_counter_with_rollup_function"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -331,10 +342,11 @@ func TestAccLogzioMetricsRollupRules_CreateCounterWithRollupFunction(t *testing.
 }
 
 func TestAccLogzioMetricsRollupRules_CreateCounterMissingRollupFunction(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_create_metrics_rollup_rules_counter_missing_rollup_function"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -352,10 +364,11 @@ func TestAccLogzioMetricsRollupRules_CreateCounterMissingRollupFunction(t *testi
 }
 
 func TestAccLogzioMetricsRollupRules_CreateMeasurementWithP99(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_create_metrics_rollup_rules_measurement_p99"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

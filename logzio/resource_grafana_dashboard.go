@@ -23,7 +23,7 @@ const (
 	grafanaDashboardVersion   = "version"
 	grafanaDashboardOverwrite = "overwrite"
 
-	grafanaDashboardRetryAttempts = 8
+	grafanaDashboardRetryAttempts = 4
 )
 
 var (

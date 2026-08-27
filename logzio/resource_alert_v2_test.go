@@ -20,9 +20,10 @@ const (
 )
 
 func TestAccLogzioAlertV2_CreateAlert(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	alertName := "test_create_alert_v2"
 	resourceName := "logzio_alert_v2." + alertName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -54,9 +55,10 @@ func TestAccLogzioAlertV2_CreateAlert(t *testing.T) {
 }
 
 func TestAccLogzioAlertV2_UpdateAlert(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	alertName := "test_update_alert_v2"
 	resourceName := "logzio_alert_v2." + alertName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -88,9 +90,10 @@ func TestAccLogzioAlertV2_UpdateAlert(t *testing.T) {
 }
 
 func TestAccLogzioAlertV2_ScheduleTests(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	alertName := "test_create_alert_v2_schedule"
 	resourceName := "logzio_alert_v2." + alertName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },

@@ -22,7 +22,7 @@ const (
 	metricsAccountPlanUts            string = "plan_uts"
 	metricsAccountAuthorizedAccounts string = "authorized_accounts"
 
-	metricsAccountRetryAttempts = 8
+	metricsAccountRetryAttempts = 4
 )
 
 // The endpoint resource schema, what terraform uses to parse and read the template

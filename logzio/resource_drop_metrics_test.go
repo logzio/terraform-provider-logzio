@@ -26,11 +26,12 @@ const (
 )
 
 func TestAccLogzioDropMetric_CreateDropMetricSimple(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_create_drop_metrics_simple"
 	resourceName := "logzio_drop_metrics." + filterName
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -61,11 +62,12 @@ func TestAccLogzioDropMetric_CreateDropMetricSimple(t *testing.T) {
 }
 
 func TestAccLogzioDropMetric_CreateDropMetricComplex(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_create_drop_metrics_complex"
 	resourceName := "logzio_drop_metrics." + filterName
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -94,10 +96,11 @@ func TestAccLogzioDropMetric_CreateDropMetricComplex(t *testing.T) {
 }
 
 func TestAccLogzioDropMetric_CreateDropMetricNoLabelName(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_create_drop_metrics_no_label_name"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -115,10 +118,11 @@ func TestAccLogzioDropMetric_CreateDropMetricNoLabelName(t *testing.T) {
 }
 
 func TestAccLogzioDropMetric_CreateDropMetricNoLabelValue(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_create_drop_metrics_no_label_value"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -136,10 +140,11 @@ func TestAccLogzioDropMetric_CreateDropMetricNoLabelValue(t *testing.T) {
 }
 
 func TestAccLogzioDropMetric_CreateDropMetricNoCondition(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_create_drop_metrics_no_filter_condition"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -157,10 +162,11 @@ func TestAccLogzioDropMetric_CreateDropMetricNoCondition(t *testing.T) {
 }
 
 func TestAccLogzioDropMetric_CreateDropMetricInvalidCondition(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_create_drop_metrics_invalid_filter_condition"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -178,10 +184,11 @@ func TestAccLogzioDropMetric_CreateDropMetricInvalidCondition(t *testing.T) {
 }
 
 func TestAccLogzioDropMetric_CreateDropMetricInvalidOperator(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_create_drop_metrics_invalid_operator"
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -199,10 +206,11 @@ func TestAccLogzioDropMetric_CreateDropMetricInvalidOperator(t *testing.T) {
 }
 
 func TestAccLogzioDropMetric_UpdateDropMetrics(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_update_drop_metrics"
 	resourceName := "logzio_drop_metrics." + filterName
 	accountId := os.Getenv(envLogzioMetricsAccountId)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -234,10 +242,11 @@ func TestAccLogzioDropMetric_UpdateDropMetrics(t *testing.T) {
 }
 
 func TestAccLogzioDropMetric_UpdateDropMetricsEnable(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_update_enable_drop_metrics"
 	resourceName := "logzio_drop_metrics." + filterName
 	accountId := os.Getenv(envLogzioMetricsAccountId)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -269,10 +278,11 @@ func TestAccLogzioDropMetric_UpdateDropMetricsEnable(t *testing.T) {
 }
 
 func TestAccLogzioDropMetric_UpdateDropMetricsDisable(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_update_disable_drop_metrics"
 	resourceName := "logzio_drop_metrics." + filterName
 	accountId := os.Getenv(envLogzioMetricsAccountId)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -304,11 +314,12 @@ func TestAccLogzioDropMetric_UpdateDropMetricsDisable(t *testing.T) {
 }
 
 func TestAccLogzioDropMetric_CreateDropMetricWithName(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_create_drop_metrics_with_name"
 	resourceName := "logzio_drop_metrics." + filterName
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -338,10 +349,11 @@ func TestAccLogzioDropMetric_CreateDropMetricWithName(t *testing.T) {
 }
 
 func TestAccLogzioDropMetric_UpdateDropMetricsWithName(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_update_drop_metrics_with_name"
 	resourceName := "logzio_drop_metrics." + filterName
 	accountId := os.Getenv(envLogzioMetricsAccountId)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -375,11 +387,12 @@ func TestAccLogzioDropMetric_UpdateDropMetricsWithName(t *testing.T) {
 }
 
 func TestAccLogzioDropMetric_CreateDropMetricWithDropPolicy(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_create_drop_metrics_with_drop_policy"
 	resourceName := "logzio_drop_metrics." + filterName
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

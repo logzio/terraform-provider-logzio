@@ -130,7 +130,7 @@ func dataSourceSubaccountReadWrapper(ctx context.Context, d *schema.ResourceData
 				return false
 			}),
 		retry.DelayType(retry.BackOffDelay),
-		retry.Attempts(15),
+		retry.Attempts(4),
 	)
 
 	if readErr != nil {

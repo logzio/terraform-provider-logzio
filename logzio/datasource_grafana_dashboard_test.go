@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccDataSourceGrafanaDashboard(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	folderUid := os.Getenv(grafanaFolderIdEnv)
 	resourceFullName := "logzio_grafana_dashboard.test_dashboard"

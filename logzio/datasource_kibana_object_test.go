@@ -13,6 +13,7 @@ import (
 )
 
 func TestAccDataSourceKibanaObject(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 
 	suffix := getRandomId()

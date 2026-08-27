@@ -23,9 +23,10 @@ const (
 )
 
 func TestAccLogzioDropFilter_CreateDropFilter(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_create_drop_filter"
 	resourceName := "logzio_drop_filter." + filterName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -50,9 +51,10 @@ func TestAccLogzioDropFilter_CreateDropFilter(t *testing.T) {
 }
 
 func TestAccLogzioDropFilter_CreateDropEmptyLogType(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_create_drop_filter_empty_log_type"
 	resourceName := "logzio_drop_filter." + filterName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -75,9 +77,10 @@ func TestAccLogzioDropFilter_CreateDropEmptyLogType(t *testing.T) {
 }
 
 func TestAccLogzioDropFilter_UpdateDropFilter(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_update_drop_filter"
 	resourceName := "logzio_drop_filter." + filterName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -106,9 +109,10 @@ func TestAccLogzioDropFilter_UpdateDropFilter(t *testing.T) {
 }
 
 func TestAccLogzioDropFilter_UpdateDropFilterChangeLogType(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_update_drop_filter_change_log_type"
 	resourceName := "logzio_drop_filter." + filterName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -133,9 +137,10 @@ func TestAccLogzioDropFilter_UpdateDropFilterChangeLogType(t *testing.T) {
 }
 
 func TestAccLogzioDropFilter_UpdateDropFilterRemoveLogType(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	filterName := "test_update_drop_filter_remove_log_type"
 	resourceName := "logzio_drop_filter." + filterName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -160,8 +165,9 @@ func TestAccLogzioDropFilter_UpdateDropFilterRemoveLogType(t *testing.T) {
 }
 
 func TestAccLogzioDropFilter_CreateDropFilterNoFieldConditions(t *testing.T) {
-	filterName := "test_create_drop_filter_no_field_conditions"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	filterName := "test_create_drop_filter_no_field_conditions"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -176,8 +182,9 @@ func TestAccLogzioDropFilter_CreateDropFilterNoFieldConditions(t *testing.T) {
 }
 
 func TestAccLogzioDropFilter_CreateDropFilterNoFieldName(t *testing.T) {
-	filterName := "test_create_drop_filter_no_field_conditions"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	filterName := "test_create_drop_filter_no_field_conditions"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -192,8 +199,9 @@ func TestAccLogzioDropFilter_CreateDropFilterNoFieldName(t *testing.T) {
 }
 
 func TestAccLogzioDropFilter_CreateDropFilterNoValue(t *testing.T) {
-	filterName := "test_create_drop_filter_no_field_conditions"
+	t.Parallel()
 	defer utils.SleepAfterTest()
+	filterName := "test_create_drop_filter_no_field_conditions"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },

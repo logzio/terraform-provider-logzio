@@ -9,6 +9,8 @@ import (
 )
 
 func TestAccDataSourceAuthenticationGroups(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	resourceName := "test_resource"
 	fullResourceName := resourceAuthenticationGroupsType + "." + resourceName
 	datasourceName := "my_auth_group_datasource"
@@ -18,7 +20,6 @@ func TestAccDataSourceAuthenticationGroups(t *testing.T) {
 		authentication_groups.AuthGroupsUserRoleRegular,
 		authentication_groups.AuthGroupsUserRoleReadonly,
 	}
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },

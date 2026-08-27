@@ -14,6 +14,7 @@ const (
 )
 
 func TestAccLogzioGrafanaDashboard_CreateUpdateDashboard(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	folderUid := os.Getenv(grafanaFolderIdEnv)
 	resourceFullName := "logzio_grafana_dashboard.test_dashboard"
@@ -55,6 +56,7 @@ func TestAccLogzioGrafanaDashboard_CreateUpdateDashboard(t *testing.T) {
 }
 
 func TestAccLogzioGrafanaDashboard_CreateUpdateDashboardChangeUid(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	folderUid := os.Getenv(grafanaFolderIdEnv)
 	resourceFullName := "logzio_grafana_dashboard.test_dashboard"

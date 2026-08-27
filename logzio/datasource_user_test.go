@@ -11,6 +11,8 @@ import (
 )
 
 func TestAccDataSourceUser(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	username := "test_datasource_user@tfacctest.com"
 	fullname := "test test"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)

@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccDataSourceUnifiedAlert_LogAlert(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	email := "test@logz.io"
 

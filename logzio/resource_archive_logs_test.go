@@ -17,12 +17,13 @@ const (
 )
 
 func TestAccLogzioArchiveLogs_SetupArchiveS3Keys(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	path := os.Getenv(envLogzioS3Path)
 	accessKey := os.Getenv(envLogzioAwsAccessKey)
 	secretKey := os.Getenv(envLogzioAwsSecretKey)
 	resourceName := "setup_test_s3_keys"
 	fullResourceName := "logzio_archive_logs." + resourceName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -49,11 +50,12 @@ func TestAccLogzioArchiveLogs_SetupArchiveS3Keys(t *testing.T) {
 }
 
 func TestAccLogzioArchiveLogs_SetupArchiveS3Iam(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	path := os.Getenv(envLogzioS3Path)
 	arn := os.Getenv(envLogzioAwsArn)
 	resourceName := "setup_test_s3_iam"
 	fullResourceName := "logzio_archive_logs." + resourceName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -80,6 +82,8 @@ func TestAccLogzioArchiveLogs_SetupArchiveS3Iam(t *testing.T) {
 }
 
 func TestAccLogzioArchiveLogs_SetupArchiveBlob(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	tenantId := os.Getenv(envLogzioAzureTenantId)
 	clientId := os.Getenv(envLogzioAzureClientId)
 	clientSecret := os.Getenv(envLogzioAzureClientSecret)
@@ -88,7 +92,6 @@ func TestAccLogzioArchiveLogs_SetupArchiveBlob(t *testing.T) {
 
 	resourceName := "setup_test_blob"
 	fullResourceName := "logzio_archive_logs." + resourceName
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -117,11 +120,12 @@ func TestAccLogzioArchiveLogs_SetupArchiveBlob(t *testing.T) {
 }
 
 func TestAccLogzioArchiveLogs_SetupArchiveEmptyStorageType(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	path := os.Getenv(envLogzioS3Path)
 	accessKey := os.Getenv(envLogzioAwsAccessKey)
 	secretKey := os.Getenv(envLogzioAwsSecretKey)
 	resourceName := "setup_test_empty_storage_type"
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -136,11 +140,12 @@ func TestAccLogzioArchiveLogs_SetupArchiveEmptyStorageType(t *testing.T) {
 }
 
 func TestAccLogzioArchiveLogs_SetupArchiveEmptyS3CredentialsType(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	path := os.Getenv(envLogzioS3Path)
 	accessKey := os.Getenv(envLogzioAwsAccessKey)
 	secretKey := os.Getenv(envLogzioAwsSecretKey)
 	resourceName := "setup_test_empty_credentials_type"
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -155,6 +160,8 @@ func TestAccLogzioArchiveLogs_SetupArchiveEmptyS3CredentialsType(t *testing.T) {
 }
 
 func TestAccLogzioArchiveLogs_UpdateArchive(t *testing.T) {
+	t.Parallel()
+	defer utils.SleepAfterTest()
 	path := os.Getenv(envLogzioS3Path)
 	accessKey := os.Getenv(envLogzioAwsAccessKey)
 	secretKey := os.Getenv(envLogzioAwsSecretKey)
@@ -162,7 +169,6 @@ func TestAccLogzioArchiveLogs_UpdateArchive(t *testing.T) {
 	fullResourceName := "logzio_archive_logs." + resourceName
 	newAccessKey := os.Getenv(envLogzioAwsAccessKeyUpdate)
 	newSecretKey := os.Getenv(envLogzioAwsSecretKeyUpdate)
-	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckApiToken(t) },
@@ -171,7 +177,6 @@ func TestAccLogzioArchiveLogs_UpdateArchive(t *testing.T) {
 			{
 				Config: getConfigTestArchiveS3Keys(resourceName, path, accessKey, secretKey),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					awaitApply(25),
 					resource.TestCheckResourceAttr(fullResourceName, archiveLogsStorageType, archive_logs.StorageTypeS3),
 					resource.TestCheckResourceAttr(fullResourceName, archiveLogsEnabled, "false"),
 					resource.TestCheckResourceAttrSet(fullResourceName, archiveLogsS3CredentialsType),
@@ -186,7 +191,6 @@ func TestAccLogzioArchiveLogs_UpdateArchive(t *testing.T) {
 				},
 				Config: getConfigTestArchiveS3Keys(resourceName, path, newAccessKey, newSecretKey),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					awaitApply(25),
 					resource.TestCheckResourceAttr(fullResourceName, archiveLogsStorageType, archive_logs.StorageTypeS3),
 					resource.TestCheckResourceAttr(fullResourceName, archiveLogsEnabled, "false"),
 					resource.TestCheckResourceAttrSet(fullResourceName, archiveLogsS3CredentialsType),

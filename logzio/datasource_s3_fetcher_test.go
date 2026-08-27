@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccDataSourceS3Fetcher(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{

@@ -16,6 +16,7 @@ const (
 )
 
 func TestAccLogzioS3Fetcher_S3FetcherKeys(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
@@ -60,6 +61,7 @@ func TestAccLogzioS3Fetcher_S3FetcherKeys(t *testing.T) {
 }
 
 func TestAccLogzioS3Fetcher_S3FetcherArn(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
@@ -100,6 +102,7 @@ func TestAccLogzioS3Fetcher_S3FetcherArn(t *testing.T) {
 }
 
 func TestAccLogzioS3Fetcher_S3FetcherInvalidRegion(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	terraformPlan := fmt.Sprintf(`
 resource "logzio_s3_fetcher" "test_fetcher" {
@@ -123,6 +126,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
 }
 
 func TestAccLogzioS3Fetcher_S3FetcherNoBucketName(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	terraformPlan := fmt.Sprintf(`
 resource "logzio_s3_fetcher" "test_fetcher" {
@@ -145,6 +149,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
 }
 
 func TestAccLogzioS3Fetcher_S3FetcherNoActive(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	terraformPlan := fmt.Sprintf(`
 resource "logzio_s3_fetcher" "test_fetcher" {
@@ -167,6 +172,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
 }
 
 func TestAccLogzioS3Fetcher_S3FetcherNoAwsAuth(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	terraformPlan := fmt.Sprintf(`
 resource "logzio_s3_fetcher" "test_fetcher" {
@@ -188,6 +194,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
 }
 
 func TestAccLogzioS3Fetcher_S3FetcherMissingSecretKey(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	terraformPlan := fmt.Sprintf(`
 resource "logzio_s3_fetcher" "test_fetcher" {
@@ -210,6 +217,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
 }
 
 func TestAccLogzioS3Fetcher_S3FetcherMissingAccessKey(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	terraformPlan := fmt.Sprintf(`
 resource "logzio_s3_fetcher" "test_fetcher" {
@@ -232,6 +240,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
 }
 
 func TestAccLogzioS3Fetcher_S3FetcherAuthNoAccess(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	terraformPlan := fmt.Sprintf(`
 resource "logzio_s3_fetcher" "test_fetcher" {
@@ -255,6 +264,7 @@ resource "logzio_s3_fetcher" "test_fetcher" {
 }
 
 func TestAccLogzioS3Fetcher_S3FetcherAllAuthMethods(t *testing.T) {
+	t.Parallel()
 	defer utils.SleepAfterTest()
 	terraformPlan := fmt.Sprintf(`
 resource "logzio_s3_fetcher" "test_fetcher" {
