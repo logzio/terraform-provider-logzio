@@ -26,6 +26,7 @@ The following Logz.io API endpoints are supported by this provider:
 - [S3 Fetcher](https://api-docs.logz.io/docs/logz/connect-to-s-3-buckets)
 - [Grafana Dashboards](https://api-docs.logz.io/docs/logz/create-dashboard)
 - [Unified Dashboards](./docs/resources/unified_dashboard.md)
+- [Unified Projects](./docs/resources/unified_project.md)
 - [Grafana folders](https://api-docs.logz.io/docs/logz/get-all-folders)
 - [Grafana Alert Rules](https://api-docs.logz.io/docs/logz/get-alert-rules)
 - [Grafana Contact Point](https://api-docs.logz.io/docs/logz/route-get-contactpoints)
