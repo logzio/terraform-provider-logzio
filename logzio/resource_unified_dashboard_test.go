@@ -137,6 +137,8 @@ func TestUnifiedDashboardExplicitIdentityStateMapping(t *testing.T) {
 }
 
 func TestSetUnifiedDashboardPropagatesStateErrors(t *testing.T) {
+	skipIfSetErrorsPanic(t)
+
 	d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
 		unifiedDashboardFolderId: {
 			Type:     schema.TypeInt,

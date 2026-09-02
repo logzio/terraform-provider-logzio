@@ -110,6 +110,8 @@ func TestUnifiedProjectSchemaSpecificIdentityWrites(t *testing.T) {
 }
 
 func TestSetUnifiedProjectPropagatesStateErrors(t *testing.T) {
+	skipIfSetErrorsPanic(t)
+
 	d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
 		unifiedProjectName: {
 			Type:     schema.TypeInt,
