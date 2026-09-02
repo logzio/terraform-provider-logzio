@@ -61,6 +61,12 @@ func TestHandleUnifiedDashboardConfig_StripsServerMetadata(t *testing.T) {
 	assert.Equal(t, `{"kind":"Dashboard","metadata":{"name":"cpu"},"spec":{"duration":"1h","layouts":[],"panels":{}}}`, got)
 }
 
+func TestHandleUnifiedDashboardConfig_KeepsAuthoredMetadata(t *testing.T) {
+	input := `{"kind":"Dashboard","metadata":{"name":"cpu","tags":["infra","cpu"],"version":3},"spec":{"duration":"1h"}}`
+	got := handleUnifiedDashboardConfig(input)
+	assert.JSONEq(t, `{"kind":"Dashboard","metadata":{"name":"cpu","tags":["infra","cpu"]},"spec":{"duration":"1h"}}`, got)
+}
+
 func TestHandleUnifiedDashboardConfig_InputForms(t *testing.T) {
 	doc := map[string]any{
 		"kind":     "Dashboard",

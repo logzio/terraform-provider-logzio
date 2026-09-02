@@ -32,10 +32,14 @@ func resourceUnifiedProject() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			// Not ForceNew: deleting a project deletes every dashboard it holds,
+			// and the PUT in resourceUnifiedProjectUpdate rewrites metadata.name
+			// in place while keeping the folder id, so a rename is an update.
+			// (The API's /rename endpoint is not that rename — it sets
+			// spec.display.name and leaves metadata.name alone.)
 			unifiedProjectName: {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			unifiedProjectDescription: {
 				Type:     schema.TypeString,
@@ -123,12 +127,12 @@ func resourceUnifiedProjectUpdate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	projectName := d.Get(unifiedProjectName).(string)
+	expectedName := d.Get(unifiedProjectName).(string)
 	expectedDisplayName := unifiedProjectDisplayNameForWrite(d)
 	expectedDescription := d.Get(unifiedProjectDescription).(string)
 
 	_, err = client.UpdateProject(d.Id(), unified_projects.UpdateProjectRequest{
-		Name:        projectName,
+		Name:        expectedName,
 		DisplayName: expectedDisplayName,
 		Description: expectedDescription,
 	})
@@ -143,10 +147,14 @@ func resourceUnifiedProjectUpdate(ctx context.Context, d *schema.ResourceData, m
 			return fmt.Errorf("received error from read unified project")
 		}
 
+		// name is part of the check so a rename the API acknowledges but does
+		// not apply to metadata.name fails loudly instead of leaving the state
+		// silently drifted from the configuration.
+		currentName := d.Get(unifiedProjectName).(string)
 		currentDisplayName := d.Get(unifiedProjectDisplayName).(string)
 		currentDescription := d.Get(unifiedProjectDescription).(string)
 
-		if currentDisplayName != expectedDisplayName || currentDescription != expectedDescription {
+		if currentName != expectedName || currentDisplayName != expectedDisplayName || currentDescription != expectedDescription {
 			return fmt.Errorf("unified project has not finished updating yet")
 		}
 
@@ -161,7 +169,13 @@ func resourceUnifiedProjectUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	if readErr != nil {
 		tflog.Error(ctx, "could not update unified project schema")
-		return diagRet
+		// diagRet only carries diagnostics when the read itself failed; when the
+		// retries ran out because the project never converged it is empty, and
+		// returning it would report the update as successful.
+		if diagRet.HasError() {
+			return diagRet
+		}
+		return diag.FromErr(readErr)
 	}
 
 	return nil

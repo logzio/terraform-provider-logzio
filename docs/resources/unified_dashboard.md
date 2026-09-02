@@ -33,7 +33,7 @@ EOD
 ### Required:
 
 * `folder_id` - (String) The unique identifier of the unified dashboard folder (Perses project) that stores the dashboard. Changing this value forces a new resource.
-* `dashboard_json` - (String) The complete Perses dashboard document in JSON format. The document must include `kind`, `metadata.name`, and `spec`. Once created, you cannot change `metadata.name`.
+* `dashboard_json` - (String) The complete Perses dashboard document in JSON format. The document must include `kind`, `metadata.name`, and `spec`. Once created, you cannot change `metadata.name`. The server-owned `metadata` keys (`project`, `version`, `createdAt`, `updatedAt`) are stripped before the document is stored and sent, so they never produce a diff; every other `metadata` key, such as `tags`, is sent and read back as written.
 
 ## Attribute Reference
 

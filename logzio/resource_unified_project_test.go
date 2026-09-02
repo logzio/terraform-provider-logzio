@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/logzio/logzio_terraform_client/unified_projects"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,7 +21,9 @@ func TestUnifiedProjectResourceSchema(t *testing.T) {
 	require.NoError(t, r.InternalValidate(nil, true))
 
 	assert.True(t, r.Schema[unifiedProjectName].Required)
-	assert.True(t, r.Schema[unifiedProjectName].ForceNew)
+	// A rename must go through the rename endpoint: replacing the project would
+	// delete every dashboard stored in it.
+	assert.False(t, r.Schema[unifiedProjectName].ForceNew)
 	assert.True(t, r.Schema[unifiedProjectDisplayName].Optional)
 	assert.True(t, r.Schema[unifiedProjectDisplayName].Computed)
 	assert.True(t, r.Schema[unifiedProjectDescription].Optional)
@@ -125,6 +128,58 @@ func TestSetUnifiedProjectPropagatesStateErrors(t *testing.T) {
 	err := setUnifiedProject(d, unifiedProjectSummary("project-1", "metadata-name", "Display name", "A description"))
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to set name")
+}
+
+// A changed metadata.name is carried by the ordinary PUT, which rewrites it in
+// place and keeps the folder id — verified live against api.logz.io on
+// 2026-09-02, where the dashboards in the folder survived the rename. The
+// API's /rename endpoint is deliberately not used: it sets spec.display.name
+// and leaves metadata.name untouched.
+func TestUnifiedProjectUpdateRenamesThroughPut(t *testing.T) {
+	var calls []string
+	var putBody map[string]any
+	project := unifiedProjectSummary("project-1", "old-name", "Display name", "A description")
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls = append(calls, r.Method+" "+r.URL.Path)
+		w.Header().Set("Content-Type", "application/json")
+
+		if r.Method == http.MethodPut {
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&putBody))
+			metadata, _ := putBody["metadata"].(map[string]any)
+			spec, _ := putBody["spec"].(map[string]any)
+			display, _ := spec["display"].(map[string]any)
+			project = unifiedProjectSummary("project-1", stringValue(metadata["name"]), stringValue(display["name"]), stringValue(display["description"]))
+		}
+		fmt.Fprint(w, mustMarshalJSON(t, project))
+	}))
+	defer server.Close()
+
+	d, err := schema.InternalMap(resourceUnifiedProject().Schema).Data(
+		&terraform.InstanceState{
+			ID: "project-1",
+			Attributes: map[string]string{
+				unifiedProjectName:        "old-name",
+				unifiedProjectDisplayName: "Display name",
+				unifiedProjectDescription: "A description",
+			},
+		},
+		&terraform.InstanceDiff{
+			Attributes: map[string]*terraform.ResourceAttrDiff{
+				unifiedProjectName: {Old: "old-name", New: "new-name"},
+			},
+		},
+	)
+	require.NoError(t, err)
+
+	diags := resourceUnifiedProjectUpdate(context.Background(), d, Config{apiToken: "token", baseUrl: server.URL})
+	require.False(t, diags.HasError(), diagnosticsString(diags))
+
+	metadata, _ := putBody["metadata"].(map[string]any)
+	assert.Equal(t, "new-name", metadata["name"], "the PUT carries the new metadata.name")
+	assert.NotContains(t, calls, "PUT /perses-public/api/v1/projects/project-1/rename",
+		"/rename sets the display name, not metadata.name, so an identity rename must not use it")
+	assert.Equal(t, "new-name", d.Get(unifiedProjectName))
 }
 
 func TestUnifiedProjectResourceLifecycle(t *testing.T) {

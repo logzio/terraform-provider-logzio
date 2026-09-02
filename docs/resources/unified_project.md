@@ -35,7 +35,7 @@ EOD
 
 ### Required
 
-* `name` - (String) The project's Perses identity (`metadata.name`). Changing this value forces a new resource.
+* `name` - (String) The project's Perses identity (`metadata.name`). Changing it renames the project in place rather than replacing the resource, so the dashboards the project holds are preserved.
 
 ### Optional
 

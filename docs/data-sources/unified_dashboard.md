@@ -26,7 +26,7 @@ The Terraform data-source ID is the stable composite `folder_id/dashboard_uid`.
 
 ## Attribute Reference
 
-* `dashboard_json` - (String) The normalized Perses dashboard document. It uses the same normalization as the `logzio_unified_dashboard` resource: the document is preserved, but server-owned metadata is removed and only `metadata.name` is retained in `metadata`.
+* `dashboard_json` - (String) The normalized Perses dashboard document. It uses the same normalization as the `logzio_unified_dashboard` resource: the document is preserved, but the server-owned `metadata` keys (`project`, `version`, `createdAt`, `updatedAt`) are removed. Every other `metadata` key, such as `tags`, is kept.
 * `name` - (String) The dashboard's Perses `metadata.name`.
 * `version` - (Int) The dashboard version.
 * `folder_id` - (String) The requested unified project identifier.

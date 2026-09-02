@@ -23,6 +23,23 @@ const (
 	unifiedDashboardRetryAttempts = 8
 )
 
+// unifiedDashboardServerOwnedMetadataFields are the metadata keys the API owns.
+// They are stripped from both the configured and the returned document so they
+// cannot produce a perpetual diff. Every other metadata key — tags among them —
+// is author-owned and round-trips untouched.
+//
+// Probed live against api.logz.io on 2026-09-02: the gateway stamps only
+// "project" into metadata and keeps version/createdAt/updatedAt beside the doc
+// rather than inside it, at v1 and v2 alike. The other three are listed because
+// upstream Perses carries them in metadata, so a gateway that stops flattening
+// them would otherwise reintroduce the perpetual diff.
+var unifiedDashboardServerOwnedMetadataFields = []string{
+	"project",
+	"version",
+	"createdAt",
+	"updatedAt",
+}
+
 func resourceUnifiedDashboard() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceUnifiedDashboardCreate,
@@ -166,7 +183,13 @@ func resourceUnifiedDashboardUpdate(ctx context.Context, d *schema.ResourceData,
 
 	if readErr != nil {
 		tflog.Error(ctx, "could not update schema")
-		return diagRet
+		// diagRet only carries diagnostics when the read itself failed; when the
+		// retries ran out because the dashboard never converged it is empty, and
+		// returning it would report the update as successful.
+		if diagRet.HasError() {
+			return diagRet
+		}
+		return diag.FromErr(readErr)
 	}
 
 	return nil
@@ -260,11 +283,10 @@ func handleUnifiedDashboardConfig(config any) string {
 	}
 
 	if metadata, ok := dashboardJson["metadata"].(map[string]any); ok {
-		cleaned := map[string]any{}
-		if name, ok := metadata["name"].(string); ok {
-			cleaned["name"] = name
+		for _, key := range unifiedDashboardServerOwnedMetadataFields {
+			delete(metadata, key)
 		}
-		dashboardJson["metadata"] = cleaned
+		dashboardJson["metadata"] = metadata
 	}
 
 	newDashboard, _ := json.Marshal(dashboardJson)
