@@ -222,17 +222,21 @@ func TestUnifiedDashboardReadClearsMissingResource(t *testing.T) {
 }
 
 func TestAccLogzioUnifiedDashboard_CreateUpdateDashboard(t *testing.T) {
+	skipUnlessAcceptance(t)
+	testAccPreCheckApiToken(t)
 	defer utils.SleepAfterTest()
-	var folderId string
+
+	// The Config strings below are built when this TestStep slice is
+	// constructed, which happens before PreCheck runs — so the folder has to
+	// exist by now. Creating it in PreCheck renders folder_id as "" and the
+	// apply fails with "folderId must be set".
+	folderId := createTestUnifiedProject(t)
 	defer deleteTestUnifiedProject(t, &folderId)
 
 	resourceFullName := "logzio_unified_dashboard.test_dashboard"
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
-		PreCheck: func() {
-			testAccPreCheckApiToken(t)
-			folderId = createTestUnifiedProject(t)
-		},
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: getUnifiedDashboardConfig(folderId, "create"),
@@ -264,17 +268,18 @@ func TestAccLogzioUnifiedDashboard_CreateUpdateDashboard(t *testing.T) {
 }
 
 func TestAccLogzioUnifiedDashboard_CreateUpdateDashboardChangeName(t *testing.T) {
+	skipUnlessAcceptance(t)
+	testAccPreCheckApiToken(t)
 	defer utils.SleepAfterTest()
-	var folderId string
+
+	// Built up front for the same reason as the test above.
+	folderId := createTestUnifiedProject(t)
 	defer deleteTestUnifiedProject(t, &folderId)
 
 	resourceFullName := "logzio_unified_dashboard.test_dashboard"
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
-		PreCheck: func() {
-			testAccPreCheckApiToken(t)
-			folderId = createTestUnifiedProject(t)
-		},
+		PreCheck:          func() { testAccPreCheckApiToken(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: getUnifiedDashboardConfig(folderId, "create"),

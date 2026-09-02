@@ -147,6 +147,16 @@ func skipIfSetErrorsPanic(t *testing.T) {
 	}
 }
 
+// skipUnlessAcceptance guards a test that has to reach the live API before
+// resource.Test can apply its own TF_ACC check — one whose Config strings
+// embed the id of a resource created up front, which therefore has to exist
+// before the TestStep slice is built.
+func skipUnlessAcceptance(t *testing.T) {
+	if os.Getenv("TF_ACC") == "" {
+		t.Skip("acceptance test; set TF_ACC to run")
+	}
+}
+
 func testAccPreCheckEnv(t *testing.T, env string) {
 	if v := os.Getenv(env); v == "" {
 		t.Errorf("%s must be set for acceptance tests", env)
