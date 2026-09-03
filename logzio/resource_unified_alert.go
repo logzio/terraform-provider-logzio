@@ -115,7 +115,6 @@ const (
 	metricQueryDefinitionPromqlQuery = "promql_query"
 
 	unifiedAlertRetryAttempts = 8
-
 )
 
 func unifiedAlertClient(m interface{}) *unified_alerts.UnifiedAlertsClient {

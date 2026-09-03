@@ -136,6 +136,27 @@ func TestProvider_BaseUrlResolution(t *testing.T) {
 	}
 }
 
+// skipIfSetErrorsPanic skips a test that asserts on the error a bad d.Set
+// returns. The SDK turns those errors into panics whenever TF_ACC is set
+// (schemaMap.panicOnError reads exactly that variable), so under the CI
+// acceptance-test environment the panic fires inside Set and the caller's
+// error handling is never reached.
+func skipIfSetErrorsPanic(t *testing.T) {
+	if os.Getenv("TF_ACC") != "" {
+		t.Skip("d.Set errors panic instead of returning while TF_ACC is set")
+	}
+}
+
+// skipUnlessAcceptance guards a test that has to reach the live API before
+// resource.Test can apply its own TF_ACC check — one whose Config strings
+// embed the id of a resource created up front, which therefore has to exist
+// before the TestStep slice is built.
+func skipUnlessAcceptance(t *testing.T) {
+	if os.Getenv("TF_ACC") == "" {
+		t.Skip("acceptance test; set TF_ACC to run")
+	}
+}
+
 func testAccPreCheckEnv(t *testing.T, env string) {
 	if v := os.Getenv(env); v == "" {
 		t.Errorf("%s must be set for acceptance tests", env)

@@ -1,13 +1,20 @@
 # Changes by Version
 
 <!-- next version -->
+## v1.28.0
+- Upgrade `logzio_client_terraform` to `1.31.1`.
+- Add support for the [Unified Dashboards](./docs/resources/unified_dashboard.md) resource and [data source](./docs/data-sources/unified_dashboard.md).
+- Add support for the [Unified Project](./docs/resources/unified_project.md) resource and [data source](./docs/data-sources/unified_project.md).
+
 ## v1.27.0
 - Upgrade `logzio_client_terraform` to `1.30.0`.
 - **Breakiung change**: Update Unified Alerts Resource and datasource to latest spec (v2 endpoint)
+
 ## v1.26.0
 - Upgrade `logzio_client_terraform` to `1.29.0`.
 - Add Unified Alerts Resource and datasource.
   - Support for both log-based and metric-based alerts through a unified interface
+
 ## v1.25.0
 - Upgrade `logzio_client_terraform` to `1.28.1`.
 - Support Consumption plan in `sub_accounts`.
@@ -62,7 +69,7 @@
         - Grafana Alerts API `exec_err_state` field is no longer configurable, always defaults to `OK`.
         - Grafana Contact Point `teams` now refers to Microsoft Teams Workflows Contact Point. The old `teams` endpoint was deprecated.
         - Default notification policy contact point changed from `default-email` to `grafana-default-email`
-    - Webhook Contact Point now supports `authorization_credentials` 
+    - Webhook Contact Point now supports `authorization_credentials`
 - Upgrade to Go 1.24.
 
 ## v1.16.0

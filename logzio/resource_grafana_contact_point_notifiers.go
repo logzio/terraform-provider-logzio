@@ -462,7 +462,7 @@ func validatePagerdutySeverity() schema.SchemaValidateDiagFunc {
 		for k := range valid {
 			validKeys = append(validKeys, k)
 		}
-		
+
 		return diag.Errorf("invalid value for %s: %s, must be a template or one of %v", grafanaContactPointPagerdutySeverity, v, validKeys)
 	}
 }

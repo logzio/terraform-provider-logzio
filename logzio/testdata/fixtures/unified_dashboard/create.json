@@ -1,0 +1,14 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "_terraform_provider_unidash_test"
+  },
+  "spec": {
+    "display": {
+      "name": "terraform provider unidash test"
+    },
+    "duration": "1h",
+    "panels": {},
+    "layouts": []
+  }
+}
