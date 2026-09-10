@@ -1,6 +1,9 @@
 # Changes by Version
 
 <!-- next version -->
+## Unreleased
+- Add `soft_limit_unique_metrics` to the [`logzio_metrics_account`](./docs/resources/metrics_account.md) resource, for Consumption accounts.
+
 ## v1.28.0
 - Upgrade `logzio_client_terraform` to `1.31.1`.
 - Add support for the [Unified Dashboards](./docs/resources/unified_dashboard.md) resource and [data source](./docs/data-sources/unified_dashboard.md).

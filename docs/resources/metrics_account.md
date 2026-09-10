@@ -35,6 +35,7 @@ resource "logzio_metrics_account" "my_metrics_account" {
 * `account_name` - (String) Name of the metrics account.
 * `plan_uts` - (Integer) Amount of unique time series that can be ingested to the metrics account.
 * `authorized_accounts` - (List) IDs of accounts that can access the account's data. Can be an empty array.
+* `soft_limit_unique_metrics` - (Integer) The account's soft limit, in unique time series (UTS). **Consumption** accounts only - the API rejects this for a Subscription account. Must not be negative.
 
 ##  Attribute Reference
 * `account_id` - ID of the metrics account.
