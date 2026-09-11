@@ -21,6 +21,7 @@ const (
 	metricsAccountToken              string = "account_token"
 	metricsAccountPlanUts            string = "plan_uts"
 	metricsAccountAuthorizedAccounts string = "authorized_accounts"
+	metricsAccountSoftLimit          string = "soft_limit_unique_metrics"
 
 	metricsAccountRetryAttempts = 8
 )
@@ -68,6 +69,11 @@ func resourceMetricsAccount() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			metricsAccountSoftLimit: {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -98,6 +104,17 @@ func resourceMetricsAccountCreate(ctx context.Context, d *schema.ResourceData, m
 	d.SetId(strconv.FormatInt(int64(metricsAccount.Id), 10))
 	d.Set(metricsAccountToken, metricsAccount.Token)
 	d.Set(metricsAccountId, metricsAccount.Id)
+
+	// the soft limit lives behind its own endpoint, so it can only be applied once the
+	// account exists
+	if softLimit, ok := d.GetOk(metricsAccountSoftLimit); ok {
+		_, err = MetricsClient.UpdateMetricsAccountSoftLimit(int64(metricsAccount.Id),
+			metrics_accounts.UpdateMetricsAccountSoftLimit{SoftLimitUniqueMetrics: int32(softLimit.(int))})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return resourceMetricsAccountRead(ctx, d, m)
 }
 
@@ -126,6 +143,15 @@ func resourceMetricsAccountRead(ctx context.Context, d *schema.ResourceData, m i
 
 	setMetricsAccount(d, metricsAccount)
 
+	// The soft limit endpoint is consumption-only and rejects a subscription owner with 400.
+	// That is not a failure of this resource, so the field is simply left unset.
+	softLimit, err := MetricsClient.GetMetricsAccountSoftLimit(id)
+	if err != nil {
+		tflog.Debug(ctx, fmt.Sprintf("could not read soft limit for metrics account %d: %s", id, err))
+	} else if softLimit.SoftLimitUniqueMetrics != nil {
+		d.Set(metricsAccountSoftLimit, *softLimit.SoftLimitUniqueMetrics)
+	}
+
 	return nil
 }
 
@@ -143,6 +169,14 @@ func resourceMetricsAccountUpdate(ctx context.Context, d *schema.ResourceData, m
 	err = MetricsClient.UpdateMetricsAccount(id, updateMetricsAccount)
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	if d.HasChange(metricsAccountSoftLimit) {
+		_, err = MetricsClient.UpdateMetricsAccountSoftLimit(id,
+			metrics_accounts.UpdateMetricsAccountSoftLimit{SoftLimitUniqueMetrics: int32(d.Get(metricsAccountSoftLimit).(int))})
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	var diagRet diag.Diagnostics
