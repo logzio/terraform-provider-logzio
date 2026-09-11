@@ -2,7 +2,6 @@ package logzio
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -21,7 +20,6 @@ const (
 	tracingAccountMaxDailyGB         string = "max_daily_gb"
 	tracingAccountRetention          string = "retention"
 	tracingAccountAuthorizedAccounts string = "authorized_accounts"
-	tracingAccountSoftLimitGB        string = "soft_limit_gb"
 )
 
 // The tracing account resource schema, what terraform uses to parse and read the template
@@ -54,6 +52,9 @@ func resourceTracingAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			// max_daily_gb IS the tracing account's soft cap: the API reads the soft limit
+			// from maxDailyGB and writes maxDailyGB from it, so there is deliberately no
+			// separate soft_limit_gb argument here - two fields would write one value.
 			tracingAccountMaxDailyGB: {
 				Type:     schema.TypeFloat,
 				Optional: true,
@@ -68,11 +69,6 @@ func resourceTracingAccount() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
-				Optional: true,
-				Computed: true,
-			},
-			tracingAccountSoftLimitGB: {
-				Type:     schema.TypeFloat,
 				Optional: true,
 				Computed: true,
 			},
@@ -103,19 +99,6 @@ func resourceTracingAccountCreate(ctx context.Context, d *schema.ResourceData, m
 	d.Set(tracingAccountId, tracingAccount.AccountId)
 	d.Set(tracingAccountToken, tracingAccount.Token)
 
-	// the soft limit lives behind its own endpoint, so it can only be applied once the
-	// account exists
-	if softLimit, ok := d.GetOk(tracingAccountSoftLimitGB); ok {
-		_, err = client.UpdateTracingAccountSoftLimit(int64(tracingAccount.AccountId),
-			tracing_accounts.UpdateTracingAccountSoftLimit{
-				TracingAccountId: tracingAccount.AccountId,
-				SoftLimitGB:      float32(softLimit.(float64)),
-			})
-		if err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
 	return resourceTracingAccountRead(ctx, d, m)
 }
 
@@ -142,13 +125,6 @@ func resourceTracingAccountRead(ctx context.Context, d *schema.ResourceData, m i
 
 	setTracingAccount(d, tracingAccount)
 
-	softLimit, err := client.GetTracingAccountSoftLimit(id)
-	if err != nil {
-		tflog.Debug(ctx, fmt.Sprintf("could not read soft limit for tracing account %d: %s", id, err))
-	} else if softLimit.SoftLimitGB != nil {
-		d.Set(tracingAccountSoftLimitGB, *softLimit.SoftLimitGB)
-	}
-
 	return nil
 }
 
@@ -165,17 +141,6 @@ func resourceTracingAccountUpdate(ctx context.Context, d *schema.ResourceData, m
 	_, err = client.UpdateTracingAccount(id, getCreateTracingAccountFromSchema(d))
 	if err != nil {
 		return diag.FromErr(err)
-	}
-
-	if d.HasChange(tracingAccountSoftLimitGB) {
-		_, err = client.UpdateTracingAccountSoftLimit(id,
-			tracing_accounts.UpdateTracingAccountSoftLimit{
-				TracingAccountId: int32(id),
-				SoftLimitGB:      float32(d.Get(tracingAccountSoftLimitGB).(float64)),
-			})
-		if err != nil {
-			return diag.FromErr(err)
-		}
 	}
 
 	return resourceTracingAccountRead(ctx, d, m)

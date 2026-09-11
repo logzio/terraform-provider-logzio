@@ -23,7 +23,6 @@ resource "logzio_tracing_account" "my_tracing_account" {
   email         = "user@logz.io"
   account_name  = "test"
   max_daily_gb  = 5
-  soft_limit_gb = 5
   authorized_accounts = [
     12345
   ]
@@ -37,8 +36,7 @@ resource "logzio_tracing_account" "my_tracing_account" {
 * `account_name` - (String) Name of the tracing account.
 
 ### Optional
-* `max_daily_gb` - (Float) The maximum volume of data, in GB, that the tracing account can index per calendar day.
-* `soft_limit_gb` - (Float) The account's soft limit, in GB. Must not be negative.
+* `max_daily_gb` - (Float) The maximum volume of data, in GB, that the tracing account can index per calendar day. This **is** the account's soft cap - the API reads the soft limit from this value and writes it back to this value, so there is no separate soft limit argument.
 * `authorized_accounts` - (List) IDs of accounts that can access the account's data. Can be an empty array.
 
 ##  Attribute Reference
