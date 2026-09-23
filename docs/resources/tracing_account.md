@@ -34,9 +34,9 @@ resource "logzio_tracing_account" "my_tracing_account" {
 ### Required:
 * `email` - (String) Email address of an existing admin user on the main account which will also become the admin of the tracing account being created.
 * `account_name` - (String) Name of the tracing account.
+* `max_daily_gb` - (Float) The maximum volume of data, in GB, that the tracing account can index per calendar day. This **is** the account's soft cap - the API reads the soft limit from this value and writes it back to this value, so there is no separate soft limit argument. Must not be negative. The account is suspended once its daily usage exceeds this value, so `0` suspends it as soon as it receives any data.
 
 ### Optional
-* `max_daily_gb` - (Float) The maximum volume of data, in GB, that the tracing account can index per calendar day. This **is** the account's soft cap - the API reads the soft limit from this value and writes it back to this value, so there is no separate soft limit argument.
 * `authorized_accounts` - (List) IDs of accounts that can access the account's data. Can be an empty array.
 
 ##  Attribute Reference

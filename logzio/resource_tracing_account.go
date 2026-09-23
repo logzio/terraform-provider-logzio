@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/logzio/logzio_terraform_client/tracing_accounts"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 )
@@ -55,10 +56,12 @@ func resourceTracingAccount() *schema.Resource {
 			// max_daily_gb IS the tracing account's soft cap: the API reads the soft limit
 			// from maxDailyGB and writes maxDailyGB from it, so there is deliberately no
 			// separate soft_limit_gb argument here - two fields would write one value.
+			// Required because the API needs it on every create and update, and an unset
+			// value would be sent as 0 - which suspends the account on its first byte.
 			tracingAccountMaxDailyGB: {
-				Type:     schema.TypeFloat,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeFloat,
+				Required:     true,
+				ValidateFunc: validation.FloatAtLeast(0),
 			},
 			tracingAccountRetention: {
 				Type:     schema.TypeInt,

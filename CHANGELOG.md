@@ -2,6 +2,7 @@
 
 <!-- next version -->
 ## v1.29.0
+- Upgrade `logzio_client_terraform` to `1.32.0`.
 - Add `soft_limit_unique_metrics` to the [`logzio_metrics_account`](./docs/resources/metrics_account.md) resource, for Consumption accounts.
 - Add support for the [`logzio_tracing_account`](./docs/resources/tracing_account.md) resource, for Consumption accounts.
 
