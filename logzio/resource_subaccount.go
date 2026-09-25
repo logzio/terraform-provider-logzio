@@ -168,56 +168,7 @@ func resourceSubAccountCreate(ctx context.Context, d *schema.ResourceData, m int
 	d.SetId(strconv.FormatInt(int64(subAccount.AccountId), 10))
 	d.Set(subAccountToken, subAccount.AccountToken)
 	d.Set(subAccountId, subAccount.AccountId)
-	waitForSubAccountCacheSync(ctx, subAccountClient(m), int64(subAccount.AccountId), createSubAccount)
 	return resourceSubAccountRead(ctx, d, m)
-}
-
-// waitForSubAccountCacheSync polls until a just-created sub account reports the sharing accounts
-// and utilization settings it was created with. The API serves both from caches that can lag the
-// create, and until they catch up it answers with defaults (no sharing accounts, utilization off),
-// which would otherwise land in state as drift. It never fails the create: if the caches have not
-// caught up after all attempts, the read that follows stores whatever the API returns.
-func waitForSubAccountCacheSync(ctx context.Context, client *sub_accounts.SubAccountClient, id int64, requested sub_accounts.CreateOrUpdateSubAccount) {
-	err := retry.Do(
-		func() error {
-			subAccount, err := client.GetSubAccount(id)
-			if err != nil {
-				return err
-			}
-			if !isSubAccountCacheSynced(requested, subAccount) {
-				return fmt.Errorf("sub account %d does not report its sharing accounts or utilization settings yet", id)
-			}
-			return nil
-		},
-		retry.Attempts(subAccountRetryAttempts),
-		retry.Delay(delayGetSubAccount),
-		retry.DelayType(retry.FixedDelay),
-		retry.LastErrorOnly(true),
-	)
-	if err != nil {
-		tflog.Warn(ctx, fmt.Sprintf("continuing without a synced read: %s", err))
-	}
-}
-
-func isSubAccountCacheSynced(requested sub_accounts.CreateOrUpdateSubAccount, subAccount *sub_accounts.SubAccount) bool {
-	sharingAccountIds := make(map[int32]bool, len(subAccount.SharingObjectsAccounts))
-	for _, account := range subAccount.SharingObjectsAccounts {
-		sharingAccountIds[account.AccountId] = true
-	}
-	if len(sharingAccountIds) != len(requested.SharingObjectsAccounts) {
-		return false
-	}
-	for _, accountId := range requested.SharingObjectsAccounts {
-		if !sharingAccountIds[accountId] {
-			return false
-		}
-	}
-
-	utilizationEnabled, _ := strconv.ParseBool(requested.UtilizationSettings.UtilizationEnabled)
-	if subAccount.UtilizationSettings.UtilizationEnabled != utilizationEnabled {
-		return false
-	}
-	return !utilizationEnabled || subAccount.UtilizationSettings.FrequencyMinutes == requested.UtilizationSettings.FrequencyMinutes
 }
 
 func resourceSubAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
