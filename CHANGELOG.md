@@ -5,6 +5,7 @@
 - Upgrade `logzio_client_terraform` to `1.32.0`.
 - Add `soft_limit_unique_metrics` to the [`logzio_metrics_account`](./docs/resources/metrics_account.md) resource, for Consumption accounts.
 - Add support for the [`logzio_tracing_account`](./docs/resources/tracing_account.md) resource, for Consumption accounts.
+- Fix endless `max_daily_gb` drift on the [`logzio_subaccount`](./docs/resources/subaccount.md) resource for Consumption accounts: the API ignores that value on creation, so the provider no longer reports it as a change.
 
 ## v1.28.0
 - Upgrade `logzio_client_terraform` to `1.31.1`.
