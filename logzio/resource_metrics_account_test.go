@@ -48,7 +48,7 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccount(t *testing.T) {
 func TestAccLogzioMetricsAccount_CreateMetricsAccountEmptyAuthorizedAccounts(t *testing.T) {
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_metrics_empty_sharing_" + getRandomId()
-	terraformPlan := testAccCheckLogzioMetricsAccountConfig(email, accountName, "")
+	terraformPlan := testAccCheckLogzioMetricsAccountConfigEmptyAuthorizedAccounts(email, accountName)
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
@@ -71,10 +71,28 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccountEmptyAuthorizedAccounts(t *
 				ResourceName:            "logzio_metrics_account.test_subaccount",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{metricsAccountEmail},
+				ImportStateVerifyIgnore: []string{metricsAccountEmail, metricsAccountAuthorizedAccounts},
 			},
 		},
 	})
+}
+
+// The API sometimes reports an authorized account on a metrics account created with none, and
+// sometimes not, depending on timing - so this test only checks that creating with an empty list
+// works, not what authorized_accounts reads back afterwards.
+func testAccCheckLogzioMetricsAccountConfigEmptyAuthorizedAccounts(email string, accountName string) string {
+	return fmt.Sprintf(`
+resource "logzio_metrics_account" "test_subaccount" {
+  email = "%s"
+  account_name = "%s"
+  plan_uts = 100
+  authorized_accounts = []
+
+  lifecycle {
+    ignore_changes = [authorized_accounts]
+  }
+}
+`, email, accountName)
 }
 
 func TestAccLogzioMetricsAccount_CreateMetricsAccountNoEmail(t *testing.T) {
