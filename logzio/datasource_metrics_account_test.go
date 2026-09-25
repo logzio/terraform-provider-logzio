@@ -15,7 +15,7 @@ func TestAccDataSourceMetricsAccount(t *testing.T) {
 	dataSourceName := "data.logzio_metrics_account.metrics_account_datasource_by_id"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_datasource_create"
+	accountName := "test_datasource_create_" + getRandomId()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
@@ -50,7 +50,7 @@ func TestAccDataSourceMetricsAccountByAccountName(t *testing.T) {
 	dataSourceName := "data.logzio_metrics_account.metrics_account_datasource_by_id"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_datasource_account_name"
+	accountName := "test_datasource_account_name_" + getRandomId()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
