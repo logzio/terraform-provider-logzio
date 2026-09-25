@@ -6,7 +6,7 @@ Logz.io tracing accounts on a **Consumption** plan.
 * Learn more about available [APIs for managing Logz.io accounts](https://api-docs.logz.io/docs/logz/logz-io-api/)
 
 **Note:** These endpoints are available for **Consumption** accounts only, and are additionally
-gated per account by a feature flag. If the account is not eligible the API responds with `400`.
+gated per account by a feature flag. If the account is not eligible, the API responds with `400`.
 
 ## Example Usage
 ```hcl
