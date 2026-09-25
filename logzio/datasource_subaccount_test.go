@@ -20,7 +20,7 @@ func TestAccDataSourceSubaccount(t *testing.T) {
 	dataSourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_datasource_create"
+	accountName := "test_datasource_create_" + getRandomId()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
@@ -59,7 +59,7 @@ func TestAccDataSourceSubaccountByAccountName(t *testing.T) {
 	dataSourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_datasource_account_name"
+	accountName := "test_datasource_account_name_" + getRandomId()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
@@ -96,7 +96,7 @@ func TestAccDataSourceSubaccountWarm(t *testing.T) {
 	dataSourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioWarmAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_datasource_create"
+	accountName := "test_datasource_create_" + getRandomId()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
@@ -141,7 +141,7 @@ func TestAccDataSourceSubaccountConsumption(t *testing.T) {
 	dataSourceName := "data.logzio_subaccount.subaccount_datasource_by_id"
 	accountId, _ := strconv.ParseInt(os.Getenv(envLogzioConsumptionAccountId), utils.BASE_10, utils.BITSIZE_64)
 	email := os.Getenv(envLogzioEmail)
-	accountName := "test_datasource_create"
+	accountName := "test_datasource_create_" + getRandomId()
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{

@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/avast/retry-go"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/logzio/logzio_terraform_client/metrics_accounts"
 	"github.com/logzio/logzio_terraform_provider/logzio/utils"
 	"reflect"
@@ -21,8 +23,11 @@ const (
 	metricsAccountToken              string = "account_token"
 	metricsAccountPlanUts            string = "plan_uts"
 	metricsAccountAuthorizedAccounts string = "authorized_accounts"
+	metricsAccountSoftLimit          string = "soft_limit_unique_metrics"
 
 	metricsAccountRetryAttempts = 8
+
+	metricsAccountNotConsumptionErrorCode = "NOT_CONSUMPTION_ACCOUNT"
 )
 
 // The endpoint resource schema, what terraform uses to parse and read the template
@@ -68,6 +73,12 @@ func resourceMetricsAccount() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			metricsAccountSoftLimit: {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntAtLeast(0),
+			},
 		},
 	}
 }
@@ -98,6 +109,17 @@ func resourceMetricsAccountCreate(ctx context.Context, d *schema.ResourceData, m
 	d.SetId(strconv.FormatInt(int64(metricsAccount.Id), 10))
 	d.Set(metricsAccountToken, metricsAccount.Token)
 	d.Set(metricsAccountId, metricsAccount.Id)
+
+	// the soft limit lives behind its own endpoint, so it can only be applied once the
+	// account exists. The raw config is checked rather than GetOk, which reports an explicit 0 as unset.
+	if isMetricsAccountSoftLimitConfigured(d) {
+		_, err = MetricsClient.UpdateMetricsAccountSoftLimit(int64(metricsAccount.Id),
+			metrics_accounts.UpdateMetricsAccountSoftLimit{SoftLimitUniqueMetrics: int32(d.Get(metricsAccountSoftLimit).(int))})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return resourceMetricsAccountRead(ctx, d, m)
 }
 
@@ -126,6 +148,18 @@ func resourceMetricsAccountRead(ctx context.Context, d *schema.ResourceData, m i
 
 	setMetricsAccount(d, metricsAccount)
 
+	// The soft limit endpoint is consumption-only and rejects a subscription owner with 400.
+	// That is not a failure of this resource, so the field is simply left unset. Any other error is.
+	softLimit, err := MetricsClient.GetMetricsAccountSoftLimit(id)
+	if err != nil {
+		if !strings.Contains(err.Error(), metricsAccountNotConsumptionErrorCode) {
+			return diag.FromErr(err)
+		}
+		tflog.Debug(ctx, fmt.Sprintf("not reading soft limit for metrics account %d: %s", id, err))
+	} else if softLimit.SoftLimitUniqueMetrics != nil {
+		d.Set(metricsAccountSoftLimit, *softLimit.SoftLimitUniqueMetrics)
+	}
+
 	return nil
 }
 
@@ -143,6 +177,14 @@ func resourceMetricsAccountUpdate(ctx context.Context, d *schema.ResourceData, m
 	err = MetricsClient.UpdateMetricsAccount(id, updateMetricsAccount)
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	if d.HasChange(metricsAccountSoftLimit) {
+		_, err = MetricsClient.UpdateMetricsAccountSoftLimit(id,
+			metrics_accounts.UpdateMetricsAccountSoftLimit{SoftLimitUniqueMetrics: int32(d.Get(metricsAccountSoftLimit).(int))})
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	var diagRet diag.Diagnostics
@@ -234,4 +276,9 @@ func getCreateMetricsAccountFromSchema(d *schema.ResourceData) metrics_accounts.
 	}
 
 	return createMetricsAccount
+}
+
+func isMetricsAccountSoftLimitConfigured(d *schema.ResourceData) bool {
+	value, diags := d.GetRawConfigAt(cty.GetAttrPath(metricsAccountSoftLimit))
+	return !diags.HasError() && !value.IsNull()
 }

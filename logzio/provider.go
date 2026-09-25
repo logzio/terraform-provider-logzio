@@ -19,6 +19,7 @@ const (
 	resourceUserType                      = "logzio_user"
 	resourceSubAccountType                = "logzio_subaccount"
 	resourceMetricsAccountType            = "logzio_metrics_account"
+	resourceTracingAccountType            = "logzio_tracing_account"
 	resourceLogShippingTokenType          = "logzio_log_shipping_token"
 	resourceDropFilterType                = "logzio_drop_filter"
 	resourceDropMetricsType               = "logzio_drop_metrics"
@@ -98,6 +99,7 @@ func ProviderWithEnvVar(apiTokenEnvVar string) *schema.Provider {
 			resourceUserType:                      resourceUser(),
 			resourceSubAccountType:                resourceSubAccount(),
 			resourceMetricsAccountType:            resourceMetricsAccount(),
+			resourceTracingAccountType:            resourceTracingAccount(),
 			resourceAlertV2Type:                   resourceAlertV2(),
 			resourceLogShippingTokenType:          resourceLogShippingToken(),
 			resourceDropFilterType:                resourceDropFilter(),

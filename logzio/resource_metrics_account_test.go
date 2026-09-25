@@ -48,7 +48,7 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccount(t *testing.T) {
 func TestAccLogzioMetricsAccount_CreateMetricsAccountEmptyAuthorizedAccounts(t *testing.T) {
 	email := os.Getenv(envLogzioEmail)
 	accountName := "test_metrics_empty_sharing_" + getRandomId()
-	terraformPlan := testAccCheckLogzioMetricsAccountConfig(email, accountName, "")
+	terraformPlan := testAccCheckLogzioMetricsAccountConfigEmptyAuthorizedAccounts(email, accountName)
 	defer utils.SleepAfterTest()
 
 	resource.Test(t, resource.TestCase{
@@ -71,10 +71,28 @@ func TestAccLogzioMetricsAccount_CreateMetricsAccountEmptyAuthorizedAccounts(t *
 				ResourceName:            "logzio_metrics_account.test_subaccount",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{metricsAccountEmail},
+				ImportStateVerifyIgnore: []string{metricsAccountEmail, metricsAccountAuthorizedAccounts},
 			},
 		},
 	})
+}
+
+// The API sometimes reports an authorized account on a metrics account created with none, and
+// sometimes not, depending on timing - so this test only checks that creating with an empty list
+// works, not what authorized_accounts reads back afterwards.
+func testAccCheckLogzioMetricsAccountConfigEmptyAuthorizedAccounts(email string, accountName string) string {
+	return fmt.Sprintf(`
+resource "logzio_metrics_account" "test_subaccount" {
+  email = "%s"
+  account_name = "%s"
+  plan_uts = 100
+  authorized_accounts = []
+
+  lifecycle {
+    ignore_changes = [authorized_accounts]
+  }
+}
+`, email, accountName)
 }
 
 func TestAccLogzioMetricsAccount_CreateMetricsAccountNoEmail(t *testing.T) {
@@ -248,4 +266,79 @@ resource "logzio_metrics_account" "test_subaccount" {
   ]
 }
 `, email, accountId)
+}
+
+func TestAccLogzioMetricsAccount_CreateMetricsAccountConsumptionSoftLimit(t *testing.T) {
+	accountId := os.Getenv(envLogzioConsumptionAccountId)
+	email := os.Getenv(envLogzioEmail)
+	accountName := "test_metrics_soft_limit_" + getRandomId()
+	resourceName := "logzio_metrics_account.test_subaccount"
+	terraformPlan := testAccCheckLogzioMetricsAccountConfigSoftLimit(email, accountName, accountId, "1000")
+	terraformPlanUpdate := testAccCheckLogzioMetricsAccountConfigSoftLimit(email, accountName, accountId, "2000")
+	defer utils.SleepAfterTest()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckApiTokenConsumption(t)
+			testAccPreCheckConsumptionAccountId(t)
+			testAccPreCheckEmail(t)
+		},
+		ProviderFactories: testAccConsumptionProviderFactories,
+		CheckDestroy:      testAccCheckMetricsAccountDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: terraformPlan,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, metricsAccountSoftLimit, "1000"),
+				),
+			},
+			{
+				Config: terraformPlanUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, metricsAccountSoftLimit, "2000"),
+				),
+			},
+			{
+				Config:                  terraformPlanUpdate,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{metricsAccountEmail},
+			},
+		},
+	})
+}
+
+func TestAccLogzioMetricsAccount_CreateMetricsAccountNegativeSoftLimit(t *testing.T) {
+	email := os.Getenv(envLogzioEmail)
+	accountName := "test_metrics_negative_soft_limit_" + getRandomId()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckApiToken(t)
+			testAccPreCheckEmail(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCheckLogzioMetricsAccountConfigSoftLimit(email, accountName, "", "-1"),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("expected soft_limit_unique_metrics to be at least"),
+			},
+		},
+	})
+}
+
+func testAccCheckLogzioMetricsAccountConfigSoftLimit(email string, accountName string, accountId string, softLimit string) string {
+	return fmt.Sprintf(`
+resource "logzio_metrics_account" "test_subaccount" {
+  email = "%s"
+  account_name = "%s"
+  plan_uts = 100
+  soft_limit_unique_metrics = %s
+  authorized_accounts = [
+    %s
+  ]
+}
+`, email, accountName, softLimit, accountId)
 }
