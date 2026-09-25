@@ -41,7 +41,6 @@ resource "logzio_tracing_account" "my_tracing_account" {
 
 ##  Attribute Reference
 * `account_id` - ID of the tracing account.
-* `account_token` - Shipping token for the tracing account.
 * `retention` - Number of days that trace data is retained.
 
 ### Import tracing accounts as resources

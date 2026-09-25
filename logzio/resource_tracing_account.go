@@ -17,7 +17,6 @@ const (
 	tracingAccountId                 string = "account_id"
 	tracingAccountEmail              string = "email"
 	tracingAccountName               string = "account_name"
-	tracingAccountToken              string = "account_token"
 	tracingAccountMaxDailyGB         string = "max_daily_gb"
 	tracingAccountRetention          string = "retention"
 	tracingAccountAuthorizedAccounts string = "authorized_accounts"
@@ -38,11 +37,6 @@ func resourceTracingAccount() *schema.Resource {
 			tracingAccountId: {
 				Type:     schema.TypeInt,
 				Computed: true,
-			},
-			tracingAccountToken: {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
 			},
 			tracingAccountEmail: {
 				Type:      schema.TypeString,
@@ -100,7 +94,6 @@ func resourceTracingAccountCreate(ctx context.Context, d *schema.ResourceData, m
 
 	d.SetId(strconv.FormatInt(int64(tracingAccount.AccountId), 10))
 	d.Set(tracingAccountId, tracingAccount.AccountId)
-	d.Set(tracingAccountToken, tracingAccount.Token)
 
 	return resourceTracingAccountRead(ctx, d, m)
 }
@@ -172,9 +165,6 @@ func setTracingAccount(d *schema.ResourceData, tracingAccount *tracing_accounts.
 	d.Set(tracingAccountId, tracingAccount.AccountId)
 	d.Set(tracingAccountName, tracingAccount.AccountName)
 	d.Set(tracingAccountRetention, tracingAccount.Retention)
-	if tracingAccount.Token != "" {
-		d.Set(tracingAccountToken, tracingAccount.Token)
-	}
 	if tracingAccount.MaxDailyGB != nil {
 		d.Set(tracingAccountMaxDailyGB, *tracingAccount.MaxDailyGB)
 	}

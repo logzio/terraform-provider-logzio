@@ -54,7 +54,7 @@ func TestAccLogzioTracingAccount_CreateUpdateTracingAccount(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{tracingAccountEmail, tracingAccountToken},
+				ImportStateVerifyIgnore: []string{tracingAccountEmail},
 			},
 		},
 	})
