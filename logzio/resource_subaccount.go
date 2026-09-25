@@ -41,6 +41,10 @@ const (
 
 	delayGetSubAccount      = 2 * time.Second
 	subAccountRetryAttempts = 8
+
+	// The API ignores the requested max_daily_gb when it creates a sub account under a
+	// consumption owner and always stores this value - the soft limit is what caps usage there.
+	consumptionSubAccountMaxDailyGB = 0.001
 )
 
 // The endpoint resource schema, what terraform uses to parse and read the template
@@ -83,8 +87,9 @@ func resourceSubAccount() *schema.Resource {
 				Optional: true,
 			},
 			subAccountMaxDailyGB: {
-				Type:     schema.TypeFloat,
-				Optional: true,
+				Type:             schema.TypeFloat,
+				Optional:         true,
+				DiffSuppressFunc: suppressConsumptionMaxDailyGBDiff,
 			},
 			subAccountRetentionDays: {
 				Type:     schema.TypeInt,
@@ -373,4 +378,16 @@ func insertAccountTokenAndId(d *schema.ResourceData, m interface{}, id int64) er
 			}),
 		retry.Delay(delayGetSubAccount),
 	)
+}
+
+// suppressConsumptionMaxDailyGBDiff hides the max_daily_gb diff that can never be applied on a
+// consumption sub account: the API stored consumptionSubAccountMaxDailyGB instead of the requested
+// value. soft_limit_gb only exists on consumption sub accounts, so subscription ones keep their diff.
+func suppressConsumptionMaxDailyGBDiff(_, old, _ string, d *schema.ResourceData) bool {
+	stored, err := strconv.ParseFloat(old, 32)
+	if err != nil || float32(stored) != float32(consumptionSubAccountMaxDailyGB) {
+		return false
+	}
+	softLimit, ok := d.GetOk(subAccountSoftLimitGB)
+	return ok && softLimit.(float64) > 0
 }
