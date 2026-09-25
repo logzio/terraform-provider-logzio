@@ -142,7 +142,7 @@ func TestAccDataSourceDropMetricTooManyMatches(t *testing.T) {
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
 	resourceConfig := datasourceResourceTestDropMetrics(resourceFilterName, accountId)
-	resourceConfig2 := datasourceResourceTestDropMetrics(fmt.Sprintf("%s_second", resourceFilterName), accountId)
+	resourceConfig2 := datasourceResourceTestDropMetricsSecond(fmt.Sprintf("%s_second", resourceFilterName), accountId)
 
 	defer utils.SleepAfterTest()
 
@@ -177,7 +177,7 @@ func TestAccDataSourceDropMetricNotFoundSearchWithResults(t *testing.T) {
 	accountId := os.Getenv(envLogzioMetricsAccountId)
 
 	resourceConfig := datasourceResourceTestDropMetrics(resourceFilterName, accountId)
-	resourceConfig2 := datasourceResourceTestDropMetrics(fmt.Sprintf("%s_second", resourceFilterName), accountId)
+	resourceConfig2 := datasourceResourceTestDropMetricsSecond(fmt.Sprintf("%s_second", resourceFilterName), accountId)
 
 	defer utils.SleepAfterTest()
 
@@ -219,6 +219,27 @@ func datasourceResourceTestDropMetrics(resourceFilterName, accountId string) str
   filters {
     name = "some_label"
     value = "some_value"
+    condition = "NOT_EQ"
+  }
+}
+`, resourceFilterName, accountId)
+}
+
+// A second filter for the tests that need two in one apply. Its content must differ from
+// datasourceResourceTestDropMetrics: the API rejects a drop filter identical to an existing one.
+func datasourceResourceTestDropMetricsSecond(resourceFilterName, accountId string) string {
+	return fmt.Sprintf(`resource "logzio_drop_metrics" "%s" {
+  account_id = %s
+
+  filters {
+    name = "__name__"
+    value = "my_metric"
+    condition = "EQ"
+  }
+
+  filters {
+    name = "some_label"
+    value = "some_other_value"
     condition = "NOT_EQ"
   }
 }
