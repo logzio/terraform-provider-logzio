@@ -1,6 +1,8 @@
 # Changes by Version
 
 <!-- next version -->
+- Clarify the `snap_search_retention_days` docs of the [`logzio_subaccount`](./docs/resources/subaccount.md) resource and [data source](./docs/data-sources/subaccount.md): allowed values, requirements, and that removing the argument turns the warm tier off.
+
 ## v1.29.0
 - Upgrade `logzio_client_terraform` to `1.32.0`.
 - Add `soft_limit_unique_metrics` to the [`logzio_metrics_account`](./docs/resources/metrics_account.md) resource, for Consumption accounts.
