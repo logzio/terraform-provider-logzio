@@ -124,9 +124,12 @@ func resourceSubAccount() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			// Computed, so that leaving it out of the configuration keeps the account's warm retention, including a
+			// value set by logzio_warm_tier, instead of turning the warm tier off.
 			subAccountsSnapSearchRetentionDays: {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			subAccountsIsCapped: {
 				Type:     schema.TypeBool,
@@ -206,7 +209,7 @@ func resourceSubAccountUpdate(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	updateSubAccount := getCreateSubAccountFromSchema(d)
+	updateSubAccount := getUpdateSubAccountFromSchema(d)
 	err = subAccountClient(m).UpdateSubAccount(id, updateSubAccount)
 	if err != nil {
 		return diag.FromErr(err)
@@ -230,7 +233,7 @@ func resourceSubAccountUpdate(ctx context.Context, d *schema.ResourceData, m int
 				} else {
 					// Check if the update shows on read
 					// if not updated yet - retry
-					subAccountFromSchema := getCreateSubAccountFromSchema(d)
+					subAccountFromSchema := getUpdateSubAccountFromSchema(d)
 					return !reflect.DeepEqual(subAccountFromSchema, updateSubAccount)
 				}
 			}),
@@ -342,6 +345,19 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 	}
 
 	return createSubAccount
+}
+
+// getUpdateSubAccountFromSchema is getCreateSubAccountFromSchema for an update. The update replaces the whole account,
+// and a snap_search_retention_days left out of the configuration would be sent as null, which turns the warm tier off.
+// Send the warm retention the account has instead.
+func getUpdateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOrUpdateSubAccount {
+	updateSubAccount := getCreateSubAccountFromSchema(d)
+	if updateSubAccount.SnapSearchRetentionDays == nil {
+		if snapSearchRetentionDays := int32(d.Get(subAccountsSnapSearchRetentionDays).(int)); snapSearchRetentionDays > 0 {
+			updateSubAccount.SnapSearchRetentionDays = &snapSearchRetentionDays
+		}
+	}
+	return updateSubAccount
 }
 
 func getDetailedSubAccount(m interface{}, id int64) (*sub_accounts.DetailedSubAccount, error) {

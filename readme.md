@@ -16,6 +16,7 @@ The following Logz.io API endpoints are supported by this provider:
 - [Notification channels](https://api-docs.logz.io/docs/logz/manage-notification-endpoints)
 - [Log-based alerts](https://github.com/logzio/public-api/tree/master/alerts)
 - [Sub accounts](https://api-docs.logz.io/docs/logz/manage-time-based-log-accounts)
+- [Warm tier retention](./docs/resources/warm_tier.md)
 - [Alerts(v2)](https://api-docs.logz.io/docs/logz/alerts)
 - [Log shipping token](https://api-docs.logz.io/docs/logz/manage-log-shipping-tokens)
 - [Drop filters](https://api-docs.logz.io/docs/logz/drop-filters)
