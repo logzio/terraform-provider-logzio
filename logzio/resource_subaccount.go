@@ -2,6 +2,7 @@ package logzio
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -46,6 +47,8 @@ const (
 	// consumption owner and always stores this value - the soft limit is what caps usage there.
 	consumptionSubAccountMaxDailyGB = 0.001
 )
+
+var errSubAccountNotUpdatedYet = errors.New("subaccount read does not show the update yet")
 
 // The endpoint resource schema, what terraform uses to parse and read the template
 func resourceSubAccount() *schema.Resource {
@@ -124,9 +127,12 @@ func resourceSubAccount() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			// Computed, so that leaving it out of the configuration keeps the account's warm retention, including a
+			// value set by logzio_warm_tier, instead of turning the warm tier off.
 			subAccountsSnapSearchRetentionDays: {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			subAccountsIsCapped: {
 				Type:     schema.TypeBool,
@@ -206,7 +212,7 @@ func resourceSubAccountUpdate(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	updateSubAccount := getCreateSubAccountFromSchema(d)
+	updateSubAccount := getUpdateSubAccountFromSchema(d)
 	err = subAccountClient(m).UpdateSubAccount(id, updateSubAccount)
 	if err != nil {
 		return diag.FromErr(err)
@@ -220,19 +226,17 @@ func resourceSubAccountUpdate(ctx context.Context, d *schema.ResourceData, m int
 				return fmt.Errorf("received error from read subaccount")
 			}
 
+			// The read can return the account from before the update
+			if !reflect.DeepEqual(getUpdateSubAccountFromSchema(d), updateSubAccount) {
+				return errSubAccountNotUpdatedYet
+			}
+
 			return nil
 		},
 		retry.RetryIf(
 			// Retry ONLY if the resource was not updated yet
 			func(err error) bool {
-				if err != nil {
-					return false
-				} else {
-					// Check if the update shows on read
-					// if not updated yet - retry
-					subAccountFromSchema := getCreateSubAccountFromSchema(d)
-					return !reflect.DeepEqual(subAccountFromSchema, updateSubAccount)
-				}
+				return errors.Is(err, errSubAccountNotUpdatedYet)
 			}),
 		retry.DelayType(retry.BackOffDelay),
 		retry.Attempts(subAccountRetryAttempts),
@@ -342,6 +346,19 @@ func getCreateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOr
 	}
 
 	return createSubAccount
+}
+
+// getUpdateSubAccountFromSchema is getCreateSubAccountFromSchema for an update. The update replaces the whole account,
+// and a snap_search_retention_days left out of the configuration would be sent as null, which turns the warm tier off.
+// Send the warm retention the account has instead.
+func getUpdateSubAccountFromSchema(d *schema.ResourceData) sub_accounts.CreateOrUpdateSubAccount {
+	updateSubAccount := getCreateSubAccountFromSchema(d)
+	if updateSubAccount.SnapSearchRetentionDays == nil {
+		if snapSearchRetentionDays := int32(d.Get(subAccountsSnapSearchRetentionDays).(int)); snapSearchRetentionDays > 0 {
+			updateSubAccount.SnapSearchRetentionDays = &snapSearchRetentionDays
+		}
+	}
+	return updateSubAccount
 }
 
 func getDetailedSubAccount(m interface{}, id int64) (*sub_accounts.DetailedSubAccount, error) {
