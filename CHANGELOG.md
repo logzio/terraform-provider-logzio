@@ -4,6 +4,7 @@
 - Upgrade `logzio_client_terraform` to `1.33.0`.
 - Add support for the [`logzio_warm_tier`](./docs/resources/warm_tier.md) resource: manages the warm tier retention of the main account or a sub account.
 - `snap_search_retention_days` of the [`logzio_subaccount`](./docs/resources/subaccount.md) resource: when it's left out of the configuration, updating the subaccount now keeps its warm tier retention instead of turning the warm tier off.
+- Fix the [`logzio_subaccount`](./docs/resources/subaccount.md) resource keeping the values from before an update in the state: the provider now waits until reading the subaccount returns the update.
 - Clarify the `snap_search_retention_days` docs of the [`logzio_subaccount`](./docs/resources/subaccount.md) resource and [data source](./docs/data-sources/subaccount.md): allowed values and requirements.
 
 ## v1.29.0

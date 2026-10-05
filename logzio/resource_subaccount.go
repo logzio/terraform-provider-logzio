@@ -2,6 +2,7 @@ package logzio
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -46,6 +47,8 @@ const (
 	// consumption owner and always stores this value - the soft limit is what caps usage there.
 	consumptionSubAccountMaxDailyGB = 0.001
 )
+
+var errSubAccountNotUpdatedYet = errors.New("subaccount read does not show the update yet")
 
 // The endpoint resource schema, what terraform uses to parse and read the template
 func resourceSubAccount() *schema.Resource {
@@ -223,19 +226,17 @@ func resourceSubAccountUpdate(ctx context.Context, d *schema.ResourceData, m int
 				return fmt.Errorf("received error from read subaccount")
 			}
 
+			// The read can return the account from before the update
+			if !reflect.DeepEqual(getUpdateSubAccountFromSchema(d), updateSubAccount) {
+				return errSubAccountNotUpdatedYet
+			}
+
 			return nil
 		},
 		retry.RetryIf(
 			// Retry ONLY if the resource was not updated yet
 			func(err error) bool {
-				if err != nil {
-					return false
-				} else {
-					// Check if the update shows on read
-					// if not updated yet - retry
-					subAccountFromSchema := getUpdateSubAccountFromSchema(d)
-					return !reflect.DeepEqual(subAccountFromSchema, updateSubAccount)
-				}
+				return errors.Is(err, errSubAccountNotUpdatedYet)
 			}),
 		retry.DelayType(retry.BackOffDelay),
 		retry.Attempts(subAccountRetryAttempts),
